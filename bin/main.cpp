@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include <toucan.h>
+#include <toucan/ImageRead.h>
 
 int main(int argc, char** argv)
 {

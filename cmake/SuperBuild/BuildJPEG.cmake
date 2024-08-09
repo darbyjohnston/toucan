@@ -16,10 +16,10 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 set(libjpeg-turbo_ARGS
+    ${toucan_EXTERNAL_PROJECT_ARGS}
     -DCMAKE_INSTALL_LIBDIR=${CMAKE_INSTALL_PREFIX}/lib
     -DENABLE_SHARED=${libjpeg-turbo_ENABLE_SHARED}
-    -DENABLE_STATIC=${libjpeg-turbo_ENABLE_STATIC}
-    ${toucan_EXTERNAL_PROJECT_ARGS})
+    -DENABLE_STATIC=${libjpeg-turbo_ENABLE_STATIC})
 if(NOT WIN32)
     list(APPEND libjpeg-turbo_ARGS -DCMAKE_ASM_NASM_COMPILER=${CMAKE_INSTALL_PREFIX}/bin/nasm)
 endif()

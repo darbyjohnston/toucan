@@ -21,7 +21,7 @@ namespace toucan
 
     OIIO::ImageBuf ImageRead::exec()
     {
-        OIIO::ImageBuf buf;
+        OIIO::ImageBuf buf(_path.string());
         return buf;
     }
 }

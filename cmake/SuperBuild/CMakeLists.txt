@@ -43,9 +43,10 @@ set(toucan_EXTERNAL_PROJECT_ARGS
     -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE})
 
 include(BuildZLIB)
-include(BuildImath)
-include(BuildOpenEXR)
+include(BuildPNG)
 include(BuildJPEG)
 include(BuildTIFF)
+include(BuildImath)
+include(BuildOpenEXR)
 include(BuildOpenImageIO)
 include(BuildOpenTimelineIO)

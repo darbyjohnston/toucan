@@ -25,7 +25,10 @@ if(APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
 endif()
 
+enable_testing()
+
 find_package(ZLIB REQUIRED)
+find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(OpenEXR REQUIRED)
@@ -34,6 +37,6 @@ find_package(OTIO REQUIRED)
 
 include_directories(lib)
 
-add_subdirectory(lib)
+add_subdirectory(lib/toucan)
 add_subdirectory(bin)
 add_subdirectory(tests)

@@ -4,6 +4,7 @@ set(TIFF_GIT_REPOSITORY "https://gitlab.com/libtiff/libtiff.git")
 set(TIFF_GIT_TAG "v4.5.0")
 
 set(TIFF_ARGS
+    ${toucan_EXTERNAL_PROJECT_ARGS}
     -DCMAKE_INSTALL_LIBDIR=lib
     -Dtiff-tools=OFF
     -Dtiff-tests=OFF
@@ -17,8 +18,7 @@ set(TIFF_ARGS
     -Djpeg12=OFF
     -Dlerc=OFF
     -Dlzma=OFF
-    -Dwebp=OFF
-    ${toucan_EXTERNAL_PROJECT_ARGS})
+    -Dwebp=OFF)
 
 ExternalProject_Add(
     TIFF

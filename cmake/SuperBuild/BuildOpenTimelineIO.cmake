@@ -4,9 +4,9 @@ set(OpenTimelineIO_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/
 set(OpenTimelineIO_GIT_TAG "v0.17.0")
 
 set(OpenTimelineIO_ARGS
+    ${toucan_EXTERNAL_PROJECT_ARGS}
     -DOTIO_SHARED_LIBS=${BUILD_SHARED_LIBS}
-    -DOTIO_FIND_IMATH=ON
-    ${toucan_EXTERNAL_PROJECT_ARGS})
+    -DOTIO_FIND_IMATH=ON)
 
 ExternalProject_Add(
     OpenTimelineIO

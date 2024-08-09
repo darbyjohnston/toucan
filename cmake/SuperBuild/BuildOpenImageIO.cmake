@@ -4,11 +4,13 @@ set(OpenImageIO_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/Ope
 set(OpenImageIO_GIT_TAG "master")
 
 set(OpenImageIO_ARGS
+    ${toucan_EXTERNAL_PROJECT_ARGS}
     -DOIIO_BUILD_TESTS=OFF
     -DOIIO_BUILD_TOOLS=OFF
     -DOIIO_BUILD_DOCS=OFF
     -DOIIO_INSTALL_DOCS=OFF
     -DOIIO_INSTALL_FONTS=OFF
+    -DUSE_PNG=ON
     -DUSE_BZIP2=OFF
     -DUSE_DCMTK=OFF
     -DUSE_FFMPEG=OFF
@@ -22,18 +24,16 @@ set(OpenImageIO_ARGS
     -DUSE_OPENCV=OFF
     -DUSE_OPENJPEG=OFF
     -DUSE_OPENVDB=OFF
-    -DUSE_PNG=OFF
     -DUSE_PTEX=OFF
     -DUSE_PYTHON=OFF
     -DUSE_QT=OFF
     -DUSE_TBB=OFF
-    -DUSE_WEBP=OFF
-    ${toucan_EXTERNAL_PROJECT_ARGS})
+    -DUSE_WEBP=OFF)
 
 ExternalProject_Add(
     OpenImageIO
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/OpenImageIO
-    DEPENDS ZLIB TIFF libjpeg-turbo OpenEXR
+    DEPENDS TIFF PNG libjpeg-turbo OpenEXR
     GIT_REPOSITORY ${OpenImageIO_GIT_REPOSITORY}
     GIT_TAG ${OpenImageIO_GIT_TAG}
     CMAKE_ARGS ${OpenImageIO_ARGS})

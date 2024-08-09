@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <ImageOp.h>
+#include <toucan/ImageOp.h>
 
 namespace toucan
 {
@@ -16,9 +16,12 @@ namespace toucan
 
         void setInputs(const std::vector<std::shared_ptr<IImageGenerator> >&) override;
 
+        void setPremult(bool);
+
         OIIO::ImageBuf exec() override;
 
     private:
         std::vector<std::shared_ptr<IImageGenerator> > _inputs;
+        bool _premult = false;
     };
 }

@@ -4,8 +4,8 @@ set(Imath_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/Imath.git
 set(Imath_GIT_TAG "v3.1.9")
 
 set(Imath_ARGS
-    -DBUILD_TESTING=OFF
-    ${toucan_EXTERNAL_PROJECT_ARGS})
+    ${toucan_EXTERNAL_PROJECT_ARGS}
+    -DBUILD_TESTING=OFF)
 
 ExternalProject_Add(
     Imath
