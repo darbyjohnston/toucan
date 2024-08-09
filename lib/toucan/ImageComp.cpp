@@ -11,7 +11,7 @@ namespace toucan
     ImageComp::~ImageComp()
     {}
 
-    void ImageComp::setInputs(const std::vector<std::shared_ptr<IImageGenerator> >& inputs)
+    void ImageComp::setInputs(const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
         _inputs = inputs;
     }
@@ -24,7 +24,7 @@ namespace toucan
     OIIO::ImageBuf ImageComp::exec()
     {
         OIIO::ImageBuf buf;
-        if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
+        if (_inputs.size() > 1)
         {
             auto fg = _inputs[0]->exec();
             auto bg = _inputs[1]->exec();
@@ -33,6 +33,15 @@ namespace toucan
                 fg = OIIO::ImageBufAlgo::premult(fg);
             }
             buf = OIIO::ImageBufAlgo::over(fg, bg);
+        }
+        else if (1 == _inputs.size())
+        {
+            auto fg = _inputs[0]->exec();
+            if (_premult)
+            {
+                fg = OIIO::ImageBufAlgo::premult(fg);
+            }
+            buf = fg;
         }
         return buf;
     }

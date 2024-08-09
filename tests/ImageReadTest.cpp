@@ -10,6 +10,8 @@ namespace toucan
 {
     void imageReadTest(const std::filesystem::path& path)
     {
+        std::cout << "imageReadTest" << std::endl;
+
         auto read = std::make_shared<ImageRead>();
         read->setPath(path / "Letter_A.png");
         auto buf = read->exec();

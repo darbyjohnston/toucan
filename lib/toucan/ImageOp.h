@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <opentime/rationalTime.h>
+#include <opentimelineio/version.h>
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -18,23 +18,16 @@ namespace toucan
     {
     public:
         virtual ~IImageOp() = 0;
-    };
-    
-    //! Base class for image generators.
-    class IImageGenerator : public IImageOp
-    {
-    public:
-        virtual ~IImageGenerator() = 0;
-        
+
         virtual OIIO::ImageBuf exec() = 0;
     };
 
-    //! Base class for image filters.
-    class IImageFilter : public IImageGenerator
+    //! Base class for image operations with multiple inputs.
+    class IImageOpMulti : public IImageOp
     {
     public:
-        virtual ~IImageFilter() = 0;
+        virtual ~IImageOpMulti() = 0;
 
-        virtual void setInputs(const std::vector<std::shared_ptr<IImageGenerator> >&) = 0;
+        virtual void setInputs(const std::vector<std::shared_ptr<IImageOp> >&) = 0;
     };
 }

@@ -4,6 +4,7 @@
 
 #include "ImageCompTest.h"
 #include "ImageReadTest.h"
+#include "TimelineTraverseTest.h"
 
 #include <iostream>
 
@@ -19,5 +20,6 @@ int main(int argc, char** argv)
     const std::filesystem::path path(argv[1]);
     imageCompTest(path);
     imageReadTest(path);
+    timelineTraverseTest(path);
     return 0;
 }

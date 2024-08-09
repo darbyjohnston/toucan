@@ -27,6 +27,7 @@ endif()
 
 enable_testing()
 
+find_package(Imath REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
@@ -36,6 +37,8 @@ find_package(OpenImageIO REQUIRED)
 find_package(OTIO REQUIRED)
 
 include_directories(lib)
+# \todo OpenTimelineIO doesn't use the "Imath" prefix for includes?
+include_directories(${CMAKE_INSTALL_PREFIX}/include/Imath)
 
 add_subdirectory(lib/toucan)
 add_subdirectory(bin)

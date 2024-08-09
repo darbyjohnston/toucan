@@ -11,14 +11,14 @@
 namespace toucan
 {
     //! Image reader.
-    class ImageRead : public IImageGenerator
+    class ImageRead : public IImageOp
     {
     public:
         virtual ~ImageRead();
 
         void setPath(const std::filesystem::path&);
 
-        void setTime(const opentime::RationalTime&);
+        void setTime(const OTIO_NS::RationalTime&);
         
         OIIO::ImageBuf exec() override;
 

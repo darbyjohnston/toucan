@@ -1,10 +1,12 @@
 set(HEADERS
     ImageCompTest.h
-    ImageReadTest.h)
+    ImageReadTest.h
+    TimelineTraverseTest.h)
 
 set(SOURCE
     ImageCompTest.cpp
     ImageReadTest.cpp
+    TimelineTraverseTest.cpp
     main.cpp)
 
 add_executable(toucan-test ${SOURCE} ${HEADERS})

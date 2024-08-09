@@ -2,13 +2,11 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageOp.h"
+#pragma once
+
+#include <filesystem>
 
 namespace toucan
 {
-    IImageOp::~IImageOp()
-    {}
-
-    IImageOpMulti::~IImageOpMulti()
-    {}
+    void timelineTraverseTest(const std::filesystem::path&);
 }

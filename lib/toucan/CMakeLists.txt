@@ -1,11 +1,13 @@
 set(HEADERS
     ImageComp.h
     ImageRead.h
-    ImageOp.h)
+    ImageOp.h
+    TimelineTraverse.h)
 set(SOURCE
     ImageComp.cpp
     ImageRead.cpp
-    ImageOp.cpp)
+    ImageOp.cpp
+    TimelineTraverse.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})
 target_link_libraries(toucan PUBLIC OTIO OpenImageIO::OpenImageIO)
