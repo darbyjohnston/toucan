@@ -1,5 +1,11 @@
-set(HEADERS toucan.h)
-set(SOURCE toucan.cpp)
+set(HEADERS
+    ImageComp.h
+    ImageRead.h
+    ImageOp.h)
+set(SOURCE
+    ImageComp.cpp
+    ImageRead.cpp
+    ImageOp.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})
 target_link_libraries(toucan PUBLIC OTIO OpenImageIO::OpenImageIO)

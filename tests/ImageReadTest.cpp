@@ -4,10 +4,11 @@
 
 #include "ImageReadTest.h"
 
-using namespace toucan;
+#include <toucan/ImageRead.h>
 
-int main(int argc, char** argv)
+namespace toucan
 {
-    imageReadTest();
-    return 0;
+    void imageReadTest()
+    {
+    }
 }

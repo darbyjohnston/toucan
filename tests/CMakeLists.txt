@@ -1,6 +1,8 @@
-set(HEADERS)
+set(HEADERS
+    ImageReadTest.h)
 
 set(SOURCE
+    ImageReadTest.cpp
     main.cpp)
 
 add_executable(toucan-test ${SOURCE} ${HEADERS})
