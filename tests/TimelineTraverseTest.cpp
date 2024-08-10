@@ -18,7 +18,8 @@ namespace toucan
         {
             "CompOver",
             "Gap",
-            "Patterns"
+            "Patterns",
+            "Text"
         };
         for (const auto& otioFile : otioFiles)
         {

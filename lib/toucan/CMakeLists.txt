@@ -6,6 +6,7 @@ set(HEADERS
     Init.h
     NoiseImageOp.h
     ReadImageOp.h
+    TextImageOp.h
     TimelineTraverse.h)
 set(SOURCE
     CheckersImageOp.cpp
@@ -15,6 +16,7 @@ set(SOURCE
     Init.cpp
     NoiseImageOp.cpp
     ReadImageOp.cpp
+    TextImageOp.cpp
     TimelineTraverse.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})
