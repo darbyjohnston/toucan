@@ -40,7 +40,7 @@ jobs:
     - name: Build
       run: |
         cd ..
-        bash SuperBuilld.sh Debug
+        bash SuperBuild.sh Debug
 
   windows-build:
     runs-on: windows-latest
