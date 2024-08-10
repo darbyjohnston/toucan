@@ -41,7 +41,6 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
-        //std::cout << "traverse: " << time.value() << std::endl;
         auto fill = std::make_shared<ImageFill>();
         fill->setSize(_width, _height);
         fill->setColor(.5F, .5F, .5F, 1.F);
@@ -76,7 +75,6 @@ namespace toucan
         const auto availableRange = clip->available_range();
         if (availableRange.contains(time))
         {
-            //std::cout << "  clip " << clip->name() << ": " << time.value() << std::endl;
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
                 const std::string url = externalRef->target_url();
