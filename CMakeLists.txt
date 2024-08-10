@@ -23,6 +23,7 @@ if(WIN32)
 endif()
 if(APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
+    set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew)
 endif()
 
 enable_testing()

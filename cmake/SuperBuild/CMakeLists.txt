@@ -23,6 +23,7 @@ if(WIN32)
 endif()
 if(APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
+    set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew)
 endif()
 
 set(toucan_EXTERNAL_PROJECT_ARGS
@@ -44,6 +45,9 @@ set(toucan_EXTERNAL_PROJECT_ARGS
 
 include(BuildZLIB)
 include(BuildPNG)
+if(NOT WIN32)
+    include(BuildNASM)
+endif()
 include(BuildJPEG)
 include(BuildTIFF)
 include(BuildImath)
