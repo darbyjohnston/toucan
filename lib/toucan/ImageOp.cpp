@@ -9,6 +9,18 @@ namespace toucan
     IImageOp::~IImageOp()
     {}
 
-    IImageOpMulti::~IImageOpMulti()
+    void IImageOp::setInputs(const std::vector<std::shared_ptr<IImageOp> >& inputs)
+    {
+        _inputs = inputs;
+    }
+
+    IEffect::IEffect(
+        std::string const& name,
+        std::string const& effect_name,
+        OTIO_NS::AnyDictionary const& metadata) :
+        Effect(name, effect_name, metadata)
+    {}
+
+    IEffect::~IEffect()
     {}
 }

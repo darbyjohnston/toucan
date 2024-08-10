@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <opentimelineio/version.h>
+#include <opentimelineio/effect.h>
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -19,15 +19,26 @@ namespace toucan
     public:
         virtual ~IImageOp() = 0;
 
+        virtual void setInputs(const std::vector<std::shared_ptr<IImageOp> >&);
+
         virtual OIIO::ImageBuf exec() = 0;
+
+    protected:
+        std::vector<std::shared_ptr<IImageOp> > _inputs;
     };
 
-    //! Base class for image operations with multiple inputs.
-    class IImageOpMulti : public IImageOp
+    //! Base class for OTIO effects.
+    class IEffect : public OTIO_NS::Effect
     {
     public:
-        virtual ~IImageOpMulti() = 0;
+        IEffect(
+            std::string const& name = std::string(),
+            std::string const& effect_name = std::string(),
+            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        virtual void setInputs(const std::vector<std::shared_ptr<IImageOp> >&) = 0;
+        virtual std::shared_ptr<IImageOp> createOp() = 0;
+
+    protected:
+        virtual ~IEffect() = 0;
     };
 }

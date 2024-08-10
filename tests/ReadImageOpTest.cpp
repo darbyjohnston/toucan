@@ -2,16 +2,16 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageReadTest.h"
+#include "ReadImageOpTest.h"
 
-#include <toucan/ImageRead.h>
+#include <toucan/ReadImageOp.h>
 
 namespace toucan
 {
-    void imageReadTest(const std::filesystem::path& path)
+    void readImageOpTest(const std::filesystem::path& path)
     {
-        std::cout << "imageReadTest" << std::endl;
-        auto read = std::make_shared<ImageRead>();
+        std::cout << "readImageOpTest" << std::endl;
+        auto read = std::make_shared<ReadImageOp>();
         read->setPath(path / "Letter_A.png");
         auto buf = read->exec();
         const auto& spec = buf.spec();

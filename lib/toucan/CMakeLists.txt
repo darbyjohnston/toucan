@@ -1,14 +1,20 @@
 set(HEADERS
-    ImageComp.h
-    ImageFill.h
-    ImageRead.h
+    CheckersImageOp.h
+    CompImageOp.h
+    FillImageOp.h
     ImageOp.h
+    Init.h
+    NoiseImageOp.h
+    ReadImageOp.h
     TimelineTraverse.h)
 set(SOURCE
-    ImageComp.cpp
-    ImageFill.cpp
-    ImageRead.cpp
+    CheckersImageOp.cpp
+    CompImageOp.cpp
+    FillImageOp.cpp
     ImageOp.cpp
+    Init.cpp
+    NoiseImageOp.cpp
+    ReadImageOp.cpp
     TimelineTraverse.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})

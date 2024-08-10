@@ -17,36 +17,42 @@ namespace toucan
         const std::vector<std::string> otioFiles =
         {
             "CompOver",
-            "Gap"
+            "Gap",
+            "Patterns"
         };
         for (const auto& otioFile : otioFiles)
         {
             const std::filesystem::path timelinePath = path / (otioFile + ".otio");
-            if (auto timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(
-                dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(timelinePath.string()))))
+            OTIO_NS::ErrorStatus errorStatus;
+            auto timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(
+                dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(timelinePath.string(), &errorStatus)));
+            if (!timeline)
             {
-                const OTIO_NS::RationalTime startTime = timeline->global_start_time().has_value() ?
-                    timeline->global_start_time().value() :
-                    OTIO_NS::RationalTime(0.0, timeline->duration().rate());
-                const OTIO_NS::TimeRange timeRange(startTime, timeline->duration());
-                const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
+                std::cout << "ERROR: " << errorStatus.full_description << std::endl;
+                continue;
+            }
 
-                auto traverse = std::make_shared<TimelineTraverse>(path, timeline);
-                for (OTIO_NS::RationalTime time = startTime;
-                    time <= timeRange.end_time_inclusive();
-                    time += timeInc)
+            const OTIO_NS::RationalTime startTime = timeline->global_start_time().has_value() ?
+                timeline->global_start_time().value() :
+                OTIO_NS::RationalTime(0.0, timeline->duration().rate());
+            const OTIO_NS::TimeRange timeRange(startTime, timeline->duration());
+            const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
+
+            auto traverse = std::make_shared<TimelineTraverse>(path, timeline);
+            for (OTIO_NS::RationalTime time = startTime;
+                time <= timeRange.end_time_inclusive();
+                time += timeInc)
+            {
+                std::cout << "  " << otioFile << ": " << time.value() << "/" <<
+                    timeRange.duration().value() << std::endl;
+                if (auto op = traverse->exec(time))
                 {
-                    std::cout << "  " << otioFile << ": " << time.value() << "/" <<
-                        timeRange.duration().value() << std::endl;
-                    if (auto op = traverse->exec(time))
-                    {
-                        auto buf = op->exec();
-                        std::stringstream ss;
-                        ss << "TimelineTraverseTest_" << otioFile << "." <<
-                            std::setw(6) << std::setfill('0') << time.to_frames() <<
-                            ".png";
-                        buf.write(ss.str());
-                    }
+                    auto buf = op->exec();
+                    std::stringstream ss;
+                    ss << "TimelineTraverseTest_" << otioFile << "." <<
+                        std::setw(6) << std::setfill('0') << time.to_frames() <<
+                        ".png";
+                    buf.write(ss.str());
                 }
             }
         }

@@ -4,9 +4,9 @@
 
 #include "TimelineTraverse.h"
 
-#include "ImageComp.h"
-#include "ImageFill.h"
-#include "ImageRead.h"
+#include "CompImageOp.h"
+#include "FillImageOp.h"
+#include "ReadImageOp.h"
 
 #include <opentimelineio/externalReference.h>
 
@@ -28,8 +28,8 @@ namespace toucan
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
-                    _width = spec.width;
-                    _height = spec.height;
+                    _size.x = spec.width;
+                    _size.y = spec.height;
                     break;
                 }
             }
@@ -41,10 +41,7 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
-        auto fill = std::make_shared<ImageFill>();
-        fill->setSize(_width, _height);
-        fill->setColor(.5F, .5F, .5F, 1.F);
-        _op = fill;
+        _op = std::make_shared<FillImageOp>(FillData{ _size });
         for (const auto& trackIt : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(trackIt))
@@ -79,12 +76,23 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ImageRead>();
+                auto read = std::make_shared<ReadImageOp>();
                 read->setPath(path);
 
-                auto comp = std::make_shared<ImageComp>();
+                std::shared_ptr<IImageOp> op = read;
+                for (const auto& effect : clip->effects())
+                {
+                    if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
+                    {
+                        auto effectOp = iEffect->createOp();
+                        effectOp->setInputs({ op });
+                        op = effectOp;
+                    }
+                }
+
+                auto comp = std::make_shared<CompImageOp>();
                 comp->setPremult(true);
-                comp->setInputs({ read, _op });
+                comp->setInputs({ op, _op });
                 _op = comp;
             }
         }

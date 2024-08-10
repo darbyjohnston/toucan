@@ -2,21 +2,21 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageCompTest.h"
+#include "CompImageOpTest.h"
 
-#include <toucan/ImageRead.h>
-#include <toucan/ImageComp.h>
+#include <toucan/ReadImageOp.h>
+#include <toucan/CompImageOp.h>
 
 namespace toucan
 {
-    void imageCompTest(const std::filesystem::path& path)
+    void compImageOpTest(const std::filesystem::path& path)
     {
-        std::cout << "imageCompTest" << std::endl;
-        auto fg = std::make_shared<ImageRead>();
+        std::cout << "compImageOpTest" << std::endl;
+        auto fg = std::make_shared<ReadImageOp>();
         fg->setPath(path / "Letter_A.png");
-        auto bg = std::make_shared<ImageRead>();
+        auto bg = std::make_shared<ReadImageOp>();
         bg->setPath(path / "Color_Blue.png");
-        auto comp = std::make_shared<ImageComp>();
+        auto comp = std::make_shared<CompImageOp>();
         comp->setInputs({ fg, bg });
         comp->setPremult(true);
         auto buf = comp->exec();

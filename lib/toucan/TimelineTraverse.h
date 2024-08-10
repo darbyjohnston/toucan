@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <toucan/ImageComp.h>
+#include <toucan/ImageOp.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/timeline.h>
@@ -37,8 +37,7 @@ namespace toucan
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
-        int _width = 0;
-        int _height = 0;
+        IMATH_NAMESPACE::V2d _size = IMATH_NAMESPACE::V2d(0, 0);
         std::shared_ptr<IImageOp> _op;
     };
 }

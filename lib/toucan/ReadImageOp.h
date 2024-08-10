@@ -10,11 +10,11 @@
 
 namespace toucan
 {
-    //! Image reader.
-    class ImageRead : public IImageOp
+    //! Read image operation.
+    class ReadImageOp : public IImageOp
     {
     public:
-        virtual ~ImageRead();
+        virtual ~ReadImageOp();
 
         void setPath(const std::filesystem::path&);
 

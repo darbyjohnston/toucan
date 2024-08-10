@@ -8,20 +8,17 @@
 
 namespace toucan
 {
-    //! Image compositing.
-    class ImageComp : public IImageOpMulti
+    //! Compositing image operation.
+    class CompImageOp : public IImageOp
     {
     public:
-        virtual ~ImageComp();
-
-        void setInputs(const std::vector<std::shared_ptr<IImageOp> >&) override;
+        virtual ~CompImageOp();
 
         void setPremult(bool);
 
         OIIO::ImageBuf exec() override;
 
     private:
-        std::vector<std::shared_ptr<IImageOp> > _inputs;
         bool _premult = false;
     };
 }

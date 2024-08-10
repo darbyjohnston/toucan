@@ -2,26 +2,21 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageComp.h"
+#include "CompImageOp.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    ImageComp::~ImageComp()
+    CompImageOp::~CompImageOp()
     {}
 
-    void ImageComp::setInputs(const std::vector<std::shared_ptr<IImageOp> >& inputs)
-    {
-        _inputs = inputs;
-    }
-
-    void ImageComp::setPremult(bool premult)
+    void CompImageOp::setPremult(bool premult)
     {
         _premult = premult;
     }
 
-    OIIO::ImageBuf ImageComp::exec()
+    OIIO::ImageBuf CompImageOp::exec()
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1)

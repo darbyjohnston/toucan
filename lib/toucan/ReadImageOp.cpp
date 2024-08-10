@@ -2,24 +2,24 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageRead.h"
+#include "ReadImageOp.h"
 
 namespace toucan
 {
-    ImageRead::~ImageRead()
+    ReadImageOp::~ReadImageOp()
     {}
 
-    void ImageRead::setPath(const std::filesystem::path& path)
+    void ReadImageOp::setPath(const std::filesystem::path& path)
     {
         _path = path;
     }
 
-    void ImageRead::setTime(const opentime::RationalTime& time)
+    void ReadImageOp::setTime(const opentime::RationalTime& time)
     {
         _time = time;
     }
 
-    OIIO::ImageBuf ImageRead::exec()
+    OIIO::ImageBuf ReadImageOp::exec()
     {
         OIIO::ImageBuf buf(_path.string());
         return buf;
