@@ -14,7 +14,7 @@ jobs:
     - name: Build 
       run: |
         cd ..
-        bash toucan/SuperBuilld.sh Debug
+        bash toucan/SuperBuild.sh Debug
 
   macos-12-build:
     runs-on: macos-12
@@ -27,7 +27,7 @@ jobs:
     - name: Build
       run: |
         cd ..
-        bash toucan/SuperBuilld.sh Debug
+        bash toucan/SuperBuild.sh Debug
 
   macos-14-build:
     runs-on: macos-14
@@ -55,5 +55,5 @@ jobs:
       shell: cmd
       run: |
         cd ..
-        toucan\SuperBuilld.bat Debug
+        toucan\SuperBuild.bat Debug
 
