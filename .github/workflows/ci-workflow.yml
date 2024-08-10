@@ -1,0 +1,59 @@
+name: CI
+
+on: [push]
+
+jobs:
+  linux-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Build 
+      run: |
+        cd ..
+        bash toucan/SuperBuilld.sh Debug
+
+  macos-12-build:
+    runs-on: macos-12
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        cd ..
+        bash toucan/SuperBuilld.sh Debug
+
+  macos-14-build:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Build
+      run: |
+        cd ..
+        bash SuperBuilld.sh Debug
+
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - uses: ilammy/setup-nasm@v1
+        
+    - name: Build
+      shell: cmd
+      run: |
+        cd ..
+        toucan\SuperBuilld.bat Debug
+
