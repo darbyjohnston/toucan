@@ -86,14 +86,7 @@ namespace toucan
 
                 auto comp = std::make_shared<ImageComp>();
                 comp->setPremult(true);
-                if (_op)
-                {
-                    comp->setInputs({ read, _op });
-                }
-                else
-                {
-                    comp->setInputs({ read });
-                }
+                comp->setInputs({ read, _op });
                 _op = comp;
             }
         }
