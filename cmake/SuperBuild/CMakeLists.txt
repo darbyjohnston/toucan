@@ -44,6 +44,7 @@ set(toucan_EXTERNAL_PROJECT_ARGS
     -DCMAKE_POSITION_INDEPENDENT_CODE=${CMAKE_POSITION_INDEPENDENT_CODE})
 
 include(BuildZLIB)
+include(BuildFreetype)
 include(BuildPNG)
 if(NOT WIN32)
     include(BuildNASM)

@@ -29,6 +29,7 @@ endif()
 enable_testing()
 
 find_package(Imath REQUIRED)
+find_package(Freetype REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(JPEG REQUIRED)
