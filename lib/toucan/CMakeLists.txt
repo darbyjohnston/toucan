@@ -1,10 +1,12 @@
 set(HEADERS
     ImageComp.h
+    ImageFill.h
     ImageRead.h
     ImageOp.h
     TimelineTraverse.h)
 set(SOURCE
     ImageComp.cpp
+    ImageFill.cpp
     ImageRead.cpp
     ImageOp.cpp
     TimelineTraverse.cpp)

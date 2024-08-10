@@ -37,6 +37,8 @@ namespace toucan
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
-        std::shared_ptr<ImageComp> _comp;
+        int _width = 0;
+        int _height = 0;
+        std::shared_ptr<IImageOp> _op;
     };
 }

@@ -12,7 +12,6 @@ namespace toucan
     void imageCompTest(const std::filesystem::path& path)
     {
         std::cout << "imageCompTest" << std::endl;
-
         auto fg = std::make_shared<ImageRead>();
         fg->setPath(path / "Letter_A.png");
         auto bg = std::make_shared<ImageRead>();

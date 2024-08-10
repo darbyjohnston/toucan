@@ -5,6 +5,7 @@
 #include "TimelineTraverse.h"
 
 #include "ImageComp.h"
+#include "ImageFill.h"
 #include "ImageRead.h"
 
 #include <opentimelineio/externalReference.h>
@@ -16,7 +17,24 @@ namespace toucan
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline) :
         _path(path),
         _timeline(timeline)
-    {}
+    {
+        for (auto clip : _timeline->find_clips())
+        {
+            if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
+            {
+                const std::string url = externalRef->target_url();
+                const std::filesystem::path path = _path / url;
+                OIIO::ImageBuf buf(path.string());
+                const auto& spec = buf.spec();
+                if (spec.width > 0)
+                {
+                    _width = spec.width;
+                    _height = spec.height;
+                    break;
+                }
+            }
+        }
+    }
 
     TimelineTraverse::~TimelineTraverse()
     {}
@@ -24,7 +42,10 @@ namespace toucan
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
         //std::cout << "traverse: " << time.value() << std::endl;
-        _comp.reset();
+        auto fill = std::make_shared<ImageFill>();
+        fill->setSize(_width, _height);
+        fill->setColor(.5F, .5F, .5F, 1.F);
+        _op = fill;
         for (const auto& trackIt : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(trackIt))
@@ -32,7 +53,7 @@ namespace toucan
                 _track(time, track);
             }
         }
-        return _comp;
+        return _op;
     }
 
     void TimelineTraverse::_track(
@@ -65,15 +86,15 @@ namespace toucan
 
                 auto comp = std::make_shared<ImageComp>();
                 comp->setPremult(true);
-                if (_comp)
+                if (_op)
                 {
-                    comp->setInputs({ read, _comp });
+                    comp->setInputs({ read, _op });
                 }
                 else
                 {
                     comp->setInputs({ read });
                 }
-                _comp = comp;
+                _op = comp;
             }
         }
     }
