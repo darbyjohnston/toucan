@@ -8,11 +8,11 @@
 
 namespace toucan
 {
-    //! Compositing image operation.
-    class CompImageOp : public IImageOp
+    //! Compositing operation.
+    class CompOp : public IImageOp
     {
     public:
-        virtual ~CompImageOp();
+        virtual ~CompOp();
 
         void setPremult(bool);
 

@@ -2,30 +2,30 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "NoiseImageOp.h"
+#include "NoiseOp.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    NoiseImageOp::NoiseImageOp(const NoiseData& data) :
+    NoiseOp::NoiseOp(const NoiseData& data) :
         _data(data)
     {}
 
-    NoiseImageOp::~NoiseImageOp()
+    NoiseOp::~NoiseOp()
     {}
 
-    const NoiseData& NoiseImageOp::getData() const
+    const NoiseData& NoiseOp::getData() const
     {
         return _data;
     }
 
-    void NoiseImageOp::setData(const NoiseData& value)
+    void NoiseOp::setData(const NoiseData& value)
     {
         _data = value;
     }
 
-    OIIO::ImageBuf NoiseImageOp::exec()
+    OIIO::ImageBuf NoiseOp::exec()
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
@@ -52,32 +52,32 @@ namespace toucan
         return buf;
     }
     
-    NoiseImageEffect::NoiseImageEffect(
+    NoiseEffect::NoiseEffect(
         std::string const& name,
         std::string const& effect_name,
         OTIO_NS::AnyDictionary const& metadata) :
         IEffect(name, effect_name, metadata)
     {}
 
-    NoiseImageEffect::~NoiseImageEffect()
+    NoiseEffect::~NoiseEffect()
     {}
 
-    const NoiseData& NoiseImageEffect::getData() const
+    const NoiseData& NoiseEffect::getData() const
     {
         return _data;
     }
 
-    void NoiseImageEffect::setData(const NoiseData & value)
+    void NoiseEffect::setData(const NoiseData & value)
     {
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> NoiseImageEffect::createOp()
+    std::shared_ptr<IImageOp> NoiseEffect::createOp()
     {
-        return std::make_shared<NoiseImageOp>(_data);
+        return std::make_shared<NoiseOp>(_data);
     }
 
-    bool NoiseImageEffect::read_from(Reader& reader)
+    bool NoiseEffect::read_from(Reader& reader)
     {
         int64_t width = 0;
         int64_t height = 0;
@@ -107,7 +107,7 @@ namespace toucan
         return out;
     }
 
-    void NoiseImageEffect::write_to(Writer& writer) const
+    void NoiseEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
         writer.write("width", static_cast<int64_t>(_data.size.x));

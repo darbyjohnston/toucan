@@ -17,13 +17,13 @@ namespace toucan
         IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 0.F);
     };
 
-    //! Fill image operation.
-    class FillImageOp : public IImageOp
+    //! Fill operation.
+    class FillOp : public IImageOp
     {
     public:
-        FillImageOp(const FillData& = FillData());
+        FillOp(const FillData& = FillData());
 
-        virtual ~FillImageOp();
+        virtual ~FillOp();
 
         const FillData& getData() const;
         void setData(const FillData&);
@@ -34,17 +34,17 @@ namespace toucan
         FillData _data;
     };
 
-    //! Fill image OTIO effect.
-    class FillImageEffect : public IEffect
+    //! Fill OTIO effect.
+    class FillEffect : public IEffect
     {
     public:
         struct Schema
         {
-            static auto constexpr name = "FillImageEffect";
+            static auto constexpr name = "FillEffect";
             static int constexpr version = 1;
         };
 
-        FillImageEffect(
+        FillEffect(
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
@@ -55,7 +55,7 @@ namespace toucan
         std::shared_ptr<IImageOp> createOp() override;
 
     protected:
-        virtual ~FillImageEffect();
+        virtual ~FillEffect();
 
         bool read_from(Reader&) override;
         void write_to(Writer&) const override;

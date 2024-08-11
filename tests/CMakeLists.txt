@@ -1,11 +1,11 @@
 set(HEADERS
-    CompImageOpTest.h
-    ReadImageOpTest.h
+    CompOpTest.h
+    ReadOpTest.h
     TimelineTraverseTest.h)
 
 set(SOURCE
-    CompImageOpTest.cpp
-    ReadImageOpTest.cpp
+    CompOpTest.cpp
+    ReadOpTest.cpp
     TimelineTraverseTest.cpp
     main.cpp)
 

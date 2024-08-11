@@ -8,5 +8,5 @@
 
 namespace toucan
 {
-    void compImageOpTest(const std::filesystem::path&);
+    void readOpTest(const std::filesystem::path&);
 }

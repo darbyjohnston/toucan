@@ -29,7 +29,7 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "TextImageEffect.1",
+                                "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
                                 "x": 100,
                                 "y": 200,
@@ -42,7 +42,7 @@
                                 "alpha": 1.0
                             },
                             {
-                                "OTIO_SCHEMA": "TextImageEffect.1",
+                                "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
                                 "x": 200,
                                 "y": 350,
@@ -55,7 +55,7 @@
                                 "alpha": 1.0
                             },
                             {
-                                "OTIO_SCHEMA": "TextImageEffect.1",
+                                "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
                                 "x": 300,
                                 "y": 500,
@@ -68,7 +68,7 @@
                                 "alpha": 1.0
                             },
                             {
-                                "OTIO_SCHEMA": "TextImageEffect.1",
+                                "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
                                 "x": 400,
                                 "y": 650,

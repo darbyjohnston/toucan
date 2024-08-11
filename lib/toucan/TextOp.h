@@ -20,13 +20,13 @@ namespace toucan
         IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(1.F, 1.F, 1.F, 1.F);
     };
 
-    //! Text drawing image operation.
-    class TextImageOp : public IImageOp
+    //! Text drawing operation.
+    class TextOp : public IImageOp
     {
     public:
-        TextImageOp(const TextData& = TextData());
+        TextOp(const TextData& = TextData());
 
-        virtual ~TextImageOp();
+        virtual ~TextOp();
 
         const TextData& getData() const;
         void setData(const TextData&);
@@ -37,17 +37,17 @@ namespace toucan
         TextData _data;
     };
 
-    //! Text drawing image OTIO effect.
-    class TextImageEffect : public IEffect
+    //! Text drawing OTIO effect.
+    class TextEffect : public IEffect
     {
     public:
         struct Schema
         {
-            static auto constexpr name = "TextImageEffect";
+            static auto constexpr name = "TextEffect";
             static int constexpr version = 1;
         };
 
-        TextImageEffect(
+        TextEffect(
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
@@ -58,7 +58,7 @@ namespace toucan
         std::shared_ptr<IImageOp> createOp() override;
 
     protected:
-        virtual ~TextImageEffect();
+        virtual ~TextEffect();
 
         bool read_from(Reader&) override;
         void write_to(Writer&) const override;

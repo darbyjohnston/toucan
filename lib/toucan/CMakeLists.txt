@@ -1,22 +1,26 @@
 set(HEADERS
-    CheckersImageOp.h
-    CompImageOp.h
-    FillImageOp.h
+    CheckersOp.h
+    CompOp.h
+    FillOp.h
     ImageOp.h
     Init.h
-    NoiseImageOp.h
-    ReadImageOp.h
-    TextImageOp.h
+    NoiseOp.h
+    ReadOp.h
+    ResizeOp.h
+    RotateOp.h
+    TextOp.h
     TimelineTraverse.h)
 set(SOURCE
-    CheckersImageOp.cpp
-    CompImageOp.cpp
-    FillImageOp.cpp
+    CheckersOp.cpp
+    CompOp.cpp
+    FillOp.cpp
     ImageOp.cpp
     Init.cpp
-    NoiseImageOp.cpp
-    ReadImageOp.cpp
-    TextImageOp.cpp
+    NoiseOp.cpp
+    ReadOp.cpp
+    ResizeOp.cpp
+    RotateOp.cpp
+    TextOp.cpp
     TimelineTraverse.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})

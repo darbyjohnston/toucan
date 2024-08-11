@@ -4,10 +4,12 @@
 
 #include "Init.h"
 
-#include "CheckersImageOp.h"
-#include "FillImageOp.h"
-#include "NoiseImageOp.h"
-#include "TextImageOp.h"
+#include "CheckersOp.h"
+#include "FillOp.h"
+#include "NoiseOp.h"
+#include "ResizeOp.h"
+#include "RotateOp.h"
+#include "TextOp.h"
 
 #include <opentimelineio/typeRegistry.h>
 
@@ -15,9 +17,11 @@ namespace toucan
 {
     void init()
     {
-        OTIO_NS::TypeRegistry::instance().register_type<CheckersImageEffect>();
-        OTIO_NS::TypeRegistry::instance().register_type<FillImageEffect>();
-        OTIO_NS::TypeRegistry::instance().register_type<NoiseImageEffect>();
-        OTIO_NS::TypeRegistry::instance().register_type<TextImageEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<CheckersEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<FillEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<NoiseEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<ResizeEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<RotateEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<TextEffect>();
     }
 }

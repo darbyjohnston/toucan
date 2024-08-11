@@ -19,7 +19,8 @@ namespace toucan
             "CompOver",
             "Gap",
             "Patterns",
-            "Text"
+            "Text",
+            "Transforms"
         };
         for (const auto& otioFile : otioFiles)
         {
@@ -29,7 +30,7 @@ namespace toucan
                 dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(timelinePath.string(), &errorStatus)));
             if (!timeline)
             {
-                std::cout << "ERROR: " << errorStatus.full_description << std::endl;
+                std::cout << "ERROR: " << path.string() << ": " << errorStatus.full_description << std::endl;
                 continue;
             }
 
@@ -50,7 +51,7 @@ namespace toucan
                 {
                     auto buf = op->exec();
                     std::stringstream ss;
-                    ss << "TimelineTraverseTest_" << otioFile << "." <<
+                    ss << "timelineTraverseTest_" << otioFile << "." <<
                         std::setw(6) << std::setfill('0') << time.to_frames() <<
                         ".png";
                     buf.write(ss.str());

@@ -2,8 +2,8 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "CompImageOpTest.h"
-#include "ReadImageOpTest.h"
+#include "CompOpTest.h"
+#include "ReadOpTest.h"
 #include "TimelineTraverseTest.h"
 
 #include <toucan/Init.h>
@@ -21,8 +21,8 @@ int main(int argc, char** argv)
     }
     const std::filesystem::path path(argv[1]);
     init();
-    compImageOpTest(path);
-    readImageOpTest(path);
+    compOpTest(path);
+    readOpTest(path);
     timelineTraverseTest(path);
     return 0;
 }

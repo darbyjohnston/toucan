@@ -2,30 +2,30 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TextImageOp.h"
+#include "TextOp.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    TextImageOp::TextImageOp(const TextData& data) :
+    TextOp::TextOp(const TextData& data) :
         _data(data)
     {}
 
-    TextImageOp::~TextImageOp()
+    TextOp::~TextOp()
     {}
 
-    const TextData& TextImageOp::getData() const
+    const TextData& TextOp::getData() const
     {
         return _data;
     }
 
-    void TextImageOp::setData(const TextData& value)
+    void TextOp::setData(const TextData& value)
     {
         _data = value;
     }
 
-    OIIO::ImageBuf TextImageOp::exec()
+    OIIO::ImageBuf TextOp::exec()
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
@@ -43,32 +43,32 @@ namespace toucan
         return buf;
     }
     
-    TextImageEffect::TextImageEffect(
+    TextEffect::TextEffect(
         std::string const& name,
         std::string const& effect_name,
         OTIO_NS::AnyDictionary const& metadata) :
         IEffect(name, effect_name, metadata)
     {}
 
-    TextImageEffect::~TextImageEffect()
+    TextEffect::~TextEffect()
     {}
 
-    const TextData& TextImageEffect::getData() const
+    const TextData& TextEffect::getData() const
     {
         return _data;
     }
 
-    void TextImageEffect::setData(const TextData & value)
+    void TextEffect::setData(const TextData & value)
     {
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> TextImageEffect::createOp()
+    std::shared_ptr<IImageOp> TextEffect::createOp()
     {
-        return std::make_shared<TextImageOp>(_data);
+        return std::make_shared<TextOp>(_data);
     }
 
-    bool TextImageEffect::read_from(Reader& reader)
+    bool TextEffect::read_from(Reader& reader)
     {
         int64_t x = 0;
         int64_t y = 0;
@@ -95,7 +95,7 @@ namespace toucan
         return out;
     }
 
-    void TextImageEffect::write_to(Writer& writer) const
+    void TextEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
         writer.write("x", static_cast<int64_t>(_data.pos.x));

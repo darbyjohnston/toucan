@@ -2,30 +2,30 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "CheckersImageOp.h"
+#include "CheckersOp.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    CheckersImageOp::CheckersImageOp(const CheckersData& data) :
+    CheckersOp::CheckersOp(const CheckersData& data) :
         _data(data)
     {}
 
-    CheckersImageOp::~CheckersImageOp()
+    CheckersOp::~CheckersOp()
     {}
 
-    const CheckersData& CheckersImageOp::getData() const
+    const CheckersData& CheckersOp::getData() const
     {
         return _data;
     }
 
-    void CheckersImageOp::setData(const CheckersData& value)
+    void CheckersOp::setData(const CheckersData& value)
     {
         _data = value;
     }
 
-    OIIO::ImageBuf CheckersImageOp::exec()
+    OIIO::ImageBuf CheckersOp::exec()
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
@@ -55,32 +55,32 @@ namespace toucan
         return buf;
     }
     
-    CheckersImageEffect::CheckersImageEffect(
+    CheckersEffect::CheckersEffect(
         std::string const& name,
         std::string const& effect_name,
         OTIO_NS::AnyDictionary const& metadata) :
         IEffect(name, effect_name, metadata)
     {}
 
-    CheckersImageEffect::~CheckersImageEffect()
+    CheckersEffect::~CheckersEffect()
     {}
 
-    const CheckersData& CheckersImageEffect::getData() const
+    const CheckersData& CheckersEffect::getData() const
     {
         return _data;
     }
 
-    void CheckersImageEffect::setData(const CheckersData & value)
+    void CheckersEffect::setData(const CheckersData & value)
     {
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> CheckersImageEffect::createOp()
+    std::shared_ptr<IImageOp> CheckersEffect::createOp()
     {
-        return std::make_shared<CheckersImageOp>(_data);
+        return std::make_shared<CheckersOp>(_data);
     }
 
-    bool CheckersImageEffect::read_from(Reader& reader)
+    bool CheckersEffect::read_from(Reader& reader)
     {
         int64_t width = 0;
         int64_t height = 0;
@@ -112,7 +112,7 @@ namespace toucan
         return out;
     }
 
-    void CheckersImageEffect::write_to(Writer& writer) const
+    void CheckersEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
         writer.write("width", static_cast<int64_t>(_data.size.x));

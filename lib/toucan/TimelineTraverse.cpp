@@ -4,9 +4,9 @@
 
 #include "TimelineTraverse.h"
 
-#include "CompImageOp.h"
-#include "FillImageOp.h"
-#include "ReadImageOp.h"
+#include "CompOp.h"
+#include "FillOp.h"
+#include "ReadOp.h"
 
 #include <opentimelineio/externalReference.h>
 
@@ -41,7 +41,7 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
-        _op = std::make_shared<FillImageOp>(FillData{ _size });
+        _op = std::make_shared<FillOp>(FillData{ _size });
         for (const auto& trackIt : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(trackIt))
@@ -76,7 +76,7 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ReadImageOp>();
+                auto read = std::make_shared<ReadOp>();
                 read->setPath(path);
 
                 std::shared_ptr<IImageOp> op = read;
@@ -90,7 +90,7 @@ namespace toucan
                     }
                 }
 
-                auto comp = std::make_shared<CompImageOp>();
+                auto comp = std::make_shared<CompOp>();
                 comp->setPremult(true);
                 comp->setInputs({ op, _op });
                 _op = comp;

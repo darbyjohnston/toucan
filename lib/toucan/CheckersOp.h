@@ -19,13 +19,13 @@ namespace toucan
         IMATH_NAMESPACE::V4f color2 = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F);
     };
 
-    //! Checkers image operation.
-    class CheckersImageOp : public IImageOp
+    //! Checkers operation.
+    class CheckersOp : public IImageOp
     {
     public:
-        CheckersImageOp(const CheckersData& = CheckersData());
+        CheckersOp(const CheckersData& = CheckersData());
 
-        virtual ~CheckersImageOp();
+        virtual ~CheckersOp();
 
         const CheckersData& getData() const;
         void setData(const CheckersData&);
@@ -36,17 +36,17 @@ namespace toucan
         CheckersData _data;
     };
 
-    //! Checkers image OTIO effect.
-    class CheckersImageEffect : public IEffect
+    //! Checkers OTIO effect.
+    class CheckersEffect : public IEffect
     {
     public:
         struct Schema
         {
-            static auto constexpr name = "CheckersImageEffect";
+            static auto constexpr name = "CheckersEffect";
             static int constexpr version = 1;
         };
 
-        CheckersImageEffect(
+        CheckersEffect(
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
@@ -57,7 +57,7 @@ namespace toucan
         std::shared_ptr<IImageOp> createOp() override;
 
     protected:
-        virtual ~CheckersImageEffect();
+        virtual ~CheckersEffect();
 
         bool read_from(Reader&) override;
         void write_to(Writer&) const override;

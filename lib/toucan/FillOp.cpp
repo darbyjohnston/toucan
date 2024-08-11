@@ -2,30 +2,30 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "FillImageOp.h"
+#include "FillOp.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    FillImageOp::FillImageOp(const FillData& data) :
+    FillOp::FillOp(const FillData& data) :
         _data(data)
     {}
 
-    FillImageOp::~FillImageOp()
+    FillOp::~FillOp()
     {}
 
-    const FillData& FillImageOp::getData() const
+    const FillData& FillOp::getData() const
     {
         return _data;
     }
 
-    void FillImageOp::setData(const FillData& value)
+    void FillOp::setData(const FillData& value)
     {
         _data = value;
     }
 
-    OIIO::ImageBuf FillImageOp::exec()
+    OIIO::ImageBuf FillOp::exec()
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
@@ -44,32 +44,32 @@ namespace toucan
         return buf;
     }
     
-    FillImageEffect::FillImageEffect(
+    FillEffect::FillEffect(
         std::string const& name,
         std::string const& effect_name,
         OTIO_NS::AnyDictionary const& metadata) :
         IEffect(name, effect_name, metadata)
     {}
 
-    FillImageEffect::~FillImageEffect()
+    FillEffect::~FillEffect()
     {}
 
-    const FillData& FillImageEffect::getData() const
+    const FillData& FillEffect::getData() const
     {
         return _data;
     }
 
-    void FillImageEffect::setData(const FillData & value)
+    void FillEffect::setData(const FillData & value)
     {
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> FillImageEffect::createOp()
+    std::shared_ptr<IImageOp> FillEffect::createOp()
     {
-        return std::make_shared<FillImageOp>(_data);
+        return std::make_shared<FillOp>(_data);
     }
 
-    bool FillImageEffect::read_from(Reader& reader)
+    bool FillEffect::read_from(Reader& reader)
     {
         int64_t width = 0;
         int64_t height = 0;
@@ -91,7 +91,7 @@ namespace toucan
         return out;
     }
 
-    void FillImageEffect::write_to(Writer& writer) const
+    void FillEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
         writer.write("width", static_cast<int64_t>(_data.size.x));

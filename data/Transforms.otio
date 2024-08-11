@@ -25,18 +25,16 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Color_Black.png"
+                            "target_url": "Gradient.png"
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "FillEffect.1",
+                                "OTIO_SCHEMA": "ResizeEffect.1",
                                 "effect_name": "",
-                                "width": 1280,
-                                "height": 720,
-                                "red": 1.0,
-                                "green": 0.0,
-                                "blue": 0.0,
-                                "alpha": 1.0
+                                "width": 1920,
+                                "height": 1080,
+                                "filter_name": "",
+                                "filter_width": 0.0
                             }
                         ],
                         "source_range": {
@@ -52,7 +50,7 @@
                                 "value": 0
                             }
                         },
-                        "name": "Fill"
+                        "name": "Resize"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
@@ -71,24 +69,15 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Color_Black.png"
+                            "target_url": "Gradient.png"
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "CheckersEffect.1",
+                                "OTIO_SCHEMA": "RotateEffect.1",
                                 "effect_name": "",
-                                "width": 1280,
-                                "height": 720,
-                                "checkerWidth": 100,
-                                "checkerHeight": 100,
-                                "red1": 1.0,
-                                "green1": 1.0,
-                                "blue1": 1.0,
-                                "alpha1": 1.0,
-                                "red2": 0.0,
-                                "green2": 0.0,
-                                "blue2": 0.0,
-                                "alpha2": 1.0
+                                "angle": 45.0,
+                                "filter_name": "",
+                                "filter_width": 0.0
                             }
                         ],
                         "source_range": {
@@ -104,54 +93,7 @@
                                 "value": 0
                             }
                         },
-                        "name": "Checkers"
-                    },
-                    {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
-                            "available_range": {
-                                "OTIO_SCHEMA": "TimeRange.1",
-                                "duration": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 24
-                                },
-                                "start_time": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 0
-                                }
-                            },
-                            "target_url": "Color_Black.png"
-                        },
-                        "effects": [
-                            {
-                                "OTIO_SCHEMA": "NoiseEffect.1",
-                                "effect_name": "",
-                                "width": 1280,
-                                "height": 720,
-                                "type": "gaussian",
-                                "a": 0.0,
-                                "b": 1.0,
-                                "mono": false,
-                                "seed": 0
-                            }
-                        ],
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 24
-                            },
-                            "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 0
-                            }
-                        },
-                        "name": "Noise"
+                        "name": "Rotate"
                     }
                 ],
                 "kind": "Video", 

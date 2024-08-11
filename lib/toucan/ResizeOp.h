@@ -10,61 +10,58 @@
 
 namespace toucan
 {
-    //! Noise data.
-    struct NoiseData
+    //! Resize data.
+    struct ResizeData
     {
         IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-        std::string type = "gaussian";
-        float a = 0.F;
-        float b = .1F;
-        bool mono = false;
-        int seed = 0;
+        std::string filterName;
+        float filterWidth = 0.F;
     };
 
-    //! Noise image operation.
-    class NoiseImageOp : public IImageOp
+    //! Resize operation.
+    class ResizeOp : public IImageOp
     {
     public:
-        NoiseImageOp(const NoiseData& = NoiseData());
+        ResizeOp(const ResizeData& = ResizeData());
 
-        virtual ~NoiseImageOp();
+        virtual ~ResizeOp();
 
-        const NoiseData& getData() const;
-        void setData(const NoiseData&);
+        const ResizeData& getData() const;
+        void setData(const ResizeData&);
 
         OIIO::ImageBuf exec() override;
 
     private:
-        NoiseData _data;
+        ResizeData _data;
     };
 
-    //! Noise image OTIO effect.
-    class NoiseImageEffect : public IEffect
+    //! Resize OTIO effect.
+    class ResizeEffect : public IEffect
     {
     public:
         struct Schema
         {
-            static auto constexpr name = "NoiseImageEffect";
+            static auto constexpr name = "ResizeEffect";
             static int constexpr version = 1;
         };
 
-        NoiseImageEffect(
+        ResizeEffect(
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        const NoiseData& getData() const;
-        void setData(const NoiseData&);
+        const ResizeData& getData() const;
+        void setData(const ResizeData&);
 
         std::shared_ptr<IImageOp> createOp() override;
 
     protected:
-        virtual ~NoiseImageEffect();
+        virtual ~ResizeEffect();
 
         bool read_from(Reader&) override;
         void write_to(Writer&) const override;
 
     private:
-        NoiseData _data;
+        ResizeData _data;
     };
 }
