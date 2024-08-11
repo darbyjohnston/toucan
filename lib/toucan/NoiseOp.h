@@ -12,11 +12,11 @@ namespace toucan
     struct NoiseData
     {
         IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-        std::string type = "gaussian";
-        float a = 0.F;
-        float b = .1F;
-        bool mono = false;
-        int seed = 0;
+        std::string          type = "gaussian";
+        float                a    = 0.F;
+        float                b    = .1F;
+        bool                 mono = false;
+        int                  seed = 0;
     };
 
     //! Noise operation.
@@ -53,9 +53,6 @@ namespace toucan
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        const NoiseData& getData() const;
-        void setData(const NoiseData&);
 
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,

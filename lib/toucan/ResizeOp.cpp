@@ -53,16 +53,6 @@ namespace toucan
     ResizeEffect::~ResizeEffect()
     {}
 
-    const ResizeData& ResizeEffect::getData() const
-    {
-        return _data;
-    }
-
-    void ResizeEffect::setData(const ResizeData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> ResizeEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

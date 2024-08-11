@@ -66,16 +66,6 @@ namespace toucan
     NoiseEffect::~NoiseEffect()
     {}
 
-    const NoiseData& NoiseEffect::getData() const
-    {
-        return _data;
-    }
-
-    void NoiseEffect::setData(const NoiseData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> NoiseEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

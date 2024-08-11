@@ -57,16 +57,6 @@ namespace toucan
     TextEffect::~TextEffect()
     {}
 
-    const TextData& TextEffect::getData() const
-    {
-        return _data;
-    }
-
-    void TextEffect::setData(const TextData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> TextEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

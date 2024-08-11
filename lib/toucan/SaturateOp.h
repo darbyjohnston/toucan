@@ -49,9 +49,6 @@ namespace toucan
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        const SaturateData& getData() const;
-        void setData(const SaturateData&);
-
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,
             const std::vector<std::shared_ptr<IImageOp> >& inputs) override;

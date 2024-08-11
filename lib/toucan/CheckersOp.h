@@ -11,10 +11,10 @@ namespace toucan
     //! Checkers data.
     struct CheckersData
     {
-        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+        IMATH_NAMESPACE::V2i size        = IMATH_NAMESPACE::V2i(0, 0);
         IMATH_NAMESPACE::V2i checkerSize = IMATH_NAMESPACE::V2i(100, 100);
-        IMATH_NAMESPACE::V4f color1 = IMATH_NAMESPACE::V4f(1.F, 1.F, 1.F, 1.F);
-        IMATH_NAMESPACE::V4f color2 = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F);
+        IMATH_NAMESPACE::V4f color1      = IMATH_NAMESPACE::V4f(1.F, 1.F, 1.F, 1.F);
+        IMATH_NAMESPACE::V4f color2      = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F);
     };
 
     //! Checkers operation.
@@ -51,9 +51,6 @@ namespace toucan
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        const CheckersData& getData() const;
-        void setData(const CheckersData&);
 
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,

@@ -11,9 +11,9 @@ namespace toucan
     //! Resize data.
     struct ResizeData
     {
-        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-        std::string filterName;
-        float filterWidth = 0.F;
+        IMATH_NAMESPACE::V2i size        = IMATH_NAMESPACE::V2i(0, 0);
+        std::string          filterName;
+        float                filterWidth = 0.F;
     };
 
     //! Resize operation.
@@ -50,9 +50,6 @@ namespace toucan
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        const ResizeData& getData() const;
-        void setData(const ResizeData&);
 
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,

@@ -58,16 +58,6 @@ namespace toucan
     FillEffect::~FillEffect()
     {}
 
-    const FillData& FillEffect::getData() const
-    {
-        return _data;
-    }
-
-    void FillEffect::setData(const FillData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> FillEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

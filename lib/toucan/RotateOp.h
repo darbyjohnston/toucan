@@ -11,9 +11,9 @@ namespace toucan
     //! Rotate data.
     struct RotateData
     {
-        float angle = 0.F;
+        float       angle       = 0.F;
         std::string filterName;
-        float filterWidth = 0.F;
+        float       filterWidth = 0.F;
     };
 
     //! Rotate operation.
@@ -50,9 +50,6 @@ namespace toucan
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        const RotateData& getData() const;
-        void setData(const RotateData&);
 
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,

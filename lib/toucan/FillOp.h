@@ -11,7 +11,7 @@ namespace toucan
     //! Fill data.
     struct FillData
     {
-        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+        IMATH_NAMESPACE::V2i size  = IMATH_NAMESPACE::V2i(0, 0);
         IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 0.F);
     };
 
@@ -49,9 +49,6 @@ namespace toucan
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        const FillData& getData() const;
-        void setData(const FillData&);
 
         std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,

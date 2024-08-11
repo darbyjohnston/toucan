@@ -51,16 +51,6 @@ namespace toucan
     SaturateEffect::~SaturateEffect()
     {}
 
-    const SaturateData& SaturateEffect::getData() const
-    {
-        return _data;
-    }
-
-    void SaturateEffect::setData(const SaturateData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> SaturateEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

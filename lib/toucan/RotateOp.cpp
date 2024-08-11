@@ -53,16 +53,6 @@ namespace toucan
     RotateEffect::~RotateEffect()
     {}
 
-    const RotateData& RotateEffect::getData() const
-    {
-        return _data;
-    }
-
-    void RotateEffect::setData(const RotateData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> RotateEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

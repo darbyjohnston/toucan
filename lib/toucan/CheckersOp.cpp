@@ -69,16 +69,6 @@ namespace toucan
     CheckersEffect::~CheckersEffect()
     {}
 
-    const CheckersData& CheckersEffect::getData() const
-    {
-        return _data;
-    }
-
-    void CheckersEffect::setData(const CheckersData & value)
-    {
-        _data = value;
-    }
-
     std::shared_ptr<IImageOp> CheckersEffect::createOp(
         const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)

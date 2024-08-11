@@ -18,6 +18,7 @@ namespace toucan
 
         virtual ~CompOp();
 
+        //! Set whether images are are pre-multiplied before compositing.
         void setPremult(bool);
 
         OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
