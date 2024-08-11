@@ -25,6 +25,7 @@ namespace toucan
 
         ~TimelineTraverse();
 
+        //! Get an image operation graph for the given time.
         std::shared_ptr<IImageOp> exec(const OTIO_NS::RationalTime&);
 
     private:

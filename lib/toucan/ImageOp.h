@@ -23,6 +23,7 @@ namespace toucan
 
         virtual ~IImageOp() = 0;
 
+        //! Execute the image operation for the given time.
         virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
 
     protected:
@@ -39,6 +40,7 @@ namespace toucan
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
+        //! Create an image operation.
         virtual std::shared_ptr<IImageOp> createOp(
             const OTIO_NS::RationalTime& timeOffset,
             const std::vector<std::shared_ptr<IImageOp> >& inputs) = 0;
