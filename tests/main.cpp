@@ -5,6 +5,7 @@
 #include "CompOpTest.h"
 #include "ReadOpTest.h"
 #include "TimelineTraverseTest.h"
+#include "UtilTest.h"
 
 #include <toucan/Init.h>
 
@@ -24,5 +25,6 @@ int main(int argc, char** argv)
     compOpTest(path);
     readOpTest(path);
     timelineTraverseTest(path);
+    utilTest(path);
     return 0;
 }

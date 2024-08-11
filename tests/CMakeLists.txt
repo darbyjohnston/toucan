@@ -1,12 +1,14 @@
 set(HEADERS
     CompOpTest.h
     ReadOpTest.h
-    TimelineTraverseTest.h)
+    TimelineTraverseTest.h
+    UtilTest.h)
 
 set(SOURCE
     CompOpTest.cpp
     ReadOpTest.cpp
     TimelineTraverseTest.cpp
+    UtilTest.cpp
     main.cpp)
 
 add_executable(toucan-test ${SOURCE} ${HEADERS})

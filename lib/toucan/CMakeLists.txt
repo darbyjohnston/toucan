@@ -14,7 +14,8 @@ set(HEADERS
     SaturateOp.h
     SequenceReadOp.h
     TextOp.h
-    TimelineTraverse.h)
+    TimelineTraverse.h
+    Util.h)
 set(SOURCE
     CheckersOp.cpp
     CompOp.cpp
@@ -31,7 +32,8 @@ set(SOURCE
     SaturateOp.cpp
     SequenceReadOp.cpp
     TextOp.cpp
-    TimelineTraverse.cpp)
+    TimelineTraverse.cpp
+    Util.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})
 target_link_libraries(toucan PUBLIC OTIO OpenImageIO::OpenImageIO)

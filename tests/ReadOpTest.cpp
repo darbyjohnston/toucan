@@ -6,6 +6,8 @@
 
 #include <toucan/ReadOp.h>
 
+#include <cassert>
+
 namespace toucan
 {
     void readOpTest(const std::filesystem::path& path)
