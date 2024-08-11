@@ -21,8 +21,7 @@ namespace toucan
             "Patterns",
             "Text",
             "Transforms",
-            "Filters",
-            "Sequence"
+            "Filters"
         };
         for (const auto& otioFile : otioFiles)
         {

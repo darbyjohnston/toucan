@@ -1,7 +1,7 @@
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {},
-    "name": "SimpleOver",
+    "name": "Text",
     "tracks": {
         "OTIO_SCHEMA": "Stack.1", 
         "children": [
@@ -17,7 +17,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 5
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -86,7 +86,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 5
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",

@@ -1,7 +1,7 @@
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {},
-    "name": "SimpleOver",
+    "name": "CompOver",
     "tracks": {
         "OTIO_SCHEMA": "Stack.1", 
         "children": [
@@ -17,7 +17,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 30
+                                    "value": 10
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -32,7 +32,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 30
+                                "value": 10
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -40,7 +40,41 @@
                                 "value": 0
                             }
                         },
-                        "name": "Color_Blue"
+                        "name": "Blue"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 10
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "target_url": "Color_Green.png"
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 10
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Green"
                     }
                 ],
                 "kind": "Video", 
@@ -52,7 +86,7 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "OTIO_SCHEMA": "ImageSequenceReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
@@ -66,7 +100,14 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Letter_A.png"
+                            "target_url_base": "",
+                            "name_prefix": "Counter.",
+                            "name_suffix": ".png",
+                            "start_frame": 0,
+                            "frame_step": 1,
+                            "rate": 0.0,
+                            "frame_zero_padding": 0,
+                            "missing_frame_policy": "black"
                         },
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
@@ -81,12 +122,12 @@
                                 "value": 0
                             }
                         },
-                        "name": "Letter_A"
+                        "name": "Counter"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "OTIO_SCHEMA": "ImageSequenceReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
@@ -100,7 +141,14 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Letter_B.png"
+                            "target_url_base": "",
+                            "name_prefix": "Counter.",
+                            "name_suffix": ".png",
+                            "start_frame": 0,
+                            "frame_step": 1,
+                            "rate": 0.0,
+                            "frame_zero_padding": 0,
+                            "missing_frame_policy": "black"
                         },
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
@@ -115,41 +163,7 @@
                                 "value": 0
                             }
                         },
-                        "name": "Letter_B"
-                    },
-                    {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
-                            "available_range": {
-                                "OTIO_SCHEMA": "TimeRange.1",
-                                "duration": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 10
-                                },
-                                "start_time": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 0
-                                }
-                            },
-                            "target_url": "Letter_C.png"
-                        },
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 10
-                            },
-                            "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 0
-                            }
-                        },
-                        "name": "Letter_C"
+                        "name": "Counter 2"
                     }
                 ],
                 "kind": "Video", 

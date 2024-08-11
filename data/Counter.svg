@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="0.67265625"
-     inkscape:cx="640"
-     inkscape:cy="359.76771"
+     inkscape:zoom="1.1305555"
+     inkscape:cx="639.95087"
+     inkscape:cy="360"
      inkscape:window-width="1920"
      inkscape:window-height="1010"
      inkscape:window-x="1913"
@@ -44,13 +44,6 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1">
-    <rect
-       style="fill:#3c3c3c;fill-opacity:1;stroke-width:2.55042"
-       id="rect1"
-       width="338.66666"
-       height="190.5"
-       x="0"
-       y="8.8817842e-16" />
     <circle
        style="fill:#787878;fill-opacity:1;stroke-width:0.54763"
        id="path1"
@@ -67,6 +60,6 @@
          id="tspan1"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:141.111px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.264583"
          x="130.54158"
-         y="145.10049">0</tspan></text>
+         y="145.10049">9</tspan></text>
   </g>
 </svg>
