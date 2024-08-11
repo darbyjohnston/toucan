@@ -20,14 +20,17 @@ namespace toucan
     class RotateOp : public IImageOp
     {
     public:
-        RotateOp(const RotateData& = RotateData());
+        RotateOp(
+            const RotateData& = RotateData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~RotateOp();
 
         const RotateData& getData() const;
         void setData(const RotateData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         RotateData _data;
@@ -51,7 +54,9 @@ namespace toucan
         const RotateData& getData() const;
         void setData(const RotateData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~RotateEffect();

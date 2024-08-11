@@ -6,20 +6,18 @@
 
 namespace toucan
 {
+    ReadOp::ReadOp(
+        const std::filesystem::path& path,
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs),
+        _path(path)
+    {}
+
     ReadOp::~ReadOp()
     {}
 
-    void ReadOp::setPath(const std::filesystem::path& path)
-    {
-        _path = path;
-    }
-
-    void ReadOp::setTime(const opentime::RationalTime& time)
-    {
-        _time = time;
-    }
-
-    OIIO::ImageBuf ReadOp::exec()
+    OIIO::ImageBuf ReadOp::exec(const OTIO_NS::RationalTime&)
     {
         OIIO::ImageBuf buf(_path.string());
         return buf;

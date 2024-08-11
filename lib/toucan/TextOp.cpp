@@ -8,7 +8,11 @@
 
 namespace toucan
 {
-    TextOp::TextOp(const TextData& data) :
+    TextOp::TextOp(
+        const TextData& data,
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs),
         _data(data)
     {}
 
@@ -25,12 +29,12 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf TextOp::exec()
+    OIIO::ImageBuf TextOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            buf = _inputs[0]->exec();
+            buf = _inputs[0]->exec(time);
             OIIO::ImageBufAlgo::render_text(
                 buf,
                 _data.pos.x,
@@ -63,9 +67,11 @@ namespace toucan
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> TextEffect::createOp()
+    std::shared_ptr<IImageOp> TextEffect::createOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<TextOp>(_data);
+        return std::make_shared<TextOp>(_data, timeOffset, inputs);
     }
 
     bool TextEffect::read_from(Reader& reader)

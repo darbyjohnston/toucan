@@ -19,14 +19,17 @@ namespace toucan
     class FillOp : public IImageOp
     {
     public:
-        FillOp(const FillData& = FillData());
+        FillOp(
+            const FillData& = FillData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~FillOp();
 
         const FillData& getData() const;
         void setData(const FillData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         FillData _data;
@@ -50,7 +53,9 @@ namespace toucan
         const FillData& getData() const;
         void setData(const FillData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~FillEffect();

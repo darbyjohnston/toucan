@@ -14,16 +14,16 @@ namespace toucan
     class ReadOp : public IImageOp
     {
     public:
+        ReadOp(
+            const std::filesystem::path&,
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
+
         virtual ~ReadOp();
-
-        void setPath(const std::filesystem::path&);
-
-        void setTime(const OTIO_NS::RationalTime&);
         
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         std::filesystem::path _path;
-        opentime::RationalTime _time;
     };
 }

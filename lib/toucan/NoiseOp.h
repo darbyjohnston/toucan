@@ -23,14 +23,17 @@ namespace toucan
     class NoiseOp : public IImageOp
     {
     public:
-        NoiseOp(const NoiseData& = NoiseData());
+        NoiseOp(
+            const NoiseData& = NoiseData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~NoiseOp();
 
         const NoiseData& getData() const;
         void setData(const NoiseData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         NoiseData _data;
@@ -54,7 +57,9 @@ namespace toucan
         const NoiseData& getData() const;
         void setData(const NoiseData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~NoiseEffect();

@@ -8,7 +8,11 @@
 
 namespace toucan
 {
-    NoiseOp::NoiseOp(const NoiseData& data) :
+    NoiseOp::NoiseOp(
+        const NoiseData& data,
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs),
         _data(data)
     {}
 
@@ -25,12 +29,12 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf NoiseOp::exec()
+    OIIO::ImageBuf NoiseOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            buf = _inputs[0]->exec();
+            buf = _inputs[0]->exec(time);
             OIIO::ImageBufAlgo::noise(
                 buf,
                 _data.type,
@@ -72,9 +76,11 @@ namespace toucan
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> NoiseEffect::createOp()
+    std::shared_ptr<IImageOp> NoiseEffect::createOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<NoiseOp>(_data);
+        return std::make_shared<NoiseOp>(_data, timeOffset, inputs);
     }
 
     bool NoiseEffect::read_from(Reader& reader)

@@ -10,6 +10,7 @@ set(HEADERS
     ResizeOp.h
     RotateOp.h
     SaturateOp.h
+    SequenceReadOp.h
     TextOp.h
     TimelineTraverse.h)
 set(SOURCE
@@ -24,6 +25,7 @@ set(SOURCE
     ResizeOp.cpp
     RotateOp.cpp
     SaturateOp.cpp
+    SequenceReadOp.cpp
     TextOp.cpp
     TimelineTraverse.cpp)
 

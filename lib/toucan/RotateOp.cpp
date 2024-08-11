@@ -8,7 +8,11 @@
 
 namespace toucan
 {
-    RotateOp::RotateOp(const RotateData& data) :
+    RotateOp::RotateOp(
+        const RotateData& data,
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs),
         _data(data)
     {}
 
@@ -25,13 +29,13 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf RotateOp::exec()
+    OIIO::ImageBuf RotateOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
             buf = OIIO::ImageBufAlgo::rotate(
-                _inputs[0]->exec(),
+                _inputs[0]->exec(time),
                 _data.angle / 360.F * 2.F * M_PI,
                 _data.filterName,
                 _data.filterWidth);
@@ -59,9 +63,11 @@ namespace toucan
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> RotateEffect::createOp()
+    std::shared_ptr<IImageOp> RotateEffect::createOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<RotateOp>(_data);
+        return std::make_shared<RotateOp>(_data, timeOffset, inputs);
     }
 
     bool RotateEffect::read_from(Reader& reader)

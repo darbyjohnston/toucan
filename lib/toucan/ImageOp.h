@@ -17,13 +17,16 @@ namespace toucan
     class IImageOp : public std::enable_shared_from_this<IImageOp>
     {
     public:
+        IImageOp(
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
+
         virtual ~IImageOp() = 0;
 
-        virtual void setInputs(const std::vector<std::shared_ptr<IImageOp> >&);
-
-        virtual OIIO::ImageBuf exec() = 0;
+        virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
 
     protected:
+        OTIO_NS::RationalTime _timeOffset = OTIO_NS::RationalTime(0.0, 1.0);
         std::vector<std::shared_ptr<IImageOp> > _inputs;
     };
 
@@ -36,7 +39,9 @@ namespace toucan
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        virtual std::shared_ptr<IImageOp> createOp() = 0;
+        virtual std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) = 0;
 
     protected:
         virtual ~IEffect() = 0;

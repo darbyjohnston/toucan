@@ -18,14 +18,17 @@ namespace toucan
     class SaturateOp : public IImageOp
     {
     public:
-        SaturateOp(const SaturateData& = SaturateData());
+        SaturateOp(
+            const SaturateData& = SaturateData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~SaturateOp();
 
         const SaturateData& getData() const;
         void setData(const SaturateData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         SaturateData _data;
@@ -49,7 +52,9 @@ namespace toucan
         const SaturateData& getData() const;
         void setData(const SaturateData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~SaturateEffect();

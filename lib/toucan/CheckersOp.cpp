@@ -8,7 +8,11 @@
 
 namespace toucan
 {
-    CheckersOp::CheckersOp(const CheckersData& data) :
+    CheckersOp::CheckersOp(
+        const CheckersData& data,
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs),
         _data(data)
     {}
 
@@ -25,12 +29,12 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf CheckersOp::exec()
+    OIIO::ImageBuf CheckersOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            buf = _inputs[0]->exec();
+            buf = _inputs[0]->exec(time);
             OIIO::ImageBufAlgo::checker(
                 buf,
                 _data.checkerSize.x,
@@ -75,9 +79,11 @@ namespace toucan
         _data = value;
     }
 
-    std::shared_ptr<IImageOp> CheckersEffect::createOp()
+    std::shared_ptr<IImageOp> CheckersEffect::createOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<CheckersOp>(_data);
+        return std::make_shared<CheckersOp>(_data, timeOffset, inputs);
     }
 
     bool CheckersEffect::read_from(Reader& reader)

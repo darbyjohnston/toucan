@@ -8,18 +8,21 @@
 
 namespace toucan
 {
-    InvertOp::InvertOp()
+    InvertOp::InvertOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(timeOffset, inputs)
     {}
 
     InvertOp::~InvertOp()
     {}
 
-    OIIO::ImageBuf InvertOp::exec()
+    OIIO::ImageBuf InvertOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            const auto input = _inputs[0]->exec();
+            const auto input = _inputs[0]->exec(time);
             const auto spec = input.spec();
             //! \todo The ROI is not working?
             buf = OIIO::ImageBufAlgo::invert(
@@ -39,9 +42,11 @@ namespace toucan
     InvertEffect::~InvertEffect()
     {}
 
-    std::shared_ptr<IImageOp> InvertEffect::createOp()
+    std::shared_ptr<IImageOp> InvertEffect::createOp(
+        const OTIO_NS::RationalTime& timeOffset,
+        const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<InvertOp>();
+        return std::make_shared<InvertOp>(timeOffset, inputs);
     }
 
     bool InvertEffect::read_from(Reader& reader)

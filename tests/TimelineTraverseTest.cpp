@@ -16,12 +16,13 @@ namespace toucan
         std::cout << "timelineTraverseTest" << std::endl;
         const std::vector<std::string> otioFiles =
         {
-            /*"CompOver",
+            "CompOver",
             "Gap",
             "Patterns",
             "Text",
-            "Transforms",*/
-            "Filters"
+            "Transforms",
+            "Filters",
+            "Sequence"
         };
         for (const auto& otioFile : otioFiles)
         {
@@ -50,7 +51,7 @@ namespace toucan
                     timeRange.duration().value() << std::endl;
                 if (auto op = traverse->exec(time))
                 {
-                    auto buf = op->exec();
+                    auto buf = op->exec(time);
                     std::stringstream ss;
                     ss << "timelineTraverseTest_" << otioFile << "." <<
                         std::setw(6) << std::setfill('0') << time.to_frames() <<

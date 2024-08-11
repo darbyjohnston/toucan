@@ -12,11 +12,13 @@ namespace toucan
     class InvertOp : public IImageOp
     {
     public:
-        InvertOp();
+        InvertOp(
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~InvertOp();
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
     };
 
     //! Invert OTIO effect.
@@ -34,7 +36,9 @@ namespace toucan
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~InvertEffect();

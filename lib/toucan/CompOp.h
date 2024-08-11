@@ -12,11 +12,15 @@ namespace toucan
     class CompOp : public IImageOp
     {
     public:
+        CompOp(
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
+
         virtual ~CompOp();
 
         void setPremult(bool);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         bool _premult = false;

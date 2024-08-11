@@ -22,14 +22,17 @@ namespace toucan
     class TextOp : public IImageOp
     {
     public:
-        TextOp(const TextData& = TextData());
+        TextOp(
+            const TextData& = TextData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~TextOp();
 
         const TextData& getData() const;
         void setData(const TextData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         TextData _data;
@@ -53,7 +56,9 @@ namespace toucan
         const TextData& getData() const;
         void setData(const TextData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~TextEffect();

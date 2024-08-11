@@ -20,14 +20,17 @@ namespace toucan
     class ResizeOp : public IImageOp
     {
     public:
-        ResizeOp(const ResizeData& = ResizeData());
+        ResizeOp(
+            const ResizeData& = ResizeData(),
+            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
+            const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~ResizeOp();
 
         const ResizeData& getData() const;
         void setData(const ResizeData&);
 
-        OIIO::ImageBuf exec() override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         ResizeData _data;
@@ -51,7 +54,9 @@ namespace toucan
         const ResizeData& getData() const;
         void setData(const ResizeData&);
 
-        std::shared_ptr<IImageOp> createOp() override;
+        std::shared_ptr<IImageOp> createOp(
+            const OTIO_NS::RationalTime& timeOffset,
+            const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:
         virtual ~ResizeEffect();

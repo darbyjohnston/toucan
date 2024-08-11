@@ -7,8 +7,10 @@
 #include "CompOp.h"
 #include "FillOp.h"
 #include "ReadOp.h"
+#include "SequenceReadOp.h"
 
 #include <opentimelineio/externalReference.h>
+#include <opentimelineio/imageSequenceReference.h>
 
 namespace toucan
 {
@@ -24,7 +26,29 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                OIIO::ImageBuf buf(path.string());
+                auto read = std::make_shared<ReadOp>(path);
+                const auto buf = read->exec(OTIO_NS::RationalTime(0.0, 1.0));
+                const auto& spec = buf.spec();
+                if (spec.width > 0)
+                {
+                    _size.x = spec.width;
+                    _size.y = spec.height;
+                    break;
+                }
+            }
+            else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
+            {
+                const std::string url = sequenceRef->target_url_base();
+                const std::filesystem::path path = _path / url;
+                auto read = std::make_shared<SequenceReadOp>(
+                    path.string(),
+                    sequenceRef->name_prefix(),
+                    sequenceRef->name_suffix(),
+                    sequenceRef->start_frame(),
+                    sequenceRef->frame_step(),
+                    sequenceRef->rate(),
+                    sequenceRef->frame_zero_padding());
+                const auto buf = read->exec(OTIO_NS::RationalTime(0.0, 1.0));
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
@@ -69,32 +93,53 @@ namespace toucan
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip)
     {
-        const auto availableRange = clip->available_range();
-        if (availableRange.contains(time))
+        const OTIO_NS::TimeRange trimmedRange = clip->trimmed_range();
+        const auto trimmedRangeInParent = clip->trimmed_range_in_parent();
+        if (trimmedRange.contains(time) && trimmedRangeInParent.has_value())
         {
+            const OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.value().start_time();
+
+            // Get the media reference.
+            std::shared_ptr<IImageOp> op;
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ReadOp>();
-                read->setPath(path);
-
-                std::shared_ptr<IImageOp> op = read;
-                for (const auto& effect : clip->effects())
-                {
-                    if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
-                    {
-                        auto effectOp = iEffect->createOp();
-                        effectOp->setInputs({ op });
-                        op = effectOp;
-                    }
-                }
-
-                auto comp = std::make_shared<CompOp>();
-                comp->setPremult(true);
-                comp->setInputs({ op, _op });
-                _op = comp;
+                auto read = std::make_shared<ReadOp>(path, timeOffset);
+                op = read;
             }
+            else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
+            {
+                const std::string url = sequenceRef->target_url_base();
+                const std::filesystem::path path = _path / url;
+                auto read = std::make_shared<SequenceReadOp>(
+                    path.string(),
+                    sequenceRef->name_prefix(),
+                    sequenceRef->name_suffix(),
+                    sequenceRef->start_frame(),
+                    sequenceRef->frame_step(),
+                    sequenceRef->rate(),
+                    sequenceRef->frame_zero_padding(),
+                    timeOffset);
+                op = read;
+            }
+
+            // Create the effects.
+            for (const auto& effect : clip->effects())
+            {
+                if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
+                {
+                    auto effectOp = iEffect->createOp(timeOffset, { op });
+                    op = effectOp;
+                }
+            }
+
+            // Composite.
+            auto comp = std::make_shared<CompOp>(
+                timeOffset,
+                std::vector<std::shared_ptr<IImageOp> >{ op, _op });
+            comp->setPremult(true);
+            _op = comp;
         }
     }
 }
