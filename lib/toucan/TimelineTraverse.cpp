@@ -69,7 +69,7 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
-        _op = std::make_shared<FillOp>(FillData{ _size });
+        _op = std::make_shared<FillOp>(FillData{ _size, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
         for (const auto& i : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
