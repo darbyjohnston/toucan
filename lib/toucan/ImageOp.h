@@ -26,7 +26,7 @@ namespace toucan
         virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
 
     protected:
-        OTIO_NS::RationalTime _timeOffset = OTIO_NS::RationalTime(0.0, 1.0);
+        OTIO_NS::RationalTime _timeOffset;
         std::vector<std::shared_ptr<IImageOp> > _inputs;
     };
 
