@@ -23,6 +23,7 @@ namespace toucan
             "Patterns",
             "Text",
             "Transition",
+            "Transition2",
             "Transforms"
         };
         for (const auto& otioFile : otioFiles)

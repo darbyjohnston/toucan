@@ -23,7 +23,7 @@ namespace toucan
         _path(path),
         _timeline(timeline)
     {
-        // The first clip sets the timeline resolution.
+        // Get the image size from the first clip.
         for (auto clip : _timeline->find_clips())
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
@@ -140,6 +140,7 @@ namespace toucan
                 }
             }
 
+            // Handle transitions.
             if (op)
             {
                 if (auto prevTransition = dynamic_cast<OTIO_NS::Transition*>(prevComposable(i.value)))
@@ -178,7 +179,7 @@ namespace toucan
                 }
             }
 
-            // Composite.
+            // Composite over the previous track.
             std::vector<std::shared_ptr<IImageOp> > ops;
             if (op)
             {
@@ -234,7 +235,7 @@ namespace toucan
             out = std::make_shared<FillOp>(FillData{ _size });
         }
 
-        // Create the effects.
+        // Get the effects.
         for (const auto& effect : item->effects())
         {
             if (auto iEffect = dynamic_cast<IEffect*>(effect.value))

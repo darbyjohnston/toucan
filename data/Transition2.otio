@@ -27,6 +27,12 @@
                             },
                             "target_url": "Counter.0.png"
                         },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "InvertEffect.1",
+                                "effect_name": ""
+                            }
+                        ],
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
@@ -76,6 +82,12 @@
                             },
                             "target_url": "ColorBars.png"
                         },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "InvertEffect.1",
+                                "effect_name": ""
+                            }
+                        ],
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
