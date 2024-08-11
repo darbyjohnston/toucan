@@ -30,9 +30,10 @@ namespace toucan
         std::shared_ptr<IImageOp> exec(const OTIO_NS::RationalTime&);
 
     private:
-        void _track(
+        std::shared_ptr<IImageOp> _track(
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&,
+            const std::shared_ptr<IImageOp>&);
         std::shared_ptr<IImageOp> _item(
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
@@ -41,6 +42,5 @@ namespace toucan
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
         IMATH_NAMESPACE::V2d _size = IMATH_NAMESPACE::V2d(0, 0);
-        std::shared_ptr<IImageOp> _op;
     };
 }

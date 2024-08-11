@@ -12,6 +12,7 @@
 #include "TransitionOp.h"
 
 #include <opentimelineio/externalReference.h>
+#include <opentimelineio/gap.h>
 #include <opentimelineio/imageSequenceReference.h>
 #include <opentimelineio/linearTimeWarp.h>
 
@@ -69,15 +70,15 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
-        _op = std::make_shared<FillOp>(FillData{ _size, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
+        std::shared_ptr<IImageOp> op = std::make_shared<FillOp>(FillData{ _size, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
         for (const auto& i : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                _track(time, track);
+                op = _track(time, track, op);
             }
         }
-        return _op;
+        return op;
     }
 
     namespace
@@ -121,10 +122,13 @@ namespace toucan
         }
     }
 
-    void TimelineTraverse::_track(
+    std::shared_ptr<IImageOp> TimelineTraverse::_track(
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const std::shared_ptr<IImageOp>& trackOp)
     {
+        std::shared_ptr<CompOp> comp;
+
         for (const auto& i : track->children())
         {
             std::shared_ptr<IImageOp> op;
@@ -180,19 +184,23 @@ namespace toucan
             }
 
             // Composite over the previous track.
-            std::vector<std::shared_ptr<IImageOp> > ops;
             if (op)
             {
-                ops.push_back(op);
+                std::vector<std::shared_ptr<IImageOp> > ops;
+                if (op)
+                {
+                    ops.push_back(op);
+                }
+                if (trackOp)
+                {
+                    ops.push_back(trackOp);
+                }
+                comp = std::make_shared<CompOp>(ops);
+                comp->setPremult(true);
             }
-            if (_op)
-            {
-                ops.push_back(_op);
-            }
-            auto comp = std::make_shared<CompOp>(ops);
-            comp->setPremult(true);
-            _op = comp;
         }
+
+        return comp;
     }
 
     std::shared_ptr<IImageOp> TimelineTraverse::_item(
@@ -230,7 +238,7 @@ namespace toucan
                 out = read;
             }
         }
-        else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
+        else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))
         {
             out = std::make_shared<FillOp>(FillData{ _size });
         }
