@@ -5,7 +5,7 @@ toucan
 
 Toucan is a project for experimenting with timeline rendering. The project
 currently consists of a C++ software renderer that can render basic timelines
-with image sequences and effects.
+with image sequences, effects, and transitions.
 
 Building
 ========
