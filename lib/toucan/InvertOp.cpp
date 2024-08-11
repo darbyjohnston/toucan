@@ -22,12 +22,12 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            const auto input = _inputs[0]->exec(time);
-            const auto spec = input.spec();
-            //! \todo The ROI is not working?
-            buf = OIIO::ImageBufAlgo::invert(
-                input);
-                //OIIO::ROI(0, spec.width, 0, spec.height, 0, 1, 0, 3));
+            auto input = _inputs[0]->exec(time);
+            auto roi = input.roi();
+            roi.chend = 3;
+            buf = OIIO::ImageBufAlgo::unpremult(input);
+            OIIO::ImageBufAlgo::invert(buf, buf, roi);
+            OIIO::ImageBufAlgo::repremult(buf, buf);
         }
         return buf;
     }
