@@ -9,6 +9,7 @@
 #include <opentimelineio/clip.h>
 #include <opentimelineio/timeline.h>
 #include <opentimelineio/track.h>
+#include <opentimelineio/transition.h>
 
 #include <filesystem>
 #include <memory>
@@ -32,9 +33,10 @@ namespace toucan
         void _track(
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
-        void _clip(
+        std::shared_ptr<IImageOp> _item(
+            const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;

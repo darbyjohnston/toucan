@@ -22,6 +22,8 @@ namespace toucan
         virtual ~IImageOp() = 0;
 
         //! Set the time offset.
+        //! 
+        //! \todo How should time transform be handled?
         void setTimeOffset(const OTIO_NS::RationalTime&);
 
         //! Execute the image operation for the given time.

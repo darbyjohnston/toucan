@@ -16,6 +16,7 @@ set(HEADERS
     SequenceReadOp.h
     TextOp.h
     TimelineTraverse.h
+    TransitionOp.h
     Util.h)
 set(SOURCE
     CheckersOp.cpp
@@ -35,6 +36,7 @@ set(SOURCE
     SequenceReadOp.cpp
     TextOp.cpp
     TimelineTraverse.cpp
+    TransitionOp.cpp
     Util.cpp)
 
 add_library(toucan ${HEADERS} ${SOURCE})

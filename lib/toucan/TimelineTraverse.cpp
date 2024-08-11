@@ -9,6 +9,7 @@
 #include "LinearTimeWarpOp.h"
 #include "ReadOp.h"
 #include "SequenceReadOp.h"
+#include "TransitionOp.h"
 
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/imageSequenceReference.h>
@@ -22,6 +23,7 @@ namespace toucan
         _path(path),
         _timeline(timeline)
     {
+        // The first clip sets the timeline resolution.
         for (auto clip : _timeline->find_clips())
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
@@ -68,9 +70,9 @@ namespace toucan
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
     {
         _op = std::make_shared<FillOp>(FillData{ _size });
-        for (const auto& trackIt : _timeline->tracks()->children())
+        for (const auto& i : _timeline->tracks()->children())
         {
-            if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(trackIt))
+            if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
                 _track(time, track);
             }
@@ -78,37 +80,139 @@ namespace toucan
         return _op;
     }
 
+    namespace
+    {
+        OTIO_NS::Composable* prevComposable(OTIO_NS::Composable* composable)
+        {
+            OTIO_NS::Composable* out = nullptr;
+            if (auto parent = composable->parent())
+            {
+                const auto children = parent->children();
+                const auto i = std::find(children.begin(), children.end(), composable);
+                if (i != children.end())
+                {
+                    const size_t offset = i - children.begin();
+                    if (offset > 0)
+                    {
+                        out = children[offset - 1].value;
+                    }
+                }
+            }
+            return out;
+        }
+
+        OTIO_NS::Composable* nextComposable(OTIO_NS::Composable* composable)
+        {
+            OTIO_NS::Composable* out = nullptr;
+            if (auto parent = composable->parent())
+            {
+                const auto children = parent->children();
+                const auto i = std::find(children.begin(), children.end(), composable);
+                if (i != children.end())
+                {
+                    const size_t offset = i - children.begin();
+                    if (offset < children.size() - 1)
+                    {
+                        out = children[offset + 1].value;
+                    }
+                }
+            }
+            return out;
+        }
+    }
+
     void TimelineTraverse::_track(
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
     {
-        for (const auto& clipIt : track->children())
+        for (const auto& i : track->children())
         {
-            if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(clipIt))
+            std::shared_ptr<IImageOp> op;
+            if (auto item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(i))
             {
-                _clip(track->transformed_time(time, clip), clip);
+                const auto trimmedRangeInParent = item->trimmed_range_in_parent();
+                if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                {
+                    op = _item(
+                        trimmedRangeInParent.value(),
+                        track->transformed_time(time, item),
+                        item);
+                }
             }
+
+            if (op)
+            {
+                if (auto prevTransition = dynamic_cast<OTIO_NS::Transition*>(prevComposable(i.value)))
+                {
+                    const auto trimmedRangeInParent = prevTransition->trimmed_range_in_parent();
+                    if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                    {
+                        if (auto prevItem = dynamic_cast<OTIO_NS::Item*>(prevComposable(prevTransition)))
+                        {
+                            auto a = _item(
+                                prevItem->trimmed_range_in_parent().value(),
+                                track->transformed_time(time, prevItem),
+                                prevItem);
+                            op = std::make_shared<TransitionOp>(
+                                trimmedRangeInParent.value(),
+                                std::vector<std::shared_ptr<IImageOp> >{ a, op });
+                        }
+                    }
+                }
+                else if (auto nextTransition = dynamic_cast<OTIO_NS::Transition*>(nextComposable(i.value)))
+                {
+                    const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
+                    if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                    {
+                        if (auto nextItem = dynamic_cast<OTIO_NS::Item*>(nextComposable(nextTransition)))
+                        {
+                            auto b = _item(
+                                nextItem->trimmed_range_in_parent().value(),
+                                track->transformed_time(time, nextItem),
+                                nextItem);
+                            op = std::make_shared<TransitionOp>(
+                                trimmedRangeInParent.value(),
+                                std::vector<std::shared_ptr<IImageOp> >{ op, b });
+                        }
+                    }
+                }
+            }
+
+            // Composite.
+            std::vector<std::shared_ptr<IImageOp> > ops;
+            if (op)
+            {
+                ops.push_back(op);
+            }
+            if (_op)
+            {
+                ops.push_back(_op);
+            }
+            auto comp = std::make_shared<CompOp>(ops);
+            comp->setPremult(true);
+            _op = comp;
         }
     }
 
-    void TimelineTraverse::_clip(
+    std::shared_ptr<IImageOp> TimelineTraverse::_item(
+        const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip)
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item)
     {
-        const OTIO_NS::TimeRange trimmedRange = clip->trimmed_range();
-        const auto trimmedRangeInParent = clip->trimmed_range_in_parent();
-        if (trimmedRange.contains(time) && trimmedRangeInParent.has_value())
-        {
-            const OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.value().start_time();
+        std::shared_ptr<IImageOp> out;
 
+        const OTIO_NS::TimeRange trimmedRange = item->trimmed_range();
+        const OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.start_time();
+
+        if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
+        {
             // Get the media reference.
-            std::shared_ptr<IImageOp> op;
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
                 auto read = std::make_shared<ReadOp>(path);
-                op = read;
+                out = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
@@ -122,35 +226,35 @@ namespace toucan
                     sequenceRef->frame_step(),
                     sequenceRef->rate(),
                     sequenceRef->frame_zero_padding());
-                op = read;
+                out = read;
             }
-
-            // Create the effects.
-            for (const auto& effect : clip->effects())
-            {
-                if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
-                {
-                    auto effectOp = iEffect->createOp({ op });
-                    op = effectOp;
-                }
-                else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
-                {
-                    auto linearTimeWarpOp = std::make_shared<LinearTimeWarpOp>(
-                        static_cast<float>(linearTimeWarp->time_scalar()),
-                        std::vector<std::shared_ptr<IImageOp> >{ op });
-                    op = linearTimeWarpOp;
-                }
-            }
-            if (op)
-            {
-                op->setTimeOffset(timeOffset);
-            }
-
-            // Composite.
-            auto comp = std::make_shared<CompOp>(
-                std::vector<std::shared_ptr<IImageOp> >{ op, _op });
-            comp->setPremult(true);
-            _op = comp;
         }
+        else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
+        {
+            out = std::make_shared<FillOp>(FillData{ _size });
+        }
+
+        // Create the effects.
+        for (const auto& effect : item->effects())
+        {
+            if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
+            {
+                auto effectOp = iEffect->createOp({ out });
+                out = effectOp;
+            }
+            else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+            {
+                auto linearTimeWarpOp = std::make_shared<LinearTimeWarpOp>(
+                    static_cast<float>(linearTimeWarp->time_scalar()),
+                    std::vector<std::shared_ptr<IImageOp> >{ out });
+                out = linearTimeWarpOp;
+            }
+        }
+        if (out)
+        {
+            out->setTimeOffset(timeOffset);
+        }
+
+        return out;
     }
 }

@@ -22,6 +22,7 @@ namespace toucan
             "LinearTimeWarp",
             "Patterns",
             "Text",
+            "Transition",
             "Transforms"
         };
         for (const auto& otioFile : otioFiles)

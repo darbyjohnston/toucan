@@ -19,7 +19,7 @@ namespace toucan
     OIIO::ImageBuf FlopOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
-        if (!_inputs.empty())
+        if (!_inputs.empty() && _inputs[0])
         {
             OTIO_NS::RationalTime offsetTime = time;
             if (!_timeOffset.is_invalid_time())
