@@ -8,9 +8,8 @@ namespace toucan
 {
     ReadOp::ReadOp(
         const std::filesystem::path& path,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _path(path)
     {}
 

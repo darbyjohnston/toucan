@@ -22,7 +22,6 @@ namespace toucan
             int frameStep,
             double rate,
             int frameZeroPadding,
-            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
             const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~SequenceReadOp();

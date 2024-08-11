@@ -1,0 +1,114 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "metadata": {},
+    "name": "LinearTimeWarp",
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1", 
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ImageSequenceReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 10
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "target_url_base": "",
+                            "name_prefix": "Counter.",
+                            "name_suffix": ".png",
+                            "start_frame": 0,
+                            "frame_step": 1,
+                            "rate": 0.0,
+                            "frame_zero_padding": 0,
+                            "missing_frame_policy": "black"
+                        },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "LinearTimeWarp.1",
+                                "effect_name": "",
+                                "time_scalar": 2.0
+                            }
+                        ],
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 5
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "LinearTimeWarp"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ImageSequenceReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 10
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "target_url_base": "",
+                            "name_prefix": "Counter.",
+                            "name_suffix": ".png",
+                            "start_frame": 0,
+                            "frame_step": 1,
+                            "rate": 0.0,
+                            "frame_zero_padding": 0,
+                            "missing_frame_policy": "black"
+                        },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "LinearTimeWarp.1",
+                                "effect_name": "",
+                                "time_scalar": 0.5
+                            }
+                        ],
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 20
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "LinearTimeWarp 2"
+                    }
+                ],
+                "kind": "Video", 
+                "name": "Video"
+            }
+        ], 
+        "name": "Stack"
+    }
+}

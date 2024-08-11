@@ -21,7 +21,6 @@ namespace toucan
     public:
         FillOp(
             const FillData& = FillData(),
-            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
             const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~FillOp();
@@ -51,7 +50,6 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageOp> createOp(
-            const OTIO_NS::RationalTime& timeOffset,
             const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:

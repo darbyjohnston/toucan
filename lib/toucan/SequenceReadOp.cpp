@@ -17,9 +17,8 @@ namespace toucan
         int frameStep,
         double rate,
         int frameZeroPadding,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _base(base),
         _namePrefix(namePrefix),
         _nameSuffix(nameSuffix),

@@ -12,13 +12,11 @@ namespace toucan
     class CompOp : public IImageOp
     {
     public:
-        CompOp(
-            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
-            const std::vector<std::shared_ptr<IImageOp> >& = {});
+        CompOp(const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~CompOp();
 
-        //! Set whether images are are pre-multiplied before compositing.
+        //! Set whether images are pre-multiplied before compositing.
         void setPremult(bool);
 
         OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;

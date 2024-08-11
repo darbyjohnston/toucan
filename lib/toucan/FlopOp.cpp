@@ -9,9 +9,8 @@
 namespace toucan
 {
     FlopOp::FlopOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs)
+        IImageOp(inputs)
     {}
 
     FlopOp::~FlopOp()
@@ -22,7 +21,12 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            const auto input = _inputs[0]->exec(time);
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
+            const auto input = _inputs[0]->exec(offsetTime);
             buf = OIIO::ImageBufAlgo::flop(input);
         }
         return buf;
@@ -39,10 +43,9 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageOp> FlopEffect::createOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<FlopOp>(timeOffset, inputs);
+        return std::make_shared<FlopOp>(inputs);
     }
 
     bool FlopEffect::read_from(Reader& reader)

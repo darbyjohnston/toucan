@@ -10,9 +10,8 @@ namespace toucan
 {
     FillOp::FillOp(
         const FillData& data,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _data(data)
     {}
 
@@ -34,7 +33,12 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            buf = _inputs[0]->exec(time);
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
+            buf = _inputs[0]->exec(offsetTime);
             OIIO::ImageBufAlgo::fill(
                 buf,
                 { _data.color.x, _data.color.y, _data.color.z, _data.color.w });
@@ -59,10 +63,9 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageOp> FillEffect::createOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<FillOp>(_data, timeOffset, inputs);
+        return std::make_shared<FillOp>(_data, inputs);
     }
 
     bool FillEffect::read_from(Reader& reader)

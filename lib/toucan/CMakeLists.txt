@@ -7,6 +7,7 @@ set(HEADERS
     ImageOp.h
     Init.h
     InvertOp.h
+    LinearTimeWarpOp.h
     NoiseOp.h
     ReadOp.h
     ResizeOp.h
@@ -25,6 +26,7 @@ set(SOURCE
     ImageOp.cpp
     Init.cpp
     InvertOp.cpp
+    LinearTimeWarpOp.cpp
     NoiseOp.cpp
     ReadOp.cpp
     ResizeOp.cpp

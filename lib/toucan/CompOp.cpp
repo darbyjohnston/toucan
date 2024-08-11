@@ -8,10 +8,8 @@
 
 namespace toucan
 {
-    CompOp::CompOp(
-        const OTIO_NS::RationalTime& timeOffset,
-        const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs)
+    CompOp::CompOp(const std::vector<std::shared_ptr<IImageOp> >& inputs) :
+        IImageOp(inputs)
     {}
 
     CompOp::~CompOp()
@@ -25,10 +23,15 @@ namespace toucan
     OIIO::ImageBuf CompOp::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
+        OTIO_NS::RationalTime offsetTime = time;
+        if (!_timeOffset.is_invalid_time())
+        {
+            offsetTime -= _timeOffset;
+        }
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
         {
-            auto fg = _inputs[0]->exec(time);
-            auto bg = _inputs[1]->exec(time);
+            auto fg = _inputs[0]->exec(offsetTime);
+            auto bg = _inputs[1]->exec(offsetTime);
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);
@@ -37,7 +40,7 @@ namespace toucan
         }
         else if (1 == _inputs.size() && _inputs[0])
         {
-            auto fg = _inputs[0]->exec(time);
+            auto fg = _inputs[0]->exec(offsetTime);
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);

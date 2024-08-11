@@ -6,11 +6,13 @@
 
 #include "CompOp.h"
 #include "FillOp.h"
+#include "LinearTimeWarpOp.h"
 #include "ReadOp.h"
 #include "SequenceReadOp.h"
 
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/imageSequenceReference.h>
+#include <opentimelineio/linearTimeWarp.h>
 
 namespace toucan
 {
@@ -105,7 +107,7 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ReadOp>(path, timeOffset);
+                auto read = std::make_shared<ReadOp>(path);
                 op = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
@@ -119,8 +121,7 @@ namespace toucan
                     sequenceRef->start_frame(),
                     sequenceRef->frame_step(),
                     sequenceRef->rate(),
-                    sequenceRef->frame_zero_padding(),
-                    timeOffset);
+                    sequenceRef->frame_zero_padding());
                 op = read;
             }
 
@@ -129,14 +130,24 @@ namespace toucan
             {
                 if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
                 {
-                    auto effectOp = iEffect->createOp(timeOffset, { op });
+                    auto effectOp = iEffect->createOp({ op });
                     op = effectOp;
                 }
+                else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+                {
+                    auto linearTimeWarpOp = std::make_shared<LinearTimeWarpOp>(
+                        static_cast<float>(linearTimeWarp->time_scalar()),
+                        std::vector<std::shared_ptr<IImageOp> >{ op });
+                    op = linearTimeWarpOp;
+                }
+            }
+            if (op)
+            {
+                op->setTimeOffset(timeOffset);
             }
 
             // Composite.
             auto comp = std::make_shared<CompOp>(
-                timeOffset,
                 std::vector<std::shared_ptr<IImageOp> >{ op, _op });
             comp->setPremult(true);
             _op = comp;

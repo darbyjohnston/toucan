@@ -12,9 +12,7 @@ namespace toucan
     class FlopOp : public IImageOp
     {
     public:
-        FlopOp(
-            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
-            const std::vector<std::shared_ptr<IImageOp> >& = {});
+        FlopOp(const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~FlopOp();
 
@@ -37,7 +35,6 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageOp> createOp(
-            const OTIO_NS::RationalTime& timeOffset,
             const std::vector<std::shared_ptr<IImageOp> >& inputs) override;
 
     protected:

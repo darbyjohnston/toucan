@@ -7,14 +7,17 @@
 namespace toucan
 {
     IImageOp::IImageOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        _timeOffset(timeOffset),
         _inputs(inputs)
     {}
 
     IImageOp::~IImageOp()
     {}
+
+    void IImageOp::setTimeOffset(const OTIO_NS::RationalTime& timeOffset)
+    {
+        _timeOffset = timeOffset;
+    }
 
     IEffect::IEffect(
         std::string const& name,

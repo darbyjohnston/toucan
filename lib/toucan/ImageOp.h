@@ -17,11 +17,12 @@ namespace toucan
     class IImageOp : public std::enable_shared_from_this<IImageOp>
     {
     public:
-        IImageOp(
-            const OTIO_NS::RationalTime& = OTIO_NS::RationalTime(),
-            const std::vector<std::shared_ptr<IImageOp> >& = {});
+        IImageOp(const std::vector<std::shared_ptr<IImageOp> >& = {});
 
         virtual ~IImageOp() = 0;
+
+        //! Set the time offset.
+        void setTimeOffset(const OTIO_NS::RationalTime&);
 
         //! Execute the image operation for the given time.
         virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
@@ -42,7 +43,6 @@ namespace toucan
 
         //! Create an image operation.
         virtual std::shared_ptr<IImageOp> createOp(
-            const OTIO_NS::RationalTime& timeOffset,
             const std::vector<std::shared_ptr<IImageOp> >& inputs) = 0;
 
     protected:

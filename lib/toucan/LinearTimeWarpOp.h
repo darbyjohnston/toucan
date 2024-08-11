@@ -6,23 +6,21 @@
 
 #include <toucan/ImageOp.h>
 
-#include <filesystem>
-
 namespace toucan
 {
-    //! Read operation.
-    class ReadOp : public IImageOp
+    //! Linear time warp operation.
+    class LinearTimeWarpOp : public IImageOp
     {
     public:
-        ReadOp(
-            const std::filesystem::path&,
+        LinearTimeWarpOp(
+            float timeScalar,
             const std::vector<std::shared_ptr<IImageOp> >& = {});
 
-        virtual ~ReadOp();
+        virtual ~LinearTimeWarpOp();
         
         OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
-        std::filesystem::path _path;
+        float _timeScalar = 1.F;
     };
 }

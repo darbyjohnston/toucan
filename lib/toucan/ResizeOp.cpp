@@ -10,9 +10,8 @@ namespace toucan
 {
     ResizeOp::ResizeOp(
         const ResizeData& data,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _data(data)
     {}
 
@@ -34,8 +33,13 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
             buf = OIIO::ImageBufAlgo::resize(
-                _inputs[0]->exec(time),
+                _inputs[0]->exec(offsetTime),
                 _data.filterName,
                 _data.filterWidth,
                 OIIO::ROI(0, _data.size.x, 0, _data.size.y, 0, 1, 0, 4));
@@ -54,10 +58,9 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageOp> ResizeEffect::createOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<ResizeOp>(_data, timeOffset, inputs);
+        return std::make_shared<ResizeOp>(_data, inputs);
     }
 
     bool ResizeEffect::read_from(Reader& reader)

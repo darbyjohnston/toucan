@@ -17,11 +17,12 @@ namespace toucan
         const std::vector<std::string> otioFiles =
         {
             "CompOver",
+            "Filters",
             "Gap",
+            "LinearTimeWarp",
             "Patterns",
             "Text",
-            "Transforms",
-            "Filters"
+            "Transforms"
         };
         for (const auto& otioFile : otioFiles)
         {

@@ -10,9 +10,8 @@ namespace toucan
 {
     CheckersOp::CheckersOp(
         const CheckersData& data,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _data(data)
     {}
 
@@ -34,7 +33,12 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            buf = _inputs[0]->exec(time);
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
+            buf = _inputs[0]->exec(offsetTime);
             OIIO::ImageBufAlgo::checker(
                 buf,
                 _data.checkerSize.x,
@@ -70,14 +74,14 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageOp> CheckersEffect::createOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<CheckersOp>(_data, timeOffset, inputs);
+        return std::make_shared<CheckersOp>(_data, inputs);
     }
 
     bool CheckersEffect::read_from(Reader& reader)
     {
+        //! \todo What is a better way to serialize non-POD types?
         int64_t width = 0;
         int64_t height = 0;
         int64_t checkerWidth = 0;

@@ -10,9 +10,8 @@ namespace toucan
 {
     SaturateOp::SaturateOp(
         const SaturateData& data,
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs) :
-        IImageOp(timeOffset, inputs),
+        IImageOp(inputs),
         _data(data)
     {}
 
@@ -34,8 +33,13 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
             buf = OIIO::ImageBufAlgo::saturate(
-                _inputs[0]->exec(time),
+                _inputs[0]->exec(offsetTime),
                 _data.value);
         }
         return buf;
@@ -52,10 +56,9 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageOp> SaturateEffect::createOp(
-        const OTIO_NS::RationalTime& timeOffset,
         const std::vector<std::shared_ptr<IImageOp> >& inputs)
     {
-        return std::make_shared<SaturateOp>(_data, timeOffset, inputs);
+        return std::make_shared<SaturateOp>(_data, inputs);
     }
 
     bool SaturateEffect::read_from(Reader& reader)
