@@ -6,8 +6,6 @@
 
 #include <toucan/ImageOp.h>
 
-#include <filesystem>
-
 namespace toucan
 {
     //! Checkers data.

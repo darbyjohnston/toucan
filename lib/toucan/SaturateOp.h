@@ -8,57 +8,56 @@
 
 namespace toucan
 {
-    //! Fill data.
-    struct FillData
+    //! Saturate data.
+    struct SaturateData
     {
-        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-        IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 0.F);
+        float value = 1.F;
     };
 
-    //! Fill operation.
-    class FillOp : public IImageOp
+    //! Saturate operation.
+    class SaturateOp : public IImageOp
     {
     public:
-        FillOp(const FillData& = FillData());
+        SaturateOp(const SaturateData& = SaturateData());
 
-        virtual ~FillOp();
+        virtual ~SaturateOp();
 
-        const FillData& getData() const;
-        void setData(const FillData&);
+        const SaturateData& getData() const;
+        void setData(const SaturateData&);
 
         OIIO::ImageBuf exec() override;
 
     private:
-        FillData _data;
+        SaturateData _data;
     };
 
-    //! Fill OTIO effect.
-    class FillEffect : public IEffect
+    //! Saturate OTIO effect.
+    class SaturateEffect : public IEffect
     {
     public:
         struct Schema
         {
-            static auto constexpr name = "FillEffect";
+            static auto constexpr name = "SaturateEffect";
             static int constexpr version = 1;
         };
 
-        FillEffect(
+        SaturateEffect(
             std::string const& name = std::string(),
             std::string const& effect_name = std::string(),
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
-        const FillData& getData() const;
-        void setData(const FillData&);
+        const SaturateData& getData() const;
+        void setData(const SaturateData&);
 
         std::shared_ptr<IImageOp> createOp() override;
 
     protected:
-        virtual ~FillEffect();
+        virtual ~SaturateEffect();
 
         bool read_from(Reader&) override;
         void write_to(Writer&) const override;
 
     private:
-        FillData _data;
+        SaturateData _data;
     };
 }

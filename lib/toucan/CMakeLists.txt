@@ -4,10 +4,12 @@ set(HEADERS
     FillOp.h
     ImageOp.h
     Init.h
+    InvertOp.h
     NoiseOp.h
     ReadOp.h
     ResizeOp.h
     RotateOp.h
+    SaturateOp.h
     TextOp.h
     TimelineTraverse.h)
 set(SOURCE
@@ -16,10 +18,12 @@ set(SOURCE
     FillOp.cpp
     ImageOp.cpp
     Init.cpp
+    InvertOp.cpp
     NoiseOp.cpp
     ReadOp.cpp
     ResizeOp.cpp
     RotateOp.cpp
+    SaturateOp.cpp
     TextOp.cpp
     TimelineTraverse.cpp)
 

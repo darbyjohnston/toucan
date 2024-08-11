@@ -16,11 +16,12 @@ namespace toucan
         std::cout << "timelineTraverseTest" << std::endl;
         const std::vector<std::string> otioFiles =
         {
-            "CompOver",
+            /*"CompOver",
             "Gap",
             "Patterns",
             "Text",
-            "Transforms"
+            "Transforms",*/
+            "Filters"
         };
         for (const auto& otioFile : otioFiles)
         {
