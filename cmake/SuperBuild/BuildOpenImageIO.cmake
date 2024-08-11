@@ -1,7 +1,8 @@
 include(ExternalProject)
 
 set(OpenImageIO_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/OpenImageIO.git")
-set(OpenImageIO_GIT_TAG "master")
+# Commit : admin: Relicense code under Apache 2.0 (#3905)
+set(OpenImageIO_GIT_TAG "64f829febd352686538beaba10e4ca716a9403a1")
 
 set(OpenImageIO_ARGS
     ${toucan_EXTERNAL_PROJECT_ARGS}
