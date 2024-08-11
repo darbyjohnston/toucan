@@ -40,10 +40,10 @@ namespace toucan
             offsetTime -= _timeOffset;
         }
         std::stringstream ss;
-        ss << _base.string() << _namePrefix <<
+        ss << _base.string() <<
+            _namePrefix <<
             std::setw(_frameZeroPadding) << std::setfill('0') << offsetTime.to_frames() <<
             _nameSuffix;
-        OIIO::ImageBuf buf(ss.str());
-        return buf;
+        return OIIO::ImageBuf(ss.str());
     }
 }

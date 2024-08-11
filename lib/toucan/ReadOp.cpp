@@ -19,7 +19,6 @@ namespace toucan
 
     OIIO::ImageBuf ReadOp::exec(const OTIO_NS::RationalTime&)
     {
-        OIIO::ImageBuf buf(_path.string());
-        return buf;
+        return OIIO::ImageBuf(_path.string());
     }
 }

@@ -36,12 +36,7 @@ namespace toucan
         {
             const auto input = _inputs[0]->exec(time);
             const auto spec = input.spec();
-            //! \todo The ROI is not working?
-            buf = OIIO::ImageBufAlgo::saturate(
-                input,
-                _data.value);
-                //0,
-                //OIIO::ROI(0, spec.width, 0, spec.height, 0, 1, 0, 3));
+            buf = OIIO::ImageBufAlgo::saturate(input, _data.value);
         }
         return buf;
     }
