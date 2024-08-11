@@ -22,7 +22,7 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            auto input = _inputs[0]->exec(time);
+            const auto input = _inputs[0]->exec(time);
             auto roi = input.roi();
             roi.chend = 3;
             buf = OIIO::ImageBufAlgo::unpremult(input);

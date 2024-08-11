@@ -34,9 +34,9 @@ namespace toucan
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            const auto input = _inputs[0]->exec(time);
-            const auto spec = input.spec();
-            buf = OIIO::ImageBufAlgo::saturate(input, _data.value);
+            buf = OIIO::ImageBufAlgo::saturate(
+                _inputs[0]->exec(time),
+                _data.value);
         }
         return buf;
     }
