@@ -2,6 +2,8 @@ set(HEADERS
     CheckersOp.h
     CompOp.h
     FillOp.h
+    FlipOp.h
+    FlopOp.h
     ImageOp.h
     Init.h
     InvertOp.h
@@ -17,6 +19,8 @@ set(SOURCE
     CheckersOp.cpp
     CompOp.cpp
     FillOp.cpp
+    FlipOp.cpp
+    FlopOp.cpp
     ImageOp.cpp
     Init.cpp
     InvertOp.cpp

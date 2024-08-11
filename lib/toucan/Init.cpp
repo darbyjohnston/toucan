@@ -6,6 +6,8 @@
 
 #include "CheckersOp.h"
 #include "FillOp.h"
+#include "FlipOp.h"
+#include "FlopOp.h"
 #include "InvertOp.h"
 #include "NoiseOp.h"
 #include "ResizeOp.h"
@@ -21,6 +23,8 @@ namespace toucan
     {
         OTIO_NS::TypeRegistry::instance().register_type<CheckersEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FillEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<FlipEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<FlopEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<InvertEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<NoiseEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<ResizeEffect>();
