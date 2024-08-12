@@ -34,30 +34,39 @@ Miscellaneous:
 Example Renders
 ===============
 Compositing multiple tracks:
+
 ![CompositeTracks](images/CompositeTracks.png)
 
 Filter effects; invert and saturate:
+
 ![Filters](images/Filters.png)
 
 Gap:
+
 ![Gap](images/Gap.png)
 
 Linear time warps:
+
 ![LinearTimeWarp](mages/LinearTimeWarp.png)
 
 Patterns; fill, checkers, and noise:
+
 ![Patterns](images/Patterns.png)
 
 Text rendering:
+
 ![Text](images/Text.png)
 
 Transition:
+
 ![Transition](images/Transition.png)
 
 Transition with an invert effect on the clips:
+
 ![Transition2](images/Transition2.png)
 
 Transforms; resize, rotate, flip, and flop:
+
 ![Transforms](images/Transforms.png)
 
 Building
