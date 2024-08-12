@@ -75,7 +75,21 @@ namespace toucan
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                op = _track(time, track, op);
+                auto trackOp = _track(time, track);
+
+                // Composite over the previous track.
+                std::vector<std::shared_ptr<IImageOp> > ops;
+                if (trackOp)
+                {
+                    ops.push_back(trackOp);
+                }
+                if (op)
+                {
+                    ops.push_back(op);
+                }
+                auto comp = std::make_shared<CompOp>(ops);
+                comp->setPremult(true);
+                op = comp;
             }
         }
         return op;
@@ -124,83 +138,68 @@ namespace toucan
 
     std::shared_ptr<IImageOp> TimelineTraverse::_track(
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
-        const std::shared_ptr<IImageOp>& trackOp)
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
     {
-        std::shared_ptr<CompOp> comp;
+        std::shared_ptr<IImageOp> out;
 
+        // Find the item for the given time.
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
         for (const auto& i : track->children())
         {
-            std::shared_ptr<IImageOp> op;
-            if (auto item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(i))
+            if (item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(i))
             {
                 const auto trimmedRangeInParent = item->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
                 {
-                    op = _item(
+                    out = _item(
                         trimmedRangeInParent.value(),
                         track->transformed_time(time, item),
                         item);
+                    break;
                 }
-            }
-
-            // Handle transitions.
-            if (op)
-            {
-                if (auto prevTransition = dynamic_cast<OTIO_NS::Transition*>(prevComposable(i.value)))
-                {
-                    const auto trimmedRangeInParent = prevTransition->trimmed_range_in_parent();
-                    if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
-                    {
-                        if (auto prevItem = dynamic_cast<OTIO_NS::Item*>(prevComposable(prevTransition)))
-                        {
-                            auto a = _item(
-                                prevItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, prevItem),
-                                prevItem);
-                            op = std::make_shared<TransitionOp>(
-                                trimmedRangeInParent.value(),
-                                std::vector<std::shared_ptr<IImageOp> >{ a, op });
-                        }
-                    }
-                }
-                else if (auto nextTransition = dynamic_cast<OTIO_NS::Transition*>(nextComposable(i.value)))
-                {
-                    const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
-                    if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
-                    {
-                        if (auto nextItem = dynamic_cast<OTIO_NS::Item*>(nextComposable(nextTransition)))
-                        {
-                            auto b = _item(
-                                nextItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, nextItem),
-                                nextItem);
-                            op = std::make_shared<TransitionOp>(
-                                trimmedRangeInParent.value(),
-                                std::vector<std::shared_ptr<IImageOp> >{ op, b });
-                        }
-                    }
-                }
-            }
-
-            // Composite over the previous track.
-            if (op)
-            {
-                std::vector<std::shared_ptr<IImageOp> > ops;
-                if (op)
-                {
-                    ops.push_back(op);
-                }
-                if (trackOp)
-                {
-                    ops.push_back(trackOp);
-                }
-                comp = std::make_shared<CompOp>(ops);
-                comp->setPremult(true);
             }
         }
 
-        return comp;
+        // Handle transitions.
+        if (item)
+        {
+            if (auto prevTransition = dynamic_cast<OTIO_NS::Transition*>(prevComposable(item)))
+            {
+                const auto trimmedRangeInParent = prevTransition->trimmed_range_in_parent();
+                if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                {
+                    if (auto prevItem = dynamic_cast<OTIO_NS::Item*>(prevComposable(prevTransition)))
+                    {
+                        auto a = _item(
+                            prevItem->trimmed_range_in_parent().value(),
+                            track->transformed_time(time, prevItem),
+                            prevItem);
+                        out = std::make_shared<TransitionOp>(
+                            trimmedRangeInParent.value(),
+                            std::vector<std::shared_ptr<IImageOp> >{ a, out });
+                    }
+                }
+            }
+            else if (auto nextTransition = dynamic_cast<OTIO_NS::Transition*>(nextComposable(item)))
+            {
+                const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
+                if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                {
+                    if (auto nextItem = dynamic_cast<OTIO_NS::Item*>(nextComposable(nextTransition)))
+                    {
+                        auto b = _item(
+                            nextItem->trimmed_range_in_parent().value(),
+                            track->transformed_time(time, nextItem),
+                            nextItem);
+                        out = std::make_shared<TransitionOp>(
+                            trimmedRangeInParent.value(),
+                            std::vector<std::shared_ptr<IImageOp> >{ out, b });
+                    }
+                }
+            }
+        }
+
+        return out;
     }
 
     std::shared_ptr<IImageOp> TimelineTraverse::_item(

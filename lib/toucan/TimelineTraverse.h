@@ -32,8 +32,7 @@ namespace toucan
     private:
         std::shared_ptr<IImageOp> _track(
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&,
-            const std::shared_ptr<IImageOp>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
         std::shared_ptr<IImageOp> _item(
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
