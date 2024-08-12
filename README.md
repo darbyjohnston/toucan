@@ -61,7 +61,7 @@ Transforms; resize, rotate, flip, and flop:
 
 Image Graph
 ===========
-Image processing graph for a timeline with two tracks:
+Image processing graph of a frame in a timeline with two tracks:
 
 ![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
