@@ -3,12 +3,12 @@
 
 <svg
    width="1100"
-   height="850"
-   viewBox="0 0 291.04166 224.89583"
+   height="800"
+   viewBox="0 0 291.04166 211.66666"
    version="1.1"
    id="svg5"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
-   sodipodi:docname="CompositeTracks.svg"
+   sodipodi:docname="CompositeTracksGraph.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -24,15 +24,16 @@
      inkscape:document-units="px"
      showgrid="true"
      units="px"
-     inkscape:zoom="0.47552931"
-     inkscape:cx="600.3836"
-     inkscape:cy="600.3836"
+     inkscape:zoom="0.6725"
+     inkscape:cx="387.3606"
+     inkscape:cy="600"
      inkscape:window-width="1850"
      inkscape:window-height="1016"
      inkscape:window-x="1990"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1">
+     inkscape:current-layer="layer1"
+     height="800px">
     <inkscape:grid
        type="xygrid"
        id="grid31"
@@ -205,23 +206,16 @@
            x="262.13541"
            y="73.069519">8</tspan></text>
     </g>
-    <rect
-       style="fill:#ff0006;fill-opacity:1;stroke-width:0.104353"
-       id="rect22533"
-       width="2.6458333"
-       height="92.604172"
-       x="79.375"
-       y="8.8817842e-15" />
     <g
        id="graph0"
        class="graph"
-       transform="matrix(0.59257185,0,0,0.59257185,15.599454,214.86655)">
+       transform="matrix(0.59257185,0,0,0.59257185,15.599454,201.63739)">
       <title
          id="title33366">CompositeTracks</title>
       <polygon
          fill="#ffffff"
          stroke="transparent"
-         points="-4,4 -4,-184 442.5,-184 442.5,4 "
+         points="442.5,-184 442.5,4 -4,4 -4,-184 "
          id="polygon33368" />
       <!-- FillOp -->
       <g
@@ -232,7 +226,7 @@
         <polygon
            fill="none"
            stroke="#000000"
-           points="194,-180 0,-180 0,-144 194,-144 "
+           points="0,-144 194,-144 194,-180 0,-180 "
            id="polygon33372" />
         <text
            text-anchor="middle"
@@ -251,7 +245,7 @@
         <polygon
            fill="none"
            stroke="#000000"
-           points="237.5,-108 166.5,-108 166.5,-72 237.5,-72 "
+           points="166.5,-72 237.5,-72 237.5,-108 166.5,-108 "
            id="polygon33379" />
         <text
            text-anchor="middle"
@@ -275,7 +269,7 @@
         <polygon
            fill="#000000"
            stroke="#000000"
-           points="176.22,-108.19 165.95,-110.82 169.84,-116.65 "
+           points="169.84,-116.65 176.22,-108.19 165.95,-110.82 "
            id="polygon33388" />
       </g>
       <!-- ReadOp -->
@@ -287,7 +281,7 @@
         <polygon
            fill="none"
            stroke="#000000"
-           points="403.5,-180 212.5,-180 212.5,-144 403.5,-144 "
+           points="212.5,-144 403.5,-144 403.5,-180 212.5,-180 "
            id="polygon33393" />
         <text
            text-anchor="middle"
@@ -311,7 +305,7 @@
         <polygon
            fill="#000000"
            stroke="#000000"
-           points="228.03,-108.19 234.45,-116.62 238.3,-110.78 "
+           points="238.3,-110.78 228.03,-108.19 234.45,-116.62 "
            id="polygon33402" />
       </g>
       <!-- ReadOp2 -->
@@ -323,7 +317,7 @@
         <polygon
            fill="none"
            stroke="#000000"
-           points="438.5,-108 255.5,-108 255.5,-72 438.5,-72 "
+           points="255.5,-72 438.5,-72 438.5,-108 255.5,-108 "
            id="polygon33407" />
         <text
            text-anchor="middle"
@@ -342,7 +336,7 @@
         <polygon
            fill="none"
            stroke="#000000"
-           points="309.5,-36 238.5,-36 238.5,0 309.5,0 "
+           points="238.5,0 309.5,0 309.5,-36 238.5,-36 "
            id="polygon33414" />
         <text
            text-anchor="middle"
@@ -366,7 +360,7 @@
         <polygon
            fill="#000000"
            stroke="#000000"
-           points="291.84,-36.1 296.63,-45.55 301.48,-40.5 "
+           points="301.48,-40.5 291.84,-36.1 296.63,-45.55 "
            id="polygon33423" />
       </g>
       <!-- OverOp&#45;&gt;OverOp2 -->
@@ -383,7 +377,7 @@
         <polygon
            fill="#000000"
            stroke="#000000"
-           points="256.41,-36.1 246.8,-40.57 251.68,-45.58 "
+           points="251.68,-45.58 256.41,-36.1 246.8,-40.57 "
            id="polygon33430" />
       </g>
     </g>
