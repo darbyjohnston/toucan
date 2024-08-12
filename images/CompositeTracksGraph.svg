@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1100"
+   height="850"
+   viewBox="0 0 291.04166 224.89583"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="CompositeTracks.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="true"
+     units="px"
+     inkscape:zoom="0.47552931"
+     inkscape:cx="600.3836"
+     inkscape:cy="600.3836"
+     inkscape:window-width="1850"
+     inkscape:window-height="1016"
+     inkscape:window-x="1990"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid31"
+       spacingx="2.6458333"
+       spacingy="2.6458333" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#00fe00;fill-opacity:1;fill-rule:evenodd;stroke-width:0.187088"
+       id="rect35"
+       width="132.29167"
+       height="26.458334"
+       x="145.52083"
+       y="13.229166" />
+    <rect
+       style="fill:#0000ff;fill-rule:evenodd;stroke-width:0.187088"
+       id="rect33"
+       width="132.29167"
+       height="26.458334"
+       x="13.229166"
+       y="13.229166" />
+    <rect
+       style="fill:#a0a0a0;fill-opacity:1;fill-rule:evenodd;stroke-width:0.264582"
+       id="rect35-4"
+       width="264.58334"
+       height="26.458334"
+       x="13.229166"
+       y="52.916664" />
+    <g
+       id="g1423">
+      <rect
+         style="fill:#000002;fill-opacity:1;fill-rule:evenodd;stroke-width:0.350451"
+         id="rect31"
+         width="47.037052"
+         height="26.458342"
+         x="13.229166"
+         y="52.916656" />
+      <circle
+         style="fill:#787878;fill-opacity:1;stroke-width:0.07606"
+         id="path1"
+         cx="36.747696"
+         cy="66.145821"
+         r="13.229171" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+         x="31.359947"
+         y="73.069511"
+         id="text1"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+           x="31.359947"
+           y="73.069511">0</tspan></text>
+    </g>
+    <g
+       id="g1417"
+       transform="translate(9.4074023)">
+      <rect
+         style="fill:#000002;fill-opacity:1;fill-rule:evenodd;stroke-width:0.350451"
+         id="rect31-6"
+         width="47.037052"
+         height="26.458342"
+         x="58.208332"
+         y="52.916664" />
+      <circle
+         style="fill:#787878;fill-opacity:1;stroke-width:0.07606"
+         id="path1-8"
+         cx="81.726845"
+         cy="66.145828"
+         r="13.229171" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+         x="76.339104"
+         y="73.069519"
+         id="text1-3"><tspan
+           sodipodi:role="line"
+           id="tspan1-3"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+           x="76.339104"
+           y="73.069519">2</tspan></text>
+    </g>
+    <g
+       id="g1411"
+       transform="translate(18.814805)">
+      <rect
+         style="fill:#000002;fill-opacity:1;fill-rule:evenodd;stroke-width:0.350451"
+         id="rect31-2"
+         width="47.037052"
+         height="26.458342"
+         x="103.1875"
+         y="52.916664" />
+      <circle
+         style="fill:#787878;fill-opacity:1;stroke-width:0.07606"
+         id="path1-5"
+         cx="126.70602"
+         cy="66.145828"
+         r="13.229171" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+         x="121.31828"
+         y="73.069519"
+         id="text1-0"><tspan
+           sodipodi:role="line"
+           id="tspan1-2"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+           x="121.31828"
+           y="73.069519">4</tspan></text>
+    </g>
+    <g
+       id="g1405"
+       transform="translate(28.222202)">
+      <rect
+         style="fill:#000002;fill-opacity:1;fill-rule:evenodd;stroke-width:0.350451"
+         id="rect31-24"
+         width="47.037052"
+         height="26.458342"
+         x="148.16667"
+         y="52.916664" />
+      <circle
+         style="fill:#787878;fill-opacity:1;stroke-width:0.07606"
+         id="path1-81"
+         cx="171.68521"
+         cy="66.145828"
+         r="13.229171" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+         x="166.29747"
+         y="73.069519"
+         id="text1-6"><tspan
+           sodipodi:role="line"
+           id="tspan1-7"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+           x="166.29747"
+           y="73.069519">6</tspan></text>
+    </g>
+    <g
+       id="g1393"
+       transform="translate(-13.22916)">
+      <rect
+         style="fill:#000002;fill-opacity:1;fill-rule:evenodd;stroke-width:0.350451"
+         id="rect31-5"
+         width="47.037052"
+         height="26.458342"
+         x="244.00461"
+         y="52.916664" />
+      <circle
+         style="fill:#787878;fill-opacity:1;stroke-width:0.07606"
+         id="path1-9"
+         cx="267.52313"
+         cy="66.145828"
+         r="13.229171" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+         x="262.13541"
+         y="73.069519"
+         id="text1-5"><tspan
+           sodipodi:role="line"
+           id="tspan1-74"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.5987px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#e6e6e6;fill-opacity:1;stroke-width:0.0367476"
+           x="262.13541"
+           y="73.069519">8</tspan></text>
+    </g>
+    <rect
+       style="fill:#ff0006;fill-opacity:1;stroke-width:0.104353"
+       id="rect22533"
+       width="2.6458333"
+       height="92.604172"
+       x="79.375"
+       y="8.8817842e-15" />
+    <g
+       id="graph0"
+       class="graph"
+       transform="matrix(0.59257185,0,0,0.59257185,15.599454,214.86655)">
+      <title
+         id="title33366">CompositeTracks</title>
+      <polygon
+         fill="#ffffff"
+         stroke="transparent"
+         points="-4,4 -4,-184 442.5,-184 442.5,4 "
+         id="polygon33368" />
+      <!-- FillOp -->
+      <g
+         id="node1"
+         class="node">
+        <title
+           id="title33370">FillOp</title>
+        <polygon
+           fill="none"
+           stroke="#000000"
+           points="194,-180 0,-180 0,-144 194,-144 "
+           id="polygon33372" />
+        <text
+           text-anchor="middle"
+           x="97"
+           y="-158.3"
+           font-family="Times, serif"
+           font-size="14px"
+           id="text33374">FillOp: Background color</text>
+      </g>
+      <!-- OverOp -->
+      <g
+         id="node4"
+         class="node">
+        <title
+           id="title33377">OverOp</title>
+        <polygon
+           fill="none"
+           stroke="#000000"
+           points="237.5,-108 166.5,-108 166.5,-72 237.5,-72 "
+           id="polygon33379" />
+        <text
+           text-anchor="middle"
+           x="202"
+           y="-86.300003"
+           font-family="Times, serif"
+           font-size="14px"
+           id="text33381">OverOp</text>
+      </g>
+      <!-- FillOp&#45;&gt;OverOp -->
+      <g
+         id="edge1"
+         class="edge">
+        <title
+           id="title33384">FillOp-&gt;OverOp</title>
+        <path
+           fill="none"
+           stroke="#000000"
+           d="m 122.69,-143.88 c 13.6,9.07 30.48,20.33 45.17,30.12"
+           id="path33386" />
+        <polygon
+           fill="#000000"
+           stroke="#000000"
+           points="176.22,-108.19 165.95,-110.82 169.84,-116.65 "
+           id="polygon33388" />
+      </g>
+      <!-- ReadOp -->
+      <g
+         id="node2"
+         class="node">
+        <title
+           id="title33391">ReadOp</title>
+        <polygon
+           fill="none"
+           stroke="#000000"
+           points="403.5,-180 212.5,-180 212.5,-144 403.5,-144 "
+           id="polygon33393" />
+        <text
+           text-anchor="middle"
+           x="308"
+           y="-158.3"
+           font-family="Times, serif"
+           font-size="14px"
+           id="text33395">ReadOp: Color_Blue.png</text>
+      </g>
+      <!-- ReadOp&#45;&gt;OverOp -->
+      <g
+         id="edge2"
+         class="edge">
+        <title
+           id="title33398">ReadOp-&gt;OverOp</title>
+        <path
+           fill="none"
+           stroke="#000000"
+           d="m 282.07,-143.88 c -13.73,9.07 -30.78,20.33 -45.61,30.12"
+           id="path33400" />
+        <polygon
+           fill="#000000"
+           stroke="#000000"
+           points="228.03,-108.19 234.45,-116.62 238.3,-110.78 "
+           id="polygon33402" />
+      </g>
+      <!-- ReadOp2 -->
+      <g
+         id="node3"
+         class="node">
+        <title
+           id="title33405">ReadOp2</title>
+        <polygon
+           fill="none"
+           stroke="#000000"
+           points="438.5,-108 255.5,-108 255.5,-72 438.5,-72 "
+           id="polygon33407" />
+        <text
+           text-anchor="middle"
+           x="347"
+           y="-86.300003"
+           font-family="Times, serif"
+           font-size="14px"
+           id="text33409">ReadOp: Counter.2.png</text>
+      </g>
+      <!-- OverOp2 -->
+      <g
+         id="node5"
+         class="node">
+        <title
+           id="title33412">OverOp2</title>
+        <polygon
+           fill="none"
+           stroke="#000000"
+           points="309.5,-36 238.5,-36 238.5,0 309.5,0 "
+           id="polygon33414" />
+        <text
+           text-anchor="middle"
+           x="274"
+           y="-14.3"
+           font-family="Times, serif"
+           font-size="14px"
+           id="text33416">OverOp</text>
+      </g>
+      <!-- ReadOp2&#45;&gt;OverOp2 -->
+      <g
+         id="edge4"
+         class="edge">
+        <title
+           id="title33419">ReadOp2-&gt;OverOp2</title>
+        <path
+           fill="none"
+           stroke="#000000"
+           d="m 328.96,-71.7 c -9.02,8.65 -20.08,19.25 -29.9,28.67"
+           id="path33421" />
+        <polygon
+           fill="#000000"
+           stroke="#000000"
+           points="291.84,-36.1 296.63,-45.55 301.48,-40.5 "
+           id="polygon33423" />
+      </g>
+      <!-- OverOp&#45;&gt;OverOp2 -->
+      <g
+         id="edge3"
+         class="edge">
+        <title
+           id="title33426">OverOp-&gt;OverOp2</title>
+        <path
+           fill="none"
+           stroke="#000000"
+           d="m 219.8,-71.7 c 8.8,8.56 19.58,19.04 29.2,28.4"
+           id="path33428" />
+        <polygon
+           fill="#000000"
+           stroke="#000000"
+           points="256.41,-36.1 246.8,-40.57 251.68,-45.58 "
+           id="polygon33430" />
+      </g>
+    </g>
+  </g>
+</svg>

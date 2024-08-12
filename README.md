@@ -10,8 +10,8 @@ with image sequences, effects, and transitions.
 The OpenTimelineIO library is used for working with timelines, and the
 OpenImageIO library is used for image I/O and image processing.
 
-Supported Effects
-=================
+Effects
+=======
 
 Patterns: Fill, Checkers, Noise
 
@@ -53,11 +53,17 @@ Transition:
 
 Transition with an invert effect on the clips:
 
-![Transition2](images/Transition2.png)
+![Transition 2](images/Transition2.png)
 
 Transforms; resize, rotate, flip, and flop:
 
 ![Transforms](images/Transforms.png)
+
+Image Graph
+===========
+Image processing graph for a timeline with two tracks:
+
+![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
 Building
 ========
