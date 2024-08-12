@@ -47,7 +47,7 @@ Gap:
 
 Linear time warps:
 
-![LinearTimeWarp](mages/LinearTimeWarp.png)
+![LinearTimeWarp](images/LinearTimeWarp.png)
 
 Patterns; fill, checkers, and noise:
 
