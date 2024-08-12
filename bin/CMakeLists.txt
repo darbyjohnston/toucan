@@ -5,3 +5,10 @@ set_target_properties(toucan-render PROPERTIES FOLDER bin)
 install(
     TARGETS toucan-render
     RUNTIME DESTINATION bin)
+
+foreach(OTIO CompositeTracks Filters Gap LinearTimeWarp Patterns Text Transition Transition2 Transforms)
+    add_test(
+        toucan-render-${OTIO}
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toucan-render${CMAKE_EXECUTABLE_SUFFIX}
+        ${PROJECT_SOURCE_DIR}/data/${OTIO}.otio ${OTIO}.png -filmstrip)
+endforeach()

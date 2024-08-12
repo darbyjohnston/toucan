@@ -36,8 +36,8 @@ namespace toucan
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
-                    _size.x = spec.width;
-                    _size.y = spec.height;
+                    _imageSize.x = spec.width;
+                    _imageSize.y = spec.height;
                     break;
                 }
             }
@@ -57,8 +57,8 @@ namespace toucan
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
-                    _size.x = spec.width;
-                    _size.y = spec.height;
+                    _imageSize.x = spec.width;
+                    _imageSize.y = spec.height;
                     break;
                 }
             }
@@ -68,9 +68,15 @@ namespace toucan
     TimelineTraverse::~TimelineTraverse()
     {}
 
+    const IMATH_NAMESPACE::V2d& TimelineTraverse::getImageSize() const
+    {
+        return _imageSize;
+    }
+
     std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time) const
     {
-        std::shared_ptr<IImageOp> op = std::make_shared<FillOp>(FillData{ _size, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
+        std::shared_ptr<IImageOp> op = std::make_shared<FillOp>(
+            FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
         for (const auto& i : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
@@ -189,9 +195,6 @@ namespace toucan
     {
         std::shared_ptr<IImageOp> out;
 
-        const OTIO_NS::TimeRange trimmedRange = item->trimmed_range();
-        const OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.start_time();
-
         if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
         {
             // Get the media reference.
@@ -219,7 +222,7 @@ namespace toucan
         }
         else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))
         {
-            out = std::make_shared<FillOp>(FillData{ _size });
+            out = std::make_shared<FillOp>(FillData{ _imageSize });
         }
 
         // Get the effects.
@@ -240,6 +243,12 @@ namespace toucan
         }
         if (out)
         {
+            OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.start_time();
+            const auto& sourceRange = item->source_range();
+            if (sourceRange.has_value())
+            {
+                timeOffset -= sourceRange.value().start_time();
+            }
             out->setTimeOffset(timeOffset);
         }
 

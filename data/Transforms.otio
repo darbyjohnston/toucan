@@ -49,7 +49,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 2
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -99,12 +99,12 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 2
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 0
+                                "value": 2
                             }
                         },
                         "name": "Rotate"
@@ -146,12 +146,12 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 2
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 0
+                                "value": 4
                             }
                         },
                         "name": "Flip"
@@ -193,12 +193,12 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 2
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 0
+                                "value": 6
                             }
                         },
                         "name": "Flop"

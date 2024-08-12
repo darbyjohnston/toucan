@@ -17,7 +17,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 5
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -32,7 +32,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 5
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -51,7 +51,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 5
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -66,7 +66,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 5
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -123,47 +123,6 @@
                             }
                         },
                         "name": "Counter"
-                    },
-                    {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "ImageSequenceReference.1",
-                            "available_range": {
-                                "OTIO_SCHEMA": "TimeRange.1",
-                                "duration": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 10
-                                },
-                                "start_time": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 0
-                                }
-                            },
-                            "target_url_base": "",
-                            "name_prefix": "Counter.",
-                            "name_suffix": ".png",
-                            "start_frame": 0,
-                            "frame_step": 1,
-                            "rate": 0.0,
-                            "frame_zero_padding": 0,
-                            "missing_frame_policy": "black"
-                        },
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 10
-                            },
-                            "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 0
-                            }
-                        },
-                        "name": "Counter 2"
                     }
                 ],
                 "kind": "Video", 

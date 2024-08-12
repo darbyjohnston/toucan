@@ -11,13 +11,13 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "OTIO_SCHEMA": "ImageSequenceReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 15
+                                    "value": 10
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -25,7 +25,14 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Counter.0.png"
+                            "target_url_base": "",
+                            "name_prefix": "Counter.",
+                            "name_suffix": ".png",
+                            "start_frame": 0,
+                            "frame_step": 1,
+                            "rate": 0.0,
+                            "frame_zero_padding": 0,
+                            "missing_frame_policy": "black"
                         },
                         "effects": [
                             {
@@ -38,7 +45,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 5
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
@@ -55,12 +62,12 @@
                         "in_offset": {
                           "OTIO_SCHEMA": "RationalTime.1",
                           "rate": 24,
-                          "value": 5
+                          "value": 3
                         },
                         "out_offset": {
                           "OTIO_SCHEMA": "RationalTime.1",
                           "rate": 24,
-                          "value": 5
+                          "value": 3
                         }
                     },
                     {
@@ -72,7 +79,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 15
+                                    "value": 10
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -80,7 +87,7 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "ColorBars.png"
+                            "target_url": "Color_Blue.png"
                         },
                         "effects": [
                             {
@@ -93,15 +100,15 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 10
+                                "value": 5
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 5
+                                "value": 3
                             }
                         },
-                        "name": "Color Bars"
+                        "name": "Color"
                     }
                 ],
                 "kind": "Video", 

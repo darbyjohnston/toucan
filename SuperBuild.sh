@@ -4,9 +4,9 @@ set -x
 
 BUILD_TYPE=$1
 
-cmake -S toucan/cmake/SuperBuild -B SuperBuild-$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$PWD/install -DCMAKE_PREFIX_PATH=$PWD/install -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build SuperBuild-$BUILD_TYPE -j 4 --config $BUILD_TYPE
+cmake -S toucan/cmake/SuperBuild -B superbuild-$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake --build superbuild-$BUILD_TYPE -j 4 --config $BUILD_TYPE
 
-cmake -S toucan -B Build-$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$PWD/install -DCMAKE_PREFIX_PATH=$PWD/install -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build Build-$BUILD_TYPE -j 4 --config $BUILD_TYPE
-cmake --build Build-$BUILD_TYPE -j 4 --config $BUILD_TYPE --target test
+cmake -S toucan -B build-$BUILD_TYPE -DCMAKE_INSTALL_PREFIX=$PWD/install-$BUILD_TYPE -DCMAKE_PREFIX_PATH=$PWD/install-$BUILD_TYPE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake --build build-$BUILD_TYPE -j 4 --config $BUILD_TYPE
+cmake --build build-$BUILD_TYPE -j 4 --config $BUILD_TYPE --target test

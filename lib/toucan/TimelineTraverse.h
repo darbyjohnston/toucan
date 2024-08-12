@@ -26,6 +26,9 @@ namespace toucan
 
         ~TimelineTraverse();
 
+        //! Get the timeline image size.
+        const IMATH_NAMESPACE::V2d& getImageSize() const;
+
         //! Get an image operation graph for the given time. This function is
         //! thread safe.
         std::shared_ptr<IImageOp> exec(const OTIO_NS::RationalTime&) const;
@@ -41,6 +44,6 @@ namespace toucan
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
-        IMATH_NAMESPACE::V2d _size = IMATH_NAMESPACE::V2d(0, 0);
+        IMATH_NAMESPACE::V2d _imageSize = IMATH_NAMESPACE::V2d(0, 0);
     };
 }

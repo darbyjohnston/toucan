@@ -7,14 +7,58 @@ Toucan is a project for experimenting with timeline rendering. The project
 currently consists of a C++ software renderer that can render basic timelines
 with image sequences, effects, and transitions.
 
-Supported effects:
+The OpenTimelineIO library is used for working with timelines, and the
+OpenImageIO library is used for image I/O and image processing.
 
-|Patterns|Filters   |Transforms|Misc            |
-|--------|----------|----------|----------------|
-|Fill    |Invert    |Flip      |Linear Time Warp|
-|Checkers|Saturation|Flop      |Text            |
-|Noise   |          |Resize    |                |
-|        |          |Rotate    |                |
+Supported Effects
+=================
+
+Patterns:
+* Fill
+* Checkers
+* Noise
+
+Filters:
+* Invert
+* Saturation
+
+Transforms:
+* Flip/flop
+* Resize
+* Rotate
+
+Miscellaneous:
+* Linear time warp
+* Text rendering
+
+Example Renders
+===============
+Compositing multiple tracks:
+![CompositeTracks](images/CompositeTracks.png)
+
+Filter effects; invert and saturate:
+![Filters](images/Filters.png)
+
+Gap:
+![Gap](images/Gap.png)
+
+Linear time warps:
+![LinearTimeWarp](mages/LinearTimeWarp.png)
+
+Patterns; fill, checkers, and noise:
+![Patterns](images/Patterns.png)
+
+Text rendering:
+![Text](images/Text.png)
+
+Transition:
+![Transition](images/Transition.png)
+
+Transition with an invert effect on the clips:
+![Transition2](images/Transition2.png)
+
+Transforms; resize, rotate, flip, and flop:
+![Transforms](images/Transforms.png)
 
 Building
 ========
