@@ -26,17 +26,18 @@ namespace toucan
 
         ~TimelineTraverse();
 
-        //! Get an image operation graph for the given time.
-        std::shared_ptr<IImageOp> exec(const OTIO_NS::RationalTime&);
+        //! Get an image operation graph for the given time. This function is
+        //! thread safe.
+        std::shared_ptr<IImageOp> exec(const OTIO_NS::RationalTime&) const;
 
     private:
         std::shared_ptr<IImageOp> _track(
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&) const;
         std::shared_ptr<IImageOp> _item(
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;

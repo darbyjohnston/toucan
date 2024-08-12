@@ -68,7 +68,7 @@ namespace toucan
     TimelineTraverse::~TimelineTraverse()
     {}
 
-    std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time)
+    std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time) const
     {
         std::shared_ptr<IImageOp> op = std::make_shared<FillOp>(FillData{ _size, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
         for (const auto& i : _timeline->tracks()->children())
@@ -95,58 +95,22 @@ namespace toucan
         return op;
     }
 
-    namespace
-    {
-        OTIO_NS::Composable* prevComposable(OTIO_NS::Composable* composable)
-        {
-            OTIO_NS::Composable* out = nullptr;
-            if (auto parent = composable->parent())
-            {
-                const auto children = parent->children();
-                const auto i = std::find(children.begin(), children.end(), composable);
-                if (i != children.end())
-                {
-                    const size_t offset = i - children.begin();
-                    if (offset > 0)
-                    {
-                        out = children[offset - 1].value;
-                    }
-                }
-            }
-            return out;
-        }
-
-        OTIO_NS::Composable* nextComposable(OTIO_NS::Composable* composable)
-        {
-            OTIO_NS::Composable* out = nullptr;
-            if (auto parent = composable->parent())
-            {
-                const auto children = parent->children();
-                const auto i = std::find(children.begin(), children.end(), composable);
-                if (i != children.end())
-                {
-                    const size_t offset = i - children.begin();
-                    if (offset < children.size() - 1)
-                    {
-                        out = children[offset + 1].value;
-                    }
-                }
-            }
-            return out;
-        }
-    }
-
     std::shared_ptr<IImageOp> TimelineTraverse::_track(
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
         std::shared_ptr<IImageOp> out;
 
-        // Find the item for the given time.
+        // Find the items for the given time.
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
-        for (const auto& i : track->children())
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> prev;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> prev2;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> next;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> next2;
+        const auto& children = track->children();
+        for (size_t i = 0; i < children.size(); ++i)
         {
-            if (item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(i))
+            if (item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(children[i]))
             {
                 const auto trimmedRangeInParent = item->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
@@ -155,6 +119,22 @@ namespace toucan
                         trimmedRangeInParent.value(),
                         track->transformed_time(time, item),
                         item);
+                    if (i > 0)
+                    {
+                        prev = children[i - 1];
+                    }
+                    if (i > 1)
+                    {
+                        prev2 = children[i - 2];
+                    }
+                    if (i < (children.size() - 1))
+                    {
+                        next = children[i + 1];
+                    }
+                    if (children.size() > 1 && i < (children.size() - 2))
+                    {
+                        next2 = children[i + 2];
+                    }
                     break;
                 }
             }
@@ -163,12 +143,12 @@ namespace toucan
         // Handle transitions.
         if (item)
         {
-            if (auto prevTransition = dynamic_cast<OTIO_NS::Transition*>(prevComposable(item)))
+            if (auto prevTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(prev))
             {
                 const auto trimmedRangeInParent = prevTransition->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
                 {
-                    if (auto prevItem = dynamic_cast<OTIO_NS::Item*>(prevComposable(prevTransition)))
+                    if (auto prevItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(prev2))
                     {
                         auto a = _item(
                             prevItem->trimmed_range_in_parent().value(),
@@ -180,12 +160,12 @@ namespace toucan
                     }
                 }
             }
-            else if (auto nextTransition = dynamic_cast<OTIO_NS::Transition*>(nextComposable(item)))
+            else if (auto nextTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(next))
             {
                 const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
                 {
-                    if (auto nextItem = dynamic_cast<OTIO_NS::Item*>(nextComposable(nextTransition)))
+                    if (auto nextItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(next2))
                     {
                         auto b = _item(
                             nextItem->trimmed_range_in_parent().value(),
@@ -205,7 +185,7 @@ namespace toucan
     std::shared_ptr<IImageOp> TimelineTraverse::_item(
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item)
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
     {
         std::shared_ptr<IImageOp> out;
 

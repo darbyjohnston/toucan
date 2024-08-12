@@ -47,7 +47,7 @@ namespace toucan
             const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
 
             // Traverse each frame of the timeline.
-            auto traverse = std::make_shared<TimelineTraverse>(path, timeline);
+            const auto traverse = std::make_shared<TimelineTraverse>(path, timeline);
             for (OTIO_NS::RationalTime time = startTime;
                 time <= timeRange.end_time_inclusive();
                 time += timeInc)
