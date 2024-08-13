@@ -26,6 +26,7 @@ Example Renders
 Compositing multiple tracks:
 
 ![CompositeTracks](images/CompositeTracks.png)
+![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
 Filter effects; invert and saturate:
 
@@ -54,16 +55,11 @@ Transition:
 Transition with an invert effect on the clips:
 
 ![Transition 2](images/Transition2.png)
+![Composite Tracks Graph](images/Transition2.svg)
 
 Transforms; resize, rotate, flip, and flop:
 
 ![Transforms](images/Transforms.png)
-
-Image Graph
-===========
-Image processing graph of a frame in a timeline with two tracks:
-
-![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
 Building
 ========
