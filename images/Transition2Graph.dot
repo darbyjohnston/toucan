@@ -1,0 +1,15 @@
+digraph CompositeTracks {
+    FillOp [shape=box, label="FillOp: Background color", fontsize=12]
+    ReadOp [shape=box, label="ReadOp: Counter.2.png", fontsize=12]
+    ReadOp2 [shape=box, label="ReadOp: Color_Blue.png", fontsize=12]
+    InvertOp [shape=box, label="InvertOp", fontsize=12]
+    InvertOp2 [shape=box, label="InvertOp", fontsize=12]
+    TransitionOp [shape=box, label="TransitionOp", fontsize=12]
+    OverOp [shape=box, label="OverOp", fontsize=12]
+    FillOp -> OverOp;
+    ReadOp -> InvertOp;
+    InvertOp -> TransitionOp;
+    ReadOp2 -> InvertOp2;
+    InvertOp2 -> TransitionOp;
+    TransitionOp -> OverOp;
+}

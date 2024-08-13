@@ -1,9 +1,9 @@
 digraph CompositeTracks {
-    FillOp [shape=box, label="FillOp: Background color"]
-    ReadOp [shape=box, label="ReadOp: Color_Blue.png"]
-    ReadOp2 [shape=box, label="ReadOp: Counter.2.png"]
-    OverOp [shape=box, label="OverOp"]
-    OverOp2 [shape=box, label="OverOp"]
+    FillOp [shape=box, label="FillOp: Background color", fontsize=12]
+    ReadOp [shape=box, label="ReadOp: Color_Blue.png", fontsize=12]
+    ReadOp2 [shape=box, label="ReadOp: Counter.2.png", fontsize=12]
+    OverOp [shape=box, label="OverOp", fontsize=12]
+    OverOp2 [shape=box, label="OverOp", fontsize=12]
     FillOp -> OverOp;
     ReadOp -> OverOp;
     OverOp -> OverOp2;
