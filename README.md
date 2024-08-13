@@ -45,7 +45,7 @@ Patterns; fill, checkers, and noise:
 
 ![Patterns](images/Patterns.png)
 
-Rendering:
+Rendering; line, box, and text:
 
 ![Render](images/Render.png)
 
