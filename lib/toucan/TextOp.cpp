@@ -4,6 +4,8 @@
 
 #include "TextOp.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
@@ -69,27 +71,21 @@ namespace toucan
 
     bool TextEffect::read_from(Reader& reader)
     {
-        int64_t x = 0;
-        int64_t y = 0;
+        OTIO_NS::AnyVector pos;
         int64_t fontSize = 0;
-        IMATH_NAMESPACE::V4d color;
+        OTIO_NS::AnyVector color;
         bool out =
-            reader.read("x", &x) &&
-            reader.read("y", &y) &&
+            reader.read("pos", &pos) &&
             reader.read("text", &_data.text) &&
             reader.read("font_size", &fontSize) &&
             reader.read("font_name", &_data.fontName) &&
-            reader.read("red", &color.x) &&
-            reader.read("green", &color.y) &&
-            reader.read("blue", &color.z) &&
-            reader.read("alpha", &color.w) &&
+            reader.read("color", &color) &&
             IEffect::read_from(reader);
         if (out)
         {
-            _data.pos.x = x;
-            _data.pos.y = y;
+            anyToVec(pos, _data.pos);
             _data.fontSize = fontSize;
-            _data.color = color;
+            anyToVec(color, _data.color);
         }
         return out;
     }
@@ -97,14 +93,10 @@ namespace toucan
     void TextEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("x", static_cast<int64_t>(_data.pos.x));
-        writer.write("y", static_cast<int64_t>(_data.pos.y));
+        writer.write("pos", vecToAny(_data.pos));
         writer.write("text", _data.text);
         writer.write("font_size", static_cast<int64_t>(_data.fontSize));
         writer.write("font_name", _data.fontName);
-        writer.write("red", static_cast<double>(_data.color.x));
-        writer.write("green", static_cast<double>(_data.color.y));
-        writer.write("blue", static_cast<double>(_data.color.z));
-        writer.write("alpha", static_cast<double>(_data.color.w));
+        writer.write("color", vecToAny(_data.color));
     }
 }

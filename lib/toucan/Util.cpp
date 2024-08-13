@@ -6,6 +6,36 @@
 
 namespace toucan
 {
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i& vec)
+    {
+        return OTIO_NS::AnyVector{ vec.x, vec.y };
+    }
+    
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V4f& vec)
+    {
+        return OTIO_NS::AnyVector{ vec.x, vec.y, vec.z, vec.w };
+    }
+    
+    void anyToVec(const OTIO_NS::AnyVector& any, IMATH_NAMESPACE::V2i& out)
+    {
+        if (2 == any.size())
+        {
+            out.x = std::any_cast<int64_t>(any[0]);
+            out.y = std::any_cast<int64_t>(any[1]);
+        }
+    }
+    
+    void anyToVec(const OTIO_NS::AnyVector& any, IMATH_NAMESPACE::V4f& out)
+    {
+        if (4 == any.size())
+        {
+            out.x = std::any_cast<double>(any[0]);
+            out.y = std::any_cast<double>(any[1]);
+            out.z = std::any_cast<double>(any[2]);
+            out.w = std::any_cast<double>(any[3]);
+        }
+    }
+    
     namespace
     {
         inline bool isNumber(char c)

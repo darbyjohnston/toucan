@@ -4,6 +4,8 @@
 
 #include "CheckersOp.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
@@ -82,32 +84,22 @@ namespace toucan
     bool CheckersEffect::read_from(Reader& reader)
     {
         //! \todo What is a better way to serialize non-POD types?
-        int64_t width = 0;
-        int64_t height = 0;
-        int64_t checkerWidth = 0;
-        int64_t checkerHeight = 0;
-        IMATH_NAMESPACE::V4d color1;
-        IMATH_NAMESPACE::V4d color2;
+        OTIO_NS::AnyVector size;
+        OTIO_NS::AnyVector checkerSize;
+        OTIO_NS::AnyVector color1;
+        OTIO_NS::AnyVector color2;
         bool out =
-            reader.read("width", &width) &&
-            reader.read("height", &height) &&
-            reader.read("checkerWidth", &width) &&
-            reader.read("checkerHeight", &height) &&
-            reader.read("red1", &color1.x) &&
-            reader.read("green1", &color1.y) &&
-            reader.read("blue1", &color1.z) &&
-            reader.read("alpha1", &color1.w) &&
-            reader.read("red2", &color2.x) &&
-            reader.read("green2", &color2.y) &&
-            reader.read("blue2", &color2.z) &&
-            reader.read("alpha2", &color2.w) &&
+            reader.read("size", &size) &&
+            reader.read("checkerSize", &checkerSize) &&
+            reader.read("color1", &color1) &&
+            reader.read("color2", &color2) &&
             IEffect::read_from(reader);
         if (out)
         {
-            _data.size.x = width;
-            _data.size.y = height;
-            _data.color1 = color1;
-            _data.color2 = color2;
+            anyToVec(size, _data.size);
+            anyToVec(checkerSize, _data.checkerSize);
+            anyToVec(color1, _data.color1);
+            anyToVec(color2, _data.color2);
         }
         return out;
     }
@@ -115,17 +107,9 @@ namespace toucan
     void CheckersEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("width", static_cast<int64_t>(_data.size.x));
-        writer.write("height", static_cast<int64_t>(_data.size.y));
-        writer.write("width", static_cast<int64_t>(_data.checkerSize.x));
-        writer.write("height", static_cast<int64_t>(_data.checkerSize.y));
-        writer.write("red1", static_cast<double>(_data.color1.x));
-        writer.write("green1", static_cast<double>(_data.color1.y));
-        writer.write("blue1", static_cast<double>(_data.color1.z));
-        writer.write("alpha1", static_cast<double>(_data.color1.w));
-        writer.write("red2", static_cast<double>(_data.color2.x));
-        writer.write("green2", static_cast<double>(_data.color2.y));
-        writer.write("blue2", static_cast<double>(_data.color2.z));
-        writer.write("alpha2", static_cast<double>(_data.color2.w));
+        writer.write("size", vecToAny(_data.size));
+        writer.write("checkerSize", vecToAny(_data.checkerSize));
+        writer.write("color1", vecToAny(_data.color1));
+        writer.write("color2", vecToAny(_data.color2));
     }
 }

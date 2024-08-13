@@ -4,6 +4,8 @@
 
 #include "FillOp.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
@@ -70,22 +72,16 @@ namespace toucan
 
     bool FillEffect::read_from(Reader& reader)
     {
-        int64_t width = 0;
-        int64_t height = 0;
-        IMATH_NAMESPACE::V4d color;
+        OTIO_NS::AnyVector size;
+        OTIO_NS::AnyVector color;
         bool out =
-            reader.read("width", &width) &&
-            reader.read("height", &height) &&
-            reader.read("red", &color.x) &&
-            reader.read("green", &color.y) &&
-            reader.read("blue", &color.z) &&
-            reader.read("alpha", &color.w) &&
+            reader.read("size", &size) &&
+            reader.read("color", &color) &&
             IEffect::read_from(reader);
         if (out)
         {
-            _data.size.x = width;
-            _data.size.y = height;
-            _data.color = color;
+            anyToVec(size, _data.size);
+            anyToVec(color, _data.color);
         }
         return out;
     }
@@ -93,11 +89,7 @@ namespace toucan
     void FillEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("width", static_cast<int64_t>(_data.size.x));
-        writer.write("height", static_cast<int64_t>(_data.size.y));
-        writer.write("red", static_cast<double>(_data.color.x));
-        writer.write("green", static_cast<double>(_data.color.y));
-        writer.write("blue", static_cast<double>(_data.color.z));
-        writer.write("alpha", static_cast<double>(_data.color.w));
+        writer.write("size", vecToAny(_data.size));
+        writer.write("color", vecToAny(_data.color));
     }
 }

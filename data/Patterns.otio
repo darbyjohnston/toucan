@@ -31,12 +31,8 @@
                             {
                                 "OTIO_SCHEMA": "FillEffect.1",
                                 "effect_name": "",
-                                "width": 1280,
-                                "height": 720,
-                                "red": 1.0,
-                                "green": 0.0,
-                                "blue": 0.0,
-                                "alpha": 1.0
+                                "size": [ 1280, 720 ],
+                                "color": [ 1.0, 0.0, 0.0, 1.0 ]
                             }
                         ],
                         "source_range": {
@@ -77,18 +73,10 @@
                             {
                                 "OTIO_SCHEMA": "CheckersEffect.1",
                                 "effect_name": "",
-                                "width": 1280,
-                                "height": 720,
-                                "checkerWidth": 100,
-                                "checkerHeight": 100,
-                                "red1": 1.0,
-                                "green1": 1.0,
-                                "blue1": 1.0,
-                                "alpha1": 1.0,
-                                "red2": 0.0,
-                                "green2": 0.0,
-                                "blue2": 0.0,
-                                "alpha2": 1.0
+                                "size": [ 1280, 720 ],
+                                "checkerSize": [ 100, 100 ],
+                                "color1": [ 1.0, 1.0, 1.0, 1.0 ],
+                                "color2": [ 0.0, 0.0, 0.0, 1.0 ]
                             }
                         ],
                         "source_range": {

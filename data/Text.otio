@@ -31,54 +31,38 @@
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "x": 100,
-                                "y": 200,
+                                "pos": [ 100, 200 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
-                                "red": 0.8,
-                                "green": 0.0,
-                                "blue": 0.3,
-                                "alpha": 1.0
+                                "color": [ 0.8, 0.0, 0.3, 1.0 ]
                             },
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "x": 200,
-                                "y": 350,
+                                "pos": [ 200, 350 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
-                                "red": 0.3,
-                                "green": 0.8,
-                                "blue": 0.1,
-                                "alpha": 1.0
+                                "color": [ 0.3, 0.8, 0.1, 1.0 ]
                             },
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "x": 300,
-                                "y": 500,
+                                "pos": [ 300, 500 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
-                                "red": 0.9,
-                                "green": 0.7,
-                                "blue": 0.1,
-                                "alpha": 1.0
+                                "color": [ 0.9, 0.7, 0.1, 1.0 ]
                             },
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "x": 400,
-                                "y": 650,
+                                "pos": [ 400, 650 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
-                                "red": 0.9,
-                                "green": 0.5,
-                                "blue": 0.1,
-                                "alpha": 1.0
+                                "color": [ 0.9, 0.5, 0.1, 1.0 ]
                             }
                         ],
                         "source_range": {
