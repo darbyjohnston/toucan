@@ -53,6 +53,8 @@ Transition:
 
 ![Transition](images/Transition.png)
 
+![Transition Graph](images/TransitionGraph.svg)
+
 Transition with an invert effect on the clips:
 
 ![Transition 2](images/Transition2.png)
