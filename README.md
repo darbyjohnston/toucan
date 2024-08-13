@@ -55,7 +55,7 @@ Transition:
 Transition with an invert effect on the clips:
 
 ![Transition 2](images/Transition2.png)
-![Composite Tracks Graph](images/Transition2.svg)
+![Transition 2 Graph](images/Transition2Graph.svg)
 
 Transforms; resize, rotate, flip, and flop:
 
