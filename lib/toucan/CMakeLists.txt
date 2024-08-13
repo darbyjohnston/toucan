@@ -1,4 +1,5 @@
 set(HEADERS
+    BoxOp.h
     CheckersOp.h
     CompOp.h
     FillOp.h
@@ -7,6 +8,7 @@ set(HEADERS
     ImageOp.h
     Init.h
     InvertOp.h
+    LineOp.h
     LinearTimeWarpOp.h
     NoiseOp.h
     ReadOp.h
@@ -19,6 +21,7 @@ set(HEADERS
     TransitionOp.h
     Util.h)
 set(SOURCE
+    BoxOp.cpp
     CheckersOp.cpp
     CompOp.cpp
     FillOp.cpp
@@ -27,6 +30,7 @@ set(SOURCE
     ImageOp.cpp
     Init.cpp
     InvertOp.cpp
+    LineOp.cpp
     LinearTimeWarpOp.cpp
     NoiseOp.cpp
     ReadOp.cpp

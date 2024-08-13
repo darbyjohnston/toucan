@@ -19,7 +19,7 @@ Filters: Invert, Saturation
 
 Transforms: Flip/flop, Resize, Rotate
 
-Miscellaneous: Linear time warp, Text rendering
+Miscellaneous: Linear time warp, Lines, Boxes, Text
 
 Example Renders
 ===============
@@ -45,9 +45,9 @@ Patterns; fill, checkers, and noise:
 
 ![Patterns](images/Patterns.png)
 
-Text rendering:
+Rendering:
 
-![Text](images/Text.png)
+![Render](images/Render.png)
 
 Transition:
 

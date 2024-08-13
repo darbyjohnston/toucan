@@ -21,7 +21,7 @@ namespace toucan
             "Gap",
             "LinearTimeWarp",
             "Patterns",
-            "Text",
+            "Render",
             "Transforms",
             "Transition",
             "Transition2"

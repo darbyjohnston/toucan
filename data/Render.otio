@@ -29,18 +29,17 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "TextEffect.1",
+                                "OTIO_SCHEMA": "BoxEffect.1",
                                 "effect_name": "",
-                                "pos": [ 100, 200 ],
-                                "text": "toucan",
-                                "font_size": 200,
-                                "font_name": "",
-                                "color": [ 0.8, 0.0, 0.3, 1.0 ]
+                                "pos1": [ 200, 200 ],
+                                "pos2": [ 1080, 520 ],
+                                "color": [ 0.8, 0.0, 0.3, 1.0 ],
+                                "fill": true
                             },
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "pos": [ 200, 350 ],
+                                "pos": [ 320, 420 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
@@ -49,20 +48,19 @@
                             {
                                 "OTIO_SCHEMA": "TextEffect.1",
                                 "effect_name": "",
-                                "pos": [ 300, 500 ],
+                                "pos": [ 315, 415 ],
                                 "text": "toucan",
                                 "font_size": 200,
                                 "font_name": "",
                                 "color": [ 0.9, 0.7, 0.1, 1.0 ]
                             },
                             {
-                                "OTIO_SCHEMA": "TextEffect.1",
+                                "OTIO_SCHEMA": "LineEffect.1",
                                 "effect_name": "",
-                                "pos": [ 400, 650 ],
-                                "text": "toucan",
-                                "font_size": 200,
-                                "font_name": "",
-                                "color": [ 0.9, 0.5, 0.1, 1.0 ]
+                                "pos1": [ 200, 450 ],
+                                "pos2": [ 1080, 450 ],
+                                "color": [ 0.9, 0.5, 0.1, 1.0 ],
+                                "skip_first_point": false
                             }
                         ],
                         "source_range": {
