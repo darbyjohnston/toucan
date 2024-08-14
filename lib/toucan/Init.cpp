@@ -6,12 +6,14 @@
 
 #include "BoxOp.h"
 #include "CheckersOp.h"
+#include "ColorMapOp.h"
 #include "FillOp.h"
 #include "FlipOp.h"
 #include "FlopOp.h"
 #include "InvertOp.h"
 #include "LineOp.h"
 #include "NoiseOp.h"
+#include "PowOp.h"
 #include "ResizeOp.h"
 #include "RotateOp.h"
 #include "SaturateOp.h"
@@ -25,12 +27,14 @@ namespace toucan
     {
         OTIO_NS::TypeRegistry::instance().register_type<BoxEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<CheckersEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<ColorMapEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FillEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FlipEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FlopEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<InvertEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<LineEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<NoiseEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<PowEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<ResizeEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<RotateEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<SaturateEffect>();

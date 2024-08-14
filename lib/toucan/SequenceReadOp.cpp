@@ -4,6 +4,8 @@
 
 #include "SequenceReadOp.h"
 
+#include <OpenImageIO/imagebufalgo.h>
+
 #include <iomanip>
 #include <sstream>
 
@@ -43,6 +45,16 @@ namespace toucan
             _namePrefix <<
             std::setw(_frameZeroPadding) << std::setfill('0') << offsetTime.to_frames() <<
             _nameSuffix;
-        return OIIO::ImageBuf(ss.str());
+        OIIO::ImageBuf buf(ss.str());
+        const auto& spec = buf.spec();
+        if (3 == spec.nchannels)
+        {
+            // Add an alpha channel.
+            const int channelorder[] = { 0, 1, 2, -1 };
+            const float channelvalues[] = { 0, 0, 0, 1.0 };
+            const std::string channelnames[] = { "", "", "", "A" };
+            buf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+        }
+        return buf;
     }
 }

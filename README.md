@@ -15,7 +15,7 @@ Effects
 
 Patterns: Fill, Checkers, Noise
 
-Filters: Invert, Saturation
+Filters: Color map, Invert, Power, Saturation
 
 Transforms: Flip/flop, Resize, Rotate
 
@@ -29,7 +29,7 @@ Compositing multiple tracks:
 
 ![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
-Filter effects; invert and saturate:
+Filter effects; color map, invert, power, and saturate:
 
 ![Filters](images/Filters.png)
 

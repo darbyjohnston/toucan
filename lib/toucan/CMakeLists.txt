@@ -1,6 +1,7 @@
 set(HEADERS
     BoxOp.h
     CheckersOp.h
+    ColorMapOp.h
     CompOp.h
     FillOp.h
     FlipOp.h
@@ -11,6 +12,7 @@ set(HEADERS
     LineOp.h
     LinearTimeWarpOp.h
     NoiseOp.h
+    PowOp.h
     ReadOp.h
     ResizeOp.h
     RotateOp.h
@@ -23,6 +25,7 @@ set(HEADERS
 set(SOURCE
     BoxOp.cpp
     CheckersOp.cpp
+    ColorMapOp.cpp
     CompOp.cpp
     FillOp.cpp
     FlipOp.cpp
@@ -33,6 +36,7 @@ set(SOURCE
     LineOp.cpp
     LinearTimeWarpOp.cpp
     NoiseOp.cpp
+    PowOp.cpp
     ReadOp.cpp
     ResizeOp.cpp
     RotateOp.cpp
