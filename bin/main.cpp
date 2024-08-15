@@ -3,6 +3,7 @@
 // All rights reserved.
 
 #include <toucan/Init.h>
+#include <toucan/Plugin.h>
 #include <toucan/TimelineTraverse.h>
 #include <toucan/Util.h>
 
@@ -14,6 +15,23 @@ using namespace toucan;
 
 int main(int argc, char** argv)
 {
+    std::filesystem::path searchPath = std::filesystem::path(argv[0]).parent_path() / ".." / "..";
+    std::vector<std::filesystem::path> pluginPaths;
+    findPlugins(searchPath, pluginPaths);
+    for (auto const& path : pluginPaths)
+    {
+        std::cout << path.string() << std::endl;
+        try
+        {
+            auto plugin = std::make_shared<Plugin>(path);
+        }
+        catch (const std::exception& e)
+        {
+            std::cout << "ERROR: " << e.what() << std::endl;
+        }
+    }
+    return 0;
+
     // Command line arguments.
     if (argc < 3)
     {

@@ -6,6 +6,37 @@
 
 namespace toucan
 {
+    namespace
+    {
+        void _findPlugins(
+            const std::filesystem::path& path,
+            std::vector<std::filesystem::path>& out,
+            int depth,
+            int maxDepth)
+        {
+            for (auto const& entry : std::filesystem::directory_iterator(path))
+            {
+                const auto& entryPath = entry.path();
+                if (entry.is_regular_file() &&
+                    (entryPath.extension() == ".dll" || entryPath.extension() == ".so"))
+                {
+                    out.push_back(entryPath);
+                }
+                else if (entry.is_directory() && depth < maxDepth)
+                {
+                    _findPlugins(entryPath, out, depth + 1, maxDepth);
+                }
+            }
+        }
+    }
+
+    void findPlugins(
+        const std::filesystem::path& path,
+        std::vector<std::filesystem::path>& out)
+    {
+        _findPlugins(path, out, 0, 2);
+    }
+
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i& vec)
     {
         return OTIO_NS::AnyVector{ vec.x, vec.y };

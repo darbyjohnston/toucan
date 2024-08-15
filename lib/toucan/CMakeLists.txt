@@ -12,6 +12,7 @@ set(HEADERS
     LineOp.h
     LinearTimeWarpOp.h
     NoiseOp.h
+    Plugin.h
     PowOp.h
     ReadOp.h
     ResizeOp.h
@@ -36,6 +37,7 @@ set(SOURCE
     LineOp.cpp
     LinearTimeWarpOp.cpp
     NoiseOp.cpp
+    Plugin.cpp
     PowOp.cpp
     ReadOp.cpp
     ResizeOp.cpp

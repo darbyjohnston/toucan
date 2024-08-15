@@ -25,6 +25,7 @@ if(APPLE)
     set(CMAKE_FIND_FRAMEWORK LAST)
     set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew)
 endif()
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 enable_testing()
 
@@ -37,11 +38,13 @@ find_package(TIFF REQUIRED)
 find_package(OpenEXR REQUIRED)
 find_package(OpenImageIO REQUIRED)
 find_package(OTIO REQUIRED)
+find_package(OpenFX REQUIRED)
 
 include_directories(lib)
 # \todo OpenTimelineIO doesn't use the "Imath" prefix for includes?
 include_directories(${CMAKE_INSTALL_PREFIX}/include/Imath)
 
 add_subdirectory(lib/toucan)
+add_subdirectory(plugins)
 add_subdirectory(bin)
 add_subdirectory(tests)

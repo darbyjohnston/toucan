@@ -8,11 +8,15 @@
 
 #include <Imath/ImathVec.h>
 
+#include <filesystem>
 #include <string>
 #include <utility>
 
 namespace toucan
 {
+    //! Find plugins.
+    void findPlugins(const std::filesystem::path&, std::vector<std::filesystem::path>&);
+
     //! Conversion to any vector.
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i&);
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V4f&);
