@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <toucan/PropertySet.h>
+
+#include <OpenFX/ofxCore.h>
+
 #include <filesystem>
 #include <memory>
 
@@ -16,7 +20,14 @@ namespace toucan
 
         ~Plugin();
 
+        int getCount();
+
+        OfxPlugin* getPlugin(int);
+
+        PropertySet* getPropertySet(int);
+
     private:
+        std::vector<PropertySet> _effectPropertySets;
         struct Private;
         std::unique_ptr<Private> _p;
     };

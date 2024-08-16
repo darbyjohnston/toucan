@@ -4,6 +4,8 @@
 
 #include "Plugin.h"
 
+#include "Util.h"
+
 #include <OpenFX/ofxCore.h>
 
 #include <iostream>
@@ -21,13 +23,21 @@ namespace toucan
 {
     namespace
     {
-        typedef int(__cdecl* GetNumberOfPluginsFnc)(void);
-        typedef OfxPlugin* (__cdecl* OfxGetPluginFnc)(int);
+        typedef int(__cdecl* GetNumberOfPluginsFunc)(void);
+        typedef OfxPlugin* (__cdecl* GetPluginFunc)(int);
+        typedef void(__cdecl* SetHostFunc)(OfxHost*);
+        typedef OfxStatus (__cdecl* MainEntryPointFunc)(
+            const char*,
+            const void*,
+            OfxPropertySetHandle,
+            OfxPropertySetHandle);
     }
 
     struct Plugin::Private
     {
-        HINSTANCE pluginInstance = NULL;
+        HINSTANCE pluginInstance = nullptr;
+        GetNumberOfPluginsFunc getNumberOfPlugins = nullptr;
+        GetPluginFunc getPlugin = nullptr;
     };
 
     Plugin::Plugin(const std::filesystem::path& path) :
@@ -41,20 +51,38 @@ namespace toucan
             throw std::runtime_error(ss.str());
         }
 
-        GetNumberOfPluginsFnc getNumberOfPluginsFunc = (GetNumberOfPluginsFnc)GetProcAddress(
+        _p->getNumberOfPlugins = (GetNumberOfPluginsFunc)GetProcAddress(
             _p->pluginInstance,
             "OfxGetNumberOfPlugins");
-        if (!getNumberOfPluginsFunc)
+        _p->getPlugin = (GetPluginFunc)GetProcAddress(
+            _p->pluginInstance,
+            "OfxGetPlugin");
+
+        if (_p->getNumberOfPlugins)
         {
-            std::stringstream ss;
-            ss << "Cannot get number of plugins";
-            throw std::runtime_error(ss.str());
+            _effectPropertySets.resize(_p->getNumberOfPlugins());
         }
-        std::cout << "Number of plugins: " << getNumberOfPluginsFunc() << std::endl;
     }
 
     Plugin::~Plugin()
     {
         FreeLibrary(_p->pluginInstance);
+    }
+
+    int Plugin::getCount()
+    {
+        return _p->getNumberOfPlugins ? _p->getNumberOfPlugins() : 0;
+    }
+
+    OfxPlugin* Plugin::getPlugin(int index)
+    {
+        return _p->getPlugin ? _p->getPlugin(index) : nullptr;
+    }
+
+    PropertySet* Plugin::getPropertySet(int index)
+    {
+        return index >= 0 && index  < _effectPropertySets.size() ?
+            &_effectPropertySets[index] :
+            nullptr;
     }
 }

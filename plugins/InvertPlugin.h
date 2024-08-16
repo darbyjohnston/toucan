@@ -8,21 +8,6 @@
 
 #include <memory>
 
-namespace toucan
-{
-    //! Invert plugin.
-    class InvertPlugin
-    {
-    public:
-        InvertPlugin(OfxHost*);
-
-        virtual ~InvertPlugin();
-
-    private:
-        OfxHost* _host = nullptr;
-    };
-}
-
 extern "C"
 {
     int OfxGetNumberOfPlugins(void);

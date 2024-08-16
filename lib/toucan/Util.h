@@ -30,4 +30,9 @@ namespace toucan
 
     //! Return the zero padding for the given number.
     size_t getNumberPadding(const std::string&);
+
+#if defined(_WINDOWS)
+    //! Get an error string from a Windows system call.
+    std::string getLastError();
+#endif // _WINDOWS
 }

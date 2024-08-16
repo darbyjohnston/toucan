@@ -6,6 +6,7 @@ set(HEADERS
     FillOp.h
     FlipOp.h
     FlopOp.h
+    Host.h
     ImageOp.h
     Init.h
     InvertOp.h
@@ -14,6 +15,7 @@ set(HEADERS
     NoiseOp.h
     Plugin.h
     PowOp.h
+    PropertySet.h
     ReadOp.h
     ResizeOp.h
     RotateOp.h
@@ -23,6 +25,7 @@ set(HEADERS
     TimelineTraverse.h
     TransitionOp.h
     Util.h)
+set(HEADERS_PRIVATE)
 set(SOURCE
     BoxOp.cpp
     CheckersOp.cpp
@@ -31,6 +34,7 @@ set(SOURCE
     FillOp.cpp
     FlipOp.cpp
     FlopOp.cpp
+    Host.cpp
     ImageOp.cpp
     Init.cpp
     InvertOp.cpp
@@ -39,6 +43,7 @@ set(SOURCE
     NoiseOp.cpp
     Plugin.cpp
     PowOp.cpp
+    PropertySet.cpp
     ReadOp.cpp
     ResizeOp.cpp
     RotateOp.cpp
@@ -48,8 +53,11 @@ set(SOURCE
     TimelineTraverse.cpp
     TransitionOp.cpp
     Util.cpp)
+if(WIN32)
+    list(APPEND SOURCE UtilWin32.cpp)
+endif()
 
-add_library(toucan ${HEADERS} ${SOURCE})
+add_library(toucan ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
 target_link_libraries(toucan PUBLIC OTIO OpenImageIO::OpenImageIO)
 set_target_properties(toucan PROPERTIES FOLDER lib)
 set_target_properties(toucan PROPERTIES PUBLIC_HEADER "${HEADERS}")
