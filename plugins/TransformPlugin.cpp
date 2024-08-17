@@ -2,20 +2,22 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "FilterPlugin.h"
+#include "TransformPlugin.h"
 
 #include "Util.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
-FilterPlugin::FilterPlugin(const std::string& group, const std::string& name) :
+#include <Imath/ImathVec.h>
+
+TransformPlugin::TransformPlugin(const std::string& group, const std::string& name) :
     Plugin(group, name)
 {}
 
-FilterPlugin::~FilterPlugin()
+TransformPlugin::~TransformPlugin()
 {}
 
-OfxStatus FilterPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
 {
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
@@ -62,7 +64,7 @@ OfxStatus FilterPlugin::_describeInContextAction(OfxImageEffectHandle descriptor
     return kOfxStatOK;
 }
 
-OfxStatus FilterPlugin::_renderAction(
+OfxStatus TransformPlugin::_renderAction(
     OfxImageEffectHandle instance,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
@@ -101,25 +103,25 @@ OfxStatus FilterPlugin::_renderAction(
     return kOfxStatOK;
 }
 
-ColorMapPlugin* ColorMapPlugin::_instance = nullptr;
+FlipPlugin* FlipPlugin::_instance = nullptr;
 
-ColorMapPlugin::ColorMapPlugin() :
-    FilterPlugin("Toucan", "ColorMap")
+FlipPlugin::FlipPlugin() :
+    TransformPlugin("Toucan", "Flip")
 {}
 
-ColorMapPlugin::~ColorMapPlugin()
+FlipPlugin::~FlipPlugin()
 {}
 
-void ColorMapPlugin::setHostFunc(OfxHost* host)
+void FlipPlugin::setHostFunc(OfxHost* host)
 {
     if (!_instance)
     {
-        _instance = new ColorMapPlugin;
+        _instance = new FlipPlugin;
     }
     _instance->_host = host;
 }
 
-OfxStatus ColorMapPlugin::mainEntryPoint(
+OfxStatus FlipPlugin::mainEntryPoint(
     const char* action,
     const void* handle,
     OfxPropertySetHandle inArgs,
@@ -128,68 +130,149 @@ OfxStatus ColorMapPlugin::mainEntryPoint(
     return _instance->_entryPoint(action, handle, inArgs, outArgs);
 }
 
-OfxStatus ColorMapPlugin::_render(
+OfxStatus FlipPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    // Apply the color map.
-    std::string mapName = "plasma";
+    //! \bug This doesn't seem to be working?
+    OIIO::ImageBufAlgo::flip(
+        outputBuf,
+        sourceBuf,
+        OIIO::ROI(
+            renderWindow.x1,
+            renderWindow.x2,
+            renderWindow.y1,
+            renderWindow.y2));
+    //OIIO::ImageBufAlgo::copy(
+    //    outputBuf,
+    //    sourceBuf);
+    return kOfxStatOK;
+}
+
+FlopPlugin* FlopPlugin::_instance = nullptr;
+
+FlopPlugin::FlopPlugin() :
+    TransformPlugin("Toucan", "Flop")
+{}
+
+FlopPlugin::~FlopPlugin()
+{}
+
+void FlopPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new FlopPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus FlopPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus FlopPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    //! \bug This doesn't seem to be working?
+    OIIO::ImageBufAlgo::flop(
+        outputBuf,
+        sourceBuf,
+        OIIO::ROI(
+            renderWindow.x1,
+            renderWindow.x2,
+            renderWindow.y1,
+            renderWindow.y2));
+    return kOfxStatOK;
+}
+
+ResizePlugin* ResizePlugin::_instance = nullptr;
+
+ResizePlugin::ResizePlugin() :
+    TransformPlugin("Toucan", "Resize")
+{}
+
+ResizePlugin::~ResizePlugin()
+{}
+
+void ResizePlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new ResizePlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus ResizePlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus ResizePlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    IMATH_NAMESPACE::V2i size;
+    _propertySuite->propGetIntN(inArgs, "size", 2, &size.x);
+
+    std::string filterName = "";
     char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "mapName", 0, &s);
+    _propertySuite->propGetString(inArgs, "filterName", 0, &s);
     if (s)
     {
-        mapName = s;
+        filterName = s;
     }
-    OIIO::ImageBufAlgo::color_map(
-        outputBuf,
-        sourceBuf,
-        -1,
-        mapName,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
 
-    // Copy the alpha channel.
-    OIIO::ImageBufAlgo::copy(
+    double filterWidth = 0.0;
+    _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
+
+    //! \bug This doesn't seem to be working?
+    OIIO::ImageBufAlgo::resize(
         outputBuf,
         sourceBuf,
-        OIIO::TypeUnknown,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            3,
-            4));
+        filterName,
+        filterWidth,
+        OIIO::ROI(0, size.x, 0, size.y, 0, 1, 0, 4));
 
     return kOfxStatOK;
 }
 
-InvertPlugin* InvertPlugin::_instance = nullptr;
+RotatePlugin* RotatePlugin::_instance = nullptr;
 
-InvertPlugin::InvertPlugin() :
-    FilterPlugin("Toucan", "Invert")
+RotatePlugin::RotatePlugin() :
+    TransformPlugin("Toucan", "Rotate")
 {}
 
-InvertPlugin::~InvertPlugin()
+RotatePlugin::~RotatePlugin()
 {}
 
-void InvertPlugin::setHostFunc(OfxHost* host)
+void RotatePlugin::setHostFunc(OfxHost* host)
 {
     if (!_instance)
     {
-        _instance = new InvertPlugin;
+        _instance = new RotatePlugin;
     }
     _instance->_host = host;
 }
 
-OfxStatus InvertPlugin::mainEntryPoint(
+OfxStatus RotatePlugin::mainEntryPoint(
     const char* action,
     const void* handle,
     OfxPropertySetHandle inArgs,
@@ -198,139 +281,33 @@ OfxStatus InvertPlugin::mainEntryPoint(
     return _instance->_entryPoint(action, handle, inArgs, outArgs);
 }
 
-OfxStatus InvertPlugin::_render(
+OfxStatus RotatePlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    // Invert the color channels.
-    OIIO::ImageBufAlgo::invert(
-        outputBuf,
-        sourceBuf,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            0,
-            3));
+    double angle = 0.0;
+    _propertySuite->propGetDouble(inArgs, "angle", 0, &angle);
 
-    // Copy the alpha channel.
-    OIIO::ImageBufAlgo::copy(
-        outputBuf,
-        sourceBuf,
-        OIIO::TypeUnknown,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            3,
-            4));
-
-    return kOfxStatOK;
-}
-
-PowPlugin* PowPlugin::_instance = nullptr;
-
-PowPlugin::PowPlugin() :
-    FilterPlugin("Toucan", "Pow")
-{}
-
-PowPlugin::~PowPlugin()
-{}
-
-void PowPlugin::setHostFunc(OfxHost* host)
-{
-    if (!_instance)
+    std::string filterName = "";
+    char* s = nullptr;
+    _propertySuite->propGetString(inArgs, "filterName", 0, &s);
+    if (s)
     {
-        _instance = new PowPlugin;
+        filterName = s;
     }
-    _instance->_host = host;
-}
 
-OfxStatus PowPlugin::mainEntryPoint(
-    const char* action,
-    const void* handle,
-    OfxPropertySetHandle inArgs,
-    OfxPropertySetHandle outArgs)
-{
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
-}
+    double filterWidth = 0.0;
+    _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
 
-OfxStatus PowPlugin::_render(
-    const OIIO::ImageBuf& sourceBuf,
-    OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow,
-    OfxPropertySetHandle inArgs)
-{
-    double value = 1.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
-    OIIO::ImageBufAlgo::pow(
+    //! \bug This doesn't seem to be working?
+    OIIO::ImageBufAlgo::rotate(
         outputBuf,
         sourceBuf,
-        value,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
-    
-    return kOfxStatOK;
-}
-
-SaturatePlugin* SaturatePlugin::_instance = nullptr;
-
-SaturatePlugin::SaturatePlugin() :
-    FilterPlugin("Toucan", "Saturate")
-{}
-
-SaturatePlugin::~SaturatePlugin()
-{}
-
-void SaturatePlugin::setHostFunc(OfxHost* host)
-{
-    if (!_instance)
-    {
-        _instance = new SaturatePlugin;
-    }
-    _instance->_host = host;
-}
-
-OfxStatus SaturatePlugin::mainEntryPoint(
-    const char* action,
-    const void* handle,
-    OfxPropertySetHandle inArgs,
-    OfxPropertySetHandle outArgs)
-{
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
-}
-
-OfxStatus SaturatePlugin::_render(
-    const OIIO::ImageBuf& sourceBuf,
-    OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow,
-    OfxPropertySetHandle inArgs)
-{
-    double value = 1.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
-    OIIO::ImageBufAlgo::saturate(
-        outputBuf,
-        sourceBuf,
-        value,
-        0,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
+        angle / 360.F * 2.F * M_PI,
+        filterName,
+        filterWidth);
 
     return kOfxStatOK;
 }
@@ -339,10 +316,10 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:ColorMap", 1, 0, ColorMapPlugin::setHostFunc, ColorMapPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Invert", 1, 0, InvertPlugin::setHostFunc, InvertPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Pow", 1, 0, PowPlugin::setHostFunc, PowPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "Toucan:Flip", 1, 0, FlipPlugin::setHostFunc, FlipPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Flop", 1, 0, FlopPlugin::setHostFunc, FlopPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Resize", 1, 0, ResizePlugin::setHostFunc, ResizePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Rotate", 1, 0, RotatePlugin::setHostFunc, RotatePlugin::mainEntryPoint }
     };
 }
 

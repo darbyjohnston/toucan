@@ -29,7 +29,9 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
             const auto input = _inputs[0]->exec(offsetTime, host);
-            buf = OIIO::ImageBufAlgo::flip(input);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            host->filter("Toucan:Flip", input, buf);
         }
         return buf;
     }
@@ -81,7 +83,9 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
             const auto input = _inputs[0]->exec(offsetTime, host);
-            buf = OIIO::ImageBufAlgo::flop(input);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            host->filter("Toucan:Flop", input, buf);
         }
         return buf;
     }
@@ -144,11 +148,16 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = OIIO::ImageBufAlgo::resize(
-                _inputs[0]->exec(offsetTime, host),
-                _data.filterName,
-                _data.filterWidth,
-                OIIO::ROI(0, _data.size.x, 0, _data.size.y, 0, 1, 0, 4));
+            auto input = _inputs[0]->exec(offsetTime, host);
+            auto spec = input.spec();
+            spec.width = _data.size.x;
+            spec.height = _data.size.y;
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setIntN("size", 2, &_data.size.x);
+            propSet.setString("filterName", 0, _data.filterName.c_str());
+            propSet.setDouble("filterWidth", 0, _data.filterWidth);
+            host->filter("Toucan:Resize", input, buf, propSet);
         }
         return buf;
     }
@@ -230,12 +239,15 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = OIIO::ImageBufAlgo::rotate(
-                _inputs[0]->exec(offsetTime, host),
-                _data.angle / 360.F * 2.F * M_PI,
-                _data.filterName,
-                _data.filterWidth);
-        }
+            const auto input = _inputs[0]->exec(offsetTime, host);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setDouble("angle", 0, _data.angle);
+            propSet.setString("filterName", 0, _data.filterName.c_str());
+            propSet.setDouble("filterWidth", 0, _data.filterWidth);
+            host->filter("Toucan:Rotate", input, buf, propSet);
+        }   
         return buf;
     }
 

@@ -42,15 +42,22 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = _inputs[0]->exec(offsetTime, host);
-            OIIO::ImageBufAlgo::render_box(
-                buf,
-                _data.pos1.x,
-                _data.pos1.y,
-                _data.pos2.x,
-                _data.pos2.y,
-                { _data.color.x, _data.color.y, _data.color.z, _data.color.w },
-                _data.fill);
+            const auto input = _inputs[0]->exec(offsetTime, host);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setIntN("pos1", 2, &_data.pos1.x);
+            propSet.setIntN("pos2", 2, &_data.pos2.x);
+            const double color[] =
+            {
+                _data.color.x,
+                _data.color.y,
+                _data.color.z,
+                _data.color.w
+            };
+            propSet.setDoubleN("color", 4, color);
+            propSet.setInt("fill", 0, _data.fill);
+            host->filter("Toucan:Box", input, buf, propSet);
         }
         return buf;
     }
@@ -132,15 +139,22 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = _inputs[0]->exec(offsetTime, host);
-            OIIO::ImageBufAlgo::render_line(
-                buf,
-                _data.pos1.x,
-                _data.pos1.y,
-                _data.pos2.x,
-                _data.pos2.y,
-                { _data.color.x, _data.color.y, _data.color.z, _data.color.w },
-                _data.skipFirstPoint);
+            const auto input = _inputs[0]->exec(offsetTime, host);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setIntN("pos1", 2, &_data.pos1.x);
+            propSet.setIntN("pos2", 2, &_data.pos2.x);
+            const double color[] =
+            {
+                _data.color.x,
+                _data.color.y,
+                _data.color.z,
+                _data.color.w
+            };
+            propSet.setDoubleN("color", 4, color);
+            propSet.setInt("skipFirstPoint", 0, _data.skipFirstPoint);
+            host->filter("Toucan:Line", input, buf, propSet);
         }
         return buf;
     }
@@ -222,15 +236,23 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = _inputs[0]->exec(offsetTime, host);
-            OIIO::ImageBufAlgo::render_text(
-                buf,
-                _data.pos.x,
-                _data.pos.y,
-                _data.text,
-                _data.fontSize,
-                _data.fontName,
-                { _data.color.x, _data.color.y, _data.color.z, _data.color.w });
+            const auto input = _inputs[0]->exec(offsetTime, host);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setIntN("pos", 2, &_data.pos.x);
+            propSet.setString("text", 0, _data.text.c_str());
+            propSet.setInt("fontSize", 0, _data.fontSize);
+            propSet.setString("fontName", 0, _data.fontName.c_str());
+            const double color[] =
+            {
+                _data.color.x,
+                _data.color.y,
+                _data.color.z,
+                _data.color.w
+            };
+            propSet.setDoubleN("color", 4, color);
+            host->filter("Toucan:Text", input, buf, propSet);
         }
         return buf;
     }

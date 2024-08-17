@@ -127,6 +127,7 @@ namespace toucan
                     OfxPlugin* ofxPlugin = plugin->getPlugin(i);
                     if (strcmp(ofxPlugin->pluginApi, kOfxImageEffectPluginApi) == 0)
                     {
+                        //std::cout << "plugin: " << ofxPlugin->pluginIdentifier << std::endl;
                         ofxPlugin->setHost(&_host);
                         OfxStatus ofxStatus = ofxPlugin->mainEntry(
                             kOfxActionLoad,

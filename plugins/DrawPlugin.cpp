@@ -2,20 +2,22 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "FilterPlugin.h"
+#include "DrawPlugin.h"
 
 #include "Util.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
-FilterPlugin::FilterPlugin(const std::string& group, const std::string& name) :
+#include <Imath/ImathVec.h>
+
+DrawPlugin::DrawPlugin(const std::string& group, const std::string& name) :
     Plugin(group, name)
 {}
 
-FilterPlugin::~FilterPlugin()
+DrawPlugin::~DrawPlugin()
 {}
 
-OfxStatus FilterPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
 {
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
@@ -62,7 +64,7 @@ OfxStatus FilterPlugin::_describeInContextAction(OfxImageEffectHandle descriptor
     return kOfxStatOK;
 }
 
-OfxStatus FilterPlugin::_renderAction(
+OfxStatus DrawPlugin::_renderAction(
     OfxImageEffectHandle instance,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
@@ -101,25 +103,25 @@ OfxStatus FilterPlugin::_renderAction(
     return kOfxStatOK;
 }
 
-ColorMapPlugin* ColorMapPlugin::_instance = nullptr;
+BoxPlugin* BoxPlugin::_instance = nullptr;
 
-ColorMapPlugin::ColorMapPlugin() :
-    FilterPlugin("Toucan", "ColorMap")
+BoxPlugin::BoxPlugin() :
+    DrawPlugin("Toucan", "Box")
 {}
 
-ColorMapPlugin::~ColorMapPlugin()
+BoxPlugin::~BoxPlugin()
 {}
 
-void ColorMapPlugin::setHostFunc(OfxHost* host)
+void BoxPlugin::setHostFunc(OfxHost* host)
 {
     if (!_instance)
     {
-        _instance = new ColorMapPlugin;
+        _instance = new BoxPlugin;
     }
     _instance->_host = host;
 }
 
-OfxStatus ColorMapPlugin::mainEntryPoint(
+OfxStatus BoxPlugin::mainEntryPoint(
     const char* action,
     const void* handle,
     OfxPropertySetHandle inArgs,
@@ -128,209 +130,176 @@ OfxStatus ColorMapPlugin::mainEntryPoint(
     return _instance->_entryPoint(action, handle, inArgs, outArgs);
 }
 
-OfxStatus ColorMapPlugin::_render(
+OfxStatus BoxPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    // Apply the color map.
-    std::string mapName = "plasma";
+    IMATH_NAMESPACE::V2i pos1(0, 0);
+    _propertySuite->propGetIntN(inArgs, "pos1", 2, &pos1.x);
+
+    IMATH_NAMESPACE::V2i pos2(0, 0);
+    _propertySuite->propGetIntN(inArgs, "pos2", 2, &pos2.x);
+
+    double color[4] = { 0.0, 0.0, 0.0, 0.0 };
+    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
+
+    int fill = 0;
+    _propertySuite->propGetInt(inArgs, "fill", 0, &fill);
+
+    OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
+    OIIO::ImageBufAlgo::render_box(
+        outputBuf,
+        pos1.x,
+        pos1.y,
+        pos2.x,
+        pos2.y,
+        {
+            static_cast<float>(color[0]),
+            static_cast<float>(color[1]),
+            static_cast<float>(color[2]),
+            static_cast<float>(color[3])
+        },
+        fill);
+
+    return kOfxStatOK;
+}
+
+LinePlugin* LinePlugin::_instance = nullptr;
+
+LinePlugin::LinePlugin() :
+    DrawPlugin("Toucan", "Line")
+{}
+
+LinePlugin::~LinePlugin()
+{}
+
+void LinePlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new LinePlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus LinePlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus LinePlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    IMATH_NAMESPACE::V2i pos1(0, 0);
+    _propertySuite->propGetIntN(inArgs, "pos1", 2, &pos1.x);
+
+    IMATH_NAMESPACE::V2i pos2(0, 0);
+    _propertySuite->propGetIntN(inArgs, "pos2", 2, &pos2.x);
+
+    double color[4] = { 0.0, 0.0, 0.0, 0.0 };
+    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
+
+    int skipFirstPoint = 0;
+    _propertySuite->propGetInt(inArgs, "skipFirstPoint", 0, &skipFirstPoint);
+
+    OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
+    OIIO::ImageBufAlgo::render_line(
+        outputBuf,
+        pos1.x,
+        pos1.y,
+        pos2.x,
+        pos2.y,
+        {
+            static_cast<float>(color[0]),
+            static_cast<float>(color[1]),
+            static_cast<float>(color[2]),
+            static_cast<float>(color[3])
+        },
+        skipFirstPoint);
+
+    return kOfxStatOK;
+}
+
+TextPlugin* TextPlugin::_instance = nullptr;
+
+TextPlugin::TextPlugin() :
+    DrawPlugin("Toucan", "Text")
+{}
+
+TextPlugin::~TextPlugin()
+{}
+
+void TextPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new TextPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus TextPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus TextPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    IMATH_NAMESPACE::V2i pos(0, 0);
+    _propertySuite->propGetIntN(inArgs, "pos", 2, &pos.x);
+
+    std::string text;
     char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "mapName", 0, &s);
+    _propertySuite->propGetString(inArgs, "text", 0, &s);
     if (s)
     {
-        mapName = s;
+        text = s;
     }
-    OIIO::ImageBufAlgo::color_map(
-        outputBuf,
-        sourceBuf,
-        -1,
-        mapName,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
 
-    // Copy the alpha channel.
-    OIIO::ImageBufAlgo::copy(
-        outputBuf,
-        sourceBuf,
-        OIIO::TypeUnknown,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            3,
-            4));
+    int fontSize = 16;
+    _propertySuite->propGetInt(inArgs, "fontSize", 0, &fontSize);
 
-    return kOfxStatOK;
-}
-
-InvertPlugin* InvertPlugin::_instance = nullptr;
-
-InvertPlugin::InvertPlugin() :
-    FilterPlugin("Toucan", "Invert")
-{}
-
-InvertPlugin::~InvertPlugin()
-{}
-
-void InvertPlugin::setHostFunc(OfxHost* host)
-{
-    if (!_instance)
+    std::string fontName;
+    _propertySuite->propGetString(inArgs, "fontName", 0, &s);
+    if (s)
     {
-        _instance = new InvertPlugin;
+        fontName = s;
     }
-    _instance->_host = host;
-}
 
-OfxStatus InvertPlugin::mainEntryPoint(
-    const char* action,
-    const void* handle,
-    OfxPropertySetHandle inArgs,
-    OfxPropertySetHandle outArgs)
-{
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
-}
+    double color[4] = { 0.0, 0.0, 0.0, 0.0 };
+    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
 
-OfxStatus InvertPlugin::_render(
-    const OIIO::ImageBuf& sourceBuf,
-    OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow,
-    OfxPropertySetHandle inArgs)
-{
-    // Invert the color channels.
-    OIIO::ImageBufAlgo::invert(
+    OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
+    OIIO::ImageBufAlgo::render_text(
         outputBuf,
-        sourceBuf,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            0,
-            3));
-
-    // Copy the alpha channel.
-    OIIO::ImageBufAlgo::copy(
-        outputBuf,
-        sourceBuf,
-        OIIO::TypeUnknown,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2,
-            0,
-            1,
-            3,
-            4));
-
-    return kOfxStatOK;
-}
-
-PowPlugin* PowPlugin::_instance = nullptr;
-
-PowPlugin::PowPlugin() :
-    FilterPlugin("Toucan", "Pow")
-{}
-
-PowPlugin::~PowPlugin()
-{}
-
-void PowPlugin::setHostFunc(OfxHost* host)
-{
-    if (!_instance)
-    {
-        _instance = new PowPlugin;
-    }
-    _instance->_host = host;
-}
-
-OfxStatus PowPlugin::mainEntryPoint(
-    const char* action,
-    const void* handle,
-    OfxPropertySetHandle inArgs,
-    OfxPropertySetHandle outArgs)
-{
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
-}
-
-OfxStatus PowPlugin::_render(
-    const OIIO::ImageBuf& sourceBuf,
-    OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow,
-    OfxPropertySetHandle inArgs)
-{
-    double value = 1.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
-    OIIO::ImageBufAlgo::pow(
-        outputBuf,
-        sourceBuf,
-        value,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
-    
-    return kOfxStatOK;
-}
-
-SaturatePlugin* SaturatePlugin::_instance = nullptr;
-
-SaturatePlugin::SaturatePlugin() :
-    FilterPlugin("Toucan", "Saturate")
-{}
-
-SaturatePlugin::~SaturatePlugin()
-{}
-
-void SaturatePlugin::setHostFunc(OfxHost* host)
-{
-    if (!_instance)
-    {
-        _instance = new SaturatePlugin;
-    }
-    _instance->_host = host;
-}
-
-OfxStatus SaturatePlugin::mainEntryPoint(
-    const char* action,
-    const void* handle,
-    OfxPropertySetHandle inArgs,
-    OfxPropertySetHandle outArgs)
-{
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
-}
-
-OfxStatus SaturatePlugin::_render(
-    const OIIO::ImageBuf& sourceBuf,
-    OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow,
-    OfxPropertySetHandle inArgs)
-{
-    double value = 1.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
-    OIIO::ImageBufAlgo::saturate(
-        outputBuf,
-        sourceBuf,
-        value,
-        0,
-        OIIO::ROI(
-            renderWindow.x1,
-            renderWindow.x2,
-            renderWindow.y1,
-            renderWindow.y2));
+        pos.x,
+        pos.y,
+        text,
+        fontSize,
+        fontName,
+        {
+            static_cast<float>(color[0]),
+            static_cast<float>(color[1]),
+            static_cast<float>(color[2]),
+            static_cast<float>(color[3])
+        });
 
     return kOfxStatOK;
 }
@@ -339,10 +308,9 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:ColorMap", 1, 0, ColorMapPlugin::setHostFunc, ColorMapPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Invert", 1, 0, InvertPlugin::setHostFunc, InvertPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Pow", 1, 0, PowPlugin::setHostFunc, PowPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "Toucan:Box", 1, 0, BoxPlugin::setHostFunc, BoxPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Line", 1, 0, LinePlugin::setHostFunc, LinePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Text", 1, 0, TextPlugin::setHostFunc, TextPlugin::mainEntryPoint }
     };
 }
 

@@ -27,6 +27,8 @@ if(APPLE)
 endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+set(TOUCAN_PLUGINS toucan-draw toucan-filter toucan-transform)
+
 enable_testing()
 
 find_package(Imath REQUIRED)

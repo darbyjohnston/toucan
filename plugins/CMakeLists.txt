@@ -1,17 +1,14 @@
-set(HEADERS
-    FilterPlugin.h
-    Plugin.h
-    Util.h)
-set(SOURCE
-    FilterPlugin.cpp
-    Plugin.cpp
-    Util.cpp)
+foreach(PLUGIN Draw Filter Transform)
+    string(TOLOWER ${PLUGIN} PLUGIN_LOWER)
+    add_library(
+        toucan-${PLUGIN_LOWER} MODULE
+        ${PLUGIN}Plugin.h Plugin.h Util.h
+        ${PLUGIN}Plugin.cpp Plugin.cpp Util.cpp)
+    target_link_libraries(toucan-${PLUGIN_LOWER} PUBLIC OpenImageIO::OpenImageIO)
+    set_target_properties(toucan-${PLUGIN_LOWER} PROPERTIES FOLDER plugin)
 
-add_library(toucan-filter MODULE ${HEADERS} ${SOURCE})
-target_link_libraries(toucan-filter PUBLIC OpenImageIO::OpenImageIO)
-set_target_properties(toucan-filter PROPERTIES FOLDER plugin)
-
-install(TARGETS toucan-filter
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin)
+    install(TARGETS toucan-${PLUGIN_LOWER}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
+endforeach()
