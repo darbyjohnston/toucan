@@ -30,7 +30,9 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf LineOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf LineOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -40,7 +42,7 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            buf = _inputs[0]->exec(offsetTime);
+            buf = _inputs[0]->exec(offsetTime, host);
             OIIO::ImageBufAlgo::render_line(
                 buf,
                 _data.pos1.x,

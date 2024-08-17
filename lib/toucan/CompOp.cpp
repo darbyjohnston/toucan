@@ -20,7 +20,9 @@ namespace toucan
         _premult = premult;
     }
 
-    OIIO::ImageBuf CompOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf CompOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         OTIO_NS::RationalTime offsetTime = time;
@@ -30,8 +32,8 @@ namespace toucan
         }
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
         {
-            auto fg = _inputs[0]->exec(offsetTime);
-            auto bg = _inputs[1]->exec(offsetTime);
+            auto fg = _inputs[0]->exec(offsetTime, host);
+            auto bg = _inputs[1]->exec(offsetTime, host);
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);
@@ -40,7 +42,7 @@ namespace toucan
         }
         else if (1 == _inputs.size() && _inputs[0])
         {
-            auto fg = _inputs[0]->exec(offsetTime);
+            auto fg = _inputs[0]->exec(offsetTime, host);
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);

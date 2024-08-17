@@ -11,7 +11,9 @@
 
 namespace toucan
 {
-    void timelineTraverseTest(const std::filesystem::path& path)
+    void timelineTraverseTest(
+        const std::filesystem::path& path,
+        const std::shared_ptr<Host>& host)
     {
         std::cout << "timelineTraverseTest" << std::endl;
         const std::vector<std::string> otioFiles =
@@ -57,7 +59,7 @@ namespace toucan
                 if (auto op = traverse->exec(time))
                 {
                     // Execute the image operation graph.
-                    const auto buf = op->exec(time);
+                    const auto buf = op->exec(time, host);
 
                     // Save the image.
                     std::stringstream ss;

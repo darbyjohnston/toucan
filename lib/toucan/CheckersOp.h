@@ -30,7 +30,9 @@ namespace toucan
         const CheckersData& getData() const;
         void setData(const CheckersData&);
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) override;
 
     private:
         CheckersData _data;

@@ -31,8 +31,7 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ReadOp>(path);
-                const auto buf = read->exec(OTIO_NS::RationalTime(0.0, 1.0));
+                const OIIO::ImageBuf buf(path.string());
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
@@ -45,15 +44,12 @@ namespace toucan
             {
                 const std::string url = sequenceRef->target_url_base();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<SequenceReadOp>(
-                    path.string(),
-                    sequenceRef->name_prefix(),
-                    sequenceRef->name_suffix(),
-                    sequenceRef->start_frame(),
-                    sequenceRef->frame_step(),
-                    sequenceRef->rate(),
-                    sequenceRef->frame_zero_padding());
-                const auto buf = read->exec(OTIO_NS::RationalTime(0.0, 1.0));
+                std::stringstream ss;
+                ss << path.string() <<
+                    sequenceRef->name_prefix() <<
+                    std::setw(sequenceRef->frame_zero_padding()) << std::setfill('0') << sequenceRef->start_frame() <<
+                    sequenceRef->name_suffix();
+                const OIIO::ImageBuf buf(ss.str());
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {

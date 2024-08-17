@@ -28,7 +28,9 @@ namespace toucan
         const FillData& getData() const;
         void setData(const FillData&);
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) override;
 
     private:
         FillData _data;

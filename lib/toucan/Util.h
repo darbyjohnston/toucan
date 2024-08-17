@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <toucan/PropertySet.h>
+
+#include <OpenFX/ofxProperty.h>
+
 #include <opentimelineio/anyVector.h>
 
 #include <Imath/ImathVec.h>

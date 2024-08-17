@@ -3,11 +3,13 @@
 // All rights reserved.
 
 #include "CompOpTest.h"
+#include "PropertySetTest.h"
 #include "ReadOpTest.h"
 #include "TimelineTraverseTest.h"
 #include "UtilTest.h"
 
 #include <toucan/Init.h>
+#include <toucan/Host.h>
 
 #include <iostream>
 
@@ -20,11 +22,16 @@ int main(int argc, char** argv)
         std::cout << "Usage: toucan-test (path to test data)" << std::endl;
         return 1;
     }
+    const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
     const std::filesystem::path path(argv[1]);
     init();
-    compOpTest(path);
-    readOpTest(path);
-    timelineTraverseTest(path);
+    auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
+        parentPath,
+        parentPath / ".." / ".."});
+    compOpTest(path, host);
+    propertySetTest();
+    readOpTest(path, host);
+    timelineTraverseTest(path, host);
     utilTest(path);
     return 0;
 }

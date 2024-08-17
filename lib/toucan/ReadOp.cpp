@@ -18,7 +18,9 @@ namespace toucan
     ReadOp::~ReadOp()
     {}
 
-    OIIO::ImageBuf ReadOp::exec(const OTIO_NS::RationalTime&)
+    OIIO::ImageBuf ReadOp::exec(
+        const OTIO_NS::RationalTime&,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf(_path.string());
         const auto& spec = buf.spec();

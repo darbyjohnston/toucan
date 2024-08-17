@@ -13,12 +13,6 @@ using namespace toucan;
 
 int main(int argc, char** argv)
 {
-    std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
-    auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
-        parentPath,
-        parentPath / ".." / ".."});
-    return 0;
-
     // Command line arguments.
     if (argc < 3)
     {
@@ -33,6 +27,7 @@ int main(int argc, char** argv)
         std::cout << std::endl;
         return 1;
     }
+    const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
     const std::filesystem::path inputPath(argv[1]);
     const std::filesystem::path outputPath(argv[2]);
     const auto outputSplit = splitFileNameNumber(outputPath.stem().string());
@@ -69,6 +64,11 @@ int main(int argc, char** argv)
     const auto traverse = std::make_shared<TimelineTraverse>(inputPath.parent_path(), timeline);
     const IMATH_NAMESPACE::V2d& imageSize = traverse->getImageSize();
 
+    // Create the host.
+    auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
+        parentPath,
+        parentPath / ".." / ".."});
+
     // Initialize the filmstrip.
     OIIO::ImageBuf filmstripBuf;
     const int thumbnailWidth = 120;
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
         if (auto op = traverse->exec(time))
         {
             // Execute the image operation graph.
-            const auto buf = op->exec(time);
+            const auto buf = op->exec(time, host);
 
             // Save the image.
             if (!filmstrip)

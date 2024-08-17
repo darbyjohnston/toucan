@@ -16,7 +16,9 @@ namespace toucan
     FlopOp::~FlopOp()
     {}
 
-    OIIO::ImageBuf FlopOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf FlopOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -26,7 +28,7 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            const auto input = _inputs[0]->exec(offsetTime);
+            const auto input = _inputs[0]->exec(offsetTime, host);
             buf = OIIO::ImageBufAlgo::flop(input);
         }
         return buf;

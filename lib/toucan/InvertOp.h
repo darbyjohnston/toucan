@@ -16,7 +16,9 @@ namespace toucan
 
         virtual ~InvertOp();
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) override;
     };
 
     //! Invert OTIO effect.

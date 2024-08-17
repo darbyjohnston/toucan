@@ -4,6 +4,8 @@
 
 #include "InvertOp.h"
 
+#include "PropertySet.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
@@ -16,7 +18,9 @@ namespace toucan
     InvertOp::~InvertOp()
     {}
 
-    OIIO::ImageBuf InvertOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf InvertOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -26,12 +30,10 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            const auto input = _inputs[0]->exec(offsetTime);
-            auto roi = input.roi();
-            roi.chend = 3;
-            buf = OIIO::ImageBufAlgo::unpremult(input);
-            OIIO::ImageBufAlgo::invert(buf, buf, roi);
-            OIIO::ImageBufAlgo::repremult(buf, buf);
+            const auto input = _inputs[0]->exec(offsetTime, host);
+            const auto& spec = input.spec();
+            buf = OIIO::ImageBuf(spec);
+            host->filter("Toucan:Invert", input, buf);
         }
         return buf;
     }

@@ -28,7 +28,9 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf PowOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf PowOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -39,7 +41,7 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
             buf = OIIO::ImageBufAlgo::pow(
-                _inputs[0]->exec(offsetTime),
+                _inputs[0]->exec(offsetTime, host),
                 _data.value);
         }
         return buf;

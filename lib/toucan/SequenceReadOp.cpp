@@ -33,7 +33,9 @@ namespace toucan
     SequenceReadOp::~SequenceReadOp()
     {}
 
-    OIIO::ImageBuf SequenceReadOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf SequenceReadOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OTIO_NS::RationalTime offsetTime = time;
         if (!_timeOffset.is_invalid_time())

@@ -1,7 +1,9 @@
 set(HEADERS
-    InvertPlugin.h)
+    InvertPlugin.h
+    Util.h)
 set(SOURCE
-    InvertPlugin.cpp)
+    InvertPlugin.cpp
+    Util.cpp)
 
 add_library(toucan-invert MODULE ${HEADERS} ${SOURCE})
 target_link_libraries(toucan-invert PUBLIC OpenImageIO::OpenImageIO)

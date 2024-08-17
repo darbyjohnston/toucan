@@ -29,7 +29,9 @@ namespace toucan
         const ResizeData& getData() const;
         void setData(const ResizeData&);
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) override;
 
     private:
         ResizeData _data;

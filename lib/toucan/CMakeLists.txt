@@ -54,7 +54,9 @@ set(SOURCE
     TransitionOp.cpp
     Util.cpp)
 if(WIN32)
-    list(APPEND SOURCE UtilWin32.cpp)
+    list(APPEND SOURCE
+        PluginWin32.cpp
+        UtilWin32.cpp)
 endif()
 
 add_library(toucan ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})

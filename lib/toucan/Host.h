@@ -9,6 +9,8 @@
 
 #include <OpenFX/ofxImageEffect.h>
 
+#include <OpenImageIO/imagebuf.h>
+
 #include <filesystem>
 #include <memory>
 
@@ -21,15 +23,35 @@ namespace toucan
 
         ~Host();
 
-    private:
-        static const void* _fetchSuite(OfxPropertySetHandle host, const char* suiteName, int suiteVersion);
+        void filter(
+            const std::string& name,
+            const OIIO::ImageBuf&,
+            OIIO::ImageBuf&,
+            const PropertySet& = PropertySet());
 
-        static OfxStatus _getPropertySet(OfxImageEffectHandle, OfxPropertySetHandle* propHandle);
+    private:
+        void _suiteInit();
+        void _pluginInit(const std::vector<std::filesystem::path>& searchPath);
+
+        static const void* _fetchSuite(OfxPropertySetHandle host, const char* suiteName, int suiteVersion);
+        static OfxStatus _getPropertySet(OfxImageEffectHandle, OfxPropertySetHandle*);
+        static OfxStatus _clipDefine(OfxImageEffectHandle, const char* name, OfxPropertySetHandle*);
+        static OfxStatus _clipGetHandle(OfxImageEffectHandle, const char* name, OfxImageClipHandle*, OfxPropertySetHandle*);
+        static OfxStatus _clipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*);
+        static OfxStatus _clipReleaseImage(OfxPropertySetHandle);
 
         PropertySet _propertySet;
+        OfxHost _host;
         OfxPropertySuiteV1 _propertySuite;
         OfxImageEffectSuiteV1 _effectSuite;
-        OfxHost _host;
-        std::vector<std::shared_ptr<Plugin> > _plugins;
+        struct PluginData
+        {
+            std::shared_ptr<Plugin> plugin;
+            OfxPlugin* ofxPlugin = nullptr;
+            PropertySet effectPropertySet;
+            std::map<std::string, PropertySet> clipPropertySets;
+            std::map<std::string, PropertySet> images;
+        };
+        std::vector<PluginData> _pluginData;
     };
 }

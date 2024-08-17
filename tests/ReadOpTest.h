@@ -4,9 +4,11 @@
 
 #pragma once
 
-#include <filesystem>
+#include <toucan/Host.h>
 
 namespace toucan
 {
-    void readOpTest(const std::filesystem::path&);
+    void readOpTest(
+        const std::filesystem::path&,
+        const std::shared_ptr<Host>&);
 }

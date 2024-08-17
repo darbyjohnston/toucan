@@ -4,6 +4,8 @@
 
 #include "Util.h"
 
+#include <OpenFX/ofxImageEffect.h>
+
 namespace toucan
 {
     namespace

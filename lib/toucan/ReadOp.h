@@ -20,7 +20,9 @@ namespace toucan
 
         virtual ~ReadOp();
         
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) override;
 
     private:
         std::filesystem::path _path;

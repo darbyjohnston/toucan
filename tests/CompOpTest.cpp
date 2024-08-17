@@ -9,7 +9,9 @@
 
 namespace toucan
 {
-    void compOpTest(const std::filesystem::path& path)
+    void compOpTest(
+        const std::filesystem::path& path,
+        const std::shared_ptr<Host>& host)
     {
         std::cout << "compOpTest" << std::endl;
         auto fg = std::make_shared<ReadOp>(path / "Letter_A.png");
@@ -17,7 +19,7 @@ namespace toucan
         auto comp = std::make_shared<CompOp>(
             std::vector<std::shared_ptr<IImageOp> >{ fg, bg });
         comp->setPremult(true);
-        auto buf = comp->exec(OTIO_NS::RationalTime());
+        auto buf = comp->exec(OTIO_NS::RationalTime(), host);
         buf.write("compOpTest.png");
     }
 }

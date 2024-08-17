@@ -24,10 +24,13 @@ namespace toucan
 
         OfxPlugin* getPlugin(int);
 
-        PropertySet* getPropertySet(int);
-
     private:
-        std::vector<PropertySet> _effectPropertySets;
+        typedef int(__cdecl* GetNumberOfPluginsFunc)(void);
+        GetNumberOfPluginsFunc _getNumberOfPlugins = nullptr;
+
+        typedef OfxPlugin* (__cdecl* GetPluginFunc)(int);
+        GetPluginFunc _getPlugin = nullptr;
+
         struct Private;
         std::unique_ptr<Private> _p;
     };

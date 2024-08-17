@@ -28,7 +28,9 @@ namespace toucan
         _data = value;
     }
 
-    OIIO::ImageBuf ResizeOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf ResizeOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -39,7 +41,7 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
             buf = OIIO::ImageBufAlgo::resize(
-                _inputs[0]->exec(offsetTime),
+                _inputs[0]->exec(offsetTime, host),
                 _data.filterName,
                 _data.filterWidth,
                 OIIO::ROI(0, _data.size.x, 0, _data.size.y, 0, 1, 0, 4));

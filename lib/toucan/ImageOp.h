@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <toucan/Host.h>
+
 #include <opentimelineio/effect.h>
 
 #include <OpenImageIO/imagebuf.h>
@@ -27,7 +29,9 @@ namespace toucan
         void setTimeOffset(const OTIO_NS::RationalTime&);
 
         //! Execute the image operation for the given time.
-        virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
+        virtual OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Host>&) = 0;
 
     protected:
         OTIO_NS::RationalTime _timeOffset;

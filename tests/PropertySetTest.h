@@ -4,11 +4,7 @@
 
 #pragma once
 
-#include <toucan/Host.h>
-
 namespace toucan
 {
-    void timelineTraverseTest(
-        const std::filesystem::path&,
-        const std::shared_ptr<Host>&);
+    void propertySetTest();
 }

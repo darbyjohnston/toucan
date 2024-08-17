@@ -20,7 +20,9 @@ namespace toucan
     TransitionOp::~TransitionOp()
     {}
 
-    OIIO::ImageBuf TransitionOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf TransitionOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
@@ -31,8 +33,8 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
 
-            const auto a = _inputs[0]->exec(offsetTime);
-            const auto b = _inputs[1]->exec(offsetTime);
+            const auto a = _inputs[0]->exec(offsetTime, host);
+            const auto b = _inputs[1]->exec(offsetTime, host);
             
             const float v =
                 (offsetTime.rescaled_to(_range.duration().rate()) - _range.start_time()).value() /

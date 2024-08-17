@@ -16,7 +16,9 @@ namespace toucan
     LinearTimeWarpOp::~LinearTimeWarpOp()
     {}
 
-    OIIO::ImageBuf LinearTimeWarpOp::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf LinearTimeWarpOp::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<Host>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
@@ -27,7 +29,7 @@ namespace toucan
                 offsetTime -= _timeOffset;
             }
             const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * _timeScalar, offsetTime.rate()).floor();
-            buf = _inputs[0]->exec(scaledTime);
+            buf = _inputs[0]->exec(scaledTime, host);
         }
         return buf;
     }

@@ -6,12 +6,15 @@
 
 #include <OpenFX/ofxProperty.h>
 
+#include <OpenImageIO/imagebuf.h>
+
 #include <map>
 #include <string>
 #include <vector>
 
 namespace toucan
 {
+    //! Container class for OpenFX values.
     class PropertySet
     {
     public:
@@ -56,9 +59,11 @@ namespace toucan
     private:
         std::map<std::string, std::vector<void*> > _p;
         std::map<std::string, std::vector<std::string> > _s;
-        std::vector<char> _sBuf;
+        std::vector<std::vector<char> > _buf;
         std::map<std::string, std::vector<double> > _d;
         std::map<std::string, std::vector<int> > _i;
     };
 
+    //! Convert to a property set.
+    PropertySet bufToPropSet(const OIIO::ImageBuf&);
 }
