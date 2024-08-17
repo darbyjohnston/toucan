@@ -43,7 +43,9 @@ namespace toucan
             const auto input = _inputs[0]->exec(offsetTime, host);
             const auto& spec = input.spec();
             buf = OIIO::ImageBuf(spec);
-            host->filter("Toucan:ColorMap", input, buf);
+            PropertySet propSet;
+            propSet.setString("mapName", 0, _data.mapName.c_str());
+            host->filter("Toucan:ColorMap", input, buf, propSet);
         }
         return buf;
     }
@@ -167,7 +169,9 @@ namespace toucan
             const auto input = _inputs[0]->exec(offsetTime, host);
             const auto& spec = input.spec();
             buf = OIIO::ImageBuf(spec);
-            host->filter("Toucan:Pow", input, buf);
+            PropertySet propSet;
+            propSet.setDouble("value", 0, _data.value);
+            host->filter("Toucan:Pow", input, buf, propSet);
         }
         return buf;
     }
@@ -242,7 +246,9 @@ namespace toucan
             const auto input = _inputs[0]->exec(offsetTime, host);
             const auto& spec = input.spec();
             buf = OIIO::ImageBuf(spec);
-            host->filter("Toucan:Saturate", input, buf);
+            PropertySet propSet;
+            propSet.setDouble("value", 0, _data.value);
+            host->filter("Toucan:Saturate", input, buf, propSet);
         }
         return buf;
     }

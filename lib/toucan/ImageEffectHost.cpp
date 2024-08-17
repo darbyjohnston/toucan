@@ -52,7 +52,7 @@ namespace toucan
 
                 data.images["Source"] = bufToPropSet(source);
                 data.images["Output"] = bufToPropSet(output);
-                PropertySet args;
+                PropertySet args = propSet;
                 args.setDouble(kOfxPropTime, 0, 0.0);
                 const auto& spec = source.spec();
                 OfxRectI bounds;

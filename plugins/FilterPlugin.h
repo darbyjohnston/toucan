@@ -19,7 +19,8 @@ protected:
     virtual OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
-        const OfxRectI& renderWindow) = 0;
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) = 0;
 
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
@@ -49,7 +50,8 @@ protected:
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
-        const OfxRectI& renderWindow) override;
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
 
 private:
     static ColorMapPlugin* _instance;
@@ -74,7 +76,8 @@ protected:
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
-        const OfxRectI& renderWindow) override;
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
 
 private:
     static InvertPlugin* _instance;
@@ -99,7 +102,8 @@ protected:
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
-        const OfxRectI& renderWindow) override;
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
 
 private:
     static PowPlugin* _instance;
@@ -124,7 +128,8 @@ protected:
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
-        const OfxRectI& renderWindow) override;
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
 
 private:
     static SaturatePlugin* _instance;

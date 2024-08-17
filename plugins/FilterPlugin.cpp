@@ -86,7 +86,7 @@ OfxStatus FilterPlugin::_renderAction(
         {
             const OIIO::ImageBuf sourceBuf = propSetToBuf(_propertySuite, sourceImage);
             OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceBuf, outputBuf, renderWindow);
+            _render(sourceBuf, outputBuf, renderWindow, inArgs);
         }
     }
 
@@ -131,10 +131,17 @@ OfxStatus ColorMapPlugin::mainEntryPoint(
 OfxStatus ColorMapPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow)
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
 {
     // Apply the color map.
     std::string mapName = "plasma";
+    char* s = nullptr;
+    _propertySuite->propGetString(inArgs, "mapName", 0, &s);
+    if (s)
+    {
+        mapName = s;
+    }
     OIIO::ImageBufAlgo::color_map(
         outputBuf,
         sourceBuf,
@@ -194,7 +201,8 @@ OfxStatus InvertPlugin::mainEntryPoint(
 OfxStatus InvertPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow)
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
 {
     // Invert the color channels.
     OIIO::ImageBufAlgo::invert(
@@ -258,9 +266,11 @@ OfxStatus PowPlugin::mainEntryPoint(
 OfxStatus PowPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow)
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
 {
-    float value = 10.F;
+    double value = 1.0;
+    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
     OIIO::ImageBufAlgo::pow(outputBuf, sourceBuf, value);
     return kOfxStatOK;
 }
@@ -295,9 +305,11 @@ OfxStatus SaturatePlugin::mainEntryPoint(
 OfxStatus SaturatePlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
-    const OfxRectI& renderWindow)
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
 {
-    float value = 0.F;
+    double value = 1.0;
+    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
     OIIO::ImageBufAlgo::saturate(outputBuf, sourceBuf, value);
     return kOfxStatOK;
 }
