@@ -4,20 +4,14 @@
 
 #include "Init.h"
 
-#include "Box.h"
-#include "Checkers.h"
-#include "ColorMap.h"
-#include "Fill.h"
-#include "Flip.h"
-#include "Flop.h"
-#include "Invert.h"
-#include "Line.h"
-#include "Noise.h"
-#include "Pow.h"
-#include "Resize.h"
-#include "Rotate.h"
-#include "Saturate.h"
-#include "Text.h"
+#include "Comp.h"
+#include "Draw.h"
+#include "Filter.h"
+#include "Generator.h"
+#include "Read.h"
+#include "TimeWarp.h"
+#include "Transform.h"
+#include "Transition.h"
 
 #include <opentimelineio/typeRegistry.h>
 

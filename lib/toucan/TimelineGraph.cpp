@@ -5,10 +5,9 @@
 #include "TimelineGraph.h"
 
 #include "Comp.h"
-#include "Fill.h"
-#include "LinearTimeWarp.h"
+#include "Generator.h"
 #include "Read.h"
-#include "SequenceRead.h"
+#include "TimeWarp.h"
 #include "Transition.h"
 
 #include <opentimelineio/externalReference.h>

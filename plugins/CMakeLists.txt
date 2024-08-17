@@ -1,15 +1,17 @@
 set(HEADERS
-    InvertPlugin.h
+    FilterPlugin.h
+    Plugin.h
     Util.h)
 set(SOURCE
-    InvertPlugin.cpp
+    FilterPlugin.cpp
+    Plugin.cpp
     Util.cpp)
 
-add_library(toucan-invert MODULE ${HEADERS} ${SOURCE})
-target_link_libraries(toucan-invert PUBLIC OpenImageIO::OpenImageIO)
-set_target_properties(toucan-invert PROPERTIES FOLDER plugin)
+add_library(toucan-filter MODULE ${HEADERS} ${SOURCE})
+target_link_libraries(toucan-filter PUBLIC OpenImageIO::OpenImageIO)
+set_target_properties(toucan-filter PROPERTIES FOLDER plugin)
 
-install(TARGETS toucan-invert
+install(TARGETS toucan-filter
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin)

@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "LinearTimeWarp.h"
+#include "TimeWarp.h"
 
 namespace toucan
 {
