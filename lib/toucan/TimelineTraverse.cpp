@@ -4,12 +4,12 @@
 
 #include "TimelineTraverse.h"
 
-#include "CompOp.h"
-#include "FillOp.h"
-#include "LinearTimeWarpOp.h"
-#include "ReadOp.h"
-#include "SequenceReadOp.h"
-#include "TransitionOp.h"
+#include "Comp.h"
+#include "Fill.h"
+#include "LinearTimeWarp.h"
+#include "Read.h"
+#include "SequenceRead.h"
+#include "Transition.h"
 
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/gap.h>
@@ -69,39 +69,39 @@ namespace toucan
         return _imageSize;
     }
 
-    std::shared_ptr<IImageOp> TimelineTraverse::exec(const OTIO_NS::RationalTime& time) const
+    std::shared_ptr<IImageNode> TimelineTraverse::exec(const OTIO_NS::RationalTime& time) const
     {
-        std::shared_ptr<IImageOp> op = std::make_shared<FillOp>(
+        std::shared_ptr<IImageNode> node = std::make_shared<FillNode>(
             FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
         for (const auto& i : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                auto trackOp = _track(time, track);
+                auto trackNode = _track(time, track);
 
                 // Composite over the previous track.
-                std::vector<std::shared_ptr<IImageOp> > ops;
-                if (trackOp)
+                std::vector<std::shared_ptr<IImageNode> > nodes;
+                if (trackNode)
                 {
-                    ops.push_back(trackOp);
+                    nodes.push_back(trackNode);
                 }
-                if (op)
+                if (node)
                 {
-                    ops.push_back(op);
+                    nodes.push_back(node);
                 }
-                auto comp = std::make_shared<CompOp>(ops);
+                auto comp = std::make_shared<CompNode>(nodes);
                 comp->setPremult(true);
-                op = comp;
+                node = comp;
             }
         }
-        return op;
+        return node;
     }
 
-    std::shared_ptr<IImageOp> TimelineTraverse::_track(
+    std::shared_ptr<IImageNode> TimelineTraverse::_track(
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
-        std::shared_ptr<IImageOp> out;
+        std::shared_ptr<IImageNode> out;
 
         // Find the items for the given time.
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
@@ -156,9 +156,9 @@ namespace toucan
                             prevItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, prevItem),
                             prevItem);
-                        out = std::make_shared<TransitionOp>(
+                        out = std::make_shared<TransitionNode>(
                             trimmedRangeInParent.value(),
-                            std::vector<std::shared_ptr<IImageOp> >{ a, out });
+                            std::vector<std::shared_ptr<IImageNode> >{ a, out });
                     }
                 }
             }
@@ -173,9 +173,9 @@ namespace toucan
                             nextItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, nextItem),
                             nextItem);
-                        out = std::make_shared<TransitionOp>(
+                        out = std::make_shared<TransitionNode>(
                             trimmedRangeInParent.value(),
-                            std::vector<std::shared_ptr<IImageOp> >{ out, b });
+                            std::vector<std::shared_ptr<IImageNode> >{ out, b });
                     }
                 }
             }
@@ -184,12 +184,12 @@ namespace toucan
         return out;
     }
 
-    std::shared_ptr<IImageOp> TimelineTraverse::_item(
+    std::shared_ptr<IImageNode> TimelineTraverse::_item(
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
     {
-        std::shared_ptr<IImageOp> out;
+        std::shared_ptr<IImageNode> out;
 
         if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
         {
@@ -198,14 +198,14 @@ namespace toucan
             {
                 const std::string url = externalRef->target_url();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<ReadOp>(path);
+                auto read = std::make_shared<ReadNode>(path);
                 out = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
                 const std::string url = sequenceRef->target_url_base();
                 const std::filesystem::path path = _path / url;
-                auto read = std::make_shared<SequenceReadOp>(
+                auto read = std::make_shared<SequenceReadNode>(
                     path.string(),
                     sequenceRef->name_prefix(),
                     sequenceRef->name_suffix(),
@@ -218,7 +218,7 @@ namespace toucan
         }
         else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))
         {
-            out = std::make_shared<FillOp>(FillData{ _imageSize });
+            out = std::make_shared<FillNode>(FillData{ _imageSize });
         }
 
         // Get the effects.
@@ -226,15 +226,15 @@ namespace toucan
         {
             if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
             {
-                auto effectOp = iEffect->createOp({ out });
-                out = effectOp;
+                auto effectNode = iEffect->createNode({ out });
+                out = effectNode;
             }
             else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
             {
-                auto linearTimeWarpOp = std::make_shared<LinearTimeWarpOp>(
+                auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
                     static_cast<float>(linearTimeWarp->time_scalar()),
-                    std::vector<std::shared_ptr<IImageOp> >{ out });
-                out = linearTimeWarpOp;
+                    std::vector<std::shared_ptr<IImageNode> >{ out });
+                out = linearTimeWarpNode;
             }
         }
         if (out)

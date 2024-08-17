@@ -1,14 +1,14 @@
 set(HEADERS
-    CompOpTest.h
+    CompTest.h
     PropertySetTest.h
-    ReadOpTest.h
+    ReadTest.h
     TimelineTraverseTest.h
     UtilTest.h)
 
 set(SOURCE
-    CompOpTest.cpp
+    CompTest.cpp
     PropertySetTest.cpp
-    ReadOpTest.cpp
+    ReadTest.cpp
     TimelineTraverseTest.cpp
     UtilTest.cpp
     main.cpp)

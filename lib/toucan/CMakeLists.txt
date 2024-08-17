@@ -1,57 +1,57 @@
 set(HEADERS
-    BoxOp.h
-    CheckersOp.h
-    ColorMapOp.h
-    CompOp.h
-    FillOp.h
-    FlipOp.h
-    FlopOp.h
+    Box.h
+    Checkers.h
+    ColorMap.h
+    Comp.h
+    Fill.h
+    Flip.h
+    Flop.h
     Host.h
-    ImageOp.h
+    ImageNode.h
     Init.h
-    InvertOp.h
-    LineOp.h
-    LinearTimeWarpOp.h
-    NoiseOp.h
+    Invert.h
+    Line.h
+    LinearTimeWarp.h
+    Noise.h
     Plugin.h
-    PowOp.h
+    Pow.h
     PropertySet.h
-    ReadOp.h
-    ResizeOp.h
-    RotateOp.h
-    SaturateOp.h
-    SequenceReadOp.h
-    TextOp.h
+    Read.h
+    Resize.h
+    Rotate.h
+    Saturate.h
+    SequenceRead.h
+    Text.h
     TimelineTraverse.h
-    TransitionOp.h
+    Transition.h
     Util.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
-    BoxOp.cpp
-    CheckersOp.cpp
-    ColorMapOp.cpp
-    CompOp.cpp
-    FillOp.cpp
-    FlipOp.cpp
-    FlopOp.cpp
+    Box.cpp
+    Checkers.cpp
+    ColorMap.cpp
+    Comp.cpp
+    Fill.cpp
+    Flip.cpp
+    Flop.cpp
     Host.cpp
-    ImageOp.cpp
+    ImageNode.cpp
     Init.cpp
-    InvertOp.cpp
-    LineOp.cpp
-    LinearTimeWarpOp.cpp
-    NoiseOp.cpp
+    Invert.cpp
+    Line.cpp
+    LinearTimeWarp.cpp
+    Noise.cpp
     Plugin.cpp
-    PowOp.cpp
+    Pow.cpp
     PropertySet.cpp
-    ReadOp.cpp
-    ResizeOp.cpp
-    RotateOp.cpp
-    SaturateOp.cpp
-    SequenceReadOp.cpp
-    TextOp.cpp
+    Read.cpp
+    Resize.cpp
+    Rotate.cpp
+    Saturate.cpp
+    SequenceRead.cpp
+    Text.cpp
     TimelineTraverse.cpp
-    TransitionOp.cpp
+    Transition.cpp
     Util.cpp)
 if(WIN32)
     list(APPEND SOURCE

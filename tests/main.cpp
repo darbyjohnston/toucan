@@ -2,9 +2,9 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "CompOpTest.h"
+#include "CompTest.h"
 #include "PropertySetTest.h"
-#include "ReadOpTest.h"
+#include "ReadTest.h"
 #include "TimelineTraverseTest.h"
 #include "UtilTest.h"
 
@@ -28,9 +28,9 @@ int main(int argc, char** argv)
     auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
         parentPath,
         parentPath / ".." / ".."});
-    compOpTest(path, host);
+    compTest(path, host);
     propertySetTest();
-    readOpTest(path, host);
+    readTest(path, host);
     timelineTraverseTest(path, host);
     utilTest(path);
     return 0;
