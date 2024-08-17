@@ -2,14 +2,14 @@ set(HEADERS
     CompTest.h
     PropertySetTest.h
     ReadTest.h
-    TimelineTraverseTest.h
+    TimelineGraphTest.h
     UtilTest.h)
 
 set(SOURCE
     CompTest.cpp
     PropertySetTest.cpp
     ReadTest.cpp
-    TimelineTraverseTest.cpp
+    TimelineGraphTest.cpp
     UtilTest.cpp
     main.cpp)
 

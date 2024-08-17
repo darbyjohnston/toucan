@@ -16,21 +16,20 @@
 
 namespace toucan
 {
-    //! Traverse a timeline.
-    class TimelineTraverse : public std::enable_shared_from_this<TimelineTraverse>
+    //! Create image graphs from a timeline.
+    class TimelineGraph : public std::enable_shared_from_this<TimelineGraph>
     {
     public:
-        TimelineTraverse(
+        TimelineGraph(
             const std::filesystem::path&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
-        ~TimelineTraverse();
+        ~TimelineGraph();
 
         //! Get the timeline image size.
         const IMATH_NAMESPACE::V2d& getImageSize() const;
 
-        //! Get an image operation graph for the given time. This function is
-        //! thread safe.
+        //! Get an image graph for the given time. This function is thread safe.
         std::shared_ptr<IImageNode> exec(const OTIO_NS::RationalTime&) const;
 
     private:

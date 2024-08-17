@@ -2,9 +2,9 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include <toucan/Host.h>
+#include <toucan/ImageEffectHost.h>
 #include <toucan/Init.h>
-#include <toucan/TimelineTraverse.h>
+#include <toucan/TimelineGraph.h>
 #include <toucan/Util.h>
 
 #include <OpenImageIO/imagebufalgo.h>
@@ -60,12 +60,12 @@ int main(int argc, char** argv)
     const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
     const int frames = timeRange.duration().value();
 
-    // Create the timeline traverse object.
-    const auto traverse = std::make_shared<TimelineTraverse>(inputPath.parent_path(), timeline);
-    const IMATH_NAMESPACE::V2d& imageSize = traverse->getImageSize();
+    // Create the timeline graph.
+    const auto graph = std::make_shared<TimelineGraph>(inputPath.parent_path(), timeline);
+    const IMATH_NAMESPACE::V2d& imageSize = graph->getImageSize();
 
-    // Create the host.
-    auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
+    // Create the image effect host.
+    auto host = std::make_shared<ImageEffectHost>(std::vector<std::filesystem::path>{
         parentPath,
         parentPath / ".." / ".."});
 
@@ -87,14 +87,14 @@ int main(int argc, char** argv)
             OIIO::ROI(0, filmstripSize.x, 0, filmstripSize.y, 0, 1, 0, 4));
     }
 
-    // Traverse each frame of the timeline.
+    // Render the timeline frames.
     int filmstripX = 0;
     for (OTIO_NS::RationalTime time = startTime;
         time <= timeRange.end_time_inclusive();
         time += timeInc)
     {
         std::cout << time.value() << "/" << timeRange.duration().value() << std::endl;
-        if (auto op = traverse->exec(time))
+        if (auto op = graph->exec(time))
         {
             // Execute the image operation graph.
             const auto buf = op->exec(time, host);

@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <toucan/Host.h>
+#include <toucan/ImageEffectHost.h>
 
 #include <opentimelineio/effect.h>
 
@@ -25,13 +25,13 @@ namespace toucan
 
         //! Set the time offset.
         //! 
-        //! \todo How should time transform be handled?
+        //! \todo How should time transforms be handled?
         void setTimeOffset(const OTIO_NS::RationalTime&);
 
         //! Execute the image operation for the given time.
         virtual OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<Host>&) = 0;
+            const std::shared_ptr<ImageEffectHost>&) = 0;
 
     protected:
         OTIO_NS::RationalTime _timeOffset;

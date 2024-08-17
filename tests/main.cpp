@@ -5,11 +5,11 @@
 #include "CompTest.h"
 #include "PropertySetTest.h"
 #include "ReadTest.h"
-#include "TimelineTraverseTest.h"
+#include "TimelineGraphTest.h"
 #include "UtilTest.h"
 
+#include <toucan/ImageEffectHost.h>
 #include <toucan/Init.h>
-#include <toucan/Host.h>
 
 #include <iostream>
 
@@ -24,14 +24,18 @@ int main(int argc, char** argv)
     }
     const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
     const std::filesystem::path path(argv[1]);
+
     init();
-    auto host = std::make_shared<Host>(std::vector<std::filesystem::path>{
+    
+    auto host = std::make_shared<ImageEffectHost>(std::vector<std::filesystem::path>{
         parentPath,
         parentPath / ".." / ".."});
+    
     compTest(path, host);
     propertySetTest();
     readTest(path, host);
-    timelineTraverseTest(path, host);
+    timelineGraphTest(path, host);
     utilTest(path);
+    
     return 0;
 }

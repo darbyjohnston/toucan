@@ -2,20 +2,20 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TimelineTraverseTest.h"
+#include "TimelineGraphTest.h"
 
-#include <toucan/TimelineTraverse.h>
+#include <toucan/TimelineGraph.h>
 
 #include <iomanip>
 #include <sstream>
 
 namespace toucan
 {
-    void timelineTraverseTest(
+    void timelineGraphTest(
         const std::filesystem::path& path,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
-        std::cout << "timelineTraverseTest" << std::endl;
+        std::cout << "timelineGraphTest" << std::endl;
         const std::vector<std::string> otioFiles =
         {
             "CompositeTracks",
@@ -48,22 +48,22 @@ namespace toucan
             const OTIO_NS::TimeRange timeRange(startTime, timeline->duration());
             const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
 
-            // Traverse each frame of the timeline.
-            const auto traverse = std::make_shared<TimelineTraverse>(path, timeline);
+            // Render the timeline frames.
+            const auto graph = std::make_shared<TimelineGraph>(path, timeline);
             for (OTIO_NS::RationalTime time = startTime;
                 time <= timeRange.end_time_inclusive();
                 time += timeInc)
             {
                 std::cout << "  " << otioFile << ": " << time.value() << "/" <<
                     timeRange.duration().value() << std::endl;
-                if (auto op = traverse->exec(time))
+                if (auto op = graph->exec(time))
                 {
                     // Execute the image operation graph.
                     const auto buf = op->exec(time, host);
 
                     // Save the image.
                     std::stringstream ss;
-                    ss << "timelineTraverseTest_" << otioFile << "." <<
+                    ss << "timelineGraphTest_" << otioFile << "." <<
                         std::setw(6) << std::setfill('0') << time.to_frames() <<
                         ".png";
                     buf.write(ss.str());

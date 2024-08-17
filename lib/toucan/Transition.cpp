@@ -22,7 +22,7 @@ namespace toucan
 
     OIIO::ImageBuf TransitionNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])

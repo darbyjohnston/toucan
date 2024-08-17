@@ -18,7 +18,7 @@ namespace toucan
 
     OIIO::ImageBuf FlopNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])

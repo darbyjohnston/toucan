@@ -35,7 +35,7 @@ namespace toucan
 
     OIIO::ImageBuf SequenceReadNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         OTIO_NS::RationalTime offsetTime = time;
         if (!_timeOffset.is_invalid_time())

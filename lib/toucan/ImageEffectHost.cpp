@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "Host.h"
+#include "ImageEffectHost.h"
 
 #include "Util.h"
 
@@ -11,7 +11,7 @@
 
 namespace toucan
 {
-    Host::Host(const std::vector<std::filesystem::path>& searchPath)
+    ImageEffectHost::ImageEffectHost(const std::vector<std::filesystem::path>& searchPath)
     {
         _propertySet.setPointer("host", 0, this);
 
@@ -22,7 +22,7 @@ namespace toucan
         _pluginInit(searchPath);
     }
 
-    Host::~Host()
+    ImageEffectHost::~ImageEffectHost()
     {
         for (const auto& data : _pluginData)
         {
@@ -34,7 +34,7 @@ namespace toucan
         }
     }
 
-    void Host::filter(
+    void ImageEffectHost::filter(
         const std::string& name,
         const OIIO::ImageBuf& source,
         OIIO::ImageBuf& output,
@@ -77,7 +77,7 @@ namespace toucan
         }
     }
 
-    void Host::_suiteInit()
+    void ImageEffectHost::_suiteInit()
     {
         _propertySuite.propSetPointer = &PropertySet::setPointer;
         _propertySuite.propSetString = &PropertySet::setString;
@@ -105,7 +105,7 @@ namespace toucan
         _effectSuite.clipReleaseImage = &_clipReleaseImage;
     }
 
-    void Host::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
+    void ImageEffectHost::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
     {
         // Find the plugins.
         std::vector<std::filesystem::path> pluginPaths;
@@ -187,14 +187,14 @@ namespace toucan
         }
     }
 
-    const void* Host::_fetchSuite(OfxPropertySetHandle handle, const char* suiteName, int suiteVersion)
+    const void* ImageEffectHost::_fetchSuite(OfxPropertySetHandle handle, const char* suiteName, int suiteVersion)
     {
         const void* out = nullptr;
         
         PropertySet* hostPropertySet = reinterpret_cast<PropertySet*>(handle);
         void* hostP = nullptr;
         hostPropertySet->getPointer("host", 0, &hostP);
-        Host* host = reinterpret_cast<Host*>(hostP);
+        ImageEffectHost* host = reinterpret_cast<ImageEffectHost*>(hostP);
 
         if (strcmp(suiteName, kOfxPropertySuite) == 0)
         {
@@ -207,21 +207,21 @@ namespace toucan
         return out;
     }
     
-    OfxStatus Host::_getPropertySet(OfxImageEffectHandle handle, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageEffectHost::_getPropertySet(OfxImageEffectHandle handle, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *propHandle = (OfxPropertySetHandle)&data->effectPropertySet;
         return kOfxStatOK;
     }
     
-    OfxStatus Host::_clipDefine(OfxImageEffectHandle handle, const char* name, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageEffectHost::_clipDefine(OfxImageEffectHandle handle, const char* name, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *propHandle = (OfxPropertySetHandle)&data->clipPropertySets[name];
         return kOfxStatOK;
     }
 
-    OfxStatus Host::_clipGetHandle(OfxImageEffectHandle handle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageEffectHost::_clipGetHandle(OfxImageEffectHandle handle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *clip = (OfxImageClipHandle)&data->images[name];
@@ -232,13 +232,13 @@ namespace toucan
         return kOfxStatOK;
     }
 
-    OfxStatus Host::_clipGetImage(OfxImageClipHandle handle, OfxTime, const OfxRectD*, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageEffectHost::_clipGetImage(OfxImageClipHandle handle, OfxTime, const OfxRectD*, OfxPropertySetHandle* propHandle)
     {
         *propHandle = (OfxPropertySetHandle)handle;
         return kOfxStatOK;
     }
 
-    OfxStatus Host::_clipReleaseImage(OfxPropertySetHandle handle)
+    OfxStatus ImageEffectHost::_clipReleaseImage(OfxPropertySetHandle handle)
     {
         return kOfxStatOK;
     }

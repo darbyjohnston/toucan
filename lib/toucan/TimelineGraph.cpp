@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TimelineTraverse.h"
+#include "TimelineGraph.h"
 
 #include "Comp.h"
 #include "Fill.h"
@@ -18,7 +18,7 @@
 
 namespace toucan
 {
-    TimelineTraverse::TimelineTraverse(
+    TimelineGraph::TimelineGraph(
         const std::filesystem::path& path,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline) :
         _path(path),
@@ -61,15 +61,15 @@ namespace toucan
         }
     }
 
-    TimelineTraverse::~TimelineTraverse()
+    TimelineGraph::~TimelineGraph()
     {}
 
-    const IMATH_NAMESPACE::V2d& TimelineTraverse::getImageSize() const
+    const IMATH_NAMESPACE::V2d& TimelineGraph::getImageSize() const
     {
         return _imageSize;
     }
 
-    std::shared_ptr<IImageNode> TimelineTraverse::exec(const OTIO_NS::RationalTime& time) const
+    std::shared_ptr<IImageNode> TimelineGraph::exec(const OTIO_NS::RationalTime& time) const
     {
         std::shared_ptr<IImageNode> node = std::make_shared<FillNode>(
             FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
@@ -97,7 +97,7 @@ namespace toucan
         return node;
     }
 
-    std::shared_ptr<IImageNode> TimelineTraverse::_track(
+    std::shared_ptr<IImageNode> TimelineGraph::_track(
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
@@ -184,7 +184,7 @@ namespace toucan
         return out;
     }
 
-    std::shared_ptr<IImageNode> TimelineTraverse::_item(
+    std::shared_ptr<IImageNode> TimelineGraph::_item(
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const

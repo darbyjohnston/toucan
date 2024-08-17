@@ -32,7 +32,7 @@ namespace toucan
 
     OIIO::ImageBuf BoxNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])

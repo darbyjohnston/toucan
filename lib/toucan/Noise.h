@@ -34,7 +34,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<Host>&) override;
+            const std::shared_ptr<ImageEffectHost>&) override;
 
     private:
         NoiseData _data;

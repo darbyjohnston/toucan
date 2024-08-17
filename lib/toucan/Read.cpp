@@ -20,7 +20,7 @@ namespace toucan
 
     OIIO::ImageBuf ReadNode::exec(
         const OTIO_NS::RationalTime&,
-        const std::shared_ptr<Host>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         OIIO::ImageBuf buf(_path.string());
         const auto& spec = buf.spec();

@@ -6,8 +6,8 @@ set(HEADERS
     Fill.h
     Flip.h
     Flop.h
-    Host.h
     ImageNode.h
+    ImageEffectHost.h
     Init.h
     Invert.h
     Line.h
@@ -22,7 +22,7 @@ set(HEADERS
     Saturate.h
     SequenceRead.h
     Text.h
-    TimelineTraverse.h
+    TimelineGraph.h
     Transition.h
     Util.h)
 set(HEADERS_PRIVATE)
@@ -34,8 +34,8 @@ set(SOURCE
     Fill.cpp
     Flip.cpp
     Flop.cpp
-    Host.cpp
     ImageNode.cpp
+    ImageEffectHost.cpp
     Init.cpp
     Invert.cpp
     Line.cpp
@@ -50,7 +50,7 @@ set(SOURCE
     Saturate.cpp
     SequenceRead.cpp
     Text.cpp
-    TimelineTraverse.cpp
+    TimelineGraph.cpp
     Transition.cpp
     Util.cpp)
 if(WIN32)
