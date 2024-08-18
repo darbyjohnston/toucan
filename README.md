@@ -12,6 +12,15 @@ Dependencies:
 * [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) - Image I/O and processing
 * [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) - Plugins
 
+Features
+========
+Generators: Checkers, Fill, Noise
+Drawing: Box, Line, Text
+Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
+Transforms: Flip, Flop, Resize, Rotate
+Transitions: Dissolve
+Compositing: Over
+
 Example Renders
 ===============
 Compositing multiple tracks:
@@ -20,7 +29,7 @@ Compositing multiple tracks:
 
 ![Composite Tracks Graph](images/CompositeTracksGraph.svg)
 
-Filter effects; color map, invert, power, and saturate:
+Filter effects; color map, invert, power, saturate, blur, and unsharp mask:
 
 ![Filters](images/Filter.png)
 

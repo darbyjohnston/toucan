@@ -166,7 +166,7 @@ namespace toucan
                             prevItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, prevItem),
                             prevItem);
-                        out = std::make_shared<TransitionNode>(
+                        out = std::make_shared<DissolveNode>(
                             trimmedRangeInParent.value(),
                             std::vector<std::shared_ptr<IImageNode> >{ a, out });
                     }
@@ -183,7 +183,7 @@ namespace toucan
                             nextItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, nextItem),
                             nextItem);
-                        out = std::make_shared<TransitionNode>(
+                        out = std::make_shared<DissolveNode>(
                             trimmedRangeInParent.value(),
                             std::vector<std::shared_ptr<IImageNode> >{ out, b });
                     }

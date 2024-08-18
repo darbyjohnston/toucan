@@ -8,15 +8,15 @@
 
 namespace toucan
 {
-    //! Transition node.
-    class TransitionNode : public IImageNode
+    //! Dissolve node.
+    class DissolveNode : public IImageNode
     {
     public:
-        TransitionNode(
+        DissolveNode(
             const OTIO_NS::TimeRange&,
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
-        virtual ~TransitionNode();
+        virtual ~DissolveNode();
         
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,

@@ -10,17 +10,17 @@
 
 namespace toucan
 {
-    TransitionNode::TransitionNode(
+    DissolveNode::DissolveNode(
         const OTIO_NS::TimeRange& range,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode(inputs),
         _range(range)
     {}
 
-    TransitionNode::~TransitionNode()
+    DissolveNode::~DissolveNode()
     {}
 
-    OIIO::ImageBuf TransitionNode::exec(
+    OIIO::ImageBuf DissolveNode::exec(
         const OTIO_NS::RationalTime& time,
         const std::shared_ptr<ImageEffectHost>& host)
     {
