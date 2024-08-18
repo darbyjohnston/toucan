@@ -1,15 +1,15 @@
 digraph CompositeTracks {
-    FillOp [shape=box, label="FillOp: Background color", fontsize=12, margin=0.05, width=0, height=0]
-    ReadOp [shape=box, label="ReadOp: Counter.2.png", fontsize=12, margin=0.05, width=0, height=0]
-    ReadOp2 [shape=box, label="ReadOp: Color_Blue.png", fontsize=12, margin=0.05, width=0, height=0]
-    InvertOp [shape=box, label="InvertOp", fontsize=12, margin=0.05, width=0, height=0]
-    InvertOp2 [shape=box, label="InvertOp", fontsize=12, margin=0.05, width=0, height=0]
-    TransitionOp [shape=box, label="TransitionOp", fontsize=12, margin=0.05, width=0, height=0]
-    OverOp [shape=box, label="OverOp", fontsize=12, margin=0.05, width=0, height=0]
-    FillOp -> OverOp;
-    ReadOp -> InvertOp;
-    InvertOp -> TransitionOp;
-    ReadOp2 -> InvertOp2;
-    InvertOp2 -> TransitionOp;
-    TransitionOp -> OverOp;
+    Fill [shape=box, label="Fill: Background color", fontsize=12, margin=0.05, width=0, height=0]
+    Read [shape=box, label="Read: Counter.2.png", fontsize=12, margin=0.05, width=0, height=0]
+    Read2 [shape=box, label="Read: Color_Blue.png", fontsize=12, margin=0.05, width=0, height=0]
+    Invert [shape=box, label="Invert", fontsize=12, margin=0.05, width=0, height=0]
+    Invert2 [shape=box, label="Invert", fontsize=12, margin=0.05, width=0, height=0]
+    Transition [shape=box, label="Transition", fontsize=12, margin=0.05, width=0, height=0]
+    Over [shape=box, label="Over", fontsize=12, margin=0.05, width=0, height=0]
+    Fill -> Over;
+    Read -> Invert;
+    Invert -> Transition;
+    Read2 -> Invert2;
+    Invert2 -> Transition;
+    Transition -> Over;
 }
