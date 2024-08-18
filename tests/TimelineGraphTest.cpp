@@ -19,12 +19,12 @@ namespace toucan
         const std::vector<std::string> otioFiles =
         {
             "CompositeTracks",
-            "Filters",
+            "Draw",
+            "Filter",
             "Gap",
+            "Generator",
             "LinearTimeWarp",
-            "Patterns",
-            "Render",
-            "Transforms",
+            "Transform",
             "Transition",
             "Transition2"
         };

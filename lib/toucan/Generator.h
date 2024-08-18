@@ -38,34 +38,6 @@ namespace toucan
         CheckersData _data;
     };
 
-    //! Checkers OTIO effect.
-    class CheckersEffect : public IEffect
-    {
-    public:
-        struct Schema
-        {
-            static auto constexpr name = "CheckersEffect";
-            static int constexpr version = 1;
-        };
-
-        CheckersEffect(
-            std::string const& name = std::string(),
-            std::string const& effect_name = std::string(),
-            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        std::shared_ptr<IImageNode> createNode(
-            const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
-
-    protected:
-        virtual ~CheckersEffect();
-
-        bool read_from(Reader&) override;
-        void write_to(Writer&) const override;
-
-    private:
-        CheckersData _data;
-    };
-
     //! Fill data.
     struct FillData
     {
@@ -89,34 +61,6 @@ namespace toucan
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) override;
-
-    private:
-        FillData _data;
-    };
-
-    //! Fill OTIO effect.
-    class FillEffect : public IEffect
-    {
-    public:
-        struct Schema
-        {
-            static auto constexpr name = "FillEffect";
-            static int constexpr version = 1;
-        };
-
-        FillEffect(
-            std::string const& name = std::string(),
-            std::string const& effect_name = std::string(),
-            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        std::shared_ptr<IImageNode> createNode(
-            const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
-
-    protected:
-        virtual ~FillEffect();
-
-        bool read_from(Reader&) override;
-        void write_to(Writer&) const override;
 
     private:
         FillData _data;
@@ -149,34 +93,6 @@ namespace toucan
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) override;
-
-    private:
-        NoiseData _data;
-    };
-
-    //! Noise OTIO effect.
-    class NoiseEffect : public IEffect
-    {
-    public:
-        struct Schema
-        {
-            static auto constexpr name = "NoiseEffect";
-            static int constexpr version = 1;
-        };
-
-        NoiseEffect(
-            std::string const& name = std::string(),
-            std::string const& effect_name = std::string(),
-            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        std::shared_ptr<IImageNode> createNode(
-            const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
-
-    protected:
-        virtual ~NoiseEffect();
-
-        bool read_from(Reader&) override;
-        void write_to(Writer&) const override;
 
     private:
         NoiseData _data;

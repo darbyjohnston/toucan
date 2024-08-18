@@ -17,6 +17,19 @@ TransformPlugin::TransformPlugin(const std::string& group, const std::string& na
 TransformPlugin::~TransformPlugin()
 {}
 
+OfxStatus TransformPlugin::_describeAction(OfxImageEffectHandle descriptor)
+{
+    Plugin::_describeAction(descriptor);
+    OfxPropertySetHandle effectProps;
+    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
+    _propertySuite->propSetString(
+        effectProps,
+        kOfxImageEffectPropSupportedContexts,
+        0,
+        kOfxImageEffectContextFilter);
+    return kOfxStatOK;
+}
+
 OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
 {
     OfxPropertySetHandle sourceProps;
@@ -136,7 +149,6 @@ OfxStatus FlipPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    //! \bug This doesn't seem to be working?
     OIIO::ImageBufAlgo::flip(
         outputBuf,
         sourceBuf,
@@ -145,9 +157,6 @@ OfxStatus FlipPlugin::_render(
             renderWindow.x2,
             renderWindow.y1,
             renderWindow.y2));
-    //OIIO::ImageBufAlgo::copy(
-    //    outputBuf,
-    //    sourceBuf);
     return kOfxStatOK;
 }
 
@@ -184,7 +193,6 @@ OfxStatus FlopPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    //! \bug This doesn't seem to be working?
     OIIO::ImageBufAlgo::flop(
         outputBuf,
         sourceBuf,
@@ -243,7 +251,6 @@ OfxStatus ResizePlugin::_render(
     double filterWidth = 0.0;
     _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
 
-    //! \bug This doesn't seem to be working?
     OIIO::ImageBufAlgo::resize(
         outputBuf,
         sourceBuf,
@@ -301,7 +308,6 @@ OfxStatus RotatePlugin::_render(
     double filterWidth = 0.0;
     _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
 
-    //! \bug This doesn't seem to be working?
     OIIO::ImageBufAlgo::rotate(
         outputBuf,
         sourceBuf,

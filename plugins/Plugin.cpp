@@ -77,11 +77,6 @@ OfxStatus Plugin::_describeAction(OfxImageEffectHandle descriptor)
         kOfxImageEffectPluginPropGrouping,
         0,
         _group.c_str());
-    _propertySuite->propSetString(
-        effectProps,
-        kOfxImageEffectPropSupportedContexts,
-        0,
-        kOfxImageEffectContextFilter);
     return kOfxStatOK;
 }
 

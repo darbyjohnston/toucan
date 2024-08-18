@@ -24,12 +24,16 @@ namespace toucan
 
         ~ImageEffectHost();
 
-        //! Apply a filter effect.
+        void generator(
+            const std::string& name,
+            OIIO::ImageBuf&,
+            const PropertySet & = PropertySet());
+
         void filter(
             const std::string& name,
             const OIIO::ImageBuf&,
             OIIO::ImageBuf&,
-            const PropertySet& = PropertySet());
+            const PropertySet & = PropertySet());
 
     private:
         void _suiteInit();

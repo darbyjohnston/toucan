@@ -43,6 +43,6 @@ namespace toucan
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
-        IMATH_NAMESPACE::V2d _imageSize = IMATH_NAMESPACE::V2d(0, 0);
+        IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
     };
 }

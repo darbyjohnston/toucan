@@ -48,17 +48,19 @@ OIIO::ImageBuf propSetToBuf(OfxPropertySuiteV1* suite, OfxPropertySetHandle hand
     void* p = nullptr;
     suite->propGetPointer(handle, kOfxImagePropData, 0, &p);
 
-    OIIO::ImageSpec spec;
-    spec.width = bounds.x2 - bounds.x1;
-    spec.height = bounds.y2 - bounds.y1;
-    spec.nchannels = components;
+    OIIO::TypeDesc format = OIIO::TypeDesc::UNKNOWN;
     switch (pixelDepth)
     {
-    case 1: spec.format = OIIO::TypeDesc::UINT8; break;
-    case 2: spec.format = OIIO::TypeDesc::UINT16; break;
-    case 4: spec.format = OIIO::TypeDesc::FLOAT; break;
+    case 1: format = OIIO::TypeDesc::UINT8; break;
+    case 2: format = OIIO::TypeDesc::UINT16; break;
+    case 4: format = OIIO::TypeDesc::FLOAT; break;
     default: break;
     }
+    OIIO::ImageSpec spec(
+        bounds.x2 - bounds.x1,
+        bounds.y2 - bounds.y1,
+        components,
+        format);
 
     return OIIO::ImageBuf(
         spec,

@@ -8,16 +8,15 @@
 
 #include <OpenImageIO/imagebuf.h>
 
-class TransformPlugin : public Plugin
+class GeneratorPlugin : public Plugin
 {
 public:
-    TransformPlugin(const std::string& group, const std::string& name);
+    GeneratorPlugin(const std::string& group, const std::string& name);
 
-    virtual ~TransformPlugin() = 0;
+    virtual ~GeneratorPlugin() = 0;
 
 protected:
     virtual OfxStatus _render(
-        const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) = 0;
@@ -32,12 +31,12 @@ protected:
         OfxPropertySetHandle outArgs) override;
 };
 
-class FlipPlugin : public TransformPlugin
+class CheckersPlugin : public GeneratorPlugin
 {
 public:
-    FlipPlugin();
+    CheckersPlugin();
 
-    virtual ~FlipPlugin();
+    virtual ~CheckersPlugin();
 
     static void setHostFunc(OfxHost*);
 
@@ -49,21 +48,20 @@ public:
 
 protected:
     OfxStatus _render(
-        const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static FlipPlugin* _instance;
+    static CheckersPlugin* _instance;
 };
 
-class FlopPlugin : public TransformPlugin
+class FillPlugin : public GeneratorPlugin
 {
 public:
-    FlopPlugin();
+    FillPlugin();
 
-    virtual ~FlopPlugin();
+    virtual ~FillPlugin();
 
     static void setHostFunc(OfxHost*);
 
@@ -75,21 +73,20 @@ public:
 
 protected:
     OfxStatus _render(
-        const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static FlopPlugin* _instance;
+    static FillPlugin* _instance;
 };
 
-class ResizePlugin : public TransformPlugin
+class NoisePlugin : public GeneratorPlugin
 {
 public:
-    ResizePlugin();
+    NoisePlugin();
 
-    virtual ~ResizePlugin();
+    virtual ~NoisePlugin();
 
     static void setHostFunc(OfxHost*);
 
@@ -101,37 +98,10 @@ public:
 
 protected:
     OfxStatus _render(
-        const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static ResizePlugin* _instance;
-};
-
-class RotatePlugin : public TransformPlugin
-{
-public:
-    RotatePlugin();
-
-    virtual ~RotatePlugin();
-
-    static void setHostFunc(OfxHost*);
-
-    static OfxStatus mainEntryPoint(
-        const char* action,
-        const void* handle,
-        OfxPropertySetHandle inArgs,
-        OfxPropertySetHandle outArgs);
-
-protected:
-    OfxStatus _render(
-        const OIIO::ImageBuf&,
-        OIIO::ImageBuf&,
-        const OfxRectI& renderWindow,
-        OfxPropertySetHandle inArgs) override;
-
-private:
-    static RotatePlugin* _instance;
+    static NoisePlugin* _instance;
 };

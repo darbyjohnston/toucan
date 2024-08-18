@@ -27,7 +27,11 @@ if(APPLE)
 endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(TOUCAN_PLUGINS toucan-draw toucan-filter toucan-transform)
+set(TOUCAN_PLUGINS
+    toucan-draw
+    toucan-filter
+    toucan-generator
+    toucan-transform)
 
 enable_testing()
 

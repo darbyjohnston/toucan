@@ -7,6 +7,7 @@
 #include <toucan/ImageEffectHost.h>
 
 #include <opentimelineio/effect.h>
+#include <opentimelineio/generatorReference.h>
 
 #include <OpenImageIO/imagebuf.h>
 

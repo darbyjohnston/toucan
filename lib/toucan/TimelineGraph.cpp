@@ -9,9 +9,11 @@
 #include "Read.h"
 #include "TimeWarp.h"
 #include "Transition.h"
+#include "Util.h"
 
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/gap.h>
+#include <opentimelineio/generatorReference.h>
 #include <opentimelineio/imageSequenceReference.h>
 #include <opentimelineio/linearTimeWarp.h>
 
@@ -23,7 +25,7 @@ namespace toucan
         _path(path),
         _timeline(timeline)
     {
-        // Get the image size from the first clip.
+        // Get the image size from the first item.
         for (auto clip : _timeline->find_clips())
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
@@ -55,6 +57,15 @@ namespace toucan
                     _imageSize.x = spec.width;
                     _imageSize.y = spec.height;
                     break;
+                }
+            }
+            else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
+            {
+                auto parameters = generatorRef->parameters();
+                auto i = parameters.find("size");
+                if (i != parameters.end() && i->second.has_value())
+                {
+                    anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), _imageSize);
                 }
             }
         }
@@ -213,6 +224,90 @@ namespace toucan
                     sequenceRef->rate(),
                     sequenceRef->frame_zero_padding());
                 out = read;
+            }
+            else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
+            {
+                if ("Checkers" == generatorRef->generator_kind())
+                {
+                    CheckersData data;
+                    auto parameters = generatorRef->parameters();
+                    auto i = parameters.find("size");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
+                    }
+                    i = parameters.find("checkerSize");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.checkerSize);
+                    }
+                    i = parameters.find("color1");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color1);
+                    }
+                    i = parameters.find("color2");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color2);
+                    }
+                    auto generator = std::make_shared<CheckersNode>(data);
+                    out = generator;
+                }
+                else if ("Fill" == generatorRef->generator_kind())
+                {
+                    FillData data;
+                    auto parameters = generatorRef->parameters();
+                    auto i = parameters.find("size");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
+                    }
+                    i = parameters.find("color");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color);
+                    }
+                    auto generator = std::make_shared<FillNode>(data);
+                    out = generator;
+                }
+                else if ("Noise" == generatorRef->generator_kind())
+                {
+                    NoiseData data;
+                    auto parameters = generatorRef->parameters();
+                    auto i = parameters.find("size");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
+                    }
+                    i = parameters.find("type");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.type = std::any_cast<std::string>(i->second);
+                    }
+                    i = parameters.find("a");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.a = std::any_cast<double>(i->second);
+                    }
+                    i = parameters.find("b");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.b = std::any_cast<double>(i->second);
+                    }
+                    i = parameters.find("mono");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.mono = std::any_cast<bool>(i->second);
+                    }
+                    i = parameters.find("seed");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.seed = std::any_cast<int64_t>(i->second);
+                    }
+                    auto generator = std::make_shared<NoiseNode>(data);
+                    out = generator;
+                }
             }
         }
         else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))

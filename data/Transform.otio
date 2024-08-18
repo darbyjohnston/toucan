@@ -1,7 +1,7 @@
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {},
-    "name": "Transforms",
+    "name": "Transform",
     "tracks": {
         "OTIO_SCHEMA": "Stack.1", 
         "children": [

@@ -22,6 +22,7 @@ protected:
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) = 0;
 
+    OfxStatus _describeAction(OfxImageEffectHandle) override;
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;

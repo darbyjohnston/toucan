@@ -34,6 +34,47 @@ namespace toucan
         }
     }
 
+    void ImageEffectHost::generator(
+        const std::string& name,
+        OIIO::ImageBuf& output,
+        const PropertySet& propSet)
+    {
+        for (auto& data : _pluginData)
+        {
+            if (name == data.ofxPlugin->pluginIdentifier)
+            {
+                OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxActionCreateInstance,
+                    &data,
+                    nullptr,
+                    nullptr);
+
+                data.images["Output"] = bufToPropSet(output);
+                PropertySet args = propSet;
+                args.setDouble(kOfxPropTime, 0, 0.0);
+                const auto& spec = output.spec();
+                OfxRectI bounds;
+                bounds.x1 = 0;
+                bounds.x2 = spec.width;
+                bounds.y1 = 0;
+                bounds.y2 = spec.height;
+                args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
+                ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxImageEffectActionRender,
+                    &data,
+                    (OfxPropertySetHandle)&args,
+                    nullptr);
+
+                ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxActionDestroyInstance,
+                    &data,
+                    nullptr,
+                    nullptr);
+                break;
+            }
+        }
+    }
+
     void ImageEffectHost::filter(
         const std::string& name,
         const OIIO::ImageBuf& source,

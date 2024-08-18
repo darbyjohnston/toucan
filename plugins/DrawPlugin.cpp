@@ -17,6 +17,19 @@ DrawPlugin::DrawPlugin(const std::string& group, const std::string& name) :
 DrawPlugin::~DrawPlugin()
 {}
 
+OfxStatus DrawPlugin::_describeAction(OfxImageEffectHandle descriptor)
+{
+    Plugin::_describeAction(descriptor);
+    OfxPropertySetHandle effectProps;
+    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
+    _propertySuite->propSetString(
+        effectProps,
+        kOfxImageEffectPropSupportedContexts,
+        0,
+        kOfxImageEffectContextFilter);
+    return kOfxStatOK;
+}
+
 OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
 {
     OfxPropertySetHandle sourceProps;

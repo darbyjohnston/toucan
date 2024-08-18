@@ -7,7 +7,7 @@ install(
     TARGETS toucan-render
     RUNTIME DESTINATION bin)
 
-foreach(OTIO CompositeTracks Filters Gap LinearTimeWarp Patterns Render Transition Transition2 Transforms)
+foreach(OTIO CompositeTracks Draw Filter Gap LinearTimeWarp Pattern Transition Transition2 Transform)
     add_test(
         toucan-render-${OTIO}
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toucan-render${CMAKE_EXECUTABLE_SUFFIX}

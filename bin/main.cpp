@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 
     // Create the timeline graph.
     const auto graph = std::make_shared<TimelineGraph>(inputPath.parent_path(), timeline);
-    const IMATH_NAMESPACE::V2d& imageSize = graph->getImageSize();
+    const IMATH_NAMESPACE::V2d imageSize = graph->getImageSize();
 
     // Create the image effect host.
     auto host = std::make_shared<ImageEffectHost>(std::vector<std::filesystem::path>{
