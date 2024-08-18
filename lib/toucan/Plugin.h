@@ -25,10 +25,10 @@ namespace toucan
         OfxPlugin* getPlugin(int);
 
     private:
-        typedef int(__cdecl* GetNumberOfPluginsFunc)(void);
+        typedef int (*GetNumberOfPluginsFunc)(void);
         GetNumberOfPluginsFunc _getNumberOfPlugins = nullptr;
 
-        typedef OfxPlugin* (__cdecl* GetPluginFunc)(int);
+        typedef OfxPlugin* (*GetPluginFunc)(int);
         GetPluginFunc _getPlugin = nullptr;
 
         struct Private;
