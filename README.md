@@ -41,7 +41,7 @@ Linear time warps:
 
 ![LinearTimeWarp](images/LinearTimeWarp.png)
 
-Generators; fill, checkers, color bars, and noise:
+Generators; fill, checkers, and noise:
 
 ![Generators](images/Generator.png)
 
