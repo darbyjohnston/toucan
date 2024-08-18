@@ -74,7 +74,7 @@ namespace toucan
     TimelineGraph::~TimelineGraph()
     {}
 
-    const IMATH_NAMESPACE::V2d& TimelineGraph::getImageSize() const
+    IMATH_NAMESPACE::V2d TimelineGraph::getImageSize() const
     {
         return _imageSize;
     }

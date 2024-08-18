@@ -27,7 +27,7 @@ namespace toucan
         ~TimelineGraph();
 
         //! Get the timeline image size.
-        const IMATH_NAMESPACE::V2d& getImageSize() const;
+        IMATH_NAMESPACE::V2d getImageSize() const;
 
         //! Get an image graph for the given time. This function is thread safe.
         std::shared_ptr<IImageNode> exec(const OTIO_NS::RationalTime&) const;
