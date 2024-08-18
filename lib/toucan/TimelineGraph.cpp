@@ -21,9 +21,11 @@ namespace toucan
 {
     TimelineGraph::TimelineGraph(
         const std::filesystem::path& path,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline) :
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        const TimelineGraphOptions& options) :
         _path(path),
-        _timeline(timeline)
+        _timeline(timeline),
+        _options(options)
     {
         // Get the image size from the first item.
         for (auto clip : _timeline->find_clips())
@@ -74,7 +76,7 @@ namespace toucan
     TimelineGraph::~TimelineGraph()
     {}
 
-    IMATH_NAMESPACE::V2d TimelineGraph::getImageSize() const
+    const IMATH_NAMESPACE::V2i& TimelineGraph::getImageSize() const
     {
         return _imageSize;
     }

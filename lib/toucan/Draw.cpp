@@ -13,7 +13,7 @@ namespace toucan
     BoxNode::BoxNode(
         const BoxData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Box", inputs),
         _data(data)
     {}
 
@@ -110,7 +110,7 @@ namespace toucan
     LineNode::LineNode(
         const LineData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Line", inputs),
         _data(data)
     {}
 
@@ -207,7 +207,7 @@ namespace toucan
     TextNode::TextNode(
         const TextData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Text", inputs),
         _data(data)
     {}
 

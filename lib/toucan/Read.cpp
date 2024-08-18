@@ -14,7 +14,7 @@ namespace toucan
     ReadNode::ReadNode(
         const std::filesystem::path& path,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Read", inputs),
         _path(path)
     {}
 
@@ -38,6 +38,13 @@ namespace toucan
         return buf;
     }
 
+    std::string ReadNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
+    {
+        std::stringstream ss;
+        ss << _name << ": " << _path.filename().string();
+        return ss.str();
+    }
+
     SequenceReadNode::SequenceReadNode(
         const std::filesystem::path& base,
         const std::string& namePrefix,
@@ -47,7 +54,7 @@ namespace toucan
         double rate,
         int frameZeroPadding,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("SequenceRead", inputs),
         _base(base),
         _namePrefix(namePrefix),
         _nameSuffix(nameSuffix),
@@ -85,5 +92,15 @@ namespace toucan
             buf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
         }
         return buf;
+    }
+
+    std::string SequenceReadNode::_getGraphLabel(const OTIO_NS::RationalTime& time) const
+    {
+        std::stringstream ss;
+        ss << "Read: " <<
+            _namePrefix <<
+            std::setw(_frameZeroPadding) << std::setfill('0') << time.to_frames() <<
+            _nameSuffix;
+        return ss.str();
     }
 }

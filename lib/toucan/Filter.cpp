@@ -11,7 +11,7 @@ namespace toucan
     BlurNode::BlurNode(
         const BlurData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Blur", inputs),
         _data(data)
     {}
 
@@ -88,7 +88,7 @@ namespace toucan
     ColorMapNode::ColorMapNode(
         const ColorMapData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("ColorMap", inputs),
         _data(data)
     {}
 
@@ -159,7 +159,7 @@ namespace toucan
 
     InvertNode::InvertNode(
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs)
+        IImageNode("Invert", inputs)
     {}
 
     InvertNode::~InvertNode()
@@ -204,7 +204,7 @@ namespace toucan
     PowNode::PowNode(
         const PowData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Pow", inputs),
         _data(data)
     {}
 
@@ -281,7 +281,7 @@ namespace toucan
     SaturateNode::SaturateNode(
         const SaturateData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Saturate", inputs),
         _data(data)
     {}
 
@@ -358,7 +358,7 @@ namespace toucan
     UnsharpMaskNode::UnsharpMaskNode(
         const UnsharpMaskData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("UnsharpMask", inputs),
         _data(data)
     {}
 

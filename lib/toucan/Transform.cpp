@@ -10,7 +10,7 @@ namespace toucan
 {
     FlipNode::FlipNode(
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs)
+        IImageNode("Flip", inputs)
     {}
 
     FlipNode::~FlipNode()
@@ -64,7 +64,7 @@ namespace toucan
 
     FlopNode::FlopNode(
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs)
+        IImageNode("Flop", inputs)
     {}
 
     FlopNode::~FlopNode()
@@ -119,7 +119,7 @@ namespace toucan
     ResizeNode::ResizeNode(
         const ResizeData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Resize", inputs),
         _data(data)
     {}
 
@@ -210,7 +210,7 @@ namespace toucan
     RotateNode::RotateNode(
         const RotateData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Rotate", inputs),
         _data(data)
     {}
 

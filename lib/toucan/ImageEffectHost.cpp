@@ -12,7 +12,10 @@
 
 namespace toucan
 {
-    ImageEffectHost::ImageEffectHost(const std::vector<std::filesystem::path>& searchPath)
+    ImageEffectHost::ImageEffectHost(
+        const std::vector<std::filesystem::path>& searchPath,
+        const ImageEffectHostOptions& options) :
+        _options(options)
     {
         _propertySet.setPointer("host", 0, this);
 
@@ -153,13 +156,20 @@ namespace toucan
         std::vector<std::filesystem::path> pluginPaths;
         for (const auto& path : searchPath)
         {
+            if (_options.verbose)
+            {
+                std::cout << "Search path: " << path.string() << std::endl;
+            }
             findPlugins(path, pluginPaths);
         }
 
         // Load plugins.
         for (const auto& path : pluginPaths)
         {
-            std::cout << path.string() << std::endl;
+            if (_options.verbose)
+            {
+                std::cout << "Plugin path: " << path.string() << std::endl;
+            }
             try
             {
                 auto plugin = std::make_shared<Plugin>(path);
@@ -169,7 +179,10 @@ namespace toucan
                     OfxPlugin* ofxPlugin = plugin->getPlugin(i);
                     if (strcmp(ofxPlugin->pluginApi, kOfxImageEffectPluginApi) == 0)
                     {
-                        std::cout << "plugin: " << ofxPlugin->pluginIdentifier << std::endl;
+                        if (_options.verbose)
+                        {
+                            std::cout << "Found plugin: " << ofxPlugin->pluginIdentifier << std::endl;
+                        }
                         ofxPlugin->setHost(&_host);
                         OfxStatus ofxStatus = ofxPlugin->mainEntry(
                             kOfxActionLoad,

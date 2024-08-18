@@ -20,9 +20,17 @@ namespace toucan
     class IImageNode : public std::enable_shared_from_this<IImageNode>
     {
     public:
-        IImageNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
+        IImageNode(
+            const std::string& name,
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~IImageNode() = 0;
+
+        //! Get the name.
+        const std::string& getName() const;
+
+        //! Get the time offset.
+        const OTIO_NS::RationalTime& getTimeOffset() const;
 
         //! Set the time offset.
         //! 
@@ -34,7 +42,20 @@ namespace toucan
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) = 0;
 
+        //! Generate a Grapviz graph for the given time.
+        std::vector<std::string> graph(
+            const OTIO_NS::RationalTime&,
+            const std::string& name);
+
     protected:
+        void _graph(
+            OTIO_NS::RationalTime,
+            const std::shared_ptr<IImageNode>&,
+            std::vector<std::string>&);
+        static std::string _getGraphName(const std::shared_ptr<IImageNode>&);
+        virtual std::string _getGraphLabel(const OTIO_NS::RationalTime&) const;
+
+        std::string _name;
         OTIO_NS::RationalTime _timeOffset;
         std::vector<std::shared_ptr<IImageNode> > _inputs;
     };

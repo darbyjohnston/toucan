@@ -24,6 +24,9 @@ namespace toucan
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) override;
 
+    protected:
+        std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
+
     private:
         std::filesystem::path _path;
     };
@@ -40,13 +43,16 @@ namespace toucan
             int frameStep,
             double rate,
             int frameZerNodeadding,
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~SequenceReadNode();
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) override;
+
+    protected:
+        std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
 
     private:
         std::filesystem::path _base;

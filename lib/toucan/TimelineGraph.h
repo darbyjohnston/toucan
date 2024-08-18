@@ -16,18 +16,25 @@
 
 namespace toucan
 {
+    //! Timeline graph options.
+    struct TimelineGraphOptions
+    {
+        bool verbose = false;
+    };
+
     //! Create image graphs from a timeline.
     class TimelineGraph : public std::enable_shared_from_this<TimelineGraph>
     {
     public:
         TimelineGraph(
             const std::filesystem::path&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            const TimelineGraphOptions& = TimelineGraphOptions());
 
         ~TimelineGraph();
 
         //! Get the timeline image size.
-        IMATH_NAMESPACE::V2d getImageSize() const;
+        const IMATH_NAMESPACE::V2i& getImageSize() const;
 
         //! Get an image graph for the given time. This function is thread safe.
         std::shared_ptr<IImageNode> exec(const OTIO_NS::RationalTime&) const;
@@ -43,6 +50,7 @@ namespace toucan
 
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
+        TimelineGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
     };
 }

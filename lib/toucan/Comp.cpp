@@ -9,7 +9,7 @@
 namespace toucan
 {
     CompNode::CompNode(const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs)
+        IImageNode("Comp", inputs)
     {}
 
     CompNode::~CompNode()

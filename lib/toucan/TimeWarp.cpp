@@ -9,7 +9,7 @@ namespace toucan
     LinearTimeWarpNode::LinearTimeWarpNode(
         float timeScalar,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("LinearTimeWarp", inputs),
         _timeScalar(timeScalar)
     {}
 

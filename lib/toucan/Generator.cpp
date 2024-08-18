@@ -13,7 +13,7 @@ namespace toucan
     CheckersNode::CheckersNode(
         const CheckersData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Checkers", inputs),
         _data(data)
     {}
 
@@ -60,7 +60,7 @@ namespace toucan
     FillNode::FillNode(
         const FillData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Fill", inputs),
         _data(data)
     {}
 
@@ -98,7 +98,7 @@ namespace toucan
     NoiseNode::NoiseNode(
         const NoiseData& data,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Noise", inputs),
         _data(data)
     {}
 

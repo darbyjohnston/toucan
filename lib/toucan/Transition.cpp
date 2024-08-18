@@ -13,7 +13,7 @@ namespace toucan
     DissolveNode::DissolveNode(
         const OTIO_NS::TimeRange& range,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(inputs),
+        IImageNode("Dissolve", inputs),
         _range(range)
     {}
 

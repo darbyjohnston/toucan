@@ -24,6 +24,8 @@ int main(int argc, char** argv)
         std::cout << "Options:" << std::endl;
         std::cout << std::endl;
         std::cout << "* -filmstrip - Render the timeline as thumbnails to a single image." << std::endl;
+        std::cout << "* -graph - Print a Graphviz graph for each frame." << std::endl;
+        std::cout << "* -v - Print verbose output." << std::endl;
         std::cout << std::endl;
         return 1;
     }
@@ -34,9 +36,23 @@ int main(int argc, char** argv)
     const int outputStartFrame = atoi(outputSplit.second.c_str());
     const size_t outputNumberPadding = getNumberPadding(outputSplit.second);
     bool filmstrip = false;
-    if (argc > 3)
+    bool printGraph = false;
+    bool verbose = false;
+    for (int i = 3; i < argc; ++i)
     {
-        filmstrip = std::string(argv[3]) == "-filmstrip";
+        const std::string arg(argv[i]);
+        if ("-filmstrip" == arg)
+        {
+            filmstrip = true;
+        }
+        else if ("-graph" == arg)
+        {
+            printGraph = true;
+        }
+        else if ("-v" == arg)
+        {
+            verbose = true;
+        }
     }
 
     // Initialize the toucan library.
@@ -61,7 +77,12 @@ int main(int argc, char** argv)
     const int frames = timeRange.duration().value();
 
     // Create the timeline graph.
-    const auto graph = std::make_shared<TimelineGraph>(inputPath.parent_path(), timeline);
+    TimelineGraphOptions timelineGraphOptions;
+    timelineGraphOptions.verbose = verbose;
+    const auto graph = std::make_shared<TimelineGraph>(
+        inputPath.parent_path(),
+        timeline,
+        timelineGraphOptions);
     const IMATH_NAMESPACE::V2d imageSize = graph->getImageSize();
 
     // Create the image effect host.
@@ -72,7 +93,11 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / "..");
 #endif // _WINDOWS
-    auto host = std::make_shared<ImageEffectHost>(searchPath);
+    ImageEffectHostOptions imageHostOptions;
+    imageHostOptions.verbose = verbose;
+    auto host = std::make_shared<ImageEffectHost>(
+        searchPath,
+        imageHostOptions);
 
     // Initialize the filmstrip.
     OIIO::ImageBuf filmstripBuf;
@@ -99,10 +124,19 @@ int main(int argc, char** argv)
         time += timeInc)
     {
         std::cout << time.value() << "/" << timeRange.duration().value() << std::endl;
-        if (auto op = graph->exec(time))
+        if (auto node = graph->exec(time))
         {
-            // Execute the image operation graph.
-            const auto buf = op->exec(time, host);
+            // Execute the graph.
+            const auto buf = node->exec(time, host);
+
+            // Print the graph.
+            if (printGraph)
+            {
+                for (const auto& line : node->graph(time, inputPath.stem().string()))
+                {
+                    std::cout << line << std::endl;
+                }
+            }
 
             // Save the image.
             if (!filmstrip)
