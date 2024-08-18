@@ -1,27 +1,16 @@
 [![Build Status](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml)
 
-toucan
+Toucan
 ======
 
 Toucan is a project for experimenting with timeline rendering. The project
-currently consists of a C++ software renderer that can render basic timelines
+currently consists of a command line renderer that can process timelines
 with image sequences, effects, and transitions.
 
-The OpenTimelineIO library is used for working with timelines, and the
-OpenImageIO library is used for image I/O and image processing.
-
-Effects
-=======
-
-Draw: Lines, Boxes, Text
-
-Filters: Color map, Invert, Power, Saturation
-
-Generators: Fill, Checkers, Noise
-
-Time: Linear time warp
-
-Transforms: Flip/flop, Resize, Rotate
+Dependencies:
+* [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) - Timelines
+* [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) - Image I/O and processing
+* [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) - Plugins
 
 Example Renders
 ===============
