@@ -22,7 +22,7 @@ Compositing multiple tracks:
 
 Filter effects; color map, invert, power, and saturate:
 
-![Filters](images/Filters.png)
+![Filters](images/Filter.png)
 
 Gap:
 
@@ -34,11 +34,11 @@ Linear time warps:
 
 Generators; fill, checkers, color bars, and noise:
 
-![Generators](images/Generators.png)
+![Generators](images/Generator.png)
 
-Rendering; line, box, and text:
+Drawing; line, box, and text:
 
-![Render](images/Render.png)
+![Render](images/Draw.png)
 
 Transition:
 
@@ -54,7 +54,7 @@ Transition with an invert effect on the clips:
 
 Transforms; resize, rotate, flip, and flop:
 
-![Transforms](images/Transforms.png)
+![Transforms](images/Transform.png)
 
 Building
 ========

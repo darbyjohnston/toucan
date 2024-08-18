@@ -114,6 +114,57 @@ OfxStatus FilterPlugin::_renderAction(
     return kOfxStatOK;
 }
 
+BlurPlugin* BlurPlugin::_instance = nullptr;
+
+BlurPlugin::BlurPlugin() :
+    FilterPlugin("Toucan", "Blur")
+{}
+
+BlurPlugin::~BlurPlugin()
+{}
+
+void BlurPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new BlurPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus BlurPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus BlurPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    double radius = 0.0;
+    _propertySuite->propGetDouble(inArgs, "radius", 0, &radius);
+
+    const OIIO::ImageBuf k = OIIO::ImageBufAlgo::make_kernel("gaussian", radius, radius);
+    OIIO::ImageBufAlgo::convolve(
+        outputBuf,
+        sourceBuf,
+        k,
+        true,
+        OIIO::ROI(
+            renderWindow.x1,
+            renderWindow.x2,
+            renderWindow.y1,
+            renderWindow.y2));
+
+    return kOfxStatOK;
+}
+
 ColorMapPlugin* ColorMapPlugin::_instance = nullptr;
 
 ColorMapPlugin::ColorMapPlugin() :
@@ -294,7 +345,7 @@ OfxStatus PowPlugin::_render(
             renderWindow.x2,
             renderWindow.y1,
             renderWindow.y2));
-    
+
     return kOfxStatOK;
 }
 
@@ -348,14 +399,80 @@ OfxStatus SaturatePlugin::_render(
     return kOfxStatOK;
 }
 
+UnsharpMaskPlugin* UnsharpMaskPlugin::_instance = nullptr;
+
+UnsharpMaskPlugin::UnsharpMaskPlugin() :
+    FilterPlugin("Toucan", "UnsharpMask")
+{}
+
+UnsharpMaskPlugin::~UnsharpMaskPlugin()
+{}
+
+void UnsharpMaskPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new UnsharpMaskPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus UnsharpMaskPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus UnsharpMaskPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    std::string kernel = "gaussian";
+    char* s = nullptr;
+    _propertySuite->propGetString(inArgs, "kernal", 0, &s);
+    if (s)
+    {
+        kernel = s;
+    }
+
+    double width = 3.0;
+    double contrast = 1.0;
+    double threshold = 0.0;
+    _propertySuite->propGetDouble(inArgs, "width", 0, &width);
+    _propertySuite->propGetDouble(inArgs, "contrast", 0, &contrast);
+    _propertySuite->propGetDouble(inArgs, "threshold", 0, &threshold);
+
+    OIIO::ImageBufAlgo::unsharp_mask(
+        outputBuf,
+        sourceBuf,
+        kernel,
+        width,
+        contrast,
+        threshold,
+        OIIO::ROI(
+            renderWindow.x1,
+            renderWindow.x2,
+            renderWindow.y1,
+            renderWindow.y2));
+
+    return kOfxStatOK;
+}
+
 namespace
 {
     std::vector<OfxPlugin> plugins =
     {
+        { kOfxImageEffectPluginApi, 1, "Toucan:Blur", 1, 0, BlurPlugin::setHostFunc, BlurPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:ColorMap", 1, 0, ColorMapPlugin::setHostFunc, ColorMapPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Invert", 1, 0, InvertPlugin::setHostFunc, InvertPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Pow", 1, 0, PowPlugin::setHostFunc, PowPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "Toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:UnsharpMask", 1, 0, UnsharpMaskPlugin::setHostFunc, UnsharpMaskPlugin::mainEntryPoint }
     };
 }
 

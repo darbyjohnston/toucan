@@ -32,6 +32,32 @@ protected:
         OfxPropertySetHandle outArgs) override;
 };
 
+class BlurPlugin : public FilterPlugin
+{
+public:
+    BlurPlugin();
+
+    virtual ~BlurPlugin();
+
+    static void setHostFunc(OfxHost*);
+
+    static OfxStatus mainEntryPoint(
+        const char* action,
+        const void* handle,
+        OfxPropertySetHandle inArgs,
+        OfxPropertySetHandle outArgs);
+
+protected:
+    OfxStatus _render(
+        const OIIO::ImageBuf&,
+        OIIO::ImageBuf&,
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
+
+private:
+    static BlurPlugin* _instance;
+};
+
 class ColorMapPlugin : public FilterPlugin
 {
 public:
@@ -134,4 +160,30 @@ protected:
 
 private:
     static SaturatePlugin* _instance;
+};
+
+class UnsharpMaskPlugin : public FilterPlugin
+{
+public:
+    UnsharpMaskPlugin();
+
+    virtual ~UnsharpMaskPlugin();
+
+    static void setHostFunc(OfxHost*);
+
+    static OfxStatus mainEntryPoint(
+        const char* action,
+        const void* handle,
+        OfxPropertySetHandle inArgs,
+        OfxPropertySetHandle outArgs);
+
+protected:
+    OfxStatus _render(
+        const OIIO::ImageBuf&,
+        OIIO::ImageBuf&,
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
+
+private:
+    static UnsharpMaskPlugin* _instance;
 };

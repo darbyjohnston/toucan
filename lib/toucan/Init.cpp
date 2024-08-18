@@ -18,6 +18,7 @@ namespace toucan
 {
     void init()
     {
+        OTIO_NS::TypeRegistry::instance().register_type<BlurEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<BoxEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<ColorMapEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FlipEffect>();
@@ -29,5 +30,6 @@ namespace toucan
         OTIO_NS::TypeRegistry::instance().register_type<RotateEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<SaturateEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<TextEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<UnsharpMaskEffect>();
     }
 }
