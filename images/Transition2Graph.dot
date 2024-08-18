@@ -1,16 +1,16 @@
 digraph Transition2 {
     node [shape=box, fontsize=12, margin=0.05, width=0, height=0];
-    Fill [label="Fill: Background color"]
-    Read [label="Read: Counter.2.png"]
-    Read2 [label="Read: Color_Blue.png"]
-    Invert [label="Invert"]
-    Invert2 [label="Invert"]
-    Transition [label="Transition"]
-    Over [label="Over"]
-    Fill -> Over;
-    Read -> Invert;
-    Invert -> Transition;
-    Read2 -> Invert2;
-    Invert2 -> Transition;
-    Transition -> Over;
+    Comp_2198512534800 [label="Comp"]
+    Dissolve_2198694435648 -> Comp_2198512534800
+    Dissolve_2198694435648 [label="Dissolve"]
+    Invert_2198612175136 -> Dissolve_2198694435648
+    Invert_2198612175136 [label="Invert"]
+    SequenceRead_2198694381632 -> Invert_2198612175136
+    SequenceRead_2198694381632 [label="Read: Counter.2.png"]
+    Invert_2198612185696 -> Dissolve_2198694435648
+    Invert_2198612185696 [label="Invert"]
+    Fill_2198512578320 -> Invert_2198612185696
+    Fill_2198512578320 [label="Fill: 0, 0, 1, 1"]
+    Fill_2198545780528 -> Comp_2198512534800
+    Fill_2198545780528 [label="Fill: 0, 0, 0, 1"]
 }

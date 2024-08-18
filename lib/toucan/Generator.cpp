@@ -94,6 +94,17 @@ namespace toucan
         host->generator("Toucan:Fill", buf, propSet);
         return buf;
     }
+
+    std::string FillNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
+    {
+        std::stringstream ss;
+        ss << _name << ": " <<
+            _data.color.x << ", " <<
+            _data.color.y << ", " <<
+            _data.color.z << ", " <<
+            _data.color.w;
+        return ss.str();
+    }
     
     NoiseNode::NoiseNode(
         const NoiseData& data,

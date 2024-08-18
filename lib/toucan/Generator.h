@@ -62,6 +62,9 @@ namespace toucan
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<ImageEffectHost>&) override;
 
+    protected:
+        std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
+
     private:
         FillData _data;
     };

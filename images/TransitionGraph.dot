@@ -1,12 +1,12 @@
 digraph Transition {
     node [shape=box, fontsize=12, margin=0.05, width=0, height=0];
-    Fill [label="Fill: Background color"]
-    Read [label="Read: Counter.2.png"]
-    Read2 [label="Read: Color_Blue.png"]
-    Transition [label="Transition"]
-    Over [label="Over"]
-    Fill -> Over;
-    Read -> Transition;
-    Read2 -> Transition;
-    Transition -> Over;
+    Comp_2524697000576 [label="Comp"]
+    Dissolve_2524878971696 -> Comp_2524697000576
+    Dissolve_2524878971696 [label="Dissolve"]
+    SequenceRead_2524878990960 -> Dissolve_2524878971696
+    SequenceRead_2524878990960 [label="Read: Counter.2.png"]
+    Fill_2524829994752 -> Dissolve_2524878971696
+    Fill_2524829994752 [label="Fill: 0, 0, 1, 1"]
+    Fill_2524878970176 -> Comp_2524697000576
+    Fill_2524878970176 [label="Fill: 0, 0, 0, 1"]
 }
