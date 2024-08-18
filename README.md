@@ -19,7 +19,6 @@ Features
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
 * Transforms: Flip, Flop, Resize, Rotate
 * Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
-* Compositing: Over
 
 Example Renders
 ===============
