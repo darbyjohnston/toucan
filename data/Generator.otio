@@ -107,7 +107,7 @@
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "type": "gaussian",
-                                "a": 0.0,
+                                "a": 1.0,
                                 "b": 1.0,
                                 "mono": false,
                                 "seed": 0

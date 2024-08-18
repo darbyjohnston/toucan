@@ -73,7 +73,7 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "OTIO_SCHEMA": "GeneratorReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
@@ -87,7 +87,11 @@
                                     "value": 0
                                 }
                             },
-                            "target_url": "Color_Blue.png"
+                            "generator_kind": "Fill",
+                            "parameters": {
+                                "size": [ 1280, 720 ],
+                                "color": [ 0.0, 0.0, 1.0, 1.0 ]
+                            }
                         },
                         "effects": [
                             {

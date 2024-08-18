@@ -32,9 +32,9 @@ Linear time warps:
 
 ![LinearTimeWarp](images/LinearTimeWarp.png)
 
-Patterns; fill, checkers, and noise:
+Generators; fill, checkers, color bars, and noise:
 
-![Patterns](images/Patterns.png)
+![Generators](images/Generators.png)
 
 Rendering; line, box, and text:
 
