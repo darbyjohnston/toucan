@@ -13,13 +13,15 @@ OpenImageIO library is used for image I/O and image processing.
 Effects
 =======
 
-Patterns: Fill, Checkers, Noise
+Draw: Lines, Boxes, Text
 
 Filters: Color map, Invert, Power, Saturation
 
-Transforms: Flip/flop, Resize, Rotate
+Generators: Fill, Checkers, Noise
 
-Miscellaneous: Linear time warp, Lines, Boxes, Text
+Time: Linear time warp
+
+Transforms: Flip/flop, Resize, Rotate
 
 Example Renders
 ===============
