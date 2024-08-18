@@ -158,7 +158,7 @@ namespace toucan
         // Load plugins.
         for (const auto& path : pluginPaths)
         {
-            //std::cout << path.string() << std::endl;
+            std::cout << path.string() << std::endl;
             try
             {
                 auto plugin = std::make_shared<Plugin>(path);
@@ -168,7 +168,7 @@ namespace toucan
                     OfxPlugin* ofxPlugin = plugin->getPlugin(i);
                     if (strcmp(ofxPlugin->pluginApi, kOfxImageEffectPluginApi) == 0)
                     {
-                        //std::cout << "plugin: " << ofxPlugin->pluginIdentifier << std::endl;
+                        std::cout << "plugin: " << ofxPlugin->pluginIdentifier << std::endl;
                         ofxPlugin->setHost(&_host);
                         OfxStatus ofxStatus = ofxPlugin->mainEntry(
                             kOfxActionLoad,

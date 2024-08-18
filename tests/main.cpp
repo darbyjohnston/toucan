@@ -27,9 +27,14 @@ int main(int argc, char** argv)
 
     init();
     
-    auto host = std::make_shared<ImageEffectHost>(std::vector<std::filesystem::path>{
-        parentPath,
-        parentPath / ".." / ".."});
+    std::vector<std::filesystem::path> searchPath;
+    searchPath.push_back(parentPath);
+#if defined(_WINDOWS)
+    searchPath.push_back(parentPath / ".." / "..");
+#else // _WINDOWS
+    searchPath.push_back(parentPath / "..");
+#endif // _WINDOWS
+    auto host = std::make_shared<ImageEffectHost>(searchPath);
     
     compTest(path, host);
     propertySetTest();

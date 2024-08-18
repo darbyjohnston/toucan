@@ -37,6 +37,9 @@ if(WIN32)
     list(APPEND SOURCE
         PluginWin32.cpp
         UtilWin32.cpp)
+else()
+    list(APPEND SOURCE
+        PluginUnix.cpp)
 endif()
 
 add_library(toucan ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
