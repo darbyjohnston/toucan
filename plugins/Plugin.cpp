@@ -6,6 +6,8 @@
 
 #include <OpenFX/ofxImageEffect.h>
 
+#include <cstring>
+
 Plugin::Plugin(const std::string& group, const std::string& name) :
     _name(name),
     _group(group)

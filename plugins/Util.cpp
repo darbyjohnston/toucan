@@ -6,6 +6,8 @@
 
 #include <OpenFX/ofxImageEffect.h>
 
+#include <cstring>
+
 OIIO::ImageBuf propSetToBuf(OfxPropertySuiteV1* suite, OfxPropertySetHandle handle)
 {
     OfxRectI bounds;
