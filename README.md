@@ -14,12 +14,12 @@ Dependencies:
 
 Features
 ========
-Generators: Checkers, Fill, Noise
-Drawing: Box, Line, Text
-Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
-Transforms: Flip, Flop, Resize, Rotate
-Transitions: Dissolve
-Compositing: Over
+* Generators: Checkers, Fill, Noise
+* Drawing: Box, Line, Text
+* Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
+* Transforms: Flip, Flop, Resize, Rotate
+* Transitions: Dissolve
+* Compositing: Over
 
 Example Renders
 ===============
