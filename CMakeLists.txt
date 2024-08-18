@@ -31,7 +31,8 @@ set(TOUCAN_PLUGINS
     toucan-draw
     toucan-filter
     toucan-generator
-    toucan-transform)
+    toucan-transform
+    toucan-transition)
 
 enable_testing()
 

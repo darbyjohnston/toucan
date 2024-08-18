@@ -1,0 +1,162 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "metadata": {},
+    "name": "Transition",
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1", 
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "GeneratorReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 5
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "generator_kind": "Fill",
+                            "parameters": {
+                                "size": [ 1280, 720 ],
+                                "color": [ 1.0, 0.0, 0.0, 1.0 ]
+                            }
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 3
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Counter"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Transition.1",
+                        "name": "Dissolve",
+                        "transition_type": "HorizontalWipe",
+                        "in_offset": {
+                          "OTIO_SCHEMA": "RationalTime.1",
+                          "rate": 24,
+                          "value": 2
+                        },
+                        "out_offset": {
+                          "OTIO_SCHEMA": "RationalTime.1",
+                          "rate": 24,
+                          "value": 2
+                        }
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "GeneratorReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 9
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "generator_kind": "Fill",
+                            "parameters": {
+                                "size": [ 1280, 720 ],
+                                "color": [ 0.0, 1.0, 0.0, 1.0 ]
+                            }
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 5
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Color"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Transition.1",
+                        "name": "Dissolve",
+                        "transition_type": "VerticalWipe",
+                        "in_offset": {
+                          "OTIO_SCHEMA": "RationalTime.1",
+                          "rate": 24,
+                          "value": 2
+                        },
+                        "out_offset": {
+                          "OTIO_SCHEMA": "RationalTime.1",
+                          "rate": 24,
+                          "value": 2
+                        }
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "GeneratorReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 5
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "generator_kind": "Fill",
+                            "parameters": {
+                                "size": [ 1280, 720 ],
+                                "color": [ 0.0, 0.0, 1.0, 1.0 ]
+                            }
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 3
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Color"
+                    }
+                ],
+                "kind": "Video", 
+                "name": "Video"
+            }
+        ], 
+        "name": "Stack"
+    }
+}

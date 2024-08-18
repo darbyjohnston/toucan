@@ -1,4 +1,4 @@
-foreach(PLUGIN Draw Filter Generator Transform)
+foreach(PLUGIN Draw Filter Generator Transform Transition)
     string(TOLOWER ${PLUGIN} PLUGIN_LOWER)
     add_library(
         toucan-${PLUGIN_LOWER} MODULE

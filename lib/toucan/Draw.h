@@ -81,7 +81,7 @@ namespace toucan
     public:
         LineNode(
             const LineData & = LineData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~LineNode();
 
@@ -140,7 +140,7 @@ namespace toucan
     public:
         TextNode(
             const TextData & = TextData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~TextNode();
 

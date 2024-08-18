@@ -168,9 +168,7 @@ namespace toucan
                             prevItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, prevItem),
                             prevItem);
-                        out = std::make_shared<DissolveNode>(
-                            trimmedRangeInParent.value(),
-                            std::vector<std::shared_ptr<IImageNode> >{ a, out });
+                        out = _transition(prevTransition, trimmedRangeInParent.value(), { a, out });
                     }
                 }
             }
@@ -185,9 +183,7 @@ namespace toucan
                             nextItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, nextItem),
                             nextItem);
-                        out = std::make_shared<DissolveNode>(
-                            trimmedRangeInParent.value(),
-                            std::vector<std::shared_ptr<IImageNode> >{ out, b });
+                        out = _transition(nextTransition, trimmedRangeInParent.value(), { out, b });
                     }
                 }
             }
@@ -344,6 +340,27 @@ namespace toucan
             out->setTimeOffset(timeOffset);
         }
 
+        return out;
+    }
+
+    std::shared_ptr<IImageNode> TimelineGraph::_transition(
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>& otioTransition,
+        const OTIO_NS::TimeRange& trimmedRangeInParent,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) const
+    {
+        std::shared_ptr<IImageNode> out;
+        if ("HorizontalWipe" == otioTransition->transition_type())
+        {
+            out = std::make_shared<HorizontalWipeNode>(trimmedRangeInParent, inputs);
+        }
+        else if ("VerticalWipe" == otioTransition->transition_type())
+        {
+            out = std::make_shared<VerticalWipeNode>(trimmedRangeInParent, inputs);
+        }
+        else
+        {
+            out = std::make_shared<DissolveNode>(trimmedRangeInParent, inputs);
+        }
         return out;
     }
 }

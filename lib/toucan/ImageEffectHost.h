@@ -35,13 +35,20 @@ namespace toucan
         void generator(
             const std::string& name,
             OIIO::ImageBuf&,
-            const PropertySet & = PropertySet());
+            const PropertySet& = PropertySet());
 
         void filter(
             const std::string& name,
             const OIIO::ImageBuf&,
             OIIO::ImageBuf&,
-            const PropertySet & = PropertySet());
+            const PropertySet& = PropertySet());
+
+        void transition(
+            const std::string& name,
+            const OIIO::ImageBuf&,
+            const OIIO::ImageBuf&,
+            OIIO::ImageBuf&,
+            const PropertySet& = PropertySet());
 
     private:
         void _suiteInit();

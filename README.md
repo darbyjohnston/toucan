@@ -18,7 +18,7 @@ Features
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
 * Transforms: Flip, Flop, Resize, Rotate
-* Transitions: Dissolve
+* Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
 * Compositing: Over
 
 Example Renders
@@ -49,17 +49,21 @@ Drawing; line, box, and text:
 
 ![Render](images/Draw.png)
 
-Transition:
+Dissolve transition:
 
 ![Transition](images/Transition.png)
 
 ![Transition Graph](images/TransitionGraph.svg)
 
-Transition with an invert effect on the clips:
+Dissolve transition with an invert effect on the clips:
 
 ![Transition 2](images/Transition2.png)
 
 ![Transition 2 Graph](images/Transition2Graph.svg)
+
+Wipe transitions:
+
+![Transition Wipe](images/TransitionWipe.png)
 
 Transforms; resize, rotate, flip, and flop:
 

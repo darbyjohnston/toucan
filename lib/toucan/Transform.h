@@ -12,7 +12,7 @@ namespace toucan
     class FlipNode : public IImageNode
     {
     public:
-        FlipNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
+        FlipNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~FlipNode();
 
@@ -50,7 +50,7 @@ namespace toucan
     class FlopNode : public IImageNode
     {
     public:
-        FlopNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
+        FlopNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~FlopNode();
 
@@ -155,7 +155,7 @@ namespace toucan
     public:
         RotateNode(
             const RotateData & = RotateData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~RotateNode();
 

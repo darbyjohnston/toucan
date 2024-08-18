@@ -122,6 +122,51 @@ namespace toucan
         }
     }
 
+    void ImageEffectHost::transition(
+        const std::string& name,
+        const OIIO::ImageBuf& sourceFrom,
+        const OIIO::ImageBuf& sourceTo,
+        OIIO::ImageBuf& output,
+        const PropertySet& propSet)
+    {
+        for (auto& data : _pluginData)
+        {
+            if (name == data.ofxPlugin->pluginIdentifier)
+            {
+                OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxActionCreateInstance,
+                    &data,
+                    nullptr,
+                    nullptr);
+
+                data.images["SourceFrom"] = bufToPropSet(sourceFrom);
+                data.images["SourceTo"] = bufToPropSet(sourceTo);
+                data.images["Output"] = bufToPropSet(output);
+                PropertySet args = propSet;
+                args.setDouble(kOfxPropTime, 0, 0.0);
+                const auto& spec = sourceFrom.spec();
+                OfxRectI bounds;
+                bounds.x1 = 0;
+                bounds.x2 = spec.width;
+                bounds.y1 = 0;
+                bounds.y2 = spec.height;
+                args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
+                ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxImageEffectActionRender,
+                    &data,
+                    (OfxPropertySetHandle)&args,
+                    nullptr);
+
+                ofxStatus = data.ofxPlugin->mainEntry(
+                    kOfxActionDestroyInstance,
+                    &data,
+                    nullptr,
+                    nullptr);
+                break;
+            }
+        }
+    }
+
     void ImageEffectHost::_suiteInit()
     {
         _propertySuite.propSetPointer = &PropertySet::setPointer;

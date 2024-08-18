@@ -23,7 +23,7 @@ namespace toucan
     public:
         CheckersNode(
             const CheckersData & = CheckersData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~CheckersNode();
 
@@ -83,7 +83,7 @@ namespace toucan
     public:
         NoiseNode(
             const NoiseData & = NoiseData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~NoiseNode();
 

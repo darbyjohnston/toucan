@@ -75,7 +75,7 @@ namespace toucan
     public:
         ColorMapNode(
             const ColorMapData & = ColorMapData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~ColorMapNode();
 
@@ -122,7 +122,7 @@ namespace toucan
     class InvertNode : public IImageNode
     {
     public:
-        InvertNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
+        InvertNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~InvertNode();
 
@@ -165,7 +165,7 @@ namespace toucan
     public:
         PowNode(
             const PowData & = PowData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~PowNode();
 
@@ -220,7 +220,7 @@ namespace toucan
     public:
         SaturateNode(
             const SaturateData & = SaturateData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~SaturateNode();
 
@@ -278,7 +278,7 @@ namespace toucan
     public:
         UnsharpMaskNode(
             const UnsharpMaskData & = UnsharpMaskData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~UnsharpMaskNode();
 
