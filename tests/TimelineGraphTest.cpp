@@ -5,8 +5,8 @@
 #include "TimelineGraphTest.h"
 
 #include <toucan/TimelineGraph.h>
+#include <toucan/Util.h>
 
-#include <iomanip>
 #include <sstream>
 
 namespace toucan
@@ -62,11 +62,13 @@ namespace toucan
                     const auto buf = op->exec(time, host);
 
                     // Save the image.
-                    std::stringstream ss;
-                    ss << "timelineGraphTest_" << otioFile << "." <<
-                        std::setw(6) << std::setfill('0') << time.to_frames() <<
-                        ".png";
-                    buf.write(ss.str());
+                    const std::filesystem::path imagePath = getSequenceFrame(
+                        std::filesystem::path(),
+                        "timelineGraphTest_" + otioFile + ".",
+                        time.to_frames(),
+                        6,
+                        ".png");
+                    buf.write(imagePath.string());
                 }
             }
         }

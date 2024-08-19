@@ -4,9 +4,10 @@
 
 #include "Read.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
-#include <iomanip>
 #include <sstream>
 
 namespace toucan
@@ -76,12 +77,13 @@ namespace toucan
         {
             offsetTime -= _timeOffset;
         }
-        std::stringstream ss;
-        ss << _base.string() <<
-            _namePrefix <<
-            std::setw(_frameZeroPadding) << std::setfill('0') << offsetTime.to_frames() <<
-            _nameSuffix;
-        OIIO::ImageBuf buf(ss.str());
+        const std::filesystem::path path = getSequenceFrame(
+            _base,
+            _namePrefix,
+            offsetTime.to_frames(),
+            _frameZeroPadding,
+            _nameSuffix);
+        OIIO::ImageBuf buf(path.string());
         const auto& spec = buf.spec();
         if (3 == spec.nchannels)
         {
@@ -97,10 +99,12 @@ namespace toucan
     std::string SequenceReadNode::_getGraphLabel(const OTIO_NS::RationalTime& time) const
     {
         std::stringstream ss;
-        ss << "Read: " <<
-            _namePrefix <<
-            std::setw(_frameZeroPadding) << std::setfill('0') << time.to_frames() <<
-            _nameSuffix;
+        ss << "Read: " << getSequenceFrame(
+            std::filesystem::path(),
+            _namePrefix,
+            time.to_frames(),
+            _frameZeroPadding,
+            _nameSuffix);
         return ss.str();
     }
 }

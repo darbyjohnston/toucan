@@ -1,4 +1,5 @@
 set(HEADERS
+    ColorSpace.h
     Comp.h
     Draw.h
     Filter.h
@@ -17,6 +18,7 @@ set(HEADERS
     Util.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
+    ColorSpace.cpp
     Comp.cpp
     Draw.cpp
     Filter.cpp

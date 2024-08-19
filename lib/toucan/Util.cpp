@@ -6,6 +6,8 @@
 
 #include <OpenFX/ofxImageEffect.h>
 
+#include <iomanip>
+
 namespace toucan
 {
     namespace
@@ -68,7 +70,22 @@ namespace toucan
             out.w = std::any_cast<double>(any[3]);
         }
     }
-    
+
+    std::filesystem::path getSequenceFrame(
+        const std::filesystem::path& path,
+        const std::string& namePrefix,
+        int frame,
+        int padding,
+        const std::string& nameSuffix)
+    {
+        std::stringstream ss;
+        ss << path.string() <<
+            namePrefix <<
+            std::setw(padding) << std::setfill('0') << frame <<
+            nameSuffix;
+        return ss.str();
+    }
+
     namespace
     {
         inline bool isNumber(char c)

@@ -19,6 +19,7 @@ Features
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
 * Transforms: Flip, Flop, Resize, Rotate
 * Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
+* Color space conversion: Premultiply Alpha, Un-Premultiply Alpha
 
 Example Renders
 ===============

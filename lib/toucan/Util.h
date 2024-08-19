@@ -28,7 +28,15 @@ namespace toucan
     //! Conversion from any vector.
     void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V2i&);
     void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V4f&);
-    
+
+    //! Get an image sequence frame path.
+    std::filesystem::path getSequenceFrame(
+        const std::filesystem::path&,
+        const std::string& namePrefix,
+        int frame,
+        int padding,
+        const std::string& nameSuffix);
+
     //! Split the number from a file path stem.
     std::pair<std::string, std::string> splitFileNameNumber(const std::string&);
 

@@ -27,13 +27,16 @@ namespace toucan
         _timeline(timeline),
         _options(options)
     {
-        // Get the image size from the first item.
+        // Get the image size from the first clip.
         for (auto clip : _timeline->find_clips())
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                const std::string url = externalRef->target_url();
-                const std::filesystem::path path = _path / url;
+                std::filesystem::path path = externalRef->target_url();
+                if (!path.is_absolute())
+                {
+                    path = _path / path;
+                }
                 const OIIO::ImageBuf buf(path.string());
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
@@ -45,14 +48,18 @@ namespace toucan
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
-                const std::string url = sequenceRef->target_url_base();
-                const std::filesystem::path path = _path / url;
-                std::stringstream ss;
-                ss << path.string() <<
-                    sequenceRef->name_prefix() <<
-                    std::setw(sequenceRef->frame_zero_padding()) << std::setfill('0') << sequenceRef->start_frame() <<
-                    sequenceRef->name_suffix();
-                const OIIO::ImageBuf buf(ss.str());
+                std::filesystem::path path = sequenceRef->target_url_base();
+                if (!path.is_absolute())
+                {
+                    path = _path / path;
+                }
+                path = getSequenceFrame(
+                    path,
+                    sequenceRef->name_prefix(),
+                    sequenceRef->start_frame(),
+                    sequenceRef->frame_zero_padding(),
+                    sequenceRef->name_suffix());
+                const OIIO::ImageBuf buf(path.string());
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
                 {
@@ -83,15 +90,19 @@ namespace toucan
 
     std::shared_ptr<IImageNode> TimelineGraph::exec(const OTIO_NS::RationalTime& time) const
     {
+        // Set the background color.
         std::shared_ptr<IImageNode> node = std::make_shared<FillNode>(
             FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
+
+        // Loop over the tracks.
         for (const auto& i : _timeline->tracks()->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
+                // Process this track.
                 auto trackNode = _track(time, track);
 
-                // Composite over the previous track.
+                // Composite this track over the previous track.
                 std::vector<std::shared_ptr<IImageNode> > nodes;
                 if (trackNode)
                 {
@@ -106,6 +117,7 @@ namespace toucan
                 node = comp;
             }
         }
+
         return node;
     }
 

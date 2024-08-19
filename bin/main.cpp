@@ -141,13 +141,13 @@ int main(int argc, char** argv)
             // Save the image.
             if (!filmstrip)
             {
-                std::filesystem::path imagePath = outputPath.parent_path() / outputSplit.first;
-                std::stringstream ss;
-                ss << imagePath.string() <<
-                    std::setw(outputNumberPadding) << std::setfill('0') << (outputStartFrame + time.to_frames()) <<
-                    std::setw(0) <<
-                    outputPath.extension().string();
-                buf.write(ss.str());
+                const std::filesystem::path path = getSequenceFrame(
+                    outputPath.parent_path(),
+                    outputSplit.first,
+                    outputStartFrame + time.to_frames(),
+                    outputNumberPadding,
+                    outputPath.extension().string());
+                buf.write(path.string());
             }
             else
             {
