@@ -13,6 +13,7 @@ set(OpenImageIO_ARGS
     -DOIIO_INSTALL_FONTS=ON
     -DUSE_FREETYPE=ON
     -DUSE_PNG=ON
+    -DUSE_OPENCOLORIO=ON
     -DUSE_BZIP2=OFF
     -DUSE_DCMTK=OFF
     -DUSE_FFMPEG=OFF
@@ -21,7 +22,6 @@ set(OpenImageIO_ARGS
     -DUSE_LIBHEIF=OFF
     -DUSE_LIBRAW=OFF
     -DUSE_NUKE=OFF
-    -DUSE_OPENCOLORIO=OFF
     -DUSE_OPENCV=OFF
     -DUSE_OPENJPEG=OFF
     -DUSE_OPENVDB=OFF
@@ -34,7 +34,7 @@ set(OpenImageIO_ARGS
 ExternalProject_Add(
     OpenImageIO
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/OpenImageIO
-    DEPENDS TIFF PNG libjpeg-turbo OpenEXR Freetype
+    DEPENDS TIFF PNG libjpeg-turbo OpenEXR OpenColorIO Freetype
     GIT_REPOSITORY ${OpenImageIO_GIT_REPOSITORY}
     GIT_TAG ${OpenImageIO_GIT_TAG}
     CMAKE_ARGS ${OpenImageIO_ARGS})

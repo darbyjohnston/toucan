@@ -6,7 +6,10 @@
 
 #include "Plugin.h"
 
+#include <OpenImageIO/color.h>
 #include <OpenImageIO/imagebuf.h>
+
+#include <filesystem>
 
 class ColorSpacePlugin : public Plugin
 {
@@ -30,6 +33,34 @@ protected:
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,
         OfxPropertySetHandle outArgs) override;
+};
+
+class ColorConvertPlugin : public ColorSpacePlugin
+{
+public:
+    ColorConvertPlugin();
+
+    virtual ~ColorConvertPlugin();
+
+    static void setHostFunc(OfxHost*);
+
+    static OfxStatus mainEntryPoint(
+        const char* action,
+        const void* handle,
+        OfxPropertySetHandle inArgs,
+        OfxPropertySetHandle outArgs);
+
+protected:
+    OfxStatus _render(
+        const OIIO::ImageBuf&,
+        OIIO::ImageBuf&,
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
+
+private:
+    static ColorConvertPlugin* _instance;
+
+    std::map<std::filesystem::path, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
 };
 
 class PremultPlugin : public ColorSpacePlugin

@@ -79,11 +79,10 @@ namespace toucan
         const std::string& nameSuffix)
     {
         std::stringstream ss;
-        ss << path.string() <<
-            namePrefix <<
+        ss << namePrefix <<
             std::setw(padding) << std::setfill('0') << frame <<
             nameSuffix;
-        return ss.str();
+        return (path / ss.str()).string();
     }
 
     namespace

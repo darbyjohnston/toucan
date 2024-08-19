@@ -114,6 +114,106 @@ OfxStatus ColorSpacePlugin::_renderAction(
     return kOfxStatOK;
 }
 
+ColorConvertPlugin* ColorConvertPlugin::_instance = nullptr;
+
+ColorConvertPlugin::ColorConvertPlugin() :
+    ColorSpacePlugin("Toucan", "ColorConvert")
+{}
+
+ColorConvertPlugin::~ColorConvertPlugin()
+{}
+
+void ColorConvertPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new ColorConvertPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus ColorConvertPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus ColorConvertPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    std::string fromspace;
+    std::string tospace;
+    char* s = nullptr;
+    _propertySuite->propGetString(inArgs, "fromspace", 0, &s);
+    if (s)
+    {
+        fromspace = s;
+    }
+    _propertySuite->propGetString(inArgs, "tospace", 0, &s);
+    if (s)
+    {
+        tospace = s;
+    }
+
+    int premult = 0;
+    _propertySuite->propGetInt(inArgs, "premult", 0, &premult);
+
+    std::string context_key;
+    std::string context_value;
+    _propertySuite->propGetString(inArgs, "context_key", 0, &s);
+    if (s)
+    {
+        context_key = s;
+    }
+    _propertySuite->propGetString(inArgs, "context_value", 0, &s);
+    if (s)
+    {
+        context_value = s;
+    }
+
+    std::filesystem::path color_config;
+    _propertySuite->propGetString(inArgs, "color_config", 0, &s);
+    if (s)
+    {
+        color_config = s;
+    }
+    std::shared_ptr<OIIO::ColorConfig> colorConfig;
+    auto i = _colorConfigs.find(color_config);
+    if (i != _colorConfigs.end())
+    {
+        colorConfig = i->second;
+    }
+    else
+    {
+        colorConfig = std::make_shared<OIIO::ColorConfig>(color_config.string());
+        _colorConfigs[color_config] = colorConfig;
+        //for (int i = 0; i < colorConfig->getNumColorSpaces(); ++i)
+        //{
+        //    std::cout << "Color space: " << colorConfig->getColorSpaceNameByIndex(i) << std::endl;
+        //}
+    }
+
+    if (colorConfig)
+    {
+        OIIO::ImageBufAlgo::colorconvert(
+            outputBuf,
+            sourceBuf,
+            fromspace,
+            tospace,
+            premult,
+            context_key,
+            context_value,
+            colorConfig.get());
+    }
+    return kOfxStatOK;
+}
+
 PremultPlugin* PremultPlugin::_instance = nullptr;
 
 PremultPlugin::PremultPlugin() :
@@ -192,6 +292,7 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
+        { kOfxImageEffectPluginApi, 1, "Toucan:ColorConvert", 1, 0, ColorConvertPlugin::setHostFunc, ColorConvertPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Premult", 1, 0, PremultPlugin::setHostFunc, PremultPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Unpremult", 1, 0, UnpremultPlugin::setHostFunc, UnpremultPlugin::mainEntryPoint }
     };

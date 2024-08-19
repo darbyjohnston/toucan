@@ -8,6 +8,66 @@
 
 namespace toucan
 {
+    //! Color convert data.
+    struct ColorConvertData
+    {
+        std::string fromspace;
+        std::string tospace;
+        bool        unpremult = true;
+        std::string context_key;
+        std::string context_value;
+        std::string color_config;
+    };
+
+    //! Color convert node.
+    class ColorConvertNode : public IImageNode
+    {
+    public:
+        ColorConvertNode(
+            const ColorConvertData & = ColorConvertData(),
+            const std::vector<std::shared_ptr<IImageNode> > & = {});
+
+        virtual ~ColorConvertNode();
+
+        const ColorConvertData& getData() const;
+        void setData(const ColorConvertData&);
+
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<ImageEffectHost>&) override;
+
+    private:
+        ColorConvertData _data;
+    };
+
+    //! Color convert OTIO effect.
+    class ColorConvertEffect : public IEffect
+    {
+    public:
+        struct Schema
+        {
+            static auto constexpr name = "ColorConvertEffect";
+            static int constexpr version = 1;
+        };
+
+        ColorConvertEffect(
+            std::string const& name = std::string(),
+            std::string const& effect_name = std::string(),
+            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
+
+        std::shared_ptr<IImageNode> createNode(
+            const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
+
+    protected:
+        virtual ~ColorConvertEffect();
+
+        bool read_from(Reader&) override;
+        void write_to(Writer&) const override;
+
+    private:
+        ColorConvertData _data;
+    };
+
     //! Premultiply alpha node.
     class PremultNode : public IImageNode
     {

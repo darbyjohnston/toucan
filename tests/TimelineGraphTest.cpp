@@ -18,6 +18,7 @@ namespace toucan
         std::cout << "timelineGraphTest" << std::endl;
         const std::vector<std::string> otioFiles =
         {
+            "ColorSpace",
             "CompositeTracks",
             "Draw",
             "Filter",

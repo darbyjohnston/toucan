@@ -10,6 +10,7 @@ with image sequences, effects, and transitions.
 Dependencies:
 * [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) - Timelines
 * [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) - Image I/O and processing
+* [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) - Color space conversion
 * [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) - Plugins
 
 Features
@@ -19,7 +20,7 @@ Features
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
 * Transforms: Flip, Flop, Resize, Rotate
 * Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
-* Color space conversion: Premultiply Alpha, Un-Premultiply Alpha
+* Color spaces: Color Convert, Premultiply Alpha, Un-Premultiply Alpha
 
 Example Renders
 ===============
@@ -68,6 +69,10 @@ Wipe transitions:
 Transforms; resize, rotate, flip, and flop:
 
 ![Transforms](images/Transform.png)
+
+Color space conversion:
+
+![Color Space](images/ColorSpace.png)
 
 Building
 ========
