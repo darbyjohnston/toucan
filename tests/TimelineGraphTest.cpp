@@ -25,6 +25,7 @@ namespace toucan
             "Gap",
             "Generator",
             "LinearTimeWarp",
+            "MultipleEffects",
             "Transform",
             "Transition",
             "Transition2"

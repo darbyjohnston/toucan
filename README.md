@@ -74,6 +74,12 @@ Color space conversion:
 
 ![Color Space](images/ColorSpace.png)
 
+Multiple effects on clips, tracks, and stacks:
+
+![Track Effects](images/MultipleEffects.png)
+
+![Multiple Effects Graph](images/MultipleEffectsGraph.svg)
+
 Building
 ========
 

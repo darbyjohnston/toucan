@@ -95,12 +95,20 @@ namespace toucan
             FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
 
         // Loop over the tracks.
-        for (const auto& i : _timeline->tracks()->children())
+        auto stack = _timeline->tracks();
+        for (const auto& i : stack->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
                 // Process this track.
                 auto trackNode = _track(time, track);
+
+                // Get the track effects.
+                const auto& effects = track->effects();
+                if (!effects.empty())
+                {
+                    trackNode = _effects(effects, trackNode);
+                }
 
                 // Composite this track over the previous track.
                 std::vector<std::shared_ptr<IImageNode> > nodes;
@@ -116,6 +124,13 @@ namespace toucan
                 comp->setPremult(true);
                 node = comp;
             }
+        }
+
+        // Get the stack effects.
+        const auto& effects = stack->effects();
+        if (!effects.empty())
+        {
+            node = _effects(effects, node);
         }
 
         return node;
@@ -326,20 +341,10 @@ namespace toucan
         }
 
         // Get the effects.
-        for (const auto& effect : item->effects())
+        const auto& effects = item->effects();
+        if (!effects.empty())
         {
-            if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
-            {
-                auto effectNode = iEffect->createNode({ out });
-                out = effectNode;
-            }
-            else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
-            {
-                auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
-                    static_cast<float>(linearTimeWarp->time_scalar()),
-                    std::vector<std::shared_ptr<IImageNode> >{ out });
-                out = linearTimeWarpNode;
-            }
+            out = _effects(effects, out);
         }
         if (out)
         {
@@ -372,6 +377,29 @@ namespace toucan
         else
         {
             out = std::make_shared<DissolveNode>(trimmedRangeInParent, inputs);
+        }
+        return out;
+    }
+
+    std::shared_ptr<IImageNode> TimelineGraph::_effects(
+        const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
+        const std::shared_ptr<IImageNode>& input) const
+    {
+        std::shared_ptr<IImageNode> out = input;
+        for (const auto& effect : effects)
+        {
+            if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
+            {
+                auto effectNode = iEffect->createNode({ out });
+                out = effectNode;
+            }
+            else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+            {
+                auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
+                    static_cast<float>(linearTimeWarp->time_scalar()),
+                    std::vector<std::shared_ptr<IImageNode> >{ out });
+                out = linearTimeWarpNode;
+            }
         }
         return out;
     }

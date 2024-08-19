@@ -1,0 +1,16 @@
+digraph MultipleEffects {
+    node [shape=box, fontsize=12, margin=0.05, width=0, height=0];
+    Pow_2560849241088 [label="Pow"]
+    Comp_2560849246288 -> Pow_2560849241088
+    Comp_2560849246288 [label="Comp"]
+    Invert_2560932117488 -> Comp_2560849246288
+    Invert_2560932117488 [label="Invert"]
+    Blur_2560849246080 -> Invert_2560932117488
+    Blur_2560849246080 [label="Blur"]
+    Flip_2560932119216 -> Blur_2560849246080
+    Flip_2560932119216 [label="Flip"]
+    Read_2560840968656 -> Flip_2560932119216
+    Read_2560840968656 [label="Read: Charlie.jpg"]
+    Fill_2560840970288 -> Comp_2560849246288
+    Fill_2560840970288 [label="Fill: 0, 0, 0, 1"]
+}
