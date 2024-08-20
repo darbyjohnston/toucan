@@ -199,7 +199,7 @@ namespace toucan
                     }
                 }
             }
-            else if (auto nextTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(next))
+            if (auto nextTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(next))
             {
                 const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))

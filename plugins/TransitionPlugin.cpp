@@ -226,7 +226,45 @@ OfxStatus HorizontalWipePlugin::_render(
     const int w = sourceFromBuf.spec().width;
     const int h = sourceFromBuf.spec().height;
     const int x = w * value;
-    OIIO::ImageBufAlgo::copy(
+    const int wipeSize = 200;
+
+    // Create the source from matte.
+    auto sourceFromMatte = OIIO::ImageBuf(OIIO::ImageSpec(w, h, 4));
+    OIIO::ImageBufAlgo::fill(sourceFromMatte, { 0.F, 0.F, 0.F, 0.F });
+    OIIO::ImageBufAlgo::fill(
+        sourceFromMatte,
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI(x, w, 0, h));
+    auto gradient = OIIO::ImageBuf(OIIO::ImageSpec(h, wipeSize, 4));
+    OIIO::ImageBufAlgo::fill(
+        gradient,
+        { 0.F, 0.F, 0.F, 0.F },
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI());
+    OIIO::ImageBufAlgo::paste(
+        sourceFromMatte,
+        x, 0, 0, 0,
+        OIIO::ImageBufAlgo::rotate270(gradient));
+
+    // Create the source to matte.
+    auto sourceToMatte = OIIO::ImageBuf(OIIO::ImageSpec(w, h, 4));
+    OIIO::ImageBufAlgo::fill(sourceToMatte, { 0.F, 0.F, 0.F, 0.F });
+    OIIO::ImageBufAlgo::fill(
+        sourceToMatte,
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI(0, x, 0, h));
+    OIIO::ImageBufAlgo::paste(
+        sourceToMatte,
+        x, 0, 0, 0,
+        OIIO::ImageBufAlgo::rotate90(gradient));
+
+    // Multiply the sources by the mattes and add the results together.
+    OIIO::ImageBufAlgo::add(
+        outputBuf,
+        OIIO::ImageBufAlgo::mul(sourceFromBuf, sourceFromMatte),
+        OIIO::ImageBufAlgo::mul(sourceToBuf, sourceToMatte));
+
+    /*OIIO::ImageBufAlgo::copy(
         outputBuf,
         sourceFromBuf,
         OIIO::TypeUnknown,
@@ -235,7 +273,7 @@ OfxStatus HorizontalWipePlugin::_render(
         outputBuf,
         sourceToBuf,
         OIIO::TypeUnknown,
-        OIIO::ROI(0, x, 0, h));
+        OIIO::ROI(0, x, 0, h));*/
 
     return kOfxStatOK;
 }
@@ -279,7 +317,46 @@ OfxStatus VerticalWipePlugin::_render(
     const int w = sourceFromBuf.spec().width;
     const int h = sourceFromBuf.spec().height;
     const int y = h * value;
-    OIIO::ImageBufAlgo::copy(
+    const int x = w * value;
+    const int wipeSize = 200;
+
+    // Create the source from matte.
+    auto sourceFromMatte = OIIO::ImageBuf(OIIO::ImageSpec(w, h, 4));
+    OIIO::ImageBufAlgo::fill(sourceFromMatte, { 0.F, 0.F, 0.F, 0.F });
+    OIIO::ImageBufAlgo::fill(
+        sourceFromMatte,
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI(0, w, y, h));
+    auto gradient = OIIO::ImageBuf(OIIO::ImageSpec(w, wipeSize, 4));
+    OIIO::ImageBufAlgo::fill(
+        gradient,
+        { 0.F, 0.F, 0.F, 0.F },
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI());
+    OIIO::ImageBufAlgo::paste(
+        sourceFromMatte,
+        0, y, 0, 0,
+        gradient);
+
+    // Create the source to matte.
+    auto sourceToMatte = OIIO::ImageBuf(OIIO::ImageSpec(w, h, 4));
+    OIIO::ImageBufAlgo::fill(sourceToMatte, { 0.F, 0.F, 0.F, 0.F });
+    OIIO::ImageBufAlgo::fill(
+        sourceToMatte,
+        { 1.F, 1.F, 1.F, 1.F },
+        OIIO::ROI(0, w, 0, y));
+    OIIO::ImageBufAlgo::paste(
+        sourceToMatte,
+        0, y, 0, 0,
+        OIIO::ImageBufAlgo::rotate180(gradient));
+
+    // Multiply the sources by the mattes and add the results together.
+    OIIO::ImageBufAlgo::add(
+        outputBuf,
+        OIIO::ImageBufAlgo::mul(sourceFromBuf, sourceFromMatte),
+        OIIO::ImageBufAlgo::mul(sourceToBuf, sourceToMatte));
+
+    /*OIIO::ImageBufAlgo::copy(
         outputBuf,
         sourceFromBuf,
         OIIO::TypeUnknown,
@@ -288,7 +365,7 @@ OfxStatus VerticalWipePlugin::_render(
         outputBuf,
         sourceToBuf,
         OIIO::TypeUnknown,
-        OIIO::ROI(0, w, 0, y));
+        OIIO::ROI(0, w, 0, y));*/
 
     return kOfxStatOK;
 }
