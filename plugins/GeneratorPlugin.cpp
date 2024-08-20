@@ -204,6 +204,90 @@ OfxStatus FillPlugin::_render(
     return kOfxStatOK;
 }
 
+GradientPlugin* GradientPlugin::_instance = nullptr;
+
+GradientPlugin::GradientPlugin() :
+    GeneratorPlugin("Toucan", "Gradient")
+{}
+
+GradientPlugin::~GradientPlugin()
+{}
+
+void GradientPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new GradientPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus GradientPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus GradientPlugin::_render(
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
+    double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
+    _propertySuite->propGetDoubleN(inArgs, "color1", 4, color1);
+    _propertySuite->propGetDoubleN(inArgs, "color2", 4, color2);
+    int vertical = 0;
+    _propertySuite->propGetInt(inArgs, "vertical", 0, &vertical);
+
+    if (vertical)
+    {
+        OIIO::ImageBufAlgo::fill(
+            outputBuf,
+            {
+                static_cast<float>(color1[0]),
+                static_cast<float>(color1[1]),
+                static_cast<float>(color1[2]),
+                static_cast<float>(color1[3])
+            },
+            {
+                static_cast<float>(color2[0]),
+                static_cast<float>(color2[1]),
+                static_cast<float>(color2[2]),
+                static_cast<float>(color2[3])
+            },
+            OIIO::ROI());
+    }
+    else
+    {
+        const auto& spec = outputBuf.spec();
+        auto gradient = OIIO::ImageBuf(OIIO::ImageSpec(spec.height, spec.width, spec.nchannels));
+        OIIO::ImageBufAlgo::fill(
+            gradient,
+            {
+                static_cast<float>(color1[0]),
+                static_cast<float>(color1[1]),
+                static_cast<float>(color1[2]),
+                static_cast<float>(color1[3])
+            },
+            {
+                static_cast<float>(color2[0]),
+                static_cast<float>(color2[1]),
+                static_cast<float>(color2[2]),
+                static_cast<float>(color2[3])
+            },
+            OIIO::ROI());
+        OIIO::ImageBufAlgo::copy(
+            outputBuf,
+            OIIO::ImageBufAlgo::rotate270(gradient));
+    }
+
+    return kOfxStatOK;
+}
+
 NoisePlugin* NoisePlugin::_instance = nullptr;
 
 NoisePlugin::NoisePlugin() :
@@ -272,6 +356,7 @@ namespace
     {
         { kOfxImageEffectPluginApi, 1, "Toucan:Checkers", 1, 0, CheckersPlugin::setHostFunc, CheckersPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Fill", 1, 0, FillPlugin::setHostFunc, FillPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "Toucan:Gradient", 1, 0, GradientPlugin::setHostFunc, GradientPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Noise", 1, 0, NoisePlugin::setHostFunc, NoisePlugin::mainEntryPoint }
     };
 }

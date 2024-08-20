@@ -42,7 +42,7 @@ namespace toucan
     struct FillData
     {
         IMATH_NAMESPACE::V2i size  = IMATH_NAMESPACE::V2i(0, 0);
-        IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 0.F);
+        IMATH_NAMESPACE::V4f color = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F);
     };
 
     //! Fill node.
@@ -67,6 +67,36 @@ namespace toucan
 
     private:
         FillData _data;
+    };
+
+    //! Gradient data.
+    struct GradientData
+    {
+        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+        IMATH_NAMESPACE::V4f color1 = IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F);
+        IMATH_NAMESPACE::V4f color2 = IMATH_NAMESPACE::V4f(1.F, 1.F, 1.F, 1.F);
+        bool vertical = true;
+    };
+
+    //! Gradient node.
+    class GradientNode : public IImageNode
+    {
+    public:
+        GradientNode(
+            const GradientData & = GradientData(),
+            const std::vector<std::shared_ptr<IImageNode> > & = {});
+
+        virtual ~GradientNode();
+
+        const GradientData& getData() const;
+        void setData(const GradientData&);
+
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<ImageEffectHost>&) override;
+
+    private:
+        GradientData _data;
     };
 
     //! Noise data.

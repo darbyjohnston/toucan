@@ -66,7 +66,7 @@
                             "generator_kind": "Fill",
                             "parameters": {
                                 "size": [ 1280, 720 ],
-                                "color": [ 0.0, 1.0, 0.0, 1.0 ]
+                                "color": [ 0.0, 0.0, 1.0, 1.0 ]
                             }
                         },
                         "source_range": {
@@ -101,10 +101,12 @@
                                     "value": 0
                                 }
                             },
-                            "generator_kind": "Fill",
+                            "generator_kind": "Gradient",
                             "parameters": {
                                 "size": [ 1280, 720 ],
-                                "color": [ 0.0, 0.0, 1.0, 1.0 ]
+                                "color1": [ 0.0, 0.0, 0.0, 1.0 ],
+                                "color2": [ 1.0, 1.0, 1.0, 1.0 ],
+                                "vertical": true
                             }
                         },
                         "source_range": {
@@ -120,7 +122,47 @@
                                 "value": 0
                             }
                         },
-                        "name": "Fill"
+                        "name": "Gradient"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "GeneratorReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 1
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "generator_kind": "Gradient",
+                            "parameters": {
+                                "size": [ 1280, 720 ],
+                                "color1": [ 1.0, 0.0, 0.0, 1.0 ],
+                                "color2": [ 0.0, 0.0, 1.0, 1.0 ],
+                                "vertical": false
+                            }
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 1
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Gradient"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
@@ -183,7 +225,7 @@
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "checkerSize": [ 200, 200 ],
-                                "color1": [ 1.0, 1.0, 1.0, 1.0 ],
+                                "color1": [ 1.0, 0.0, 0.0, 1.0 ],
                                 "color2": [ 0.0, 0.0, 0.0, 1.0 ]
                             }
                         },
@@ -223,7 +265,7 @@
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "checkerSize": [ 300, 300 ],
-                                "color1": [ 1.0, 1.0, 1.0, 1.0 ],
+                                "color1": [ 0.0, 0.0, 1.0, 1.0 ],
                                 "color2": [ 0.0, 0.0, 0.0, 1.0 ]
                             }
                         },
@@ -251,7 +293,7 @@
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 3
+                                    "value": 2
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -274,7 +316,7 @@
                             "duration": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 3
+                                "value": 2
                             },
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",

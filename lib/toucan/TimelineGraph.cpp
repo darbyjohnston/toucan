@@ -296,6 +296,33 @@ namespace toucan
                     auto generator = std::make_shared<FillNode>(data);
                     out = generator;
                 }
+                else if ("Gradient" == generatorRef->generator_kind())
+                {
+                    GradientData data;
+                    auto parameters = generatorRef->parameters();
+                    auto i = parameters.find("size");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
+                    }
+                    i = parameters.find("color1");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color1);
+                    }
+                    i = parameters.find("color2");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color2);
+                    }
+                    i = parameters.find("vertical");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        data.vertical = std::any_cast<bool>(i->second);
+                    }
+                    auto generator = std::make_shared<GradientNode>(data);
+                    out = generator;
+                }
                 else if ("Noise" == generatorRef->generator_kind())
                 {
                     NoiseData data;

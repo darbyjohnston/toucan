@@ -15,7 +15,7 @@ Dependencies:
 
 Features
 ========
-* Generators: Checkers, Fill, Noise
+* Generators: Checkers, Fill, Gradient, Noise
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
 * Transforms: Flip, Flop, Resize, Rotate
@@ -42,7 +42,7 @@ Linear time warps:
 
 ![LinearTimeWarp](images/LinearTimeWarp.png)
 
-Generators; fill, checkers, and noise:
+Generators; fill, gradient, checkers, and noise:
 
 ![Generators](images/Generator.png)
 

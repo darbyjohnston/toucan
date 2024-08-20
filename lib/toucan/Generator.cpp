@@ -95,6 +95,53 @@ namespace toucan
         return buf;
     }
 
+    GradientNode::GradientNode(
+        const GradientData& data,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IImageNode("Gradient", inputs),
+        _data(data)
+    {}
+
+    GradientNode::~GradientNode()
+    {}
+
+    const GradientData& GradientNode::getData() const
+    {
+        return _data;
+    }
+
+    void GradientNode::setData(const GradientData& value)
+    {
+        _data = value;
+    }
+
+    OIIO::ImageBuf GradientNode::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<ImageEffectHost>& host)
+    {
+        OIIO::ImageBuf buf(OIIO::ImageSpec(_data.size.x, _data.size.y, 4));
+        PropertySet propSet;
+        const double color1[] =
+        {
+            _data.color1.x,
+            _data.color1.y,
+            _data.color1.z,
+            _data.color1.w
+        };
+        propSet.setDoubleN("color1", 4, color1);
+        const double color2[] =
+        {
+            _data.color2.x,
+            _data.color2.y,
+            _data.color2.z,
+            _data.color2.w
+        };
+        propSet.setDoubleN("color2", 4, color2);
+        propSet.setInt("vertical", 0, _data.vertical);
+        host->generator("Toucan:Gradient", buf, propSet);
+        return buf;
+    }
+
     std::string FillNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
     {
         std::stringstream ss;

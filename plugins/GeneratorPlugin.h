@@ -81,6 +81,31 @@ private:
     static FillPlugin* _instance;
 };
 
+class GradientPlugin : public GeneratorPlugin
+{
+public:
+    GradientPlugin();
+
+    virtual ~GradientPlugin();
+
+    static void setHostFunc(OfxHost*);
+
+    static OfxStatus mainEntryPoint(
+        const char* action,
+        const void* handle,
+        OfxPropertySetHandle inArgs,
+        OfxPropertySetHandle outArgs);
+
+protected:
+    OfxStatus _render(
+        OIIO::ImageBuf&,
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
+
+private:
+    static GradientPlugin* _instance;
+};
+
 class NoisePlugin : public GeneratorPlugin
 {
 public:
