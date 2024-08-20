@@ -11,13 +11,13 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ImageSequenceReference.1",
+                            "OTIO_SCHEMA": "ExternalReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 3
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -25,23 +25,14 @@
                                     "value": 0
                                 }
                             },
-                            "target_url_base": "",
-                            "name_prefix": "Counter.",
-                            "name_suffix": ".png",
-                            "start_frame": 0,
-                            "frame_step": 1,
-                            "rate": 0.0,
-                            "frame_zero_padding": 0,
-                            "missing_frame_policy": "black"
+                            "target_url": "Charlie.jpg"
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "ResizeEffect.1",
+                                "OTIO_SCHEMA": "CropEffect.1",
                                 "effect_name": "",
-                                "width": 640,
-                                "height": 360,
-                                "filter_name": "",
-                                "filter_width": 0.0
+                                "pos": [ 640, 360 ],
+                                "size": [ 640, 360 ]
                             }
                         ],
                         "source_range": {
@@ -54,21 +45,21 @@
                             "start_time": {
                                 "OTIO_SCHEMA": "RationalTime.1",
                                 "rate": 24,
-                                "value": 0
+                                "value": 4
                             }
                         },
-                        "name": "Resize"
+                        "name": "Crop"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ImageSequenceReference.1",
+                            "OTIO_SCHEMA": "ExternalReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 3
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -76,64 +67,7 @@
                                     "value": 0
                                 }
                             },
-                            "target_url_base": "",
-                            "name_prefix": "Counter.",
-                            "name_suffix": ".png",
-                            "start_frame": 0,
-                            "frame_step": 1,
-                            "rate": 0.0,
-                            "frame_zero_padding": 0,
-                            "missing_frame_policy": "black"
-                        },
-                        "effects": [
-                            {
-                                "OTIO_SCHEMA": "RotateEffect.1",
-                                "effect_name": "",
-                                "angle": 45.0,
-                                "filter_name": "",
-                                "filter_width": 0.0
-                            }
-                        ],
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 2
-                            },
-                            "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1",
-                                "rate": 24,
-                                "value": 2
-                            }
-                        },
-                        "name": "Rotate"
-                    },
-                    {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "ImageSequenceReference.1",
-                            "available_range": {
-                                "OTIO_SCHEMA": "TimeRange.1",
-                                "duration": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 10
-                                },
-                                "start_time": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 0
-                                }
-                            },
-                            "target_url_base": "",
-                            "name_prefix": "Counter.",
-                            "name_suffix": ".png",
-                            "start_frame": 0,
-                            "frame_step": 1,
-                            "rate": 0.0,
-                            "frame_zero_padding": 0,
-                            "missing_frame_policy": "black"
+                            "target_url": "Charlie.jpg"
                         },
                         "effects": [
                             {
@@ -159,13 +93,13 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "media_reference": {
-                            "OTIO_SCHEMA": "ImageSequenceReference.1",
+                            "OTIO_SCHEMA": "ExternalReference.1",
                             "available_range": {
                                 "OTIO_SCHEMA": "TimeRange.1",
                                 "duration": {
                                     "OTIO_SCHEMA": "RationalTime.1",
                                     "rate": 24,
-                                    "value": 10
+                                    "value": 3
                                 },
                                 "start_time": {
                                     "OTIO_SCHEMA": "RationalTime.1",
@@ -173,14 +107,7 @@
                                     "value": 0
                                 }
                             },
-                            "target_url_base": "",
-                            "name_prefix": "Counter.",
-                            "name_suffix": ".png",
-                            "start_frame": 0,
-                            "frame_step": 1,
-                            "rate": 0.0,
-                            "frame_zero_padding": 0,
-                            "missing_frame_policy": "black"
+                            "target_url": "Charlie.jpg"
                         },
                         "effects": [
                             {
@@ -202,6 +129,92 @@
                             }
                         },
                         "name": "Flop"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 3
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "target_url": "Charlie.jpg"
+                        },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "ResizeEffect.1",
+                                "effect_name": "",
+                                "size": [ 640, 360 ],
+                                "filter_name": "",
+                                "filter_width": 0.0
+                            }
+                        ],
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 2
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        },
+                        "name": "Resize"
+                    },
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 3
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "target_url": "Charlie.jpg"
+                        },
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "RotateEffect.1",
+                                "effect_name": "",
+                                "angle": 45.0,
+                                "filter_name": "",
+                                "filter_width": 0.0
+                            }
+                        ],
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 2
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 2
+                            }
+                        },
+                        "name": "Rotate"
                     }
                 ],
                 "kind": "Video", 

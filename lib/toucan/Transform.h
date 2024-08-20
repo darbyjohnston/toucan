@@ -8,11 +8,67 @@
 
 namespace toucan
 {
+    //! Crop data.
+    struct CropData
+    {
+        IMATH_NAMESPACE::V2i pos  = IMATH_NAMESPACE::V2i(0, 0);
+        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+    };
+
+    //! Crop node.
+    class CropNode : public IImageNode
+    {
+    public:
+        CropNode(
+            const CropData & = CropData(),
+            const std::vector<std::shared_ptr<IImageNode> > & = {});
+
+        virtual ~CropNode();
+
+        const CropData& getData() const;
+        void setData(const CropData&);
+
+        OIIO::ImageBuf exec(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<ImageEffectHost>&) override;
+
+    private:
+        CropData _data;
+    };
+
+    //! Crop OTIO effect.
+    class CropEffect : public IEffect
+    {
+    public:
+        struct Schema
+        {
+            static auto constexpr name = "CropEffect";
+            static int constexpr version = 1;
+        };
+
+        CropEffect(
+            std::string const& name = std::string(),
+            std::string const& effect_name = std::string(),
+            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
+
+        std::shared_ptr<IImageNode> createNode(
+            const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
+
+    protected:
+        virtual ~CropEffect();
+
+        bool read_from(Reader&) override;
+        void write_to(Writer&) const override;
+
+    private:
+        CropData _data;
+    };
+
     //! Flip node.
     class FlipNode : public IImageNode
     {
     public:
-        FlipNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
+        FlipNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
 
         virtual ~FlipNode();
 

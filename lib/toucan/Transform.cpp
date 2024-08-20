@@ -4,10 +4,96 @@
 
 #include "Transform.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
+    CropNode::CropNode(
+        const CropData& data,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IImageNode("Crop", inputs),
+        _data(data)
+    {}
+
+    CropNode::~CropNode()
+    {}
+
+    const CropData& CropNode::getData() const
+    {
+        return _data;
+    }
+
+    void CropNode::setData(const CropData& value)
+    {
+        _data = value;
+    }
+
+    OIIO::ImageBuf CropNode::exec(
+        const OTIO_NS::RationalTime& time,
+        const std::shared_ptr<ImageEffectHost>& host)
+    {
+        OIIO::ImageBuf buf;
+        if (!_inputs.empty() && _inputs[0])
+        {
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
+            auto input = _inputs[0]->exec(offsetTime, host);
+            auto spec = input.spec();
+            spec.width = _data.size.x;
+            spec.height = _data.size.y;
+            buf = OIIO::ImageBuf(spec);
+            PropertySet propSet;
+            propSet.setIntN("pos", 2, &_data.pos.x);
+            propSet.setIntN("size", 2, &_data.size.x);
+            host->filter("Toucan:Crop", input, buf, propSet);
+        }
+        return buf;
+    }
+
+    CropEffect::CropEffect(
+        std::string const& name,
+        std::string const& effect_name,
+        OTIO_NS::AnyDictionary const& metadata) :
+        IEffect(name, effect_name, metadata)
+    {}
+
+    CropEffect::~CropEffect()
+    {}
+
+    std::shared_ptr<IImageNode> CropEffect::createNode(
+        const std::vector<std::shared_ptr<IImageNode> >& inputs)
+    {
+        return std::make_shared<CropNode>(_data, inputs);
+    }
+
+    bool CropEffect::read_from(Reader& reader)
+    {
+        OTIO_NS::AnyVector pos;
+        OTIO_NS::AnyVector size;
+        bool out =
+            reader.read("pos", &pos) &&
+            reader.read("size", &size) &&
+            IEffect::read_from(reader);
+        if (out)
+        {
+            anyToVec(pos, _data.pos);
+            anyToVec(size, _data.size);
+        }
+        return out;
+    }
+
+    void CropEffect::write_to(Writer& writer) const
+    {
+        IEffect::write_to(writer);
+        writer.write("pos", vecToAny(_data.pos));
+        writer.write("size", vecToAny(_data.size));
+    }
+
     FlipNode::FlipNode(
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode("Flip", inputs)
@@ -180,19 +266,16 @@ namespace toucan
 
     bool ResizeEffect::read_from(Reader& reader)
     {
-        int64_t width = 0;
-        int64_t height = 0;
+        OTIO_NS::AnyVector size;
         double filterWidth = 0.0;
         bool out =
-            reader.read("width", &width) &&
-            reader.read("height", &height) &&
+            reader.read("size", &size) &&
             reader.read("filter_name", &_data.filterName) &&
             reader.read("filter_width", &filterWidth) &&
             IEffect::read_from(reader);
         if (out)
         {
-            _data.size.x = width;
-            _data.size.y = height;
+            anyToVec(size, _data.size);
             _data.filterWidth = filterWidth;
         }
         return out;
@@ -201,8 +284,7 @@ namespace toucan
     void ResizeEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("width", static_cast<int64_t>(_data.size.x));
-        writer.write("height", static_cast<int64_t>(_data.size.y));
+        writer.write("size", vecToAny(_data.size));
         writer.write("filter_name", _data.filterName);
         writer.write("filter_width", static_cast<double>(_data.filterWidth));
     }

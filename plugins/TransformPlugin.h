@@ -32,6 +32,32 @@ protected:
         OfxPropertySetHandle outArgs) override;
 };
 
+class CropPlugin : public TransformPlugin
+{
+public:
+    CropPlugin();
+
+    virtual ~CropPlugin();
+
+    static void setHostFunc(OfxHost*);
+
+    static OfxStatus mainEntryPoint(
+        const char* action,
+        const void* handle,
+        OfxPropertySetHandle inArgs,
+        OfxPropertySetHandle outArgs);
+
+protected:
+    OfxStatus _render(
+        const OIIO::ImageBuf&,
+        OIIO::ImageBuf&,
+        const OfxRectI& renderWindow,
+        OfxPropertySetHandle inArgs) override;
+
+private:
+    static CropPlugin* _instance;
+};
+
 class FlipPlugin : public TransformPlugin
 {
 public:

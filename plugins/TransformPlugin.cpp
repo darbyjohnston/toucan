@@ -116,6 +116,52 @@ OfxStatus TransformPlugin::_renderAction(
     return kOfxStatOK;
 }
 
+CropPlugin* CropPlugin::_instance = nullptr;
+
+CropPlugin::CropPlugin() :
+    TransformPlugin("Toucan", "Crop")
+{}
+
+CropPlugin::~CropPlugin()
+{}
+
+void CropPlugin::setHostFunc(OfxHost* host)
+{
+    if (!_instance)
+    {
+        _instance = new CropPlugin;
+    }
+    _instance->_host = host;
+}
+
+OfxStatus CropPlugin::mainEntryPoint(
+    const char* action,
+    const void* handle,
+    OfxPropertySetHandle inArgs,
+    OfxPropertySetHandle outArgs)
+{
+    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus CropPlugin::_render(
+    const OIIO::ImageBuf& sourceBuf,
+    OIIO::ImageBuf& outputBuf,
+    const OfxRectI& renderWindow,
+    OfxPropertySetHandle inArgs)
+{
+    IMATH_NAMESPACE::V2i pos;
+    IMATH_NAMESPACE::V2i size;
+    _propertySuite->propGetIntN(inArgs, "pos", 2, &pos.x);
+    _propertySuite->propGetIntN(inArgs, "size", 2, &size.x);
+
+    const auto crop = OIIO::ImageBufAlgo::cut(
+        sourceBuf,
+        OIIO::ROI(pos.x, pos.x + size.x, pos.y, pos.y + size.y));
+    OIIO::ImageBufAlgo::copy(outputBuf, crop);
+
+    return kOfxStatOK;
+}
+
 FlipPlugin* FlipPlugin::_instance = nullptr;
 
 FlipPlugin::FlipPlugin() :
@@ -256,7 +302,7 @@ OfxStatus ResizePlugin::_render(
         sourceBuf,
         filterName,
         filterWidth,
-        OIIO::ROI(0, size.x, 0, size.y, 0, 1, 0, 4));
+        OIIO::ROI(0, size.x, 0, size.y));
 
     return kOfxStatOK;
 }
@@ -322,6 +368,7 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
+        { kOfxImageEffectPluginApi, 1, "Toucan:Crop", 1, 0, CropPlugin::setHostFunc, CropPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Flip", 1, 0, FlipPlugin::setHostFunc, FlipPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Flop", 1, 0, FlopPlugin::setHostFunc, FlopPlugin::mainEntryPoint },
         { kOfxImageEffectPluginApi, 1, "Toucan:Resize", 1, 0, ResizePlugin::setHostFunc, ResizePlugin::mainEntryPoint },

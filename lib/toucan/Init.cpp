@@ -23,6 +23,7 @@ namespace toucan
         OTIO_NS::TypeRegistry::instance().register_type<BoxEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<ColorConvertEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<ColorMapEffect>();
+        OTIO_NS::TypeRegistry::instance().register_type<CropEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FlipEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<FlopEffect>();
         OTIO_NS::TypeRegistry::instance().register_type<InvertEffect>();

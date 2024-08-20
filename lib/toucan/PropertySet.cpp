@@ -299,6 +299,46 @@ namespace toucan
         return out;
     }
 
+    std::vector<std::string> PropertySet::getPointerProperties() const
+    {
+        std::vector<std::string> out;
+        for (const auto& p : _p)
+        {
+            out.push_back(p.first);
+        }
+        return out;
+    }
+
+    std::vector<std::string> PropertySet::getStringProperties() const
+    {
+        std::vector<std::string> out;
+        for (const auto& s : _s)
+        {
+            out.push_back(s.first);
+        }
+        return out;
+    }
+
+    std::vector<std::string> PropertySet::getDoubleProperties() const
+    {
+        std::vector<std::string> out;
+        for (const auto& d : _d)
+        {
+            out.push_back(d.first);
+        }
+        return out;
+    }
+
+    std::vector<std::string> PropertySet::getIntProperties() const
+    {
+        std::vector<std::string> out;
+        for (const auto& i : _i)
+        {
+            out.push_back(i.first);
+        }
+        return out;
+    }
+
     OfxStatus PropertySet::setPointer(OfxPropertySetHandle handle, const char* property, int index, void* value)
     {
         return reinterpret_cast<PropertySet*>(handle)->setPointer(property, index, value);

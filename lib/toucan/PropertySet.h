@@ -36,6 +36,11 @@ namespace toucan
         OfxStatus getIntN(const char* property, int count, int* value);
         OfxStatus reset(const char* property);
         OfxStatus getDimension(const char* property, int* count);
+        
+        std::vector<std::string> getPointerProperties() const;
+        std::vector<std::string> getStringProperties() const;
+        std::vector<std::string> getDoubleProperties() const;
+        std::vector<std::string> getIntProperties() const;
 
         static OfxStatus setPointer(OfxPropertySetHandle, const char* property, int index, void* value);
         static OfxStatus setString(OfxPropertySetHandle, const char* property, int index, const char* value);

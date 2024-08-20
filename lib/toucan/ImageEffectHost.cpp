@@ -198,22 +198,30 @@ namespace toucan
     void ImageEffectHost::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
     {
         // Find the plugins.
+        if (_options.verbose)
+        {
+            std::cout << "Finding plugins..." << std::endl;
+        }
         std::vector<std::filesystem::path> pluginPaths;
         for (const auto& path : searchPath)
         {
             if (_options.verbose)
             {
-                std::cout << "Search path: " << path.string() << std::endl;
+                std::cout << "    Search path: " << path.string() << std::endl;
             }
             findPlugins(path, pluginPaths);
         }
 
         // Load plugins.
+        if (_options.verbose)
+        {
+            std::cout << "Loading plugins..." << std::endl;
+        }
         for (const auto& path : pluginPaths)
         {
             if (_options.verbose)
             {
-                std::cout << "Plugin path: " << path.string() << std::endl;
+                std::cout << "    Plugin path: " << path.string() << std::endl;
             }
             try
             {
@@ -226,7 +234,7 @@ namespace toucan
                     {
                         if (_options.verbose)
                         {
-                            std::cout << "Found plugin: " << ofxPlugin->pluginIdentifier << std::endl;
+                            std::cout << "        Plugin: " << ofxPlugin->pluginIdentifier << std::endl;
                         }
                         ofxPlugin->setHost(&_host);
                         OfxStatus ofxStatus = ofxPlugin->mainEntry(
@@ -261,8 +269,16 @@ namespace toucan
         }
 
         // Initialize plugins.
+        if (_options.verbose)
+        {
+            std::cout << "Initializing plugins..." << std::endl;
+        }
         for (auto& data : _pluginData)
         {
+            if (_options.verbose)
+            {
+                std::cout << "    Plugin: " << data.ofxPlugin->pluginIdentifier << std::endl;
+            }
             OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
                 kOfxActionDescribe,
                 &data,
@@ -278,6 +294,10 @@ namespace toucan
                 {
                     PropertySet propertySet;
                     propertySet.setString(kOfxImageEffectPropContext, 0, context);
+                    if (_options.verbose)
+                    {
+                        std::cout << "        Context: " << context << std::endl;
+                    }
                     ofxStatus = data.ofxPlugin->mainEntry(
                         kOfxImageEffectActionDescribeInContext,
                         &data,
@@ -285,6 +305,25 @@ namespace toucan
                         nullptr);
                 }
             }
+            /*if (_options.verbose)
+            {
+                for (const auto& property : data.effectPropertySet.getPointerProperties())
+                {
+                    std::cout << "        Pointer property: " << property << std::endl;
+                }
+                for (const auto& property : data.effectPropertySet.getStringProperties())
+                {
+                    std::cout << "        String property: " << property << std::endl;
+                }
+                for (const auto& property : data.effectPropertySet.getDoubleProperties())
+                {
+                    std::cout << "        Double property: " << property << std::endl;
+                }
+                for (const auto& property : data.effectPropertySet.getIntProperties())
+                {
+                    std::cout << "        Int property: " << property << std::endl;
+                }
+            }*/
         }
     }
 
