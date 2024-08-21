@@ -2,20 +2,20 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TimelineGraphTest.h"
+#include "ImageGraphTest.h"
 
-#include <toucan/TimelineGraph.h>
+#include <toucan/ImageGraph.h>
 #include <toucan/Util.h>
 
 #include <sstream>
 
 namespace toucan
 {
-    void timelineGraphTest(
+    void imageGraphTest(
         const std::filesystem::path& path,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
-        std::cout << "timelineGraphTest" << std::endl;
+        std::cout << "imageGraphTest" << std::endl;
         const std::vector<std::string> otioFiles =
         {
             "ColorSpace",
@@ -51,7 +51,7 @@ namespace toucan
             const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
 
             // Render the timeline frames.
-            const auto graph = std::make_shared<TimelineGraph>(path, timeline);
+            const auto graph = std::make_shared<ImageGraph>(path, timeline);
             for (OTIO_NS::RationalTime time = startTime;
                 time <= timeRange.end_time_inclusive();
                 time += timeInc)
@@ -66,7 +66,7 @@ namespace toucan
                     // Save the image.
                     const std::filesystem::path imagePath = getSequenceFrame(
                         std::filesystem::path(),
-                        "timelineGraphTest_" + otioFile + ".",
+                        "imageGraphTest_" + otioFile + ".",
                         time.to_frames(),
                         6,
                         ".png");

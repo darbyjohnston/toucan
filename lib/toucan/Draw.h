@@ -32,7 +32,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         BoxData _data;
@@ -90,7 +90,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         LineData _data;
@@ -149,7 +149,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         TextData _data;

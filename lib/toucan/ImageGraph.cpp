@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TimelineGraph.h"
+#include "ImageGraph.h"
 
 #include "Comp.h"
 #include "Generator.h"
@@ -19,10 +19,10 @@
 
 namespace toucan
 {
-    TimelineGraph::TimelineGraph(
+    ImageGraph::ImageGraph(
         const std::filesystem::path& path,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
-        const TimelineGraphOptions& options) :
+        const ImageGraphOptions& options) :
         _path(path),
         _timeline(timeline),
         _options(options)
@@ -80,15 +80,15 @@ namespace toucan
         }
     }
 
-    TimelineGraph::~TimelineGraph()
+    ImageGraph::~ImageGraph()
     {}
 
-    const IMATH_NAMESPACE::V2i& TimelineGraph::getImageSize() const
+    const IMATH_NAMESPACE::V2i& ImageGraph::getImageSize() const
     {
         return _imageSize;
     }
 
-    std::shared_ptr<IImageNode> TimelineGraph::exec(const OTIO_NS::RationalTime& time) const
+    std::shared_ptr<IImageNode> ImageGraph::exec(const OTIO_NS::RationalTime& time) const
     {
         // Set the background color.
         std::shared_ptr<IImageNode> node = std::make_shared<FillNode>(
@@ -136,7 +136,7 @@ namespace toucan
         return node;
     }
 
-    std::shared_ptr<IImageNode> TimelineGraph::_track(
+    std::shared_ptr<IImageNode> ImageGraph::_track(
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
@@ -219,7 +219,7 @@ namespace toucan
         return out;
     }
 
-    std::shared_ptr<IImageNode> TimelineGraph::_item(
+    std::shared_ptr<IImageNode> ImageGraph::_item(
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
@@ -387,7 +387,7 @@ namespace toucan
         return out;
     }
 
-    std::shared_ptr<IImageNode> TimelineGraph::_transition(
+    std::shared_ptr<IImageNode> ImageGraph::_transition(
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>& otioTransition,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) const
@@ -408,7 +408,7 @@ namespace toucan
         return out;
     }
 
-    std::shared_ptr<IImageNode> TimelineGraph::_effects(
+    std::shared_ptr<IImageNode> ImageGraph::_effects(
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
         const std::shared_ptr<IImageNode>& input) const
     {

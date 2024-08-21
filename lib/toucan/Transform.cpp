@@ -32,7 +32,7 @@ namespace toucan
 
     OIIO::ImageBuf CropNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -104,7 +104,7 @@ namespace toucan
 
     OIIO::ImageBuf FlipNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -158,7 +158,7 @@ namespace toucan
 
     OIIO::ImageBuf FlopNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -224,7 +224,7 @@ namespace toucan
 
     OIIO::ImageBuf ResizeNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -311,7 +311,7 @@ namespace toucan
 
     OIIO::ImageBuf RotateNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])

@@ -32,7 +32,7 @@ namespace toucan
 
     OIIO::ImageBuf CheckersNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf(OIIO::ImageSpec(_data.size.x, _data.size.y, 4));
         PropertySet propSet;
@@ -79,7 +79,7 @@ namespace toucan
 
     OIIO::ImageBuf FillNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf(OIIO::ImageSpec(_data.size.x, _data.size.y, 4));
         PropertySet propSet;
@@ -117,7 +117,7 @@ namespace toucan
 
     OIIO::ImageBuf GradientNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf(OIIO::ImageSpec(_data.size.x, _data.size.y, 4));
         PropertySet propSet;
@@ -175,7 +175,7 @@ namespace toucan
 
     OIIO::ImageBuf NoiseNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf(OIIO::ImageSpec(_data.size.x, _data.size.y, 4));
         PropertySet propSet;

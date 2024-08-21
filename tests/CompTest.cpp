@@ -11,7 +11,7 @@ namespace toucan
 {
     void compTest(
         const std::filesystem::path& path,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         std::cout << "compTest" << std::endl;
         auto fg = std::make_shared<ReadNode>(path / "Letter_A.png");

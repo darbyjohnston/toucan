@@ -30,7 +30,7 @@ namespace toucan
 
     OIIO::ImageBuf ColorConvertNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -105,7 +105,7 @@ namespace toucan
 
     OIIO::ImageBuf PremultNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])
@@ -149,7 +149,7 @@ namespace toucan
 
     OIIO::ImageBuf UnpremultNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty() && _inputs[0])

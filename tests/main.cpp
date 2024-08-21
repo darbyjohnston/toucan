@@ -3,12 +3,12 @@
 // All rights reserved.
 
 #include "CompTest.h"
+#include "ImageGraphTest.h"
 #include "PropertySetTest.h"
 #include "ReadTest.h"
-#include "TimelineGraphTest.h"
 #include "UtilTest.h"
 
-#include <toucan/ImageEffectHost.h>
+#include <toucan/ImageHost.h>
 #include <toucan/Init.h>
 
 #include <iostream>
@@ -34,12 +34,12 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / "..");
 #endif // _WINDOWS
-    auto host = std::make_shared<ImageEffectHost>(searchPath);
+    auto host = std::make_shared<ImageHost>(searchPath);
     
     compTest(path, host);
     propertySetTest();
     readTest(path, host);
-    timelineGraphTest(path, host);
+    imageGraphTest(path, host);
     utilTest(path);
     
     return 0;

@@ -2,9 +2,9 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include <toucan/ImageEffectHost.h>
 #include <toucan/Init.h>
-#include <toucan/TimelineGraph.h>
+#include <toucan/ImageHost.h>
+#include <toucan/ImageGraph.h>
 #include <toucan/Util.h>
 
 #include <OpenImageIO/imagebufalgo.h>
@@ -76,16 +76,16 @@ int main(int argc, char** argv)
     const OTIO_NS::RationalTime timeInc(1.0, timeline->duration().rate());
     const int frames = timeRange.duration().value();
 
-    // Create the timeline graph.
-    TimelineGraphOptions timelineGraphOptions;
-    timelineGraphOptions.verbose = verbose;
-    const auto graph = std::make_shared<TimelineGraph>(
+    // Create the image graph.
+    ImageGraphOptions imageGraphOptions;
+    imageGraphOptions.verbose = verbose;
+    const auto graph = std::make_shared<ImageGraph>(
         inputPath.parent_path(),
         timeline,
-        timelineGraphOptions);
+        imageGraphOptions);
     const IMATH_NAMESPACE::V2d imageSize = graph->getImageSize();
 
-    // Create the image effect host.
+    // Create the image host.
     std::vector<std::filesystem::path> searchPath;
     searchPath.push_back(parentPath);
 #if defined(_WINDOWS)
@@ -93,9 +93,9 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / "..");
 #endif // _WINDOWS
-    ImageEffectHostOptions imageHostOptions;
+    ImageHostOptions imageHostOptions;
     imageHostOptions.verbose = verbose;
-    auto host = std::make_shared<ImageEffectHost>(
+    auto host = std::make_shared<ImageHost>(
         searchPath,
         imageHostOptions);
 

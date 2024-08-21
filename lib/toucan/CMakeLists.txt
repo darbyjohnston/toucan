@@ -3,15 +3,15 @@ set(HEADERS
     Comp.h
     Draw.h
     Filter.h
+    ImageGraph.h
+    ImageHost.h
     ImageNode.h
-    ImageEffectHost.h
     Init.h
     Generator.h
     Plugin.h
     PropertySet.h
     Read.h
     TimeWarp.h
-    TimelineGraph.h
     Transform.h
     Transition.h
     Transition.h
@@ -22,15 +22,15 @@ set(SOURCE
     Comp.cpp
     Draw.cpp
     Filter.cpp
+    ImageGraph.cpp
+    ImageHost.cpp
     ImageNode.cpp
-    ImageEffectHost.cpp
     Init.cpp
     Generator.cpp
     Plugin.cpp
     PropertySet.cpp
     Read.cpp
     TimeWarp.cpp
-    TimelineGraph.cpp
     Transform.cpp
     Transition.cpp
     Transition.cpp

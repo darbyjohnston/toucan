@@ -34,7 +34,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         ColorConvertData _data;
@@ -78,7 +78,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
     };
 
     //! Premultiply alpha OTIO effect.
@@ -113,7 +113,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
     };
 
     //! Un-premultiply alpha OTIO effect.

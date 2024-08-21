@@ -30,7 +30,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         CropData _data;
@@ -74,7 +74,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
     };
 
     //! Flip OTIO effect.
@@ -112,7 +112,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
     };
 
     //! Flop OTIO effect.
@@ -163,7 +163,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         ResizeData _data;
@@ -220,7 +220,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         RotateData _data;

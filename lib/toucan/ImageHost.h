@@ -16,33 +16,36 @@
 
 namespace toucan
 {
-    //! Image effect host options.
-    struct ImageEffectHostOptions
+    //! Image host options.
+    struct ImageHostOptions
     {
         bool verbose = false;
     };
 
-    //! Image effect host.
-    class ImageEffectHost : public std::enable_shared_from_this<ImageEffectHost>
+    //! Image plugins host.
+    class ImageHost : public std::enable_shared_from_this<ImageHost>
     {
     public:
-        ImageEffectHost(
+        ImageHost(
             const std::vector<std::filesystem::path>& searchPath,
-            const ImageEffectHostOptions& = ImageEffectHostOptions());
+            const ImageHostOptions& = ImageHostOptions());
 
-        ~ImageEffectHost();
+        ~ImageHost();
 
+        //! Generate an image.
         void generator(
             const std::string& name,
             OIIO::ImageBuf&,
             const PropertySet& = PropertySet());
 
+        //! Apply a filter.
         void filter(
             const std::string& name,
             const OIIO::ImageBuf&,
             OIIO::ImageBuf&,
             const PropertySet& = PropertySet());
 
+        //! Apply a transition.
         void transition(
             const std::string& name,
             const OIIO::ImageBuf&,
@@ -61,7 +64,7 @@ namespace toucan
         static OfxStatus _clipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*);
         static OfxStatus _clipReleaseImage(OfxPropertySetHandle);
 
-        ImageEffectHostOptions _options;
+        ImageHostOptions _options;
         PropertySet _propertySet;
         OfxHost _host;
         OfxPropertySuiteV1 _propertySuite;

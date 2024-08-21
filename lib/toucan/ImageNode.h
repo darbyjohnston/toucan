@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <toucan/ImageEffectHost.h>
+#include <toucan/ImageHost.h>
 
 #include <opentimelineio/effect.h>
 #include <opentimelineio/generatorReference.h>
@@ -40,7 +40,7 @@ namespace toucan
         //! Execute the image operation for the given time.
         virtual OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) = 0;
+            const std::shared_ptr<ImageHost>&) = 0;
 
         //! Generate a Grapviz graph for the given time.
         std::vector<std::string> graph(

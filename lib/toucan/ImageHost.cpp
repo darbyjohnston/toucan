@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageEffectHost.h"
+#include "ImageHost.h"
 
 #include "Util.h"
 
@@ -12,9 +12,9 @@
 
 namespace toucan
 {
-    ImageEffectHost::ImageEffectHost(
+    ImageHost::ImageHost(
         const std::vector<std::filesystem::path>& searchPath,
-        const ImageEffectHostOptions& options) :
+        const ImageHostOptions& options) :
         _options(options)
     {
         _propertySet.setPointer("host", 0, this);
@@ -26,7 +26,7 @@ namespace toucan
         _pluginInit(searchPath);
     }
 
-    ImageEffectHost::~ImageEffectHost()
+    ImageHost::~ImageHost()
     {
         for (const auto& data : _pluginData)
         {
@@ -38,7 +38,7 @@ namespace toucan
         }
     }
 
-    void ImageEffectHost::generator(
+    void ImageHost::generator(
         const std::string& name,
         OIIO::ImageBuf& output,
         const PropertySet& propSet)
@@ -79,7 +79,7 @@ namespace toucan
         }
     }
 
-    void ImageEffectHost::filter(
+    void ImageHost::filter(
         const std::string& name,
         const OIIO::ImageBuf& source,
         OIIO::ImageBuf& output,
@@ -122,7 +122,7 @@ namespace toucan
         }
     }
 
-    void ImageEffectHost::transition(
+    void ImageHost::transition(
         const std::string& name,
         const OIIO::ImageBuf& sourceFrom,
         const OIIO::ImageBuf& sourceTo,
@@ -167,7 +167,7 @@ namespace toucan
         }
     }
 
-    void ImageEffectHost::_suiteInit()
+    void ImageHost::_suiteInit()
     {
         _propertySuite.propSetPointer = &PropertySet::setPointer;
         _propertySuite.propSetString = &PropertySet::setString;
@@ -195,7 +195,7 @@ namespace toucan
         _effectSuite.clipReleaseImage = &_clipReleaseImage;
     }
 
-    void ImageEffectHost::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
+    void ImageHost::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
     {
         // Find the plugins.
         if (_options.verbose)
@@ -327,14 +327,14 @@ namespace toucan
         }
     }
 
-    const void* ImageEffectHost::_fetchSuite(OfxPropertySetHandle handle, const char* suiteName, int suiteVersion)
+    const void* ImageHost::_fetchSuite(OfxPropertySetHandle handle, const char* suiteName, int suiteVersion)
     {
         const void* out = nullptr;
         
         PropertySet* hostPropertySet = reinterpret_cast<PropertySet*>(handle);
         void* hostP = nullptr;
         hostPropertySet->getPointer("host", 0, &hostP);
-        ImageEffectHost* host = reinterpret_cast<ImageEffectHost*>(hostP);
+        ImageHost* host = reinterpret_cast<ImageHost*>(hostP);
 
         if (strcmp(suiteName, kOfxPropertySuite) == 0)
         {
@@ -347,21 +347,21 @@ namespace toucan
         return out;
     }
     
-    OfxStatus ImageEffectHost::_getPropertySet(OfxImageEffectHandle handle, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_getPropertySet(OfxImageEffectHandle handle, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *propHandle = (OfxPropertySetHandle)&data->effectPropertySet;
         return kOfxStatOK;
     }
     
-    OfxStatus ImageEffectHost::_clipDefine(OfxImageEffectHandle handle, const char* name, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_clipDefine(OfxImageEffectHandle handle, const char* name, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *propHandle = (OfxPropertySetHandle)&data->clipPropertySets[name];
         return kOfxStatOK;
     }
 
-    OfxStatus ImageEffectHost::_clipGetHandle(OfxImageEffectHandle handle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_clipGetHandle(OfxImageEffectHandle handle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
     {
         PluginData* data = reinterpret_cast<PluginData*>(handle);
         *clip = (OfxImageClipHandle)&data->images[name];
@@ -372,13 +372,13 @@ namespace toucan
         return kOfxStatOK;
     }
 
-    OfxStatus ImageEffectHost::_clipGetImage(OfxImageClipHandle handle, OfxTime, const OfxRectD*, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_clipGetImage(OfxImageClipHandle handle, OfxTime, const OfxRectD*, OfxPropertySetHandle* propHandle)
     {
         *propHandle = (OfxPropertySetHandle)handle;
         return kOfxStatOK;
     }
 
-    OfxStatus ImageEffectHost::_clipReleaseImage(OfxPropertySetHandle handle)
+    OfxStatus ImageHost::_clipReleaseImage(OfxPropertySetHandle handle)
     {
         return kOfxStatOK;
     }

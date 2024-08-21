@@ -22,7 +22,7 @@ namespace toucan
 
     OIIO::ImageBuf CompNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         OTIO_NS::RationalTime offsetTime = time;

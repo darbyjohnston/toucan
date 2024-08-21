@@ -12,7 +12,7 @@ namespace toucan
 {
     void readTest(
         const std::filesystem::path& path,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         std::cout << "readTest" << std::endl;
         auto read = std::make_shared<ReadNode>(path / "Letter_A.png");

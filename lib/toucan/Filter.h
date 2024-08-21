@@ -29,7 +29,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         BlurData _data;
@@ -84,7 +84,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         ColorMapData _data;
@@ -128,7 +128,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
     };
 
     //! Invert OTIO effect.
@@ -174,7 +174,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         PowData _data;
@@ -229,7 +229,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         SaturateData _data;
@@ -287,7 +287,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     private:
         UnsharpMaskData _data;

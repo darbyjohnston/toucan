@@ -22,7 +22,7 @@ namespace toucan
 
     OIIO::ImageBuf DissolveNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
@@ -58,7 +58,7 @@ namespace toucan
 
     OIIO::ImageBuf HorizontalWipeNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
@@ -94,7 +94,7 @@ namespace toucan
 
     OIIO::ImageBuf VerticalWipeNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf;
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])

@@ -24,7 +24,7 @@ namespace toucan
 
     OIIO::ImageBuf ReadNode::exec(
         const OTIO_NS::RationalTime&,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OIIO::ImageBuf buf(_path.string());
         const auto& spec = buf.spec();
@@ -70,7 +70,7 @@ namespace toucan
 
     OIIO::ImageBuf SequenceReadNode::exec(
         const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageEffectHost>& host)
+        const std::shared_ptr<ImageHost>& host)
     {
         OTIO_NS::RationalTime offsetTime = time;
         if (!_timeOffset.is_invalid_time())

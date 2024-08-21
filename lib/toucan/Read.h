@@ -22,7 +22,7 @@ namespace toucan
         
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     protected:
         std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
@@ -49,7 +49,7 @@ namespace toucan
 
         OIIO::ImageBuf exec(
             const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageEffectHost>&) override;
+            const std::shared_ptr<ImageHost>&) override;
 
     protected:
         std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;

@@ -18,7 +18,7 @@ Features
 * Generators: Checkers, Fill, Gradient, Noise
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
-* Transforms: Flip, Flop, Resize, Rotate
+* Transforms: Crop, Flip, Flop, Resize, Rotate
 * Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
 * Color spaces: Color Convert, Premultiply Alpha, Un-Premultiply Alpha
 
