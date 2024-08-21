@@ -45,12 +45,19 @@ else()
 endif()
 
 add_library(toucan ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(toucan PUBLIC OTIO OpenImageIO::OpenImageIO MINIZIP::minizip)
+target_link_libraries(toucan PUBLIC OTIO::opentimelineio OTIO::opentime OpenImageIO::OpenImageIO MINIZIP::minizip)
 set_target_properties(toucan PROPERTIES FOLDER lib)
 set_target_properties(toucan PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-install(TARGETS toucan
+install(
+    TARGETS toucan
+    EXPORT toucanTargets
     ARCHIVE DESTINATION lib
     LIBRARY DESTINATION lib
     RUNTIME DESTINATION bin
-    PUBLIC_HEADER DESTINATION include)
+    PUBLIC_HEADER DESTINATION include/toucan)
+install(
+    EXPORT toucanTargets
+    FILE toucanTargets.cmake
+    DESTINATION "lib/cmake/toucan"
+    NAMESPACE toucan::)

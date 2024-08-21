@@ -8,6 +8,6 @@ foreach(PLUGIN ColorSpace Draw Filter Generator Transform Transition)
 
     install(TARGETS toucan${PLUGIN}
         ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
+        LIBRARY DESTINATION bin
         RUNTIME DESTINATION bin)
 endforeach()

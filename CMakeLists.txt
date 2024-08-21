@@ -58,3 +58,20 @@ add_subdirectory(lib/toucan)
 add_subdirectory(plugins)
 add_subdirectory(bin)
 add_subdirectory(tests)
+
+install(
+    FILES cmake/FindOpenFX.cmake
+    DESTINATION lib/cmake/toucan)
+install(
+    FILES cmake/FindOTIO.cmake
+    DESTINATION lib/cmake/toucan)
+include(CMakePackageConfigHelpers)
+set(INCLUDE_INSTALL_DIR include/toucan)
+configure_package_config_file(
+    toucanConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/toucanConfig.cmake
+    INSTALL_DESTINATION lib/cmake/toucan
+    PATH_VARS INCLUDE_INSTALL_DIR)
+install(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/toucanConfig.cmake
+    DESTINATION lib/cmake/toucan)

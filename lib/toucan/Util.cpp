@@ -18,18 +18,25 @@ namespace toucan
             int depth,
             int maxDepth)
         {
-            for (auto const& entry : std::filesystem::directory_iterator(path))
+            try
             {
-                const auto& entryPath = entry.path();
-                if (entry.is_regular_file() &&
-                    (entryPath.extension() == ".dll" || entryPath.extension() == ".so"))
+                for (auto const& entry : std::filesystem::directory_iterator(path))
                 {
-                    out.push_back(entryPath);
+                    const auto& entryPath = entry.path();
+                    if (entry.is_regular_file() &&
+                        (entryPath.extension() == ".dll" || entryPath.extension() == ".so"))
+                    {
+                        out.push_back(entryPath);
+                    }
+                    else if (entry.is_directory() && depth < maxDepth)
+                    {
+                        _findPlugins(entryPath, out, depth + 1, maxDepth);
+                    }
                 }
-                else if (entry.is_directory() && depth < maxDepth)
-                {
-                    _findPlugins(entryPath, out, depth + 1, maxDepth);
-                }
+            }
+            catch (const std::exception&)
+            {
+                //! \bug How should this be handled?
             }
         }
     }
