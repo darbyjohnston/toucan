@@ -4,8 +4,6 @@
 
 #include "Filter.h"
 
-#include <OpenImageIO/imagebufalgo.h>
-
 namespace toucan
 {
     BlurNode::BlurNode(

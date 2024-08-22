@@ -4,8 +4,6 @@
 
 #include "ColorSpace.h"
 
-#include <OpenImageIO/imagebufalgo.h>
-
 namespace toucan
 {
     ColorConvertNode::ColorConvertNode(

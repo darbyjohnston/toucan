@@ -6,8 +6,6 @@
 
 #include "Util.h"
 
-#include <OpenImageIO/imagebufalgo.h>
-
 namespace toucan
 {
     BoxNode::BoxNode(

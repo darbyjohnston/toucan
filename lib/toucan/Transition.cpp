@@ -4,8 +4,6 @@
 
 #include "Transition.h"
 
-#include <OpenImageIO/imagebufalgo.h>
-
 #include <iostream>
 
 namespace toucan

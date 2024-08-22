@@ -47,7 +47,7 @@
                                 "value": 0
                             }
                         },
-                        "name": "Invert"
+                        "name": "ColorMap"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
