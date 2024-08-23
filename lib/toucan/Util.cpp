@@ -23,8 +23,7 @@ namespace toucan
                 for (auto const& entry : std::filesystem::directory_iterator(path))
                 {
                     const auto& entryPath = entry.path();
-                    if (entry.is_regular_file() &&
-                        (entryPath.extension() == ".dll" || entryPath.extension() == ".so"))
+                    if (entry.is_regular_file() && entryPath.extension() == ".ofx")
                     {
                         out.push_back(entryPath);
                     }
