@@ -48,6 +48,9 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
@@ -56,6 +59,7 @@ protected:
 
 private:
     static BlurPlugin* _instance;
+    OfxParamHandle _radiusParam = nullptr;
 };
 
 class ColorMapPlugin : public FilterPlugin

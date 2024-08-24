@@ -14,7 +14,7 @@
 
 namespace toucan
 {
-    //! Container class for OpenFX values.
+    //! OpenFX properties.
     class PropertySet
     {
     public:
@@ -26,16 +26,16 @@ namespace toucan
         OfxStatus setStringN(const char* property, int count, const char* const* value);
         OfxStatus setDoubleN(const char* property, int count, const double* value);
         OfxStatus setIntN(const char* property, int count, const int* value);
-        OfxStatus getPointer(const char* property, int index, void** value);
-        OfxStatus getString(const char* property, int index, char** value);
-        OfxStatus getDouble(const char* property, int index, double* value);
-        OfxStatus getInt(const char* property, int index, int* value);
-        OfxStatus getPointerN(const char* property, int count, void** value);
-        OfxStatus getStringN(const char* property, int count, char** value);
-        OfxStatus getDoubleN(const char* property, int count, double* value);
-        OfxStatus getIntN(const char* property, int count, int* value);
+        OfxStatus getPointer(const char* property, int index, void** value) const;
+        OfxStatus getString(const char* property, int index, char** value) const;
+        OfxStatus getDouble(const char* property, int index, double* value) const;
+        OfxStatus getInt(const char* property, int index, int* value) const;
+        OfxStatus getPointerN(const char* property, int count, void** value) const;
+        OfxStatus getStringN(const char* property, int count, char** value) const;
+        OfxStatus getDoubleN(const char* property, int count, double* value) const;
+        OfxStatus getIntN(const char* property, int count, int* value) const;
         OfxStatus reset(const char* property);
-        OfxStatus getDimension(const char* property, int* count);
+        OfxStatus getDimension(const char* property, int* count) const;
         
         std::vector<std::string> getPointerProperties() const;
         std::vector<std::string> getStringProperties() const;
@@ -64,7 +64,7 @@ namespace toucan
     private:
         std::map<std::string, std::vector<void*> > _p;
         std::map<std::string, std::vector<std::string> > _s;
-        std::vector<std::vector<char> > _buf;
+        mutable std::vector<std::vector<char> > _buf;
         std::map<std::string, std::vector<double> > _d;
         std::map<std::string, std::vector<int> > _i;
     };

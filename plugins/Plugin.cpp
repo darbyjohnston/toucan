@@ -53,6 +53,10 @@ OfxStatus Plugin::_loadAction(void)
         _host->host,
         kOfxPropertySuite,
         1);
+    _parameterSuite = (OfxParameterSuiteV1*)_host->fetchSuite(
+        _host->host,
+        kOfxParameterSuite,
+        1);
     _imageEffectSuite = (OfxImageEffectSuiteV1*)_host->fetchSuite(
         _host->host,
         kOfxImageEffectSuite,

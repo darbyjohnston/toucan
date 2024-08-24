@@ -5,6 +5,7 @@
 #pragma once
 
 #include <OpenFX/ofxImageEffect.h>
+#include <OpenFX/ofxParam.h>
 
 #include <string>
 
@@ -36,5 +37,6 @@ protected:
     std::string _group;
     OfxHost* _host = nullptr;
     OfxPropertySuiteV1* _propertySuite = nullptr;
+    OfxParameterSuiteV1* _parameterSuite = nullptr;
     OfxImageEffectSuiteV1* _imageEffectSuite = nullptr;
 };

@@ -11,6 +11,7 @@
 
 #include <OpenImageIO/imagebuf.h>
 
+#include <any>
 #include <filesystem>
 #include <memory>
 
@@ -59,23 +60,37 @@ namespace toucan
 
         static const void* _fetchSuite(OfxPropertySetHandle, const char* suiteName, int suiteVersion);
         static OfxStatus _getPropertySet(OfxImageEffectHandle, OfxPropertySetHandle*);
+        static OfxStatus _getParamSet(OfxImageEffectHandle, OfxParamSetHandle*);
+        static OfxStatus _paramDefine(OfxParamSetHandle, const char* paramType, const char* name, OfxPropertySetHandle*);
+        static OfxStatus _paramGetHandle(OfxParamSetHandle, const char* name, OfxParamHandle*, OfxPropertySetHandle*);
+        static OfxStatus _paramGetValue(OfxParamHandle, ...);
         static OfxStatus _clipDefine(OfxImageEffectHandle, const char* name, OfxPropertySetHandle*);
         static OfxStatus _clipGetHandle(OfxImageEffectHandle, const char* name, OfxImageClipHandle*, OfxPropertySetHandle*);
         static OfxStatus _clipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*);
         static OfxStatus _clipReleaseImage(OfxPropertySetHandle);
 
         ImageHostOptions _options;
-        PropertySet _propertySet;
+        PropertySet _propSet;
         OfxHost _host;
         OfxPropertySuiteV1 _propertySuite;
+        OfxParameterSuiteV1 _parameterSuite;
         OfxImageEffectSuiteV1 _effectSuite;
         struct PluginData
         {
             std::shared_ptr<Plugin> plugin;
             OfxPlugin* ofxPlugin = nullptr;
-            PropertySet effectPropertySet;
-            std::map<std::string, PropertySet> clipPropertySets;
-            std::map<std::string, PropertySet> images;
+            PropertySet effectPropSet;
+            std::map<std::string, PropertySet> clipPropSets;
+            std::map<std::string, std::string> paramTypes;
+            std::map<std::string, PropertySet> params;
+            
+            struct InstanceData
+            {
+                std::map<std::string, std::any> paramValues;
+                std::map<std::string, PropertySet> images;
+            };
+            //! \todo Add multiple instances.
+            InstanceData instance;
         };
         std::vector<PluginData> _pluginData;
     };

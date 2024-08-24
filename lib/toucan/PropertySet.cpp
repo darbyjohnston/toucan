@@ -96,7 +96,7 @@ namespace toucan
         return kOfxStatOK;
     }
 
-    OfxStatus PropertySet::getPointer(const char* property, int index, void** value)
+    OfxStatus PropertySet::getPointer(const char* property, int index, void** value) const
     {
         auto p = _p.find(property);
         if (p != _p.end())
@@ -111,7 +111,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getString(const char* property, int index, char** value)
+    OfxStatus PropertySet::getString(const char* property, int index, char** value) const
     {
         auto s = _s.find(property);
         if (s != _s.end())
@@ -132,7 +132,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getDouble(const char* property, int index, double* value)
+    OfxStatus PropertySet::getDouble(const char* property, int index, double* value) const
     {
         auto d = _d.find(property);
         if (d != _d.end())
@@ -147,7 +147,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getInt(const char* property, int index, int* value)
+    OfxStatus PropertySet::getInt(const char* property, int index, int* value) const
     {
         auto i = _i.find(property);
         if (i != _i.end())
@@ -162,7 +162,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getPointerN(const char* property, int count, void** value)
+    OfxStatus PropertySet::getPointerN(const char* property, int count, void** value) const
     {
         auto p = _p.find(property);
         if (p != _p.end())
@@ -180,7 +180,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getStringN(const char* property, int count, char** value)
+    OfxStatus PropertySet::getStringN(const char* property, int count, char** value) const
     {
         auto s = _s.find(property);
         if (s != _s.end())
@@ -203,7 +203,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getDoubleN(const char* property, int count, double* value)
+    OfxStatus PropertySet::getDoubleN(const char* property, int count, double* value) const
     {
         auto d = _d.find(property);
         if (d != _d.end())
@@ -221,7 +221,7 @@ namespace toucan
         return kOfxStatFailed;
     }
 
-    OfxStatus PropertySet::getIntN(const char* property, int count, int* value)
+    OfxStatus PropertySet::getIntN(const char* property, int count, int* value) const
     {
         auto i = _i.find(property);
         if (i != _i.end())
@@ -269,7 +269,7 @@ namespace toucan
         return out;
     }
 
-    OfxStatus PropertySet::getDimension(const char* property, int* count)
+    OfxStatus PropertySet::getDimension(const char* property, int* count) const
     {
         OfxStatus out = kOfxStatFailed;
         auto p = _p.find(property);

@@ -28,7 +28,9 @@ OfxStatus FilterPlugin::_describeAction(OfxImageEffectHandle descriptor)
     return kOfxStatOK;
 }
 
-OfxStatus FilterPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus FilterPlugin::_describeInContextAction(
+    OfxImageEffectHandle descriptor,
+    OfxPropertySetHandle inArgs)
 {
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
@@ -141,6 +143,27 @@ OfxStatus BlurPlugin::mainEntryPoint(
     return _instance->_entryPoint(action, handle, inArgs, outArgs);
 }
 
+OfxStatus BlurPlugin::_describeInContextAction(
+    OfxImageEffectHandle descriptor,
+    OfxPropertySetHandle inArgs)
+{
+    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+
+    OfxPropertySetHandle props;
+    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "radius", &props);
+    _propertySuite->propSetString(props, kOfxParamPropDoubleType, 0, kOfxParamDoubleTypeX);
+    _propertySuite->propSetString(props, kOfxParamPropDefaultCoordinateSystem, 0, kOfxParamDoubleTypeX);
+    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 10.0);
+    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The blur radius");
+    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Radius");
+    _parameterSuite->paramGetHandle(paramSet, "radius", &_radiusParam, nullptr);
+
+    return kOfxStatOK;
+}
+
 OfxStatus BlurPlugin::_render(
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
@@ -148,7 +171,7 @@ OfxStatus BlurPlugin::_render(
     OfxPropertySetHandle inArgs)
 {
     double radius = 0.0;
-    _propertySuite->propGetDouble(inArgs, "radius", 0, &radius);
+    _parameterSuite->paramGetValue(_radiusParam, &radius);
 
     const OIIO::ImageBuf k = OIIO::ImageBufAlgo::make_kernel("gaussian", radius, radius);
     OIIO::ImageBufAlgo::convolve(
