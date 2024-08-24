@@ -8,34 +8,7 @@
 
 namespace toucan
 {
-    //! Blur data.
-    struct BlurData
-    {
-        float radius = 10.F;
-    };
-
-    //! Blur node.
-    class BlurNode : public IImageNode
-    {
-    public:
-        BlurNode(
-            const BlurData& = BlurData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~BlurNode();
-
-        const BlurData& getData() const;
-        void setData(const BlurData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        BlurData _data;
-    };
-
-    //! Blur OTIO effect.
+    //! Blur effect.
     class BlurEffect : public IEffect
     {
     public:
@@ -51,6 +24,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -60,37 +34,10 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        BlurData _data;
+        float _radius = 10.F;
     };
 
-    //! Color map data.
-    struct ColorMapData
-    {
-        std::string mapName;
-    };
-
-    //! Color map node.
-    class ColorMapNode : public IImageNode
-    {
-    public:
-        ColorMapNode(
-            const ColorMapData & = ColorMapData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~ColorMapNode();
-
-        const ColorMapData& getData() const;
-        void setData(const ColorMapData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        ColorMapData _data;
-    };
-
-    //! Color map OTIO effect.
+    //! Color map effect.
     class ColorMapEffect : public IEffect
     {
     public:
@@ -106,6 +53,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -115,23 +63,10 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        ColorMapData _data;
+        std::string _mapName;
     };
 
-    //! Invert node.
-    class InvertNode : public IImageNode
-    {
-    public:
-        InvertNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~InvertNode();
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-    };
-
-    //! Invert OTIO effect.
+    //! Invert effect.
     class InvertEffect : public IEffect
     {
     public:
@@ -147,40 +82,14 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
         virtual ~InvertEffect();
     };
 
-    //! Power data.
-    struct PowData
-    {
-        float value = 1.F;
-    };
-
-    //! Power node.
-    class PowNode : public IImageNode
-    {
-    public:
-        PowNode(
-            const PowData & = PowData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~PowNode();
-
-        const PowData& getData() const;
-        void setData(const PowData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        PowData _data;
-    };
-
-    //! Power OTIO effect.
+    //! Power effect.
     class PowEffect : public IEffect
     {
     public:
@@ -196,6 +105,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -205,37 +115,10 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        PowData _data;
+        float _value = 1.F;
     };
 
-    //! Saturate data.
-    struct SaturateData
-    {
-        float value = 1.F;
-    };
-
-    //! Saturate node.
-    class SaturateNode : public IImageNode
-    {
-    public:
-        SaturateNode(
-            const SaturateData & = SaturateData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~SaturateNode();
-
-        const SaturateData& getData() const;
-        void setData(const SaturateData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        SaturateData _data;
-    };
-
-    //! Saturate OTIO effect.
+    //! Saturate effect.
     class SaturateEffect : public IEffect
     {
     public:
@@ -251,6 +134,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -260,40 +144,10 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        SaturateData _data;
+        float _value = 1.F;
     };
 
-    //! Unsharp mask data.
-    struct UnsharpMaskData
-    {
-        std::string kernel = "gaussian";
-        float width = 3.F;
-        float contrast = 1.F;
-        float threshold = 0.F;
-    };
-
-    //! Unsharp mask node.
-    class UnsharpMaskNode : public IImageNode
-    {
-    public:
-        UnsharpMaskNode(
-            const UnsharpMaskData & = UnsharpMaskData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~UnsharpMaskNode();
-
-        const UnsharpMaskData& getData() const;
-        void setData(const UnsharpMaskData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        UnsharpMaskData _data;
-    };
-
-    //! Unsharp mask OTIO effect.
+    //! Unsharp mask effect.
     class UnsharpMaskEffect : public IEffect
     {
     public:
@@ -309,6 +163,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -318,6 +173,9 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        UnsharpMaskData _data;
+        std::string _kernel = "gaussian";
+        float _width = 3.F;
+        float _contrast = 1.F;
+        float _threshold = 0.F;
     };
 }

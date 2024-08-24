@@ -49,12 +49,22 @@ namespace toucan
 
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i& vec)
     {
-        return OTIO_NS::AnyVector{ vec.x, vec.y };
+        return OTIO_NS::AnyVector
+        {
+            static_cast<int64_t>(vec.x),
+            static_cast<int64_t>(vec.y)
+        };
     }
     
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V4f& vec)
     {
-        return OTIO_NS::AnyVector{ vec.x, vec.y, vec.z, vec.w };
+        return OTIO_NS::AnyVector
+        {
+            static_cast<double>(vec.x),
+            static_cast<double>(vec.y),
+            static_cast<double>(vec.z),
+            static_cast<double>(vec.w)
+        };
     }
     
     void anyToVec(const OTIO_NS::AnyVector& any, IMATH_NAMESPACE::V2i& out)

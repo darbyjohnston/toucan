@@ -7,14 +7,11 @@ set(HEADERS
     ImageHost.h
     ImageNode.h
     Init.h
-    Generator.h
     Plugin.h
     PropertySet.h
     Read.h
     TimeWarp.h
     Transform.h
-    Transition.h
-    Transition.h
     Util.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
@@ -26,14 +23,11 @@ set(SOURCE
     ImageHost.cpp
     ImageNode.cpp
     Init.cpp
-    Generator.cpp
     Plugin.cpp
     PropertySet.cpp
     Read.cpp
     TimeWarp.cpp
     Transform.cpp
-    Transition.cpp
-    Transition.cpp
     Util.cpp)
 if(WIN32)
     list(APPEND SOURCE

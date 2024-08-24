@@ -40,6 +40,14 @@ OfxStatus Plugin::_entryPoint(
     {
         out = _describeInContextAction(effectHandle, inArgs);
     }
+    else if (strcmp(action, kOfxActionCreateInstance) == 0)
+    {
+        out = _createInstance(effectHandle);
+    }
+    else if (strcmp(action, kOfxActionDestroyInstance) == 0)
+    {
+        out = _destroyInstance(effectHandle);
+    }
     else if (strcmp(action, kOfxImageEffectActionRender) == 0)
     {
         out = _renderAction(effectHandle, inArgs, outArgs);
@@ -87,6 +95,16 @@ OfxStatus Plugin::_describeAction(OfxImageEffectHandle descriptor)
 }
 
 OfxStatus Plugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+{
+    return kOfxStatOK;
+}
+
+OfxStatus Plugin::_createInstance(OfxImageEffectHandle)
+{
+    return kOfxStatOK;
+}
+
+OfxStatus Plugin::_destroyInstance(OfxImageEffectHandle)
 {
     return kOfxStatOK;
 }

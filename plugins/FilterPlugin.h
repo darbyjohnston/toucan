@@ -51,6 +51,7 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,

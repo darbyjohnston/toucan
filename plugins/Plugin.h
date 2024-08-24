@@ -28,6 +28,8 @@ protected:
     virtual OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle);
+    virtual OfxStatus _createInstance(OfxImageEffectHandle);
+    virtual OfxStatus _destroyInstance(OfxImageEffectHandle);
     virtual OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,

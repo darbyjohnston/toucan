@@ -19,9 +19,7 @@ namespace toucan
         //! Set whether images are pre-multiplied before compositing.
         void setPremult(bool);
 
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         bool _premult = false;

@@ -10,13 +10,11 @@
 
 namespace toucan
 {
-    void readTest(
-        const std::filesystem::path& path,
-        const std::shared_ptr<ImageHost>& host)
+    void readTest(const std::filesystem::path& path)
     {
         std::cout << "readTest" << std::endl;
         auto read = std::make_shared<ReadNode>(path / "Letter_A.png");
-        auto buf = read->exec(OTIO_NS::RationalTime(), host);
+        auto buf = read->exec(OTIO_NS::RationalTime());
         const auto& spec = buf.spec();
         assert(spec.width > 0);
     }

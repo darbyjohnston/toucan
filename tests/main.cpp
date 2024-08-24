@@ -36,9 +36,9 @@ int main(int argc, char** argv)
 #endif // _WINDOWS
     auto host = std::make_shared<ImageHost>(searchPath);
     
-    compTest(path, host);
+    compTest(path);
     propertySetTest();
-    readTest(path, host);
+    readTest(path);
     imageGraphTest(path, host);
     utilTest(path);
     

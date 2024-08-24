@@ -8,39 +8,7 @@
 
 namespace toucan
 {
-    //! Color convert data.
-    struct ColorConvertData
-    {
-        std::string fromspace;
-        std::string tospace;
-        bool        unpremult = true;
-        std::string context_key;
-        std::string context_value;
-        std::string color_config;
-    };
-
-    //! Color convert node.
-    class ColorConvertNode : public IImageNode
-    {
-    public:
-        ColorConvertNode(
-            const ColorConvertData & = ColorConvertData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
-
-        virtual ~ColorConvertNode();
-
-        const ColorConvertData& getData() const;
-        void setData(const ColorConvertData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        ColorConvertData _data;
-    };
-
-    //! Color convert OTIO effect.
+    //! Color convert effect.
     class ColorConvertEffect : public IEffect
     {
     public:
@@ -56,6 +24,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -65,23 +34,15 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        ColorConvertData _data;
+        std::string _fromSpace;
+        std::string _toSpace;
+        bool        _unpremult = true;
+        std::string _contextKey;
+        std::string _contextValue;
+        std::string _colorConfig;
     };
 
-    //! Premultiply alpha node.
-    class PremultNode : public IImageNode
-    {
-    public:
-        PremultNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~PremultNode();
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-    };
-
-    //! Premultiply alpha OTIO effect.
+    //! Premultiply alpha effect.
     class PremultEffect : public IEffect
     {
     public:
@@ -97,26 +58,14 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
         virtual ~PremultEffect();
     };
 
-    //! Un-premultiply alpha node.
-    class UnpremultNode : public IImageNode
-    {
-    public:
-        UnpremultNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
-
-        virtual ~UnpremultNode();
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-    };
-
-    //! Un-premultiply alpha OTIO effect.
+    //! Un-premultiply alpha effect.
     class UnpremultEffect : public IEffect
     {
     public:
@@ -132,6 +81,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:

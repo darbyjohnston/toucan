@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <toucan/ImageNode.h>
 #include <toucan/Plugin.h>
 #include <toucan/PropertySet.h>
 
@@ -11,19 +12,66 @@
 
 #include <OpenImageIO/imagebuf.h>
 
-#include <any>
+#include <opentimelineio/anyDictionary.h>
+
 #include <filesystem>
 #include <memory>
 
 namespace toucan
 {
-    //! Image host options.
+    //! Image effect plugin.
+    struct ImageEffectPlugin
+    {
+        std::shared_ptr<Plugin> plugin;
+        OfxPlugin* ofxPlugin = nullptr;
+        PropertySet propSet;
+        std::map<std::string, PropertySet> clipPropSets;
+        std::map<std::string, std::string> paramTypes;
+        std::map<std::string, PropertySet> paramDefs;
+    };
+
+    //! Image effect instance.
+    struct ImageEffectInstance
+    {
+        std::map<std::string, std::any> params;
+        std::map<std::string, PropertySet> images;
+    };
+
+    //! Image effect handle.
+    struct ImageEffectHandle
+    {
+        ImageEffectPlugin* plugin = nullptr;
+        ImageEffectInstance* instance = nullptr;
+    };
+
+    //! Image effect node.
+    class ImageEffectNode : public IImageNode
+    {
+    public:
+        ImageEffectNode(
+            ImageEffectPlugin&,
+            const std::string& name,
+            const OTIO_NS::AnyDictionary& metaData,
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
+
+        virtual ~ImageEffectNode();
+
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+
+    private:
+        ImageEffectPlugin& _plugin;
+        ImageEffectInstance _instance;
+        ImageEffectHandle _handle;
+        OTIO_NS::AnyDictionary _metaData;
+    };
+
+    //! Image effect host options.
     struct ImageHostOptions
     {
         bool verbose = false;
     };
 
-    //! Image plugins host.
+    //! Image effect host.
     class ImageHost : public std::enable_shared_from_this<ImageHost>
     {
     public:
@@ -33,26 +81,11 @@ namespace toucan
 
         ~ImageHost();
 
-        //! Generate an image.
-        void generator(
+        //! Create an image node.
+        std::shared_ptr<IImageNode> createNode(
             const std::string& name,
-            OIIO::ImageBuf&,
-            const PropertySet& = PropertySet());
-
-        //! Apply a filter.
-        void filter(
-            const std::string& name,
-            const OIIO::ImageBuf&,
-            OIIO::ImageBuf&,
-            const PropertySet& = PropertySet());
-
-        //! Apply a transition.
-        void transition(
-            const std::string& name,
-            const OIIO::ImageBuf&,
-            const OIIO::ImageBuf&,
-            OIIO::ImageBuf&,
-            const PropertySet& = PropertySet());
+            const OTIO_NS::AnyDictionary&,
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
     private:
         void _suiteInit();
@@ -75,23 +108,6 @@ namespace toucan
         OfxPropertySuiteV1 _propertySuite;
         OfxParameterSuiteV1 _parameterSuite;
         OfxImageEffectSuiteV1 _effectSuite;
-        struct PluginData
-        {
-            std::shared_ptr<Plugin> plugin;
-            OfxPlugin* ofxPlugin = nullptr;
-            PropertySet effectPropSet;
-            std::map<std::string, PropertySet> clipPropSets;
-            std::map<std::string, std::string> paramTypes;
-            std::map<std::string, PropertySet> params;
-            
-            struct InstanceData
-            {
-                std::map<std::string, std::any> paramValues;
-                std::map<std::string, PropertySet> images;
-            };
-            //! \todo Add multiple instances.
-            InstanceData instance;
-        };
-        std::vector<PluginData> _pluginData;
+        std::vector<ImageEffectPlugin> _plugins;
     };
 }

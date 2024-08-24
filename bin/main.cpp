@@ -124,10 +124,10 @@ int main(int argc, char** argv)
         time += timeInc)
     {
         std::cout << time.value() << "/" << timeRange.duration().value() << std::endl;
-        if (auto node = graph->exec(time))
+        if (auto node = graph->exec(host, time))
         {
             // Execute the graph.
-            const auto buf = node->exec(time, host);
+            const auto buf = node->exec(time);
 
             // Print the graph.
             if (printGraph)

@@ -4,50 +4,10 @@
 
 #include "Filter.h"
 
+#include "ImageHost.h"
+
 namespace toucan
-{
-    BlurNode::BlurNode(
-        const BlurData& data,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("Blur", inputs),
-        _data(data)
-    {}
-
-    BlurNode::~BlurNode()
-    {}
-
-    const BlurData& BlurNode::getData() const
-    {
-        return _data;
-    }
-
-    void BlurNode::setData(const BlurData& value)
-    {
-        _data = value;
-    }
-
-    OIIO::ImageBuf BlurNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            PropertySet propSet;
-            propSet.setDouble("radius", 0, _data.radius);
-            host->filter("Toucan:Blur", input, buf, propSet);
-        }
-        return buf;
-    }
-    
+{    
     BlurEffect::BlurEffect(
         std::string const& name,
         std::string const& effect_name,
@@ -59,9 +19,12 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> BlurEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<BlurNode>(_data, inputs);
+        OTIO_NS::AnyDictionary metadata = this->metadata();
+        metadata["radius"] = static_cast<double>(_radius);
+        return host->createNode(effect_name(), metadata, inputs);
     }
 
     bool BlurEffect::read_from(Reader& reader)
@@ -72,7 +35,7 @@ namespace toucan
             IEffect::read_from(reader);
         if (out)
         {
-            _data.radius = radius;
+            _radius = radius;
         }
         return out;
     }
@@ -80,49 +43,7 @@ namespace toucan
     void BlurEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("radius", static_cast<double>(_data.radius));
-    }
-
-    ColorMapNode::ColorMapNode(
-        const ColorMapData& data,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("ColorMap", inputs),
-        _data(data)
-    {}
-
-    ColorMapNode::~ColorMapNode()
-    {}
-
-    const ColorMapData& ColorMapNode::getData() const
-    {
-        return _data;
-    }
-
-    void ColorMapNode::setData(const ColorMapData& value)
-    {
-        _data = value;
-    }
-
-    OIIO::ImageBuf ColorMapNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            PropertySet propSet;
-            propSet.setString("mapName", 0, _data.mapName.c_str());
-            host->filter("Toucan:ColorMap", input, buf, propSet);
-        }
-        return buf;
+        writer.write("radius", static_cast<double>(_radius));
     }
 
     ColorMapEffect::ColorMapEffect(
@@ -136,15 +57,18 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> ColorMapEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<ColorMapNode>(_data, inputs);
+        OTIO_NS::AnyDictionary metadata = this->metadata();
+        metadata["map_name"] = _mapName;
+        return host->createNode(effect_name(), metadata, inputs);
     }
 
     bool ColorMapEffect::read_from(Reader& reader)
     {
         bool out =
-            reader.read("map_name", &_data.mapName) &&
+            reader.read("map_name", &_mapName) &&
             IEffect::read_from(reader);
         return out;
     }
@@ -152,35 +76,7 @@ namespace toucan
     void ColorMapEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("map_name", _data.mapName);
-    }
-
-    InvertNode::InvertNode(
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("Invert", inputs)
-    {}
-
-    InvertNode::~InvertNode()
-    {}
-
-    OIIO::ImageBuf InvertNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            host->filter("Toucan:Invert", input, buf);
-        }
-        return buf;
+        writer.write("map_name", _mapName);
     }
 
     InvertEffect::InvertEffect(
@@ -194,51 +90,10 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> InvertEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<InvertNode>(inputs);
-    }
-
-    PowNode::PowNode(
-        const PowData& data,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("Pow", inputs),
-        _data(data)
-    {}
-
-    PowNode::~PowNode()
-    {}
-
-    const PowData& PowNode::getData() const
-    {
-        return _data;
-    }
-
-    void PowNode::setData(const PowData& value)
-    {
-        _data = value;
-    }
-
-    OIIO::ImageBuf PowNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            PropertySet propSet;
-            propSet.setDouble("value", 0, _data.value);
-            host->filter("Toucan:Pow", input, buf, propSet);
-        }
-        return buf;
+        return host->createNode(effect_name(), metadata(), inputs);
     }
 
     PowEffect::PowEffect(
@@ -252,9 +107,12 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> PowEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<PowNode>(_data, inputs);
+        OTIO_NS::AnyDictionary metadata = this->metadata();
+        metadata["value"] = static_cast<double>(_value);
+        return host->createNode(effect_name(), metadata, inputs);
     }
 
     bool PowEffect::read_from(Reader& reader)
@@ -265,7 +123,7 @@ namespace toucan
             IEffect::read_from(reader);
         if (out)
         {
-            _data.value = value;
+            _value = value;
         }
         return out;
     }
@@ -273,49 +131,7 @@ namespace toucan
     void PowEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("value", static_cast<double>(_data.value));
-    }
-
-    SaturateNode::SaturateNode(
-        const SaturateData& data,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("Saturate", inputs),
-        _data(data)
-    {}
-
-    SaturateNode::~SaturateNode()
-    {}
-
-    const SaturateData& SaturateNode::getData() const
-    {
-        return _data;
-    }
-
-    void SaturateNode::setData(const SaturateData& value)
-    {
-        _data = value;
-    }
-
-    OIIO::ImageBuf SaturateNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            PropertySet propSet;
-            propSet.setDouble("value", 0, _data.value);
-            host->filter("Toucan:Saturate", input, buf, propSet);
-        }
-        return buf;
+        writer.write("value", static_cast<double>(_value));
     }
 
     SaturateEffect::SaturateEffect(
@@ -329,9 +145,12 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> SaturateEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<SaturateNode>(_data, inputs);
+        OTIO_NS::AnyDictionary metadata = this->metadata();
+        metadata["value"] = static_cast<double>(_value);
+        return host->createNode(effect_name(), metadata, inputs);
     }
 
     bool SaturateEffect::read_from(Reader& reader)
@@ -342,7 +161,7 @@ namespace toucan
             IEffect::read_from(reader);
         if (out)
         {
-            _data.value = value;
+            _value = value;
         }
         return out;
     }
@@ -350,52 +169,7 @@ namespace toucan
     void SaturateEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("value", static_cast<double>(_data.value));
-    }
-
-    UnsharpMaskNode::UnsharpMaskNode(
-        const UnsharpMaskData& data,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("UnsharpMask", inputs),
-        _data(data)
-    {}
-
-    UnsharpMaskNode::~UnsharpMaskNode()
-    {}
-
-    const UnsharpMaskData& UnsharpMaskNode::getData() const
-    {
-        return _data;
-    }
-
-    void UnsharpMaskNode::setData(const UnsharpMaskData& value)
-    {
-        _data = value;
-    }
-
-    OIIO::ImageBuf UnsharpMaskNode::exec(
-        const OTIO_NS::RationalTime& time,
-        const std::shared_ptr<ImageHost>& host)
-    {
-        OIIO::ImageBuf buf;
-        if (!_inputs.empty() && _inputs[0])
-        {
-            OTIO_NS::RationalTime offsetTime = time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-            const auto input = _inputs[0]->exec(offsetTime, host);
-            const auto& spec = input.spec();
-            buf = OIIO::ImageBuf(spec);
-            PropertySet propSet;
-            propSet.setString("kernal", 0, _data.kernel.c_str());
-            propSet.setDouble("width", 0, _data.width);
-            propSet.setDouble("contrast", 0, _data.contrast);
-            propSet.setDouble("threshold", 0, _data.threshold);
-            host->filter("Toucan:UnsharpMask", input, buf, propSet);
-        }
-        return buf;
+        writer.write("value", static_cast<double>(_value));
     }
 
     UnsharpMaskEffect::UnsharpMaskEffect(
@@ -409,9 +183,15 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> UnsharpMaskEffect::createNode(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        return std::make_shared<UnsharpMaskNode>(_data, inputs);
+        OTIO_NS::AnyDictionary metadata = this->metadata();
+        metadata["kernel"] = _kernel;
+        metadata["width"] = static_cast<double>(_width);
+        metadata["contrast"] = static_cast<double>(_contrast);
+        metadata["threshold"] = static_cast<double>(_threshold);
+        return host->createNode(effect_name(), metadata, inputs);
     }
 
     bool UnsharpMaskEffect::read_from(Reader& reader)
@@ -428,10 +208,10 @@ namespace toucan
             IEffect::read_from(reader);
         if (out)
         {
-            _data.kernel = kernel;
-            _data.width = width;
-            _data.contrast = contrast;
-            _data.threshold = threshold;
+            _kernel = kernel;
+            _width = width;
+            _contrast = contrast;
+            _threshold = threshold;
         }
         return out;
     }
@@ -439,9 +219,9 @@ namespace toucan
     void UnsharpMaskEffect::write_to(Writer& writer) const
     {
         IEffect::write_to(writer);
-        writer.write("kernel", _data.kernel);
-        writer.write("width", static_cast<double>(_data.width));
-        writer.write("contrast", static_cast<double>(_data.contrast));
-        writer.write("threshold", static_cast<double>(_data.threshold));
+        writer.write("kernel", _kernel);
+        writer.write("width", static_cast<double>(_width));
+        writer.write("contrast", static_cast<double>(_contrast));
+        writer.write("threshold", static_cast<double>(_threshold));
     }
 }

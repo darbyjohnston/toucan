@@ -5,10 +5,9 @@
 #include "ImageGraph.h"
 
 #include "Comp.h"
-#include "Generator.h"
+#include "ImageHost.h"
 #include "Read.h"
 #include "TimeWarp.h"
-#include "Transition.h"
 #include "Util.h"
 
 #include <opentimelineio/externalReference.h>
@@ -88,11 +87,15 @@ namespace toucan
         return _imageSize;
     }
 
-    std::shared_ptr<IImageNode> ImageGraph::exec(const OTIO_NS::RationalTime& time) const
+    std::shared_ptr<IImageNode> ImageGraph::exec(
+        const std::shared_ptr<ImageHost>& host,
+        const OTIO_NS::RationalTime& time) const
     {
         // Set the background color.
-        std::shared_ptr<IImageNode> node = std::make_shared<FillNode>(
-            FillData{ _imageSize, IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F )});
+        OTIO_NS::AnyDictionary metaData;
+        metaData["size"] = vecToAny(_imageSize);
+        metaData["color"] = vecToAny(IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F));
+        std::shared_ptr<IImageNode> node = host->createNode("Toucan:Fill", metaData);
 
         // Loop over the tracks.
         auto stack = _timeline->tracks();
@@ -101,13 +104,13 @@ namespace toucan
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
                 // Process this track.
-                auto trackNode = _track(time, track);
+                auto trackNode = _track(host, time, track);
 
                 // Get the track effects.
                 const auto& effects = track->effects();
                 if (!effects.empty())
                 {
-                    trackNode = _effects(effects, trackNode);
+                    trackNode = _effects(host, effects, trackNode);
                 }
 
                 // Composite this track over the previous track.
@@ -130,13 +133,14 @@ namespace toucan
         const auto& effects = stack->effects();
         if (!effects.empty())
         {
-            node = _effects(effects, node);
+            node = _effects(host, effects, node);
         }
 
         return node;
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_track(
+        const std::shared_ptr<ImageHost>& host,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
@@ -157,6 +161,7 @@ namespace toucan
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
                 {
                     out = _item(
+                        host,
                         trimmedRangeInParent.value(),
                         track->transformed_time(time, item),
                         item);
@@ -192,10 +197,15 @@ namespace toucan
                     if (auto prevItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(prev2))
                     {
                         auto a = _item(
+                            host,
                             prevItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, prevItem),
                             prevItem);
-                        out = _transition(prevTransition, trimmedRangeInParent.value(), { a, out });
+                        out = _transition(
+                            host,
+                            prevTransition,
+                            trimmedRangeInParent.value(),
+                            { a, out });
                     }
                 }
             }
@@ -207,10 +217,15 @@ namespace toucan
                     if (auto nextItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(next2))
                     {
                         auto b = _item(
+                            host,
                             nextItem->trimmed_range_in_parent().value(),
                             track->transformed_time(time, nextItem),
                             nextItem);
-                        out = _transition(nextTransition, trimmedRangeInParent.value(), { out, b });
+                        out = _transition(
+                            host,
+                            nextTransition,
+                            trimmedRangeInParent.value(),
+                            { out, b });
                     }
                 }
             }
@@ -220,6 +235,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_item(
+        const std::shared_ptr<ImageHost>& host,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
@@ -252,126 +268,21 @@ namespace toucan
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
             {
-                if ("Checkers" == generatorRef->generator_kind())
-                {
-                    CheckersData data;
-                    auto parameters = generatorRef->parameters();
-                    auto i = parameters.find("size");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
-                    }
-                    i = parameters.find("checkerSize");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.checkerSize);
-                    }
-                    i = parameters.find("color1");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color1);
-                    }
-                    i = parameters.find("color2");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color2);
-                    }
-                    auto generator = std::make_shared<CheckersNode>(data);
-                    out = generator;
-                }
-                else if ("Fill" == generatorRef->generator_kind())
-                {
-                    FillData data;
-                    auto parameters = generatorRef->parameters();
-                    auto i = parameters.find("size");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
-                    }
-                    i = parameters.find("color");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color);
-                    }
-                    auto generator = std::make_shared<FillNode>(data);
-                    out = generator;
-                }
-                else if ("Gradient" == generatorRef->generator_kind())
-                {
-                    GradientData data;
-                    auto parameters = generatorRef->parameters();
-                    auto i = parameters.find("size");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
-                    }
-                    i = parameters.find("color1");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color1);
-                    }
-                    i = parameters.find("color2");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.color2);
-                    }
-                    i = parameters.find("vertical");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.vertical = std::any_cast<bool>(i->second);
-                    }
-                    auto generator = std::make_shared<GradientNode>(data);
-                    out = generator;
-                }
-                else if ("Noise" == generatorRef->generator_kind())
-                {
-                    NoiseData data;
-                    auto parameters = generatorRef->parameters();
-                    auto i = parameters.find("size");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), data.size);
-                    }
-                    i = parameters.find("type");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.type = std::any_cast<std::string>(i->second);
-                    }
-                    i = parameters.find("a");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.a = std::any_cast<double>(i->second);
-                    }
-                    i = parameters.find("b");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.b = std::any_cast<double>(i->second);
-                    }
-                    i = parameters.find("mono");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.mono = std::any_cast<bool>(i->second);
-                    }
-                    i = parameters.find("seed");
-                    if (i != parameters.end() && i->second.has_value())
-                    {
-                        data.seed = std::any_cast<int64_t>(i->second);
-                    }
-                    auto generator = std::make_shared<NoiseNode>(data);
-                    out = generator;
-                }
+                out = host->createNode(generatorRef->generator_kind(), generatorRef->parameters());
             }
         }
         else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))
         {
-            out = std::make_shared<FillNode>(FillData{ _imageSize });
+            OTIO_NS::AnyDictionary metaData;
+            metaData["size"] = vecToAny(_imageSize);
+            out = host->createNode("Toucan:Fill", metaData);
         }
 
         // Get the effects.
         const auto& effects = item->effects();
         if (!effects.empty())
         {
-            out = _effects(effects, out);
+            out = _effects(host, effects, out);
         }
         if (out)
         {
@@ -388,27 +299,18 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_transition(
+        const std::shared_ptr<ImageHost>& host,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>& otioTransition,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) const
     {
-        std::shared_ptr<IImageNode> out;
-        if ("HorizontalWipe" == otioTransition->transition_type())
-        {
-            out = std::make_shared<HorizontalWipeNode>(trimmedRangeInParent, inputs);
-        }
-        else if ("VerticalWipe" == otioTransition->transition_type())
-        {
-            out = std::make_shared<VerticalWipeNode>(trimmedRangeInParent, inputs);
-        }
-        else
-        {
-            out = std::make_shared<DissolveNode>(trimmedRangeInParent, inputs);
-        }
-        return out;
+        OTIO_NS::AnyDictionary metaData;
+        metaData["range"] = trimmedRangeInParent;
+        return host->createNode("Toucan:" + otioTransition->transition_type(), metaData);
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_effects(
+        const std::shared_ptr<ImageHost>& host,
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
         const std::shared_ptr<IImageNode>& input) const
     {
@@ -417,7 +319,7 @@ namespace toucan
         {
             if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
             {
-                auto effectNode = iEffect->createNode({ out });
+                auto effectNode = iEffect->createNode(host, { out });
                 out = effectNode;
             }
             else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))

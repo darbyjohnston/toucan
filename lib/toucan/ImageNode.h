@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <toucan/ImageHost.h>
-
 #include <opentimelineio/effect.h>
 #include <opentimelineio/generatorReference.h>
 
@@ -16,6 +14,8 @@
 
 namespace toucan
 {
+    class ImageHost;
+
     //! Base class for image nodes.
     class IImageNode : public std::enable_shared_from_this<IImageNode>
     {
@@ -38,9 +38,7 @@ namespace toucan
         void setTimeOffset(const OTIO_NS::RationalTime&);
 
         //! Execute the image operation for the given time.
-        virtual OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) = 0;
+        virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
 
         //! Generate a Grapviz graph for the given time.
         std::vector<std::string> graph(
@@ -71,6 +69,7 @@ namespace toucan
 
         //! Create an image node.
         virtual std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) = 0;
 
     protected:

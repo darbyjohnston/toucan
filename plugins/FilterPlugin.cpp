@@ -159,8 +159,15 @@ OfxStatus BlurPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 10.0);
     _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The blur radius");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Radius");
-    _parameterSuite->paramGetHandle(paramSet, "radius", &_radiusParam, nullptr);
 
+    return kOfxStatOK;
+}
+
+OfxStatus BlurPlugin::_createInstance(OfxImageEffectHandle descriptor)
+{
+    OfxParamSetHandle paramSet;
+    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+    _parameterSuite->paramGetHandle(paramSet, "radius", &_radiusParam, nullptr);
     return kOfxStatOK;
 }
 

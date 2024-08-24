@@ -13,6 +13,144 @@
 
 namespace toucan
 {
+    ImageEffectNode::ImageEffectNode(
+        ImageEffectPlugin& plugin,
+        const std::string& name,
+        const OTIO_NS::AnyDictionary& metaData,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IImageNode(name, inputs),
+        _plugin(plugin),
+        _handle{ &plugin, &_instance },
+        _metaData(metaData)
+    {
+        // Set default values.
+        for (const auto& param : _plugin.paramDefs)
+        {
+            auto props = param.second.getStringProperties();
+            auto i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                char* s = nullptr;
+                param.second.getString(kOfxParamPropDefault, 0, &s);
+                if (s)
+                {
+                    _instance.params[param.first] = std::string(s);
+                }
+            }
+            props = param.second.getDoubleProperties();
+            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                double d = 0.0;
+                param.second.getDouble(kOfxParamPropDefault, 0, &d);
+                _instance.params[param.first] = d;
+            }
+            props = param.second.getIntProperties();
+            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                int i = 0;
+                param.second.getInt(kOfxParamPropDefault, 0, &i);
+                _instance.params[param.first] = i;
+            }
+        }
+
+        // Set values.
+        for (const auto& i : metaData)
+        {
+            _instance.params[i.first] = i.second;
+        }
+
+        // Create the plugin instance.
+        OfxStatus ofxStatus = _plugin.ofxPlugin->mainEntry(
+            kOfxActionCreateInstance,
+            &_handle,
+            nullptr,
+            nullptr);
+    }
+
+    ImageEffectNode::~ImageEffectNode()
+    {
+        // Destroy the plugin instance.
+        OfxStatus ofxStatus = _plugin.ofxPlugin->mainEntry(
+            kOfxActionDestroyInstance,
+            &_handle,
+            nullptr,
+            nullptr);
+    }
+
+    OIIO::ImageBuf ImageEffectNode::exec(const OTIO_NS::RationalTime& time)
+    {
+        OIIO::ImageBuf out;
+
+        OTIO_NS::RationalTime offsetTime = time;
+        if (!_timeOffset.is_invalid_time())
+        {
+            offsetTime -= _timeOffset;
+        }
+
+        // Initialize the images.
+        char* context = nullptr;
+        _plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, 0, &context);
+        if (strcmp(context, kOfxImageEffectContextGenerator) == 0)
+        {
+            auto i = _metaData.find("size");
+            if (i != _metaData.end() && i->second.has_value())
+            {
+                IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+                anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), size);
+
+                out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
+                _instance.images["Output"] = bufToPropSet(out);
+            }
+        }
+        else if (
+            strcmp(context, kOfxImageEffectContextFilter) == 0 &&
+            !_inputs.empty() &&
+            _inputs[0])
+        {
+            const auto input = _inputs[0]->exec(offsetTime);
+            out = OIIO::ImageBuf(input.spec());
+            _instance.images["Source"] = bufToPropSet(input);
+            _instance.images["Output"] = bufToPropSet(out);
+        }
+        else if (
+            strcmp(context, kOfxImageEffectContextTransition) == 0 &&
+            _inputs.size() > 1 &&
+            _inputs[0] &&
+            _inputs[1])
+        {
+            const auto input0 = _inputs[0]->exec(offsetTime);
+            const auto input1 = _inputs[1]->exec(offsetTime);
+            out = OIIO::ImageBuf(input0.spec());
+            _instance.images["SourceFrom"] = bufToPropSet(input0);
+            _instance.images["SourceTo"] = bufToPropSet(input1);
+            _instance.images["Output"] = bufToPropSet(out);
+        }
+
+        // Render.
+        const auto& spec = out.spec();
+        if (spec.width > 0 && spec.height > 0)
+        {
+            PropertySet args;
+            args.setDouble(kOfxPropTime, 0, offsetTime.value());
+            OfxRectI bounds;
+            bounds.x1 = 0;
+            bounds.x2 = spec.width;
+            bounds.y1 = 0;
+            bounds.y2 = spec.height;
+            args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
+
+            _plugin.ofxPlugin->mainEntry(
+                kOfxImageEffectActionRender,
+                &_handle,
+                (OfxPropertySetHandle)&args,
+                nullptr);
+        }
+
+        return out;
+    }
+
     ImageHost::ImageHost(
         const std::vector<std::filesystem::path>& searchPath,
         const ImageHostOptions& options) :
@@ -29,9 +167,9 @@ namespace toucan
 
     ImageHost::~ImageHost()
     {
-        for (const auto& data : _pluginData)
+        for (const auto& plugin : _plugins)
         {
-            OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
+            OfxStatus ofxStatus = plugin.ofxPlugin->mainEntry(
                 kOfxActionUnload,
                 nullptr,
                 nullptr,
@@ -39,133 +177,21 @@ namespace toucan
         }
     }
 
-    void ImageHost::generator(
+    std::shared_ptr<IImageNode> ImageHost::createNode(
         const std::string& name,
-        OIIO::ImageBuf& output,
-        const PropertySet& propSet)
+        const OTIO_NS::AnyDictionary& metaData,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
-        for (auto& data : _pluginData)
+        std::shared_ptr<IImageNode> out;
+        for (auto& plugin : _plugins)
         {
-            if (name == data.ofxPlugin->pluginIdentifier)
+            if (name == plugin.ofxPlugin->pluginIdentifier)
             {
-                OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionCreateInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
-
-                data.instance.images["Output"] = bufToPropSet(output);
-                PropertySet args = propSet;
-                args.setDouble(kOfxPropTime, 0, 0.0);
-                const auto& spec = output.spec();
-                OfxRectI bounds;
-                bounds.x1 = 0;
-                bounds.x2 = spec.width;
-                bounds.y1 = 0;
-                bounds.y2 = spec.height;
-                args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxImageEffectActionRender,
-                    &data,
-                    (OfxPropertySetHandle)&args,
-                    nullptr);
-
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionDestroyInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
+                out = std::make_shared<ImageEffectNode>(plugin, name, metaData, inputs);
                 break;
             }
         }
-    }
-
-    void ImageHost::filter(
-        const std::string& name,
-        const OIIO::ImageBuf& source,
-        OIIO::ImageBuf& output,
-        const PropertySet& propSet)
-    {
-        for (auto& data : _pluginData)
-        {
-            if (name == data.ofxPlugin->pluginIdentifier)
-            {
-                OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionCreateInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
-
-                data.instance.images["Source"] = bufToPropSet(source);
-                data.instance.images["Output"] = bufToPropSet(output);
-                PropertySet args = propSet;
-                args.setDouble(kOfxPropTime, 0, 0.0);
-                const auto& spec = source.spec();
-                OfxRectI bounds;
-                bounds.x1 = 0;
-                bounds.x2 = spec.width;
-                bounds.y1 = 0;
-                bounds.y2 = spec.height;
-                args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxImageEffectActionRender,
-                    &data,
-                    (OfxPropertySetHandle)&args,
-                    nullptr);
-
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionDestroyInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
-                break;
-            }
-        }
-    }
-
-    void ImageHost::transition(
-        const std::string& name,
-        const OIIO::ImageBuf& sourceFrom,
-        const OIIO::ImageBuf& sourceTo,
-        OIIO::ImageBuf& output,
-        const PropertySet& propSet)
-    {
-        for (auto& data : _pluginData)
-        {
-            if (name == data.ofxPlugin->pluginIdentifier)
-            {
-                OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionCreateInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
-
-                data.instance.images["SourceFrom"] = bufToPropSet(sourceFrom);
-                data.instance.images["SourceTo"] = bufToPropSet(sourceTo);
-                data.instance.images["Output"] = bufToPropSet(output);
-                PropertySet args = propSet;
-                args.setDouble(kOfxPropTime, 0, 0.0);
-                const auto& spec = sourceFrom.spec();
-                OfxRectI bounds;
-                bounds.x1 = 0;
-                bounds.x2 = spec.width;
-                bounds.y1 = 0;
-                bounds.y2 = spec.height;
-                args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxImageEffectActionRender,
-                    &data,
-                    (OfxPropertySetHandle)&args,
-                    nullptr);
-
-                ofxStatus = data.ofxPlugin->mainEntry(
-                    kOfxActionDestroyInstance,
-                    &data,
-                    nullptr,
-                    nullptr);
-                break;
-            }
-        }
+        return out;
     }
 
     void ImageHost::_suiteInit()
@@ -218,7 +244,7 @@ namespace toucan
             findPlugins(path, pluginPaths);
         }
 
-        // Load plugins.
+        // Load the plugins.
         if (_options.verbose)
         {
             std::cout << "Loading plugins..." << std::endl;
@@ -252,7 +278,7 @@ namespace toucan
                         {
                         case kOfxStatOK:
                         case kOfxStatReplyDefault:
-                            _pluginData.push_back({ plugin, ofxPlugin });
+                            _plugins.push_back({ plugin, ofxPlugin });
                             break;
                         case kOfxStatErrFatal:
                         {
@@ -274,28 +300,29 @@ namespace toucan
             }
         }
 
-        // Initialize plugins.
+        // Initialize the plugins.
         if (_options.verbose)
         {
             std::cout << "Initializing plugins..." << std::endl;
         }
-        for (auto& data : _pluginData)
+        for (auto& plugin : _plugins)
         {
             if (_options.verbose)
             {
-                std::cout << "  Plugin: " << data.ofxPlugin->pluginIdentifier << std::endl;
+                std::cout << "  Plugin: " << plugin.ofxPlugin->pluginIdentifier << std::endl;
             }
-            OfxStatus ofxStatus = data.ofxPlugin->mainEntry(
+            ImageEffectHandle handle = { &plugin };
+            OfxStatus ofxStatus = plugin.ofxPlugin->mainEntry(
                 kOfxActionDescribe,
-                &data,
+                &handle,
                 nullptr,
                 nullptr);
             int contextCount = 0;
-            data.effectPropSet.getDimension(kOfxImageEffectPropSupportedContexts, &contextCount);
+            plugin.propSet.getDimension(kOfxImageEffectPropSupportedContexts, &contextCount);
             for (int i = 0; i < contextCount; ++i)
             {
                 char* context = nullptr;
-                data.effectPropSet.getString(kOfxImageEffectPropSupportedContexts, i, &context);
+                plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, i, &context);
                 if (context)
                 {
                     PropertySet propSet;
@@ -304,53 +331,22 @@ namespace toucan
                     {
                         std::cout << "    Context: " << context << std::endl;
                     }
-                    ofxStatus = data.ofxPlugin->mainEntry(
+                    ofxStatus = plugin.ofxPlugin->mainEntry(
                         kOfxImageEffectActionDescribeInContext,
-                        &data,
+                        &handle,
                         (OfxPropertySetHandle)&propSet,
                         nullptr);
-
-                    for (const auto& param : data.params)
-                    {
-                        auto props = param.second.getStringProperties();
-                        auto i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-                        if (i != props.end())
-                        {
-                            char* s = nullptr;
-                            param.second.getString(kOfxParamPropDefault, 0, &s);
-                            if (s)
-                            {
-                                data.instance.paramValues[param.first] = std::string(s);
-                            }
-                        }
-                        props = param.second.getDoubleProperties();
-                        i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-                        if (i != props.end())
-                        {
-                            double d = 0.0;
-                            param.second.getDouble(kOfxParamPropDefault, 0, &d);
-                            data.instance.paramValues[param.first] = d;
-                        }
-                        props = param.second.getIntProperties();
-                        i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-                        if (i != props.end())
-                        {
-                            int i = 0;
-                            param.second.getInt(kOfxParamPropDefault, 0, &i);
-                            data.instance.paramValues[param.first] = i;
-                        }
-                    }
                 }
             }
             if (_options.verbose)
             {
-                for (const auto& param : data.paramTypes)
+                for (const auto& param : plugin.paramTypes)
                 {
                     std::cout << "    Parameter \"" << param.first << "\": " << param.second << std::endl;
-                    for (const auto& prop : data.params[param.first].getStringProperties())
+                    for (const auto& prop : plugin.paramDefs[param.first].getStringProperties())
                     {
                         char* s = nullptr;
-                        data.params[param.first].getString(prop.c_str(), 0, &s);
+                        plugin.paramDefs[param.first].getString(prop.c_str(), 0, &s);
                         if (s)
                         {
                             std::cout << "      " << prop << ": " << s << std::endl;
@@ -365,10 +361,9 @@ namespace toucan
     {
         const void* out = nullptr;
         
-        PropertySet* hostPropSet = reinterpret_cast<PropertySet*>(handle);
-        void* hostP = nullptr;
-        hostPropSet->getPointer("host", 0, &hostP);
-        ImageHost* host = reinterpret_cast<ImageHost*>(hostP);
+        PropertySet* hostPropSet = (PropertySet*)handle;
+        ImageHost* host = nullptr;
+        hostPropSet->getPointer("host", 0, (void**)&host);
 
         if (strcmp(suiteName, kOfxPropertySuite) == 0)
         {
@@ -385,46 +380,34 @@ namespace toucan
         return out;
     }
     
-    OfxStatus ImageHost::_getPropertySet(OfxImageEffectHandle handle, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_getPropertySet(OfxImageEffectHandle effectHandle, OfxPropertySetHandle* propHandle)
     {
-        PluginData* data = reinterpret_cast<PluginData*>(handle);
-        *propHandle = (OfxPropertySetHandle)&data->effectPropSet;
+        ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
+        *propHandle = (OfxPropertySetHandle)&handle->plugin->propSet;
         return kOfxStatOK;
     }
 
-    OfxStatus ImageHost::_getParamSet(OfxImageEffectHandle handle, OfxParamSetHandle* paramHandle)
+    OfxStatus ImageHost::_getParamSet(OfxImageEffectHandle effectHandle, OfxParamSetHandle* paramHandle)
     {
-        *paramHandle = (OfxParamSetHandle)handle;
+        *paramHandle = (OfxParamSetHandle)effectHandle;
         return kOfxStatOK;
     }
 
-    OfxStatus ImageHost::_paramDefine(OfxParamSetHandle handle, const char* paramType, const char* name, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_paramDefine(OfxParamSetHandle effectHandle, const char* paramType, const char* name, OfxPropertySetHandle* propHandle)
     {
-        PluginData* data = reinterpret_cast<PluginData*>(handle);
-        data->paramTypes[name] = paramType;
-        *propHandle = (OfxPropertySetHandle)&data->params[name];
-        if (strcmp(paramType, kOfxParamTypeInteger) == 0)
-        {
-            data->instance.paramValues[name] = std::any(int());
-        }
-        if (strcmp(paramType, kOfxParamTypeDouble) == 0)
-        {
-            data->instance.paramValues[name] = std::any(double());
-        }
-        if (strcmp(paramType, kOfxParamTypeString) == 0)
-        {
-            data->instance.paramValues[name] = std::any(std::string());
-        }
+        ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
+        handle->plugin->paramTypes[name] = paramType;
+        *propHandle = (OfxPropertySetHandle)&handle->plugin->paramDefs[name];
         return kOfxStatOK;
     }
 
-    OfxStatus ImageHost::_paramGetHandle(OfxParamSetHandle handle, const char* name, OfxParamHandle* paramHandle, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_paramGetHandle(OfxParamSetHandle effectHandle, const char* name, OfxParamHandle* paramHandle, OfxPropertySetHandle* propHandle)
     {
-        PluginData* data = reinterpret_cast<PluginData*>(handle);
-        auto i = data->instance.paramValues.find(name);
-        if (i != data->instance.paramValues.end())
+        ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
+        auto i = handle->instance->params.find(name);
+        if (i != handle->instance->params.end())
         {
-            *paramHandle = (OfxParamHandle)&data->instance.paramValues[name];
+            *paramHandle = (OfxParamHandle)&handle->instance->params[name];
         }
         return kOfxStatOK;
     }
@@ -453,20 +436,20 @@ namespace toucan
         return kOfxStatOK;
     }
 
-    OfxStatus ImageHost::_clipDefine(OfxImageEffectHandle handle, const char* name, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_clipDefine(OfxImageEffectHandle effectHandle, const char* name, OfxPropertySetHandle* propHandle)
     {
-        PluginData* data = reinterpret_cast<PluginData*>(handle);
-        *propHandle = (OfxPropertySetHandle)&data->clipPropSets[name];
+        ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
+        *propHandle = (OfxPropertySetHandle)&handle->plugin->clipPropSets[name];
         return kOfxStatOK;
     }
 
-    OfxStatus ImageHost::_clipGetHandle(OfxImageEffectHandle handle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
+    OfxStatus ImageHost::_clipGetHandle(OfxImageEffectHandle effectHandle, const char* name, OfxImageClipHandle* clip, OfxPropertySetHandle* propHandle)
     {
-        PluginData* data = reinterpret_cast<PluginData*>(handle);
-        *clip = (OfxImageClipHandle)&data->instance.images[name];
+        ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
+        *clip = (OfxImageClipHandle)&handle->instance->images[name];
         if (propHandle)
         {
-            *propHandle = (OfxPropertySetHandle)&data->clipPropSets[name];
+            *propHandle = (OfxPropertySetHandle)&handle->plugin->clipPropSets[name];
         }
         return kOfxStatOK;
     }

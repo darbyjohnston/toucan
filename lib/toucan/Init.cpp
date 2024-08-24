@@ -8,10 +8,7 @@
 #include "Comp.h"
 #include "Draw.h"
 #include "Filter.h"
-#include "Read.h"
-#include "TimeWarp.h"
 #include "Transform.h"
-#include "Transition.h"
 
 #include <opentimelineio/typeRegistry.h>
 

@@ -30,7 +30,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "ColorMapEffect.1",
-                                "effect_name": "",
+                                "effect_name": "Toucan:ColorMap",
                                 "map_name": "plasma"
                             }
                         ],
@@ -193,7 +193,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "BlurEffect.1",
-                                "effect_name": "",
+                                "effect_name": "Toucan:Blur",
                                 "radius": 30.0
                             }
                         ],

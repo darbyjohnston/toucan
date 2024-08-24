@@ -20,9 +20,7 @@ namespace toucan
 
         virtual ~ReadNode();
         
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     protected:
         std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
@@ -47,9 +45,7 @@ namespace toucan
 
         virtual ~SequenceReadNode();
 
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     protected:
         std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;

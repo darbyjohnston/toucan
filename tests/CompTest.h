@@ -4,11 +4,9 @@
 
 #pragma once
 
-#include <toucan/ImageHost.h>
+#include <filesystem>
 
 namespace toucan
 {
-    void compTest(
-        const std::filesystem::path&,
-        const std::shared_ptr<ImageHost>&);
+    void compTest(const std::filesystem::path&);
 }

@@ -36,22 +36,28 @@ namespace toucan
         //! Get the timeline image size.
         const IMATH_NAMESPACE::V2i& getImageSize() const;
 
-        //! Get an image graph for the given time. This function is thread safe.
-        std::shared_ptr<IImageNode> exec(const OTIO_NS::RationalTime&) const;
+        //! Get an image graph for the given time.
+        std::shared_ptr<IImageNode> exec(
+            const std::shared_ptr<ImageHost>&,
+            const OTIO_NS::RationalTime&) const;
 
     private:
         std::shared_ptr<IImageNode> _track(
+            const std::shared_ptr<ImageHost>&,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&) const;
         std::shared_ptr<IImageNode> _item(
+            const std::shared_ptr<ImageHost>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
         std::shared_ptr<IImageNode> _transition(
+            const std::shared_ptr<ImageHost>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const std::vector<std::shared_ptr<IImageNode> >&) const;
         std::shared_ptr<IImageNode> _effects(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
             const std::shared_ptr<IImageNode>&) const;
 

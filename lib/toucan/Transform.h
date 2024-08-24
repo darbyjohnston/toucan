@@ -8,35 +8,7 @@
 
 namespace toucan
 {
-    //! Crop data.
-    struct CropData
-    {
-        IMATH_NAMESPACE::V2i pos  = IMATH_NAMESPACE::V2i(0, 0);
-        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-    };
-
-    //! Crop node.
-    class CropNode : public IImageNode
-    {
-    public:
-        CropNode(
-            const CropData & = CropData(),
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
-
-        virtual ~CropNode();
-
-        const CropData& getData() const;
-        void setData(const CropData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        CropData _data;
-    };
-
-    //! Crop OTIO effect.
+    //! Crop effect.
     class CropEffect : public IEffect
     {
     public:
@@ -52,6 +24,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -61,23 +34,11 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        CropData _data;
+        IMATH_NAMESPACE::V2i _pos = IMATH_NAMESPACE::V2i(0, 0);
+        IMATH_NAMESPACE::V2i _size = IMATH_NAMESPACE::V2i(0, 0);
     };
 
-    //! Flip node.
-    class FlipNode : public IImageNode
-    {
-    public:
-        FlipNode(const std::vector<std::shared_ptr<IImageNode> > & = {});
-
-        virtual ~FlipNode();
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-    };
-
-    //! Flip OTIO effect.
+    //! Flip effect.
     class FlipEffect : public IEffect
     {
     public:
@@ -93,6 +54,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -102,20 +64,7 @@ namespace toucan
         void write_to(Writer&) const override;
     };
 
-    //! Flop node.
-    class FlopNode : public IImageNode
-    {
-    public:
-        FlopNode(const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~FlopNode();
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-    };
-
-    //! Flop OTIO effect.
+    //! Flop effect.
     class FlopEffect : public IEffect
     {
     public:
@@ -131,6 +80,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -140,36 +90,7 @@ namespace toucan
         void write_to(Writer&) const override;
     };
 
-    //! Resize data.
-    struct ResizeData
-    {
-        IMATH_NAMESPACE::V2i size        = IMATH_NAMESPACE::V2i(0, 0);
-        std::string          filterName;
-        float                filterWidth = 0.F;
-    };
-
-    //! Resize node.
-    class ResizeNode : public IImageNode
-    {
-    public:
-        ResizeNode(
-            const ResizeData& = ResizeData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~ResizeNode();
-
-        const ResizeData& getData() const;
-        void setData(const ResizeData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        ResizeData _data;
-    };
-
-    //! Resize OTIO effect.
+    //! Resize effect.
     class ResizeEffect : public IEffect
     {
     public:
@@ -185,6 +106,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -194,39 +116,12 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        ResizeData _data;
+        IMATH_NAMESPACE::V2i _size = IMATH_NAMESPACE::V2i(0, 0);
+        std::string _filterName;
+        float _filterWidth = 0.F;
     };
 
-    //! Rotate data.
-    struct RotateData
-    {
-        float       angle = 0.F;
-        std::string filterName;
-        float       filterWidth = 0.F;
-    };
-
-    //! Rotate node.
-    class RotateNode : public IImageNode
-    {
-    public:
-        RotateNode(
-            const RotateData & = RotateData(),
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~RotateNode();
-
-        const RotateData& getData() const;
-        void setData(const RotateData&);
-
-        OIIO::ImageBuf exec(
-            const OTIO_NS::RationalTime&,
-            const std::shared_ptr<ImageHost>&) override;
-
-    private:
-        RotateData _data;
-    };
-
-    //! Rotate OTIO effect.
+    //! Rotate effect.
     class RotateEffect : public IEffect
     {
     public:
@@ -242,6 +137,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
+            const std::shared_ptr<ImageHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -251,6 +147,8 @@ namespace toucan
         void write_to(Writer&) const override;
 
     private:
-        RotateData _data;
+        float _angle = 0.F;
+        std::string _filterName;
+        float _filterWidth = 0.F;
     };
 }
