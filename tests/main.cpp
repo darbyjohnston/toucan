@@ -8,7 +8,7 @@
 #include "ReadTest.h"
 #include "UtilTest.h"
 
-#include <toucan/ImageHost.h>
+#include <toucan/ImageEffectHost.h>
 #include <toucan/Init.h>
 
 #include <iostream>
@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / "..");
 #endif // _WINDOWS
-    auto host = std::make_shared<ImageHost>(searchPath);
+    auto host = std::make_shared<ImageEffectHost>(searchPath);
     
     compTest(path);
     propertySetTest();

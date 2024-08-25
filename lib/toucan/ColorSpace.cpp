@@ -4,7 +4,7 @@
 
 #include "ColorSpace.h"
 
-#include "ImageHost.h"
+#include "ImageEffectHost.h"
 
 namespace toucan
 {
@@ -19,7 +19,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> ColorConvertEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -67,7 +67,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> PremultEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         return host->createNode(name(), metadata(), inputs);
@@ -84,7 +84,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> UnpremultEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         return host->createNode(name(), metadata(), inputs);

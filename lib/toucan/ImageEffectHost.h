@@ -4,82 +4,30 @@
 
 #pragma once
 
-#include <toucan/ImageNode.h>
-#include <toucan/Plugin.h>
-#include <toucan/PropertySet.h>
-
-#include <OpenFX/ofxImageEffect.h>
+#include <toucan/ImageEffect.h>
+#include <toucan/MessageLog.h>
 
 #include <OpenImageIO/imagebuf.h>
 
-#include <opentimelineio/anyDictionary.h>
-
 #include <filesystem>
-#include <memory>
 
 namespace toucan
 {
-    //! Image effect plugin.
-    struct ImageEffectPlugin
-    {
-        std::shared_ptr<Plugin> plugin;
-        OfxPlugin* ofxPlugin = nullptr;
-        PropertySet propSet;
-        std::map<std::string, PropertySet> clipPropSets;
-        std::map<std::string, std::string> paramTypes;
-        std::map<std::string, PropertySet> paramDefs;
-    };
-
-    //! Image effect instance.
-    struct ImageEffectInstance
-    {
-        std::map<std::string, std::any> params;
-        std::map<std::string, PropertySet> images;
-    };
-
-    //! Image effect handle.
-    struct ImageEffectHandle
-    {
-        ImageEffectPlugin* plugin = nullptr;
-        ImageEffectInstance* instance = nullptr;
-    };
-
-    //! Image effect node.
-    class ImageEffectNode : public IImageNode
-    {
-    public:
-        ImageEffectNode(
-            ImageEffectPlugin&,
-            const std::string& name,
-            const OTIO_NS::AnyDictionary& metaData,
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~ImageEffectNode();
-
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
-
-    private:
-        ImageEffectPlugin& _plugin;
-        ImageEffectInstance _instance;
-        ImageEffectHandle _handle;
-        OTIO_NS::AnyDictionary _metaData;
-    };
-
     //! Image effect host options.
-    struct ImageHostOptions
+    struct ImageEffectHostOptions
     {
-        bool verbose = false;
+        std::shared_ptr<MessageLog> log;
     };
 
     //! Image effect host.
-    class ImageHost : public std::enable_shared_from_this<ImageHost>
+    class ImageEffectHost : public std::enable_shared_from_this<ImageEffectHost>
     {
     public:
-        ImageHost(
+        ImageEffectHost(
             const std::vector<std::filesystem::path>& searchPath,
-            const ImageHostOptions& = ImageHostOptions());
+            const ImageEffectHostOptions& = ImageEffectHostOptions());
 
-        ~ImageHost();
+        ~ImageEffectHost();
 
         //! Create an image node.
         std::shared_ptr<IImageNode> createNode(
@@ -102,12 +50,13 @@ namespace toucan
         static OfxStatus _clipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*);
         static OfxStatus _clipReleaseImage(OfxPropertySetHandle);
 
-        ImageHostOptions _options;
+        ImageEffectHostOptions _options;
         PropertySet _propSet;
         OfxHost _host;
         OfxPropertySuiteV1 _propertySuite;
         OfxParameterSuiteV1 _parameterSuite;
         OfxImageEffectSuiteV1 _effectSuite;
         std::vector<ImageEffectPlugin> _plugins;
+
     };
 }

@@ -29,9 +29,11 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "ColorMapEffect.1",
+                                "OTIO_SCHEMA": "Effect.1",
                                 "effect_name": "Toucan:ColorMap",
-                                "map_name": "plasma"
+                                "metadata": {
+                                    "map_name": "plasma"
+                                }
                             }
                         ],
                         "source_range": {
@@ -70,8 +72,8 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "InvertEffect.1",
-                                "effect_name": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Invert"
                             }
                         ],
                         "source_range": {
@@ -110,9 +112,11 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "PowEffect.1",
-                                "effect_name": "",
-                                "value": 2.0
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Pow",
+                                "metadata": {
+                                    "value": 2.0
+                                }
                             }
                         ],
                         "source_range": {
@@ -151,9 +155,11 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "SaturateEffect.1",
-                                "effect_name": "",
-                                "value": 0.0
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Saturate",
+                                "metadata": {
+                                    "value": 0.0
+                                }
                             }
                         ],
                         "source_range": {
@@ -192,9 +198,11 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "BlurEffect.1",
+                                "OTIO_SCHEMA": "Effect.1",
                                 "effect_name": "Toucan:Blur",
-                                "radius": 30.0
+                                "metadata": {
+                                    "radius": 50.0
+                                }
                             }
                         ],
                         "source_range": {
@@ -233,12 +241,14 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "UnsharpMaskEffect.1",
-                                "effect_name": "",
-                                "kernel": "gaussian",
-                                "width": 30.0,
-                                "contrast": 1.0,
-                                "threshold": 0.0
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:UnsharpMask",
+                                "metadata": {
+                                    "kernel": "gaussian",
+                                    "width": 30.0,
+                                    "contrast": 1.0,
+                                    "threshold": 0.0
+                                }
                             }
                         ],
                         "source_range": {

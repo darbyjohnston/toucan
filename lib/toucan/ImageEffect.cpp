@@ -1,0 +1,149 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2024 Darby Johnston
+// All rights reserved.
+
+#include "ImageEffect.h"
+
+#include "Util.h"
+
+namespace toucan
+{
+    ImageEffectNode::ImageEffectNode(
+        ImageEffectPlugin& plugin,
+        const std::string& name,
+        const OTIO_NS::AnyDictionary& metaData,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IImageNode(name, inputs),
+        _plugin(plugin),
+        _handle{ &plugin, &_instance },
+        _metaData(metaData)
+    {
+        // Set default values.
+        for (const auto& param : _plugin.paramDefs)
+        {
+            auto props = param.second.getStringProperties();
+            auto i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                char* s = nullptr;
+                param.second.getString(kOfxParamPropDefault, 0, &s);
+                if (s)
+                {
+                    _instance.params[param.first] = std::string(s);
+                }
+            }
+            props = param.second.getDoubleProperties();
+            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                double d = 0.0;
+                param.second.getDouble(kOfxParamPropDefault, 0, &d);
+                _instance.params[param.first] = d;
+            }
+            props = param.second.getIntProperties();
+            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
+            if (i != props.end())
+            {
+                int i = 0;
+                param.second.getInt(kOfxParamPropDefault, 0, &i);
+                _instance.params[param.first] = i;
+            }
+        }
+
+        // Set values.
+        for (const auto& i : metaData)
+        {
+            _instance.params[i.first] = i.second;
+        }
+
+        // Create the plugin instance.
+        OfxStatus ofxStatus = _plugin.ofxPlugin->mainEntry(
+            kOfxActionCreateInstance,
+            &_handle,
+            nullptr,
+            nullptr);
+    }
+
+    ImageEffectNode::~ImageEffectNode()
+    {
+        // Destroy the plugin instance.
+        OfxStatus ofxStatus = _plugin.ofxPlugin->mainEntry(
+            kOfxActionDestroyInstance,
+            &_handle,
+            nullptr,
+            nullptr);
+    }
+
+    OIIO::ImageBuf ImageEffectNode::exec(const OTIO_NS::RationalTime& time)
+    {
+        OIIO::ImageBuf out;
+
+        OTIO_NS::RationalTime offsetTime = time;
+        if (!_timeOffset.is_invalid_time())
+        {
+            offsetTime -= _timeOffset;
+        }
+
+        // Initialize the images.
+        std::vector<OIIO::ImageBuf> inputs;
+        char* context = nullptr;
+        _plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, 0, &context);
+        if (strcmp(context, kOfxImageEffectContextGenerator) == 0)
+        {
+            auto i = _metaData.find("size");
+            if (i != _metaData.end() && i->second.has_value())
+            {
+                IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+                anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), size);
+
+                out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
+                _instance.images["Output"] = bufToPropSet(out);
+            }
+        }
+        else if (
+            strcmp(context, kOfxImageEffectContextFilter) == 0 &&
+            !_inputs.empty() &&
+            _inputs[0])
+        {
+            inputs.push_back(_inputs[0]->exec(offsetTime));
+            out = OIIO::ImageBuf(inputs[0].spec());
+            _instance.images["Source"] = bufToPropSet(inputs[0]);
+            _instance.images["Output"] = bufToPropSet(out);
+        }
+        else if (
+            strcmp(context, kOfxImageEffectContextTransition) == 0 &&
+            _inputs.size() > 1 &&
+            _inputs[0] &&
+            _inputs[1])
+        {
+            inputs.push_back(_inputs[0]->exec(offsetTime));
+            inputs.push_back(_inputs[1]->exec(offsetTime));
+            out = OIIO::ImageBuf(inputs[0].spec());
+            _instance.images["SourceFrom"] = bufToPropSet(inputs[0]);
+            _instance.images["SourceTo"] = bufToPropSet(inputs[1]);
+            _instance.images["Output"] = bufToPropSet(out);
+        }
+
+        // Render.
+        const auto& spec = out.spec();
+        if (spec.width > 0 && spec.height > 0)
+        {
+            PropertySet args;
+            args.setDouble(kOfxPropTime, 0, offsetTime.value());
+            OfxRectI bounds;
+            bounds.x1 = 0;
+            bounds.x2 = spec.width;
+            bounds.y1 = 0;
+            bounds.y2 = spec.height;
+            args.setIntN(kOfxImageEffectPropRenderWindow, 4, &bounds.x1);
+
+            _plugin.ofxPlugin->mainEntry(
+                kOfxImageEffectActionRender,
+                &_handle,
+                (OfxPropertySetHandle)&args,
+                nullptr);
+        }
+
+        return out;
+    }
+}

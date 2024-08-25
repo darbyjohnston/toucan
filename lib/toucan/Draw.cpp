@@ -4,7 +4,7 @@
 
 #include "Draw.h"
 
-#include "ImageHost.h"
+#include "ImageEffectHost.h"
 #include "Util.h"
 
 namespace toucan
@@ -20,7 +20,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> BoxEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -71,7 +71,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> LineEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -122,7 +122,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> TextEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();

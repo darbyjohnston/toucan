@@ -4,7 +4,7 @@
 
 #include "Filter.h"
 
-#include "ImageHost.h"
+#include "ImageEffectHost.h"
 
 namespace toucan
 {    
@@ -19,7 +19,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> BlurEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -57,7 +57,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> ColorMapEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -90,7 +90,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> InvertEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         return host->createNode(effect_name(), metadata(), inputs);
@@ -107,7 +107,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> PowEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -145,7 +145,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> SaturateEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -183,7 +183,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> UnsharpMaskEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();

@@ -24,7 +24,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -54,7 +54,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -80,7 +80,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -106,7 +106,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:
@@ -137,7 +137,7 @@ namespace toucan
             OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
 
         std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) override;
 
     protected:

@@ -3,7 +3,7 @@
 // All rights reserved.
 
 #include <toucan/Init.h>
-#include <toucan/ImageHost.h>
+#include <toucan/ImageEffectHost.h>
 #include <toucan/ImageGraph.h>
 #include <toucan/Util.h>
 
@@ -77,8 +77,13 @@ int main(int argc, char** argv)
     const int frames = timeRange.duration().value();
 
     // Create the image graph.
+    std::shared_ptr<MessageLog> log;
+    if (verbose)
+    {
+        log = std::make_shared<MessageLog>();
+    }
     ImageGraphOptions imageGraphOptions;
-    imageGraphOptions.verbose = verbose;
+    imageGraphOptions.log = log;
     const auto graph = std::make_shared<ImageGraph>(
         inputPath.parent_path(),
         timeline,
@@ -93,9 +98,9 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / "..");
 #endif // _WINDOWS
-    ImageHostOptions imageHostOptions;
-    imageHostOptions.verbose = verbose;
-    auto host = std::make_shared<ImageHost>(
+    ImageEffectHostOptions imageHostOptions;
+    imageHostOptions.log = log;
+    auto host = std::make_shared<ImageEffectHost>(
         searchPath,
         imageHostOptions);
 

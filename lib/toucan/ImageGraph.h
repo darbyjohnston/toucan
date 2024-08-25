@@ -5,6 +5,7 @@
 #pragma once
 
 #include <toucan/ImageNode.h>
+#include <toucan/MessageLog.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/timeline.h>
@@ -19,7 +20,7 @@ namespace toucan
     //! Image graph options.
     struct ImageGraphOptions
     {
-        bool verbose = false;
+        std::shared_ptr<MessageLog> log;
     };
 
     //! Create image graphs from a timeline.
@@ -38,26 +39,26 @@ namespace toucan
 
         //! Get an image graph for the given time.
         std::shared_ptr<IImageNode> exec(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::RationalTime&) const;
 
     private:
         std::shared_ptr<IImageNode> _track(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&) const;
         std::shared_ptr<IImageNode> _item(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
         std::shared_ptr<IImageNode> _transition(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const std::vector<std::shared_ptr<IImageNode> >&) const;
         std::shared_ptr<IImageNode> _effects(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
             const std::shared_ptr<IImageNode>&) const;
 

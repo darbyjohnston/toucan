@@ -3,10 +3,12 @@ set(HEADERS
     Comp.h
     Draw.h
     Filter.h
+    ImageEffect.h
+    ImageEffectHost.h
     ImageGraph.h
-    ImageHost.h
     ImageNode.h
     Init.h
+    MessageLog.h
     Plugin.h
     PropertySet.h
     Read.h
@@ -19,10 +21,12 @@ set(SOURCE
     Comp.cpp
     Draw.cpp
     Filter.cpp
+    ImageEffect.cpp
+    ImageEffectHost.cpp
     ImageGraph.cpp
-    ImageHost.cpp
     ImageNode.cpp
     Init.cpp
+    MessageLog.cpp
     Plugin.cpp
     PropertySet.cpp
     Read.cpp

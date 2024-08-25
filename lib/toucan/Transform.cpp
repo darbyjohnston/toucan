@@ -4,7 +4,7 @@
 
 #include "Transform.h"
 
-#include "ImageHost.h"
+#include "ImageEffectHost.h"
 #include "Util.h"
 
 namespace toucan
@@ -20,7 +20,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> CropEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -63,7 +63,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> FlipEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         return host->createNode(name(), metadata(), inputs);
@@ -90,7 +90,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> FlopEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         return host->createNode(name(), metadata(), inputs);
@@ -117,7 +117,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> ResizeEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();
@@ -163,7 +163,7 @@ namespace toucan
     {}
 
     std::shared_ptr<IImageNode> RotateEffect::createNode(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         OTIO_NS::AnyDictionary metadata = this->metadata();

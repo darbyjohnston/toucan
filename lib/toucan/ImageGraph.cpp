@@ -5,7 +5,7 @@
 #include "ImageGraph.h"
 
 #include "Comp.h"
-#include "ImageHost.h"
+#include "ImageEffectHost.h"
 #include "Read.h"
 #include "TimeWarp.h"
 #include "Util.h"
@@ -18,6 +18,11 @@
 
 namespace toucan
 {
+    namespace
+    {
+        const std::string logPrefix = "toucan::ImageGraph";
+    }
+
     ImageGraph::ImageGraph(
         const std::filesystem::path& path,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
@@ -88,7 +93,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::exec(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::RationalTime& time) const
     {
         // Set the background color.
@@ -140,7 +145,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_track(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
     {
@@ -235,7 +240,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_item(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
@@ -299,7 +304,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_transition(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>& otioTransition,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) const
@@ -310,7 +315,7 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_effects(
-        const std::shared_ptr<ImageHost>& host,
+        const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
         const std::shared_ptr<IImageNode>& input) const
     {
@@ -328,6 +333,16 @@ namespace toucan
                     static_cast<float>(linearTimeWarp->time_scalar()),
                     std::vector<std::shared_ptr<IImageNode> >{ out });
                 out = linearTimeWarpNode;
+            }
+            else
+            {
+                if (auto imageEffect = host->createNode(
+                    effect->effect_name(),
+                    effect->metadata(),
+                    { out }))
+                {
+                    out = imageEffect;
+                }
             }
         }
         return out;

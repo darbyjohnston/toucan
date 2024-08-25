@@ -13,7 +13,7 @@ namespace toucan
 {
     void imageGraphTest(
         const std::filesystem::path& path,
-        const std::shared_ptr<ImageHost>& host)
+        const std::shared_ptr<ImageEffectHost>& host)
     {
         std::cout << "imageGraphTest" << std::endl;
         const std::vector<std::string> otioFiles =

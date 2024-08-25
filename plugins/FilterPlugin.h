@@ -79,6 +79,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
@@ -87,6 +91,7 @@ protected:
 
 private:
     static ColorMapPlugin* _instance;
+    OfxParamHandle _mapNameParam = nullptr;
 };
 
 class InvertPlugin : public FilterPlugin
@@ -131,6 +136,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
@@ -139,6 +148,7 @@ protected:
 
 private:
     static PowPlugin* _instance;
+    OfxParamHandle _valueParam = nullptr;
 };
 
 class SaturatePlugin : public FilterPlugin
@@ -157,6 +167,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
@@ -165,6 +179,7 @@ protected:
 
 private:
     static SaturatePlugin* _instance;
+    OfxParamHandle _valueParam = nullptr;
 };
 
 class UnsharpMaskPlugin : public FilterPlugin
@@ -183,6 +198,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
@@ -191,4 +210,8 @@ protected:
 
 private:
     static UnsharpMaskPlugin* _instance;
+    OfxParamHandle _kernelParam = nullptr;
+    OfxParamHandle _widthParam = nullptr;
+    OfxParamHandle _contrastParam = nullptr;
+    OfxParamHandle _thresholdParam = nullptr;
 };

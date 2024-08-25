@@ -73,7 +73,6 @@ OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "size", &props);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 1280);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 1, 720);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The size in pixels");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Size");
 
     return kOfxStatOK;
@@ -159,7 +158,6 @@ OfxStatus CheckersPlugin::_describeInContextAction(
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "checkerSize", &props);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 100);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 1, 100);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The checker size");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Checker Size");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color1", &props);
@@ -167,7 +165,6 @@ OfxStatus CheckersPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The first color");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
@@ -175,7 +172,6 @@ OfxStatus CheckersPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The second color");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
 
     return kOfxStatOK;
@@ -269,7 +265,6 @@ OfxStatus FillPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 0.0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The fill color");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color");
 
     return kOfxStatOK;
@@ -347,7 +342,6 @@ OfxStatus GradientPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The first color");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
@@ -355,12 +349,10 @@ OfxStatus GradientPlugin::_describeInContextAction(
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
     _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The second color");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "vertical", &props);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "Whether the gradient is vertical");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Vertical");
 
     return kOfxStatOK;
@@ -474,7 +466,6 @@ OfxStatus NoisePlugin::_describeInContextAction(
     OfxPropertySetHandle props;
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeString, "type", &props);
     _propertySuite->propSetString(props, kOfxParamPropDefault, 0, "gaussian");
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The noise type");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Type");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "a", &props);
@@ -487,12 +478,10 @@ OfxStatus NoisePlugin::_describeInContextAction(
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "mono", &props);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "Whether the noise is monochrome");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Monochrome");
 
     _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger, "seed", &props);
     _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxParamPropHint, 0, "The random number generator seed");
     _propertySuite->propSetString(props, kOfxPropLabel, 0, "Seed");
 
     return kOfxStatOK;

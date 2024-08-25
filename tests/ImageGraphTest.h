@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <toucan/ImageHost.h>
+#include <toucan/ImageEffectHost.h>
 
 namespace toucan
 {
     void imageGraphTest(
         const std::filesystem::path&,
-        const std::shared_ptr<ImageHost>&);
+        const std::shared_ptr<ImageEffectHost>&);
 }

@@ -14,7 +14,7 @@
 
 namespace toucan
 {
-    class ImageHost;
+    class ImageEffectHost;
 
     //! Base class for image nodes.
     class IImageNode : public std::enable_shared_from_this<IImageNode>
@@ -69,7 +69,7 @@ namespace toucan
 
         //! Create an image node.
         virtual std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageHost>&,
+            const std::shared_ptr<ImageEffectHost>&,
             const std::vector<std::shared_ptr<IImageNode> >& inputs) = 0;
 
     protected:
