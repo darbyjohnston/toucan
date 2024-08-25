@@ -44,8 +44,8 @@
                     },
                     {
                         "OTIO_SCHEMA": "Transition.1",
-                        "name": "Dissolve",
-                        "transition_type": "HorizontalWipe",
+                        "name": "HorizontalWipe",
+                        "transition_type": "Toucan:HorizontalWipe",
                         "in_offset": {
                           "OTIO_SCHEMA": "RationalTime.1",
                           "rate": 24,
@@ -100,8 +100,8 @@
                     },
                     {
                         "OTIO_SCHEMA": "Transition.1",
-                        "name": "Dissolve",
-                        "transition_type": "VerticalWipe",
+                        "name": "VerticalWipe",
+                        "transition_type": "Toucan:VerticalWipe",
                         "in_offset": {
                           "OTIO_SCHEMA": "RationalTime.1",
                           "rate": 24,

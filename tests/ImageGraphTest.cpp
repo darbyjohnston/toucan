@@ -28,7 +28,8 @@ namespace toucan
             "MultipleEffects",
             "Transform",
             "Transition",
-            "Transition2"
+            "Transition2",
+            "TransitionWipe"
         };
         for (const auto& otioFile : otioFiles)
         {
