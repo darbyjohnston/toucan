@@ -57,6 +57,5 @@ namespace toucan
         OfxParameterSuiteV1 _parameterSuite;
         OfxImageEffectSuiteV1 _effectSuite;
         std::vector<ImageEffectPlugin> _plugins;
-
     };
 }

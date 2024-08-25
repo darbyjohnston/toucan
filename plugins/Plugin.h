@@ -38,7 +38,7 @@ protected:
     std::string _name;
     std::string _group;
     OfxHost* _host = nullptr;
-    OfxPropertySuiteV1* _propertySuite = nullptr;
-    OfxParameterSuiteV1* _parameterSuite = nullptr;
-    OfxImageEffectSuiteV1* _imageEffectSuite = nullptr;
+    OfxPropertySuiteV1* _propSuite = nullptr;
+    OfxParameterSuiteV1* _paramSuite = nullptr;
+    OfxImageEffectSuiteV1* _effectSuite = nullptr;
 };

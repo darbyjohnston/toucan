@@ -1,37 +1,27 @@
 set(HEADERS
-    ColorSpace.h
     Comp.h
-    Draw.h
-    Filter.h
     ImageEffect.h
     ImageEffectHost.h
     ImageGraph.h
     ImageNode.h
-    Init.h
     MessageLog.h
     Plugin.h
     PropertySet.h
     Read.h
     TimeWarp.h
-    Transform.h
     Util.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
-    ColorSpace.cpp
     Comp.cpp
-    Draw.cpp
-    Filter.cpp
     ImageEffect.cpp
     ImageEffectHost.cpp
     ImageGraph.cpp
     ImageNode.cpp
-    Init.cpp
     MessageLog.cpp
     Plugin.cpp
     PropertySet.cpp
     Read.cpp
     TimeWarp.cpp
-    Transform.cpp
     Util.cpp)
 if(WIN32)
     list(APPEND SOURCE

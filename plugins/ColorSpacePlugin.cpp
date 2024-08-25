@@ -15,25 +15,29 @@ ColorSpacePlugin::ColorSpacePlugin(const std::string& group, const std::string& 
 ColorSpacePlugin::~ColorSpacePlugin()
 {}
 
-OfxStatus ColorSpacePlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus ColorSpacePlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
+
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
         kOfxImageEffectContextFilter);
+
     return kOfxStatOK;
 }
 
-OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
+    Plugin::_describeInContextAction(handle, inArgs);
+
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "Source", &sourceProps);
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "Source", &sourceProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -48,12 +52,12 @@ OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle descri
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -61,60 +65,61 @@ OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle descri
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
     }
+
     return kOfxStatOK;
 }
 
 OfxStatus ColorSpacePlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle ,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     OfxImageClipHandle sourceClip = nullptr;
     OfxImageClipHandle outputClip = nullptr;
     OfxPropertySetHandle sourceImage = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "Source", &sourceClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Source", &sourceClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (sourceClip && outputClip)
     {
-        _imageEffectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (sourceImage && outputImage)
         {
-            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propertySuite, sourceImage);
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceBuf, outputBuf, renderWindow, inArgs);
+            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propSuite, sourceImage);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(handle, sourceBuf, outputBuf, renderWindow, inArgs);
         }
     }
 
     if (sourceImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceImage);
+        _effectSuite->clipReleaseImage(sourceImage);
     }
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
     return kOfxStatOK;
 }
 
-ColorConvertPlugin* ColorConvertPlugin::_instance = nullptr;
+ColorConvertPlugin* ColorConvertPlugin::_plugin = nullptr;
 
 ColorConvertPlugin::ColorConvertPlugin() :
     ColorSpacePlugin("Toucan", "ColorConvert")
@@ -125,11 +130,11 @@ ColorConvertPlugin::~ColorConvertPlugin()
 
 void ColorConvertPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new ColorConvertPlugin;
+        _plugin = new ColorConvertPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus ColorConvertPlugin::mainEntryPoint(
@@ -138,61 +143,92 @@ OfxStatus ColorConvertPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus ColorConvertPlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    ColorSpacePlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "fromspace", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "From Space");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "tospace", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "To Space");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "premult", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, true);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Premultiplied");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "context_key", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Context Key");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "context_value", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Context Value");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "color_config", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "ColorConfig");
+
+    return kOfxStatOK;
+}
+
+OfxStatus ColorConvertPlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    ColorSpacePlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "fromspace", &_fromSpaceParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "tospace", &_toSpaceParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "premult", &_premultParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "context_key", &_contextKeyParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "context_value", &_contextValueParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color_config", &_colorConfigParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus ColorConvertPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    std::string fromspace;
-    std::string tospace;
-    char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "fromspace", 0, &s);
-    if (s)
-    {
-        fromspace = s;
-    }
-    _propertySuite->propGetString(inArgs, "tospace", 0, &s);
-    if (s)
-    {
-        tospace = s;
-    }
-
+    std::string fromSpace;
+    std::string toSpace;
     int premult = 0;
-    _propertySuite->propGetInt(inArgs, "premult", 0, &premult);
+    std::string contextKey;
+    std::string contextValue;
+    std::string colorConfigValue;
+    _paramSuite->paramGetValue(_fromSpaceParam[handle], &fromSpace);
+    _paramSuite->paramGetValue(_toSpaceParam[handle], &toSpace);
+    _paramSuite->paramGetValue(_premultParam[handle], &premult);
+    _paramSuite->paramGetValue(_contextKeyParam[handle], &contextKey);
+    _paramSuite->paramGetValue(_contextValueParam[handle], &contextValue);
+    _paramSuite->paramGetValue(_colorConfigParam[handle], &colorConfigValue);
 
-    std::string context_key;
-    std::string context_value;
-    _propertySuite->propGetString(inArgs, "context_key", 0, &s);
-    if (s)
-    {
-        context_key = s;
-    }
-    _propertySuite->propGetString(inArgs, "context_value", 0, &s);
-    if (s)
-    {
-        context_value = s;
-    }
-
-    std::filesystem::path color_config;
-    _propertySuite->propGetString(inArgs, "color_config", 0, &s);
-    if (s)
-    {
-        color_config = s;
-    }
+    const std::filesystem::path colorConfigPath(colorConfigValue);
     std::shared_ptr<OIIO::ColorConfig> colorConfig;
-    auto i = _colorConfigs.find(color_config);
+    auto i = _colorConfigs.find(colorConfigPath);
     if (i != _colorConfigs.end())
     {
         colorConfig = i->second;
     }
     else
     {
-        colorConfig = std::make_shared<OIIO::ColorConfig>(color_config.string());
-        _colorConfigs[color_config] = colorConfig;
+        colorConfig = std::make_shared<OIIO::ColorConfig>(colorConfigPath.string());
+        _colorConfigs[colorConfigPath] = colorConfig;
         //for (int i = 0; i < colorConfig->getNumColorSpaces(); ++i)
         //{
         //    std::cout << "Color space: " << colorConfig->getColorSpaceNameByIndex(i) << std::endl;
@@ -204,17 +240,17 @@ OfxStatus ColorConvertPlugin::_render(
         OIIO::ImageBufAlgo::colorconvert(
             outputBuf,
             sourceBuf,
-            fromspace,
-            tospace,
+            fromSpace,
+            toSpace,
             premult,
-            context_key,
-            context_value,
+            contextKey,
+            contextValue,
             colorConfig.get());
     }
     return kOfxStatOK;
 }
 
-PremultPlugin* PremultPlugin::_instance = nullptr;
+PremultPlugin* PremultPlugin::_plugin = nullptr;
 
 PremultPlugin::PremultPlugin() :
     ColorSpacePlugin("Toucan", "Premult")
@@ -225,11 +261,11 @@ PremultPlugin::~PremultPlugin()
 
 void PremultPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new PremultPlugin;
+        _plugin = new PremultPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus PremultPlugin::mainEntryPoint(
@@ -238,10 +274,11 @@ OfxStatus PremultPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus PremultPlugin::_render(
+    OfxImageEffectHandle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -251,7 +288,7 @@ OfxStatus PremultPlugin::_render(
     return kOfxStatOK;
 }
 
-UnpremultPlugin* UnpremultPlugin::_instance = nullptr;
+UnpremultPlugin* UnpremultPlugin::_plugin = nullptr;
 
 UnpremultPlugin::UnpremultPlugin() :
     ColorSpacePlugin("Toucan", "Unpremult")
@@ -262,11 +299,11 @@ UnpremultPlugin::~UnpremultPlugin()
 
 void UnpremultPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new UnpremultPlugin;
+        _plugin = new UnpremultPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus UnpremultPlugin::mainEntryPoint(
@@ -275,10 +312,11 @@ OfxStatus UnpremultPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus UnpremultPlugin::_render(
+    OfxImageEffectHandle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,

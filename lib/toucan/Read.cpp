@@ -100,7 +100,7 @@ namespace toucan
             _namePrefix,
             time.to_frames(),
             _frameZeroPadding,
-            _nameSuffix);
+            _nameSuffix).string();
         return ss.str();
     }
 }

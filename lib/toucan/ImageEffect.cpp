@@ -86,19 +86,18 @@ namespace toucan
 
         // Initialize the images.
         std::vector<OIIO::ImageBuf> inputs;
+        IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
+        auto i = _metaData.find("size");
+        if (i != _metaData.end() && i->second.has_value())
+        {
+            anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), size);
+        }
         char* context = nullptr;
         _plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, 0, &context);
         if (strcmp(context, kOfxImageEffectContextGenerator) == 0)
         {
-            auto i = _metaData.find("size");
-            if (i != _metaData.end() && i->second.has_value())
-            {
-                IMATH_NAMESPACE::V2i size = IMATH_NAMESPACE::V2i(0, 0);
-                anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), size);
-
-                out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
-                _instance.images["Output"] = bufToPropSet(out);
-            }
+            out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
+            _instance.images["Output"] = bufToPropSet(out);
         }
         else if (
             strcmp(context, kOfxImageEffectContextFilter) == 0 &&
@@ -106,7 +105,13 @@ namespace toucan
             _inputs[0])
         {
             inputs.push_back(_inputs[0]->exec(offsetTime));
-            out = OIIO::ImageBuf(inputs[0].spec());
+            auto spec = inputs[0].spec();
+            if (size.x > 0 && size.y > 0)
+            {
+                spec.width = size.x;
+                spec.height = size.y;
+            }
+            out = OIIO::ImageBuf(spec);
             _instance.images["Source"] = bufToPropSet(inputs[0]);
             _instance.images["Output"] = bufToPropSet(out);
         }
@@ -118,7 +123,13 @@ namespace toucan
         {
             inputs.push_back(_inputs[0]->exec(offsetTime));
             inputs.push_back(_inputs[1]->exec(offsetTime));
-            out = OIIO::ImageBuf(inputs[0].spec());
+            auto spec = inputs[0].spec();
+            if (size.x > 0 && size.y > 0)
+            {
+                spec.width = size.x;
+                spec.height = size.y;
+            }
+            out = OIIO::ImageBuf(spec);
             _instance.images["SourceFrom"] = bufToPropSet(inputs[0]);
             _instance.images["SourceTo"] = bufToPropSet(inputs[1]);
             _instance.images["Output"] = bufToPropSet(out);

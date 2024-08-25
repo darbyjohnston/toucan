@@ -17,6 +17,7 @@ public:
 
 protected:
     virtual OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -48,14 +49,23 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static BoxPlugin* _instance;
+    static BoxPlugin* _plugin;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _pos1Param;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _pos2Param;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _colorParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _fillParam;
 };
 
 class LinePlugin : public DrawPlugin
@@ -74,14 +84,23 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static LinePlugin* _instance;
+    static LinePlugin* _plugin;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _pos1Param;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _pos2Param;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _colorParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _skipFirstPointParam;
 };
 
 class TextPlugin : public DrawPlugin
@@ -100,12 +119,22 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static TextPlugin* _instance;
+    static TextPlugin* _plugin;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _posParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _textParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _fontSizeParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _fontNameParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _colorParam;
 };

@@ -52,7 +52,7 @@
                     {
                         "OTIO_SCHEMA": "Transition.1",
                         "name": "Dissolve",
-                        "transition_type": "SMPTE_Dissolve",
+                        "transition_type": "Toucan:Dissolve",
                         "in_offset": {
                           "OTIO_SCHEMA": "RationalTime.1",
                           "rate": 24,
@@ -81,7 +81,7 @@
                                     "value": 0
                                 }
                             },
-                            "generator_kind": "Fill",
+                            "generator_kind": "Toucan:Fill",
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "color": [ 0.0, 0.0, 1.0, 1.0 ]

@@ -17,25 +17,29 @@ DrawPlugin::DrawPlugin(const std::string& group, const std::string& name) :
 DrawPlugin::~DrawPlugin()
 {}
 
-OfxStatus DrawPlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus DrawPlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
+
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
         kOfxImageEffectContextFilter);
+
     return kOfxStatOK;
 }
 
-OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
+    Plugin::_describeInContextAction(handle, inArgs);
+
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "Source", &sourceProps);
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "Source", &sourceProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -50,12 +54,12 @@ OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, 
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -63,60 +67,62 @@ OfxStatus DrawPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, 
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
     }
+
     return kOfxStatOK;
 }
 
 OfxStatus DrawPlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     OfxImageClipHandle sourceClip = nullptr;
     OfxImageClipHandle outputClip = nullptr;
     OfxPropertySetHandle sourceImage = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "Source", &sourceClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Source", &sourceClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (sourceClip && outputClip)
     {
-        _imageEffectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (sourceImage && outputImage)
         {
-            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propertySuite, sourceImage);
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceBuf, outputBuf, renderWindow, inArgs);
+            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propSuite, sourceImage);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(handle, sourceBuf, outputBuf, renderWindow, inArgs);
         }
     }
 
     if (sourceImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceImage);
+        _effectSuite->clipReleaseImage(sourceImage);
     }
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
+
     return kOfxStatOK;
 }
 
-BoxPlugin* BoxPlugin::_instance = nullptr;
+BoxPlugin* BoxPlugin::_plugin = nullptr;
 
 BoxPlugin::BoxPlugin() :
     DrawPlugin("Toucan", "Box")
@@ -127,11 +133,11 @@ BoxPlugin::~BoxPlugin()
 
 void BoxPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new BoxPlugin;
+        _plugin = new BoxPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus BoxPlugin::mainEntryPoint(
@@ -140,34 +146,79 @@ OfxStatus BoxPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus BoxPlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    DrawPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos1", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Upper left corner");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos2", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Lower right corner");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "fill", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, true);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Fill the box");
+
+    return kOfxStatOK;
+}
+
+OfxStatus BoxPlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    DrawPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "pos1", &_pos1Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "pos2", &_pos2Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "fill", &_fillParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus BoxPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    IMATH_NAMESPACE::V2i pos1(0, 0);
-    _propertySuite->propGetIntN(inArgs, "pos1", 2, &pos1.x);
-
-    IMATH_NAMESPACE::V2i pos2(0, 0);
-    _propertySuite->propGetIntN(inArgs, "pos2", 2, &pos2.x);
-
+    int64_t pos1[2] = { 0, 0 };
+    int64_t pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
-
     int fill = 0;
-    _propertySuite->propGetInt(inArgs, "fill", 0, &fill);
+    _paramSuite->paramGetValue(_pos1Param[handle], &pos1[0], &pos1[1]);
+    _paramSuite->paramGetValue(_pos2Param[handle], &pos2[0], &pos2[1]);
+    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
+    _paramSuite->paramGetValue(_fillParam[handle], &fill);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_box(
         outputBuf,
-        pos1.x,
-        pos1.y,
-        pos2.x,
-        pos2.y,
+        pos1[0],
+        pos1[1],
+        pos2[0],
+        pos2[1],
         {
             static_cast<float>(color[0]),
             static_cast<float>(color[1]),
@@ -179,7 +230,7 @@ OfxStatus BoxPlugin::_render(
     return kOfxStatOK;
 }
 
-LinePlugin* LinePlugin::_instance = nullptr;
+LinePlugin* LinePlugin::_plugin = nullptr;
 
 LinePlugin::LinePlugin() :
     DrawPlugin("Toucan", "Line")
@@ -190,11 +241,11 @@ LinePlugin::~LinePlugin()
 
 void LinePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new LinePlugin;
+        _plugin = new LinePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus LinePlugin::mainEntryPoint(
@@ -203,34 +254,79 @@ OfxStatus LinePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus LinePlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    DrawPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos1", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Start position");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos2", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "End position");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "skip_first_point", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, false);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Skip the first point");
+
+    return kOfxStatOK;
+}
+
+OfxStatus LinePlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    DrawPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "pos1", &_pos1Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "pos2", &_pos2Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "skip_first_point", &_skipFirstPointParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus LinePlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    IMATH_NAMESPACE::V2i pos1(0, 0);
-    _propertySuite->propGetIntN(inArgs, "pos1", 2, &pos1.x);
-
-    IMATH_NAMESPACE::V2i pos2(0, 0);
-    _propertySuite->propGetIntN(inArgs, "pos2", 2, &pos2.x);
-
+    int64_t pos1[2] = { 0, 0 };
+    int64_t pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
-
     int skipFirstPoint = 0;
-    _propertySuite->propGetInt(inArgs, "skipFirstPoint", 0, &skipFirstPoint);
+    _paramSuite->paramGetValue(_pos1Param[handle], &pos1[0], &pos1[1]);
+    _paramSuite->paramGetValue(_pos2Param[handle], &pos2[0], &pos2[1]);
+    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
+    _paramSuite->paramGetValue(_skipFirstPointParam[handle], &skipFirstPoint);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_line(
         outputBuf,
-        pos1.x,
-        pos1.y,
-        pos2.x,
-        pos2.y,
+        pos1[0],
+        pos1[1],
+        pos2[0],
+        pos2[1],
         {
             static_cast<float>(color[0]),
             static_cast<float>(color[1]),
@@ -242,7 +338,7 @@ OfxStatus LinePlugin::_render(
     return kOfxStatOK;
 }
 
-TextPlugin* TextPlugin::_instance = nullptr;
+TextPlugin* TextPlugin::_plugin = nullptr;
 
 TextPlugin::TextPlugin() :
     DrawPlugin("Toucan", "Text")
@@ -253,11 +349,11 @@ TextPlugin::~TextPlugin()
 
 void TextPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new TextPlugin;
+        _plugin = new TextPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus TextPlugin::mainEntryPoint(
@@ -266,44 +362,83 @@ OfxStatus TextPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus TextPlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    DrawPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Position");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "text", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Text");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger, "font_size", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 16);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Font size");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "font_name", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Font name");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color");
+
+    return kOfxStatOK;
+}
+
+OfxStatus TextPlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    DrawPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "pos", &_posParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "text", &_textParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "font_size", &_fontSizeParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "font_name", &_fontNameParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus TextPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    IMATH_NAMESPACE::V2i pos(0, 0);
-    _propertySuite->propGetIntN(inArgs, "pos", 2, &pos.x);
-
+    int64_t pos[2] = { 0, 0 };
     std::string text;
-    char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "text", 0, &s);
-    if (s)
-    {
-        text = s;
-    }
-
-    int fontSize = 16;
-    _propertySuite->propGetInt(inArgs, "fontSize", 0, &fontSize);
-
+    int64_t fontSize = 16;
     std::string fontName;
-    _propertySuite->propGetString(inArgs, "fontName", 0, &s);
-    if (s)
-    {
-        fontName = s;
-    }
-
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _propertySuite->propGetDoubleN(inArgs, "color", 4, color);
+    _paramSuite->paramGetValue(_posParam[handle], &pos[0], &pos[1]);
+    _paramSuite->paramGetValue(_textParam[handle], &text);
+    _paramSuite->paramGetValue(_fontSizeParam[handle], &fontSize);
+    _paramSuite->paramGetValue(_fontNameParam[handle], &fontName);
+    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_text(
         outputBuf,
-        pos.x,
-        pos.y,
+        pos[0],
+        pos[1],
         text,
         fontSize,
         fontName,

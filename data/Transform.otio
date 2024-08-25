@@ -29,10 +29,12 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "CropEffect.1",
-                                "effect_name": "",
-                                "pos": [ 640, 360 ],
-                                "size": [ 640, 360 ]
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Crop",
+                                "metadata": {
+                                    "pos": [ 640, 360 ],
+                                    "size": [ 640, 360 ]
+                                }
                             }
                         ],
                         "source_range": {
@@ -71,8 +73,8 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "FlipEffect.1",
-                                "effect_name": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Flip"
                             }
                         ],
                         "source_range": {
@@ -111,8 +113,8 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "FlopEffect.1",
-                                "effect_name": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Flop"
                             }
                         ],
                         "source_range": {
@@ -151,11 +153,13 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "ResizeEffect.1",
-                                "effect_name": "",
-                                "size": [ 640, 360 ],
-                                "filter_name": "",
-                                "filter_width": 0.0
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Resize",
+                                "metadata": {
+                                    "size": [ 640, 360 ],
+                                    "filter_name": "",
+                                    "filter_width": 0.0
+                                }
                             }
                         ],
                         "source_range": {
@@ -194,11 +198,13 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "RotateEffect.1",
-                                "effect_name": "",
-                                "angle": 45.0,
-                                "filter_name": "",
-                                "filter_width": 0.0
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Rotate",
+                                "metadata": {
+                                    "angle": 45.0,
+                                    "filter_name": "",
+                                    "filter_width": 0.0
+                                }
                             }
                         ],
                         "source_range": {

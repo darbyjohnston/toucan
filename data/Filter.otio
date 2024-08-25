@@ -245,7 +245,7 @@
                                 "effect_name": "Toucan:UnsharpMask",
                                 "metadata": {
                                     "kernel": "gaussian",
-                                    "width": 30.0,
+                                    "width": 50.0,
                                     "contrast": 1.0,
                                     "threshold": 0.0
                                 }

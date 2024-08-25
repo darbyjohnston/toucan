@@ -63,14 +63,16 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "ColorConvertEffect.1",
-                                "effect_name": "",
-                                "fromspace": "Linear Rec.709 (sRGB)",
-                                "tospace": "ACEScct",
-                                "unpremult": true,
-                                "context_key": "",
-                                "context_value": "",
-                                "color_config": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:ColorConvert",
+                                "metadata": {
+                                    "fromspace": "Linear Rec.709 (sRGB)",
+                                    "tospace": "ACEScct",
+                                    "unpremult": true,
+                                    "context_key": "",
+                                    "context_value": "",
+                                    "color_config": ""
+                                }
                             }
                         ],
                         "source_range": {
@@ -109,14 +111,16 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "ColorConvertEffect.1",
-                                "effect_name": "",
-                                "fromspace": "Gamma 2.4 Rec.709 - Texture",
-                                "tospace": "Linear P3-D65",
-                                "unpremult": true,
-                                "context_key": "",
-                                "context_value": "",
-                                "color_config": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:ColorConvert",
+                                "metadata": {
+                                    "fromspace": "Gamma 2.4 Rec.709 - Texture",
+                                    "tospace": "Linear P3-D65",
+                                    "unpremult": true,
+                                    "context_key": "",
+                                    "context_value": "",
+                                    "color_config": ""
+                                }
                             }
                         ],
                         "source_range": {

@@ -20,16 +20,21 @@ protected:
         const OIIO::ImageBuf&,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
+        double,
         OfxPropertySetHandle inArgs) = 0;
 
     OfxStatus _describeAction(OfxImageEffectHandle) override;
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,
         OfxPropertySetHandle outArgs) override;
+
+protected:
+    std::map<OfxImageEffectHandle, OfxParamHandle> _valueParam;
 };
 
 class DissolvePlugin : public TransitionPlugin
@@ -52,10 +57,11 @@ protected:
         const OIIO::ImageBuf&,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
+        double,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static DissolvePlugin* _instance;
+    static DissolvePlugin* _plugin;
 };
 
 class HorizontalWipePlugin : public TransitionPlugin
@@ -78,10 +84,11 @@ protected:
         const OIIO::ImageBuf&,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
+        double,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static HorizontalWipePlugin* _instance;
+    static HorizontalWipePlugin* _plugin;
 };
 
 class VerticalWipePlugin : public TransitionPlugin
@@ -104,9 +111,10 @@ protected:
         const OIIO::ImageBuf&,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
+        double,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static VerticalWipePlugin* _instance;
+    static VerticalWipePlugin* _plugin;
 };
 

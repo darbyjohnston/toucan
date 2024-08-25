@@ -201,16 +201,24 @@ namespace toucan
                 {
                     if (auto prevItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(prev2))
                     {
-                        auto a = _item(
-                            host,
-                            prevItem->trimmed_range_in_parent().value(),
-                            track->transformed_time(time, prevItem),
-                            prevItem);
-                        out = _transition(
-                            host,
-                            prevTransition,
-                            trimmedRangeInParent.value(),
-                            { a, out });
+                        const double value =
+                            (time - trimmedRangeInParent.value().start_time()).value() /
+                            trimmedRangeInParent.value().duration().value();
+
+                        auto metaData = prevTransition->metadata();
+                        metaData["value"] = value;
+                        if (auto node = host->createNode(
+                            prevTransition->transition_type(),
+                            metaData))
+                        {
+                            auto a = _item(
+                                host,
+                                prevItem->trimmed_range_in_parent().value(),
+                                track->transformed_time(time, prevItem),
+                                prevItem);
+                            node->setInputs({ a, out });
+                            out = node;
+                        }
                     }
                 }
             }
@@ -221,16 +229,24 @@ namespace toucan
                 {
                     if (auto nextItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(next2))
                     {
-                        auto b = _item(
-                            host,
-                            nextItem->trimmed_range_in_parent().value(),
-                            track->transformed_time(time, nextItem),
-                            nextItem);
-                        out = _transition(
-                            host,
-                            nextTransition,
-                            trimmedRangeInParent.value(),
-                            { out, b });
+                        const double value =
+                            (time - trimmedRangeInParent.value().start_time()).value() /
+                            trimmedRangeInParent.value().duration().value();
+
+                        auto metaData = nextTransition->metadata();
+                        metaData["value"] = value;
+                        if (auto node = host->createNode(
+                            nextTransition->transition_type(),
+                            metaData))
+                        {
+                            auto b = _item(
+                                host,
+                                nextItem->trimmed_range_in_parent().value(),
+                                track->transformed_time(time, nextItem),
+                                nextItem);
+                            node->setInputs({ out, b });
+                            out = node;
+                        }
                     }
                 }
             }
@@ -301,17 +317,6 @@ namespace toucan
         }
 
         return out;
-    }
-
-    std::shared_ptr<IImageNode> ImageGraph::_transition(
-        const std::shared_ptr<ImageEffectHost>& host,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>& otioTransition,
-        const OTIO_NS::TimeRange& trimmedRangeInParent,
-        const std::vector<std::shared_ptr<IImageNode> >& inputs) const
-    {
-        OTIO_NS::AnyDictionary metaData;
-        metaData["range"] = trimmedRangeInParent;
-        return host->createNode("Toucan:" + otioTransition->transition_type(), metaData);
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_effects(

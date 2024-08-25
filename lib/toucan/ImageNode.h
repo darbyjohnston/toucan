@@ -29,6 +29,12 @@ namespace toucan
         //! Get the name.
         const std::string& getName() const;
 
+        //! Get the inputs.
+        const std::vector<std::shared_ptr<IImageNode> >& getInputs() const;
+
+        //! Set the inputs.
+        void setInputs(const std::vector<std::shared_ptr<IImageNode> >&);
+
         //! Get the time offset.
         const OTIO_NS::RationalTime& getTimeOffset() const;
 

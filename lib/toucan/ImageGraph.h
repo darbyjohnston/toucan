@@ -52,11 +52,6 @@ namespace toucan
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
-        std::shared_ptr<IImageNode> _transition(
-            const std::shared_ptr<ImageEffectHost>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Transition>&,
-            const OTIO_NS::TimeRange& trimmedRangeInParent,
-            const std::vector<std::shared_ptr<IImageNode> >&) const;
         std::shared_ptr<IImageNode> _effects(
             const std::shared_ptr<ImageEffectHost>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,

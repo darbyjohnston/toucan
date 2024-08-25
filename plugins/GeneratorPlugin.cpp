@@ -17,13 +17,13 @@ GeneratorPlugin::GeneratorPlugin(const std::string& group, const std::string& na
 GeneratorPlugin::~GeneratorPlugin()
 {}
 
-OfxStatus GeneratorPlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus GeneratorPlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
 
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
@@ -32,12 +32,12 @@ OfxStatus GeneratorPlugin::_describeAction(OfxImageEffectHandle descriptor)
     return kOfxStatOK;
 }
 
-OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
-    Plugin::_describeInContextAction(descriptor, inArgs);
+    Plugin::_describeInContextAction(handle, inArgs);
 
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -52,7 +52,7 @@ OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -60,7 +60,7 @@ OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
@@ -68,58 +68,58 @@ OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     }
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "size", &props);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 1280);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 1, 720);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Size");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "size", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 1280);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 720);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Size");
 
     return kOfxStatOK;
 }
 
-OfxStatus GeneratorPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus GeneratorPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    Plugin::_createInstance(descriptor);
+    Plugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "size", &_sizeParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus GeneratorPlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     OfxImageClipHandle outputClip = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (outputClip)
     {
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (outputImage)
         {
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(outputBuf, renderWindow, inArgs);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(handle, outputBuf, renderWindow, inArgs);
         }
     }
 
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
     return kOfxStatOK;
 }
 
-CheckersPlugin* CheckersPlugin::_instance = nullptr;
+CheckersPlugin* CheckersPlugin::_plugin = nullptr;
 
 CheckersPlugin::CheckersPlugin() :
     GeneratorPlugin("Toucan", "Checkers")
@@ -130,11 +130,11 @@ CheckersPlugin::~CheckersPlugin()
 
 void CheckersPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new CheckersPlugin;
+        _plugin = new CheckersPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus CheckersPlugin::mainEntryPoint(
@@ -143,54 +143,55 @@ OfxStatus CheckersPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus CheckersPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    GeneratorPlugin::_describeInContextAction(descriptor, inArgs);
+    GeneratorPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "checkerSize", &props);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 100);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 1, 100);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Checker Size");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "checkerSize", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 100);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 100);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Checker Size");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color1", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color1", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
 
     return kOfxStatOK;
 }
 
-OfxStatus CheckersPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus CheckersPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    GeneratorPlugin::_createInstance(descriptor);
+    GeneratorPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "checkerSize", &_checkerSizeParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "color1", &_color1Param, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "color2", &_color2Param, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "checkerSize", &_checkerSizeParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color1", &_color1Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color2", &_color2Param[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus CheckersPlugin::_render(
+    OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
@@ -198,9 +199,9 @@ OfxStatus CheckersPlugin::_render(
     int64_t checkerSize[2] = { 0, 0 };
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _parameterSuite->paramGetValue(_checkerSizeParam, &checkerSize[0], &checkerSize[1]);
-    _parameterSuite->paramGetValue(_color1Param, &color1[0], &color1[1], &color1[2], &color1[3]);
-    _parameterSuite->paramGetValue(_color2Param, &color2[0], &color2[1], &color2[2], &color2[3]);
+    _paramSuite->paramGetValue(_checkerSizeParam[handle], &checkerSize[0], &checkerSize[1]);
+    _paramSuite->paramGetValue(_color1Param[handle], &color1[0], &color1[1], &color1[2], &color1[3]);
+    _paramSuite->paramGetValue(_color2Param[handle], &color2[0], &color2[1], &color2[2], &color2[3]);
 
     OIIO::ImageBufAlgo::checker(
         outputBuf,
@@ -223,7 +224,7 @@ OfxStatus CheckersPlugin::_render(
     return kOfxStatOK;
 }
 
-FillPlugin* FillPlugin::_instance = nullptr;
+FillPlugin* FillPlugin::_plugin = nullptr;
 
 FillPlugin::FillPlugin() :
     GeneratorPlugin("Toucan", "Fill")
@@ -234,11 +235,11 @@ FillPlugin::~FillPlugin()
 
 void FillPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new FillPlugin;
+        _plugin = new FillPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus FillPlugin::mainEntryPoint(
@@ -247,48 +248,52 @@ OfxStatus FillPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus FillPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    GeneratorPlugin::_describeInContextAction(descriptor, inArgs);
+    GeneratorPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 0.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color");
 
     return kOfxStatOK;
 }
 
-OfxStatus FillPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus FillPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    GeneratorPlugin::_createInstance(descriptor);
+    GeneratorPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "color", &_colorParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus FillPlugin::_render(
+    OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _parameterSuite->paramGetValue(_colorParam, &color[0], &color[1], &color[2], &color[3]);
-
+    _paramSuite->paramGetValue(
+        _colorParam[handle],
+        &color[0],
+        &color[1],
+        &color[2],
+        &color[3]);
     OIIO::ImageBufAlgo::fill(
         outputBuf,
         {
@@ -301,7 +306,7 @@ OfxStatus FillPlugin::_render(
     return kOfxStatOK;
 }
 
-GradientPlugin* GradientPlugin::_instance = nullptr;
+GradientPlugin* GradientPlugin::_plugin = nullptr;
 
 GradientPlugin::GradientPlugin() :
     GeneratorPlugin("Toucan", "Gradient")
@@ -312,11 +317,11 @@ GradientPlugin::~GradientPlugin()
 
 void GradientPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new GradientPlugin;
+        _plugin = new GradientPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus GradientPlugin::mainEntryPoint(
@@ -325,53 +330,54 @@ OfxStatus GradientPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus GradientPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    GeneratorPlugin::_describeInContextAction(descriptor, inArgs);
+    GeneratorPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color1", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color1", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 0.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color 1");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeRGBA, "color2", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 1, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 2, 1.0);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 3, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Color 2");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "vertical", &props);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Vertical");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "vertical", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Vertical");
 
     return kOfxStatOK;
 }
 
-OfxStatus GradientPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus GradientPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    GeneratorPlugin::_createInstance(descriptor);
+    GeneratorPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "color1", &_color1Param, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "color2", &_color2Param, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "vertical", &_verticalParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "color1", &_color1Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "color2", &_color2Param[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "vertical", &_verticalParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus GradientPlugin::_render(
+    OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
@@ -379,9 +385,9 @@ OfxStatus GradientPlugin::_render(
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
     bool vertical = false;
-    _parameterSuite->paramGetValue(_color1Param, &color1[0], &color1[1], &color1[2], &color1[3]);
-    _parameterSuite->paramGetValue(_color2Param, &color2[0], &color2[1], &color2[2], &color2[3]);
-    _parameterSuite->paramGetValue(_verticalParam, &vertical);
+    _paramSuite->paramGetValue(_color1Param[handle], &color1[0], &color1[1], &color1[2], &color1[3]);
+    _paramSuite->paramGetValue(_color2Param[handle], &color2[0], &color2[1], &color2[2], &color2[3]);
+    _paramSuite->paramGetValue(_verticalParam[handle], &vertical);
 
     if (vertical)
     {
@@ -428,7 +434,7 @@ OfxStatus GradientPlugin::_render(
     return kOfxStatOK;
 }
 
-NoisePlugin* NoisePlugin::_instance = nullptr;
+NoisePlugin* NoisePlugin::_plugin = nullptr;
 
 NoisePlugin::NoisePlugin() :
     GeneratorPlugin("Toucan", "Noise")
@@ -439,11 +445,11 @@ NoisePlugin::~NoisePlugin()
 
 void NoisePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new NoisePlugin;
+        _plugin = new NoisePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus NoisePlugin::mainEntryPoint(
@@ -452,55 +458,56 @@ OfxStatus NoisePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus NoisePlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    GeneratorPlugin::_describeInContextAction(descriptor, inArgs);
+    GeneratorPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeString, "type", &props);
-    _propertySuite->propSetString(props, kOfxParamPropDefault, 0, "gaussian");
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Type");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "type", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "gaussian");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Type");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "a", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "A");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "a", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "A");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "b", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "B");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "b", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "B");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "mono", &props);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Monochrome");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeBoolean, "mono", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Monochrome");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeInteger, "seed", &props);
-    _propertySuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Seed");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger, "seed", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Seed");
 
     return kOfxStatOK;
 }
 
-OfxStatus NoisePlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus NoisePlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    GeneratorPlugin::_createInstance(descriptor);
+    GeneratorPlugin::_createInstance(handle);
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "type", &_typeParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "a", &_aParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "b", &_bParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "mono", &_monoParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "seed", &_seedParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "type", &_typeParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "a", &_aParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "b", &_bParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "mono", &_monoParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "seed", &_seedParam[handle], nullptr);
     return kOfxStatOK;
 }
 
 OfxStatus NoisePlugin::_render(
+    OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
@@ -509,12 +516,12 @@ OfxStatus NoisePlugin::_render(
     double a = 0.0;
     double b = 0.0;
     int mono = 0;
-    int seed = 0;
-    _parameterSuite->paramGetValue(_typeParam, &type);
-    _parameterSuite->paramGetValue(_aParam, &a);
-    _parameterSuite->paramGetValue(_bParam, &b);
-    _parameterSuite->paramGetValue(_monoParam, &mono);
-    _parameterSuite->paramGetValue(_seedParam, &seed);
+    int64_t seed = 0;
+    _paramSuite->paramGetValue(_typeParam[handle], &type);
+    _paramSuite->paramGetValue(_aParam[handle], &a);
+    _paramSuite->paramGetValue(_bParam[handle], &b);
+    _paramSuite->paramGetValue(_monoParam[handle], &mono);
+    _paramSuite->paramGetValue(_seedParam[handle], &seed);
 
     OIIO::ImageBufAlgo::noise(
         outputBuf,

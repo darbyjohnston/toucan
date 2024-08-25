@@ -288,10 +288,10 @@ namespace toucan
             const bool value = std::any_cast<bool>(*a);
             *va_arg(args, bool*) = value;
         }
-        else if (a->type() == typeid(int))
+        else if (a->type() == typeid(int64_t))
         {
-            const int value = std::any_cast<int>(*a);
-            *va_arg(args, int*) = value;
+            const int value = std::any_cast<int64_t>(*a);
+            *va_arg(args, int64_t*) = value;
         }
         else if (a->type() == typeid(double))
         {

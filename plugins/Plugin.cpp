@@ -57,15 +57,15 @@ OfxStatus Plugin::_entryPoint(
 
 OfxStatus Plugin::_loadAction(void)
 {
-    _propertySuite = (OfxPropertySuiteV1*)_host->fetchSuite(
+    _propSuite = (OfxPropertySuiteV1*)_host->fetchSuite(
         _host->host,
         kOfxPropertySuite,
         1);
-    _parameterSuite = (OfxParameterSuiteV1*)_host->fetchSuite(
+    _paramSuite = (OfxParameterSuiteV1*)_host->fetchSuite(
         _host->host,
         kOfxParameterSuite,
         1);
-    _imageEffectSuite = (OfxImageEffectSuiteV1*)_host->fetchSuite(
+    _effectSuite = (OfxImageEffectSuiteV1*)_host->fetchSuite(
         _host->host,
         kOfxImageEffectSuite,
         1);
@@ -80,13 +80,13 @@ OfxStatus Plugin::_unloadAction(void)
 OfxStatus Plugin::_describeAction(OfxImageEffectHandle descriptor)
 {
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(descriptor, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxPropLabel,
         0,
         _name.c_str());
-    _propertySuite->propSetString(
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPluginPropGrouping,
         0,

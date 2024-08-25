@@ -17,25 +17,29 @@ TransformPlugin::TransformPlugin(const std::string& group, const std::string& na
 TransformPlugin::~TransformPlugin()
 {}
 
-OfxStatus TransformPlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus TransformPlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
+
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
         kOfxImageEffectContextFilter);
+
     return kOfxStatOK;
 }
 
-OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
+    Plugin::_describeInContextAction(handle, inArgs);
+
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "Source", &sourceProps);
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "Source", &sourceProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -50,12 +54,12 @@ OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -63,60 +67,62 @@ OfxStatus TransformPlugin::_describeInContextAction(OfxImageEffectHandle descrip
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
     }
+
     return kOfxStatOK;
 }
 
 OfxStatus TransformPlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     OfxImageClipHandle sourceClip = nullptr;
     OfxImageClipHandle outputClip = nullptr;
     OfxPropertySetHandle sourceImage = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "Source", &sourceClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Source", &sourceClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (sourceClip && outputClip)
     {
-        _imageEffectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (sourceImage && outputImage)
         {
-            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propertySuite, sourceImage);
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceBuf, outputBuf, renderWindow, inArgs);
+            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propSuite, sourceImage);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(handle, sourceBuf, outputBuf, renderWindow, inArgs);
         }
     }
 
     if (sourceImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceImage);
+        _effectSuite->clipReleaseImage(sourceImage);
     }
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
+
     return kOfxStatOK;
 }
 
-CropPlugin* CropPlugin::_instance = nullptr;
+CropPlugin* CropPlugin::_plugin = nullptr;
 
 CropPlugin::CropPlugin() :
     TransformPlugin("Toucan", "Crop")
@@ -127,11 +133,11 @@ CropPlugin::~CropPlugin()
 
 void CropPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new CropPlugin;
+        _plugin = new CropPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus CropPlugin::mainEntryPoint(
@@ -140,29 +146,64 @@ OfxStatus CropPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus CropPlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    TransformPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "pos", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Position");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "size", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Size");
+
+    return kOfxStatOK;
+}
+
+OfxStatus CropPlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    TransformPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "pos", &_posParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus CropPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    IMATH_NAMESPACE::V2i pos;
-    IMATH_NAMESPACE::V2i size;
-    _propertySuite->propGetIntN(inArgs, "pos", 2, &pos.x);
-    _propertySuite->propGetIntN(inArgs, "size", 2, &size.x);
+    int64_t pos[2] = { 0, 0 };
+    int64_t size[2] = { 0, 0 };
+    _paramSuite->paramGetValue(_posParam[handle], &pos[0], &pos[1]);
+    _paramSuite->paramGetValue(_sizeParam[handle], &size[0], &size[1]);
 
     const auto crop = OIIO::ImageBufAlgo::cut(
         sourceBuf,
-        OIIO::ROI(pos.x, pos.x + size.x, pos.y, pos.y + size.y));
+        OIIO::ROI(pos[0], pos[0] + size[0], pos[1], pos[1] + size[1]));
     OIIO::ImageBufAlgo::copy(outputBuf, crop);
 
     return kOfxStatOK;
 }
 
-FlipPlugin* FlipPlugin::_instance = nullptr;
+FlipPlugin* FlipPlugin::_plugin = nullptr;
 
 FlipPlugin::FlipPlugin() :
     TransformPlugin("Toucan", "Flip")
@@ -173,11 +214,11 @@ FlipPlugin::~FlipPlugin()
 
 void FlipPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new FlipPlugin;
+        _plugin = new FlipPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus FlipPlugin::mainEntryPoint(
@@ -186,10 +227,11 @@ OfxStatus FlipPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus FlipPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -206,7 +248,7 @@ OfxStatus FlipPlugin::_render(
     return kOfxStatOK;
 }
 
-FlopPlugin* FlopPlugin::_instance = nullptr;
+FlopPlugin* FlopPlugin::_plugin = nullptr;
 
 FlopPlugin::FlopPlugin() :
     TransformPlugin("Toucan", "Flop")
@@ -217,11 +259,11 @@ FlopPlugin::~FlopPlugin()
 
 void FlopPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new FlopPlugin;
+        _plugin = new FlopPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus FlopPlugin::mainEntryPoint(
@@ -230,10 +272,11 @@ OfxStatus FlopPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus FlopPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -250,7 +293,7 @@ OfxStatus FlopPlugin::_render(
     return kOfxStatOK;
 }
 
-ResizePlugin* ResizePlugin::_instance = nullptr;
+ResizePlugin* ResizePlugin::_plugin = nullptr;
 
 ResizePlugin::ResizePlugin() :
     TransformPlugin("Toucan", "Resize")
@@ -261,11 +304,11 @@ ResizePlugin::~ResizePlugin()
 
 void ResizePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new ResizePlugin;
+        _plugin = new ResizePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus ResizePlugin::mainEntryPoint(
@@ -274,40 +317,72 @@ OfxStatus ResizePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus ResizePlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    TransformPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeInteger2D, "size", &props);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 0, 0);
+    _propSuite->propSetInt(props, kOfxParamPropDefault, 1, 0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Size");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "filter_name", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Filter name");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "filter_width", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Filter width");
+
+    return kOfxStatOK;
+}
+
+OfxStatus ResizePlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    TransformPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "filter_name", &_filterNameParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "filter_width", &_filterWidthParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus ResizePlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    IMATH_NAMESPACE::V2i size;
-    _propertySuite->propGetIntN(inArgs, "size", 2, &size.x);
-
-    std::string filterName = "";
-    char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "filterName", 0, &s);
-    if (s)
-    {
-        filterName = s;
-    }
-
+    int64_t size[2] = { 0, 0 };
+    std::string filterName;
     double filterWidth = 0.0;
-    _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
+    _paramSuite->paramGetValue(_sizeParam[handle], &size[0], &size[1]);
+    _paramSuite->paramGetValue(_filterNameParam[handle], &filterName);
+    _paramSuite->paramGetValue(_filterWidthParam[handle], &filterWidth);
 
     OIIO::ImageBufAlgo::resize(
         outputBuf,
         sourceBuf,
         filterName,
         filterWidth,
-        OIIO::ROI(0, size.x, 0, size.y));
+        OIIO::ROI(0, size[0], 0, size[1]));
 
     return kOfxStatOK;
 }
 
-RotatePlugin* RotatePlugin::_instance = nullptr;
+RotatePlugin* RotatePlugin::_plugin = nullptr;
 
 RotatePlugin::RotatePlugin() :
     TransformPlugin("Toucan", "Rotate")
@@ -318,11 +393,11 @@ RotatePlugin::~RotatePlugin()
 
 void RotatePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new RotatePlugin;
+        _plugin = new RotatePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus RotatePlugin::mainEntryPoint(
@@ -331,28 +406,59 @@ OfxStatus RotatePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
+}
+
+OfxStatus RotatePlugin::_describeInContextAction(
+    OfxImageEffectHandle handle,
+    OfxPropertySetHandle inArgs)
+{
+    TransformPlugin::_describeInContextAction(handle, inArgs);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "angle", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Angle");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "filter_name", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Filter name");
+
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "filter_width", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Filter width");
+
+    return kOfxStatOK;
+}
+
+OfxStatus RotatePlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    TransformPlugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "angle", &_angleParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "filter_name", &_filterNameParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "filter_width", &_filterWidthParam[handle], nullptr);
+
+    return kOfxStatOK;
 }
 
 OfxStatus RotatePlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
     double angle = 0.0;
-    _propertySuite->propGetDouble(inArgs, "angle", 0, &angle);
-
-    std::string filterName = "";
-    char* s = nullptr;
-    _propertySuite->propGetString(inArgs, "filterName", 0, &s);
-    if (s)
-    {
-        filterName = s;
-    }
-
+    std::string filterName;
     double filterWidth = 0.0;
-    _propertySuite->propGetDouble(inArgs, "filterWidth", 0, &filterWidth);
+    _paramSuite->paramGetValue(_angleParam[handle], &angle);
+    _paramSuite->paramGetValue(_filterNameParam[handle], &filterName);
+    _paramSuite->paramGetValue(_filterWidthParam[handle], &filterWidth);
 
     OIIO::ImageBufAlgo::rotate(
         outputBuf,

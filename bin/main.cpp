@@ -2,7 +2,6 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include <toucan/Init.h>
 #include <toucan/ImageEffectHost.h>
 #include <toucan/ImageGraph.h>
 #include <toucan/Util.h>
@@ -54,9 +53,6 @@ int main(int argc, char** argv)
             verbose = true;
         }
     }
-
-    // Initialize the toucan library.
-    init();
 
     // Open the timeline.
     OTIO_NS::ErrorStatus errorStatus;
@@ -131,9 +127,6 @@ int main(int argc, char** argv)
         std::cout << time.value() << "/" << timeRange.duration().value() << std::endl;
         if (auto node = graph->exec(host, time))
         {
-            // Execute the graph.
-            const auto buf = node->exec(time);
-
             // Print the graph.
             if (printGraph)
             {
@@ -142,6 +135,9 @@ int main(int argc, char** argv)
                     std::cout << line << std::endl;
                 }
             }
+
+            // Execute the graph.
+            const auto buf = node->exec(time);
 
             // Save the image.
             if (!filmstrip)

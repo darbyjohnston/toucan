@@ -15,13 +15,13 @@ FilterPlugin::FilterPlugin(const std::string& group, const std::string& name) :
 FilterPlugin::~FilterPlugin()
 {}
 
-OfxStatus FilterPlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus FilterPlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
 
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
@@ -31,15 +31,15 @@ OfxStatus FilterPlugin::_describeAction(OfxImageEffectHandle descriptor)
 }
 
 OfxStatus FilterPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    Plugin::_describeInContextAction(descriptor, inArgs);
+    Plugin::_describeInContextAction(handle, inArgs);
 
     OfxPropertySetHandle sourceProps;
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "Source", &sourceProps);
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "Source", &sourceProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -54,12 +54,12 @@ OfxStatus FilterPlugin::_describeInContextAction(
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -67,12 +67,12 @@ OfxStatus FilterPlugin::_describeInContextAction(
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
@@ -83,46 +83,46 @@ OfxStatus FilterPlugin::_describeInContextAction(
 }
 
 OfxStatus FilterPlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     OfxImageClipHandle sourceClip = nullptr;
     OfxImageClipHandle outputClip = nullptr;
     OfxPropertySetHandle sourceImage = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "Source", &sourceClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Source", &sourceClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (sourceClip && outputClip)
     {
-        _imageEffectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(sourceClip, time, nullptr, &sourceImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (sourceImage && outputImage)
         {
-            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propertySuite, sourceImage);
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceBuf, outputBuf, renderWindow, inArgs);
+            const OIIO::ImageBuf sourceBuf = propSetToBuf(_propSuite, sourceImage);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(handle, sourceBuf, outputBuf, renderWindow, inArgs);
         }
     }
 
     if (sourceImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceImage);
+        _effectSuite->clipReleaseImage(sourceImage);
     }
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
 
     return kOfxStatOK;
 }
 
-BlurPlugin* BlurPlugin::_instance = nullptr;
+BlurPlugin* BlurPlugin::_plugin = nullptr;
 
 BlurPlugin::BlurPlugin() :
     FilterPlugin("Toucan", "Blur")
@@ -133,11 +133,11 @@ BlurPlugin::~BlurPlugin()
 
 void BlurPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new BlurPlugin;
+        _plugin = new BlurPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus BlurPlugin::mainEntryPoint(
@@ -146,45 +146,45 @@ OfxStatus BlurPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus BlurPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+    FilterPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "radius", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 10.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Radius");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "radius", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 10.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Radius");
 
     return kOfxStatOK;
 }
 
-OfxStatus BlurPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus BlurPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    FilterPlugin::_createInstance(descriptor);
+    FilterPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "radius", &_radiusParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "radius", &_radiusParam[handle], nullptr);
     
     return kOfxStatOK;
 }
 
 OfxStatus BlurPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
     double radius = 0.0;
-    _parameterSuite->paramGetValue(_radiusParam, &radius);
+    _paramSuite->paramGetValue(_radiusParam[handle], &radius);
 
     const OIIO::ImageBuf k = OIIO::ImageBufAlgo::make_kernel(
         "gaussian",
@@ -205,7 +205,7 @@ OfxStatus BlurPlugin::_render(
     return kOfxStatOK;
 }
 
-ColorMapPlugin* ColorMapPlugin::_instance = nullptr;
+ColorMapPlugin* ColorMapPlugin::_plugin = nullptr;
 
 ColorMapPlugin::ColorMapPlugin() :
     FilterPlugin("Toucan", "ColorMap")
@@ -216,11 +216,11 @@ ColorMapPlugin::~ColorMapPlugin()
 
 void ColorMapPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new ColorMapPlugin;
+        _plugin = new ColorMapPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus ColorMapPlugin::mainEntryPoint(
@@ -229,38 +229,38 @@ OfxStatus ColorMapPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus ColorMapPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+    FilterPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeString, "map_name", &props);
-    _propertySuite->propSetString(props, kOfxParamPropDefault, 0, "plasma");
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Map Name");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "map_name", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "plasma");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Map Name");
 
     return kOfxStatOK;
 }
 
-OfxStatus ColorMapPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus ColorMapPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    FilterPlugin::_createInstance(descriptor);
+    FilterPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "map_name", &_mapNameParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "map_name", &_mapNameParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus ColorMapPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -268,7 +268,7 @@ OfxStatus ColorMapPlugin::_render(
 {
     // Apply the color map.
     std::string mapName = "plasma";
-    _parameterSuite->paramGetValue(_mapNameParam, &mapName);
+    _paramSuite->paramGetValue(_mapNameParam[handle], &mapName);
     OIIO::ImageBufAlgo::color_map(
         outputBuf,
         sourceBuf,
@@ -298,7 +298,7 @@ OfxStatus ColorMapPlugin::_render(
     return kOfxStatOK;
 }
 
-InvertPlugin* InvertPlugin::_instance = nullptr;
+InvertPlugin* InvertPlugin::_plugin = nullptr;
 
 InvertPlugin::InvertPlugin() :
     FilterPlugin("Toucan", "Invert")
@@ -309,11 +309,11 @@ InvertPlugin::~InvertPlugin()
 
 void InvertPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new InvertPlugin;
+        _plugin = new InvertPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus InvertPlugin::mainEntryPoint(
@@ -322,10 +322,11 @@ OfxStatus InvertPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus InvertPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -363,7 +364,7 @@ OfxStatus InvertPlugin::_render(
     return kOfxStatOK;
 }
 
-PowPlugin* PowPlugin::_instance = nullptr;
+PowPlugin* PowPlugin::_plugin = nullptr;
 
 PowPlugin::PowPlugin() :
     FilterPlugin("Toucan", "Pow")
@@ -374,11 +375,11 @@ PowPlugin::~PowPlugin()
 
 void PowPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new PowPlugin;
+        _plugin = new PowPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus PowPlugin::mainEntryPoint(
@@ -387,45 +388,45 @@ OfxStatus PowPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus PowPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+    FilterPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "value", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Value");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "value", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Value");
 
     return kOfxStatOK;
 }
 
-OfxStatus PowPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus PowPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    FilterPlugin::_createInstance(descriptor);
+    FilterPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "value", &_valueParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus PowPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
     double value = 1.0;
-    _parameterSuite->paramGetValue(_valueParam, &value);
+    _paramSuite->paramGetValue(_valueParam[handle], &value);
 
     OIIO::ImageBufAlgo::pow(
         outputBuf,
@@ -440,7 +441,7 @@ OfxStatus PowPlugin::_render(
     return kOfxStatOK;
 }
 
-SaturatePlugin* SaturatePlugin::_instance = nullptr;
+SaturatePlugin* SaturatePlugin::_plugin = nullptr;
 
 SaturatePlugin::SaturatePlugin() :
     FilterPlugin("Toucan", "Saturate")
@@ -451,11 +452,11 @@ SaturatePlugin::~SaturatePlugin()
 
 void SaturatePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new SaturatePlugin;
+        _plugin = new SaturatePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus SaturatePlugin::mainEntryPoint(
@@ -464,45 +465,45 @@ OfxStatus SaturatePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus SaturatePlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+    FilterPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "value", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Value");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "value", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Value");
 
     return kOfxStatOK;
 }
 
-OfxStatus SaturatePlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus SaturatePlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    FilterPlugin::_createInstance(descriptor);
+    FilterPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "value", &_valueParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus SaturatePlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
     double value = 1.0;
-    _parameterSuite->paramGetValue(_valueParam, &value);
+    _paramSuite->paramGetValue(_valueParam[handle], &value);
 
     OIIO::ImageBufAlgo::saturate(
         outputBuf,
@@ -518,7 +519,7 @@ OfxStatus SaturatePlugin::_render(
     return kOfxStatOK;
 }
 
-UnsharpMaskPlugin* UnsharpMaskPlugin::_instance = nullptr;
+UnsharpMaskPlugin* UnsharpMaskPlugin::_plugin = nullptr;
 
 UnsharpMaskPlugin::UnsharpMaskPlugin() :
     FilterPlugin("Toucan", "UnsharpMask")
@@ -529,11 +530,11 @@ UnsharpMaskPlugin::~UnsharpMaskPlugin()
 
 void UnsharpMaskPlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new UnsharpMaskPlugin;
+        _plugin = new UnsharpMaskPlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus UnsharpMaskPlugin::mainEntryPoint(
@@ -542,53 +543,53 @@ OfxStatus UnsharpMaskPlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus UnsharpMaskPlugin::_describeInContextAction(
-    OfxImageEffectHandle descriptor,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    FilterPlugin::_describeInContextAction(descriptor, inArgs);
+    FilterPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-
+    _effectSuite->getParamSet(handle, &paramSet);
     OfxPropertySetHandle props;
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeString, "kernel", &props);
-    _propertySuite->propSetString(props, kOfxParamPropDefault, 0, "gaussian");
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Kernel");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeString, "kernel", &props);
+    _propSuite->propSetString(props, kOfxParamPropDefault, 0, "gaussian");
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Kernel");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "width", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Width");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "width", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Width");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "contrast", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Contrast");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "contrast", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Contrast");
 
-    _parameterSuite->paramDefine(paramSet, kOfxParamTypeDouble, "threshold", &props);
-    _propertySuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
-    _propertySuite->propSetString(props, kOfxPropLabel, 0, "Threshold");
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "threshold", &props);
+    _propSuite->propSetDouble(props, kOfxParamPropDefault, 0, 1.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Threshold");
 
     return kOfxStatOK;
 }
 
-OfxStatus UnsharpMaskPlugin::_createInstance(OfxImageEffectHandle descriptor)
+OfxStatus UnsharpMaskPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    FilterPlugin::_createInstance(descriptor);
+    FilterPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
-    _imageEffectSuite->getParamSet(descriptor, &paramSet);
-    _parameterSuite->paramGetHandle(paramSet, "kernel", &_kernelParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "width", &_widthParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "contrast", &_contrastParam, nullptr);
-    _parameterSuite->paramGetHandle(paramSet, "threshold", &_thresholdParam, nullptr);
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "kernel", &_kernelParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "width", &_widthParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "contrast", &_contrastParam[handle], nullptr);
+    _paramSuite->paramGetHandle(paramSet, "threshold", &_thresholdParam[handle], nullptr);
 
     return kOfxStatOK;
 }
 
 OfxStatus UnsharpMaskPlugin::_render(
+    OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
@@ -598,10 +599,10 @@ OfxStatus UnsharpMaskPlugin::_render(
     double width = 3.0;
     double contrast = 1.0;
     double threshold = 0.0;
-    _parameterSuite->paramGetValue(_kernelParam, &kernel);
-    _parameterSuite->paramGetValue(_widthParam, &width);
-    _parameterSuite->paramGetValue(_contrastParam, &contrast);
-    _parameterSuite->paramGetValue(_thresholdParam, &threshold);
+    _paramSuite->paramGetValue(_kernelParam[handle], &kernel);
+    _paramSuite->paramGetValue(_widthParam[handle], &width);
+    _paramSuite->paramGetValue(_contrastParam[handle], &contrast);
+    _paramSuite->paramGetValue(_thresholdParam[handle], &threshold);
 
     OIIO::ImageBufAlgo::unsharp_mask(
         outputBuf,

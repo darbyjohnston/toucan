@@ -25,7 +25,7 @@
                                     "value": 0
                                 }
                             },
-                            "generator_kind": "Fill",
+                            "generator_kind": "Toucan:Fill",
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "color": [ 0.0, 0.0, 1.0, 1.0 ]
@@ -63,7 +63,7 @@
                                     "value": 0
                                 }
                             },
-                            "generator_kind": "Fill",
+                            "generator_kind": "Toucan:Fill",
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "color": [ 0.0, 1.0, 0.0, 1.0 ]

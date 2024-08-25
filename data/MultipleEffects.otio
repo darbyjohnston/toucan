@@ -6,8 +6,8 @@
         "OTIO_SCHEMA": "Stack.1", 
         "effects": [
             {
-                "OTIO_SCHEMA": "PowEffect.1",
-                "effect_name": "",
+                "OTIO_SCHEMA": "Effect.1",
+                "effect_name": "Toucan:Pow",
                 "value": 2
             }
         ],
@@ -16,9 +16,8 @@
                 "OTIO_SCHEMA": "Track.1", 
                 "effects": [
                     {
-                        "OTIO_SCHEMA": "InvertEffect.1",
-                        "effect_name": "",
-                        "value": 0.0
+                        "OTIO_SCHEMA": "Effect.1",
+                        "effect_name": "Toucan:Invert"
                     }
                 ],
                 "children": [
@@ -43,13 +42,13 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "FlipEffect.1",
-                                "effect_name": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Flip"
                             },
                             {
-                                "OTIO_SCHEMA": "BlurEffect.1",
-                                "effect_name": "",
-                                "radius": 30
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Blur",
+                                "radius": 50
                             }
                         ],
                         "source_range": {
@@ -88,13 +87,15 @@
                         },
                         "effects": [
                             {
-                                "OTIO_SCHEMA": "FlopEffect.1",
-                                "effect_name": ""
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:Flop"
                             },
                             {
-                                "OTIO_SCHEMA": "ColorMapEffect.1",
-                                "effect_name": "",
-                                "map_name": "plasma"
+                                "OTIO_SCHEMA": "Effect.1",
+                                "effect_name": "Toucan:ColorMap",
+                                "metadata": {
+                                    "map_name": "plasma"
+                                }
                             }
                         ],
                         "source_range": {

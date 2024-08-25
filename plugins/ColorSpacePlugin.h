@@ -20,6 +20,7 @@ public:
 
 protected:
     virtual OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -51,15 +52,25 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static ColorConvertPlugin* _instance;
-
+    static ColorConvertPlugin* _plugin;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _fromSpaceParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _toSpaceParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _premultParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _contextKeyParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _contextValueParam;
+    std::map<OfxImageEffectHandle, OfxParamHandle> _colorConfigParam;
     std::map<std::filesystem::path, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
 };
 
@@ -80,13 +91,14 @@ public:
 
 protected:
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static PremultPlugin* _instance;
+    static PremultPlugin* _plugin;
 };
 
 class UnpremultPlugin : public ColorSpacePlugin
@@ -106,11 +118,12 @@ public:
 
 protected:
     OfxStatus _render(
+        OfxImageEffectHandle,
         const OIIO::ImageBuf&,
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
         OfxPropertySetHandle inArgs) override;
 
 private:
-    static UnpremultPlugin* _instance;
+    static UnpremultPlugin* _plugin;
 };

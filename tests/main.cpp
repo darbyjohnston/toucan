@@ -9,7 +9,6 @@
 #include "UtilTest.h"
 
 #include <toucan/ImageEffectHost.h>
-#include <toucan/Init.h>
 
 #include <iostream>
 
@@ -24,8 +23,6 @@ int main(int argc, char** argv)
     }
     const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
     const std::filesystem::path path(argv[1]);
-
-    init();
     
     std::vector<std::filesystem::path> searchPath;
     searchPath.push_back(parentPath);

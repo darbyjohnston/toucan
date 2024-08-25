@@ -17,27 +17,31 @@ TransitionPlugin::TransitionPlugin(const std::string& group, const std::string& 
 TransitionPlugin::~TransitionPlugin()
 {}
 
-OfxStatus TransitionPlugin::_describeAction(OfxImageEffectHandle descriptor)
+OfxStatus TransitionPlugin::_describeAction(OfxImageEffectHandle handle)
 {
-    Plugin::_describeAction(descriptor);
+    Plugin::_describeAction(handle);
+
     OfxPropertySetHandle effectProps;
-    _imageEffectSuite->getPropertySet(descriptor, &effectProps);
-    _propertySuite->propSetString(
+    _effectSuite->getPropertySet(handle, &effectProps);
+    _propSuite->propSetString(
         effectProps,
         kOfxImageEffectPropSupportedContexts,
         0,
         kOfxImageEffectContextTransition);
+
     return kOfxStatOK;
 }
 
-OfxStatus TransitionPlugin::_describeInContextAction(OfxImageEffectHandle descriptor, OfxPropertySetHandle inArgs)
+OfxStatus TransitionPlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
+    Plugin::_describeInContextAction(handle, inArgs);
+
     OfxPropertySetHandle sourceFromProps;
     OfxPropertySetHandle sourceToProps;
     OfxPropertySetHandle outputProps;
-    _imageEffectSuite->clipDefine(descriptor, "SourceFrom", &sourceFromProps);
-    _imageEffectSuite->clipDefine(descriptor, "SourceTo", &sourceToProps);
-    _imageEffectSuite->clipDefine(descriptor, "Output", &outputProps);
+    _effectSuite->clipDefine(handle, "SourceFrom", &sourceFromProps);
+    _effectSuite->clipDefine(handle, "SourceTo", &sourceToProps);
+    _effectSuite->clipDefine(handle, "Output", &outputProps);
     const std::vector<std::string> components =
     {
         kOfxImageComponentAlpha,
@@ -52,17 +56,17 @@ OfxStatus TransitionPlugin::_describeInContextAction(OfxImageEffectHandle descri
     };
     for (int i = 0; i < components.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceFromProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceToProps,
             kOfxImageEffectPropSupportedComponents,
             i,
             components[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedComponents,
             i,
@@ -70,34 +74,56 @@ OfxStatus TransitionPlugin::_describeInContextAction(OfxImageEffectHandle descri
     }
     for (int i = 0; i < pixelDepths.size(); ++i)
     {
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceFromProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             sourceToProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
-        _propertySuite->propSetString(
+        _propSuite->propSetString(
             outputProps,
             kOfxImageEffectPropSupportedPixelDepths,
             i,
             pixelDepths[i].c_str());
     }
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxPropertySetHandle props;
+    _paramSuite->paramDefine(paramSet, kOfxParamTypeDouble, "value", &props);
+    _propSuite->propSetDouble (props, kOfxParamPropDefault, 0, 0.0);
+    _propSuite->propSetString(props, kOfxPropLabel, 0, "Value");
+
+    return kOfxStatOK;
+}
+
+OfxStatus TransitionPlugin::_createInstance(OfxImageEffectHandle handle)
+{
+    Plugin::_createInstance(handle);
+
+    OfxParamSetHandle paramSet;
+    _effectSuite->getParamSet(handle, &paramSet);
+    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
+
     return kOfxStatOK;
 }
 
 OfxStatus TransitionPlugin::_renderAction(
-    OfxImageEffectHandle instance,
+    OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
     OfxTime time;
     OfxRectI renderWindow;
-    _propertySuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
-    _propertySuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+    _propSuite->propGetDouble(inArgs, kOfxPropTime, 0, &time);
+    _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
+
+    double value = 0.0;
+    _paramSuite->paramGetValue(_valueParam[handle], &value);
 
     OfxImageClipHandle sourceFromClip = nullptr;
     OfxImageClipHandle sourceToClip = nullptr;
@@ -105,39 +131,39 @@ OfxStatus TransitionPlugin::_renderAction(
     OfxPropertySetHandle sourceFromImage = nullptr;
     OfxPropertySetHandle sourceToImage = nullptr;
     OfxPropertySetHandle outputImage = nullptr;
-    _imageEffectSuite->clipGetHandle(instance, "SourceFrom", &sourceFromClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "SourceTo", &sourceToClip, nullptr);
-    _imageEffectSuite->clipGetHandle(instance, "Output", &outputClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "SourceFrom", &sourceFromClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "SourceTo", &sourceToClip, nullptr);
+    _effectSuite->clipGetHandle(handle, "Output", &outputClip, nullptr);
     if (sourceFromClip && sourceToClip && outputClip)
     {
-        _imageEffectSuite->clipGetImage(sourceFromClip, time, nullptr, &sourceFromImage);
-        _imageEffectSuite->clipGetImage(sourceToClip, time, nullptr, &sourceToImage);
-        _imageEffectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
+        _effectSuite->clipGetImage(sourceFromClip, time, nullptr, &sourceFromImage);
+        _effectSuite->clipGetImage(sourceToClip, time, nullptr, &sourceToImage);
+        _effectSuite->clipGetImage(outputClip, time, nullptr, &outputImage);
         if (sourceFromImage && sourceToImage && outputImage)
         {
-            const OIIO::ImageBuf sourceFromBuf = propSetToBuf(_propertySuite, sourceFromImage);
-            const OIIO::ImageBuf sourceToBuf = propSetToBuf(_propertySuite, sourceToImage);
-            OIIO::ImageBuf outputBuf = propSetToBuf(_propertySuite, outputImage);
-            _render(sourceFromBuf, sourceToBuf, outputBuf,  inArgs);
+            const OIIO::ImageBuf sourceFromBuf = propSetToBuf(_propSuite, sourceFromImage);
+            const OIIO::ImageBuf sourceToBuf = propSetToBuf(_propSuite, sourceToImage);
+            OIIO::ImageBuf outputBuf = propSetToBuf(_propSuite, outputImage);
+            _render(sourceFromBuf, sourceToBuf, outputBuf, value, inArgs);
         }
     }
 
     if (sourceFromImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceFromImage);
+        _effectSuite->clipReleaseImage(sourceFromImage);
     }
     if (sourceToImage)
     {
-        _imageEffectSuite->clipReleaseImage(sourceToImage);
+        _effectSuite->clipReleaseImage(sourceToImage);
     }
     if (outputImage)
     {
-        _imageEffectSuite->clipReleaseImage(outputImage);
+        _effectSuite->clipReleaseImage(outputImage);
     }
     return kOfxStatOK;
 }
 
-DissolvePlugin* DissolvePlugin::_instance = nullptr;
+DissolvePlugin* DissolvePlugin::_plugin = nullptr;
 
 DissolvePlugin::DissolvePlugin() :
     TransitionPlugin("Toucan", "Dissolve")
@@ -148,11 +174,11 @@ DissolvePlugin::~DissolvePlugin()
 
 void DissolvePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new DissolvePlugin;
+        _plugin = new DissolvePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus DissolvePlugin::mainEntryPoint(
@@ -161,18 +187,16 @@ OfxStatus DissolvePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus DissolvePlugin::_render(
     const OIIO::ImageBuf& sourceFromBuf,
     const OIIO::ImageBuf& sourceToBuf,
     OIIO::ImageBuf& outputBuf,
+    double value,
     OfxPropertySetHandle inArgs)
 {
-    double value = 0.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
     const float v = value;
     const float iv = 1.0 - value;
     OIIO::ImageBufAlgo::add(
@@ -187,7 +211,7 @@ OfxStatus DissolvePlugin::_render(
     return kOfxStatOK;
 }
 
-HorizontalWipePlugin* HorizontalWipePlugin::_instance = nullptr;
+HorizontalWipePlugin* HorizontalWipePlugin::_plugin = nullptr;
 
 HorizontalWipePlugin::HorizontalWipePlugin() :
     TransitionPlugin("Toucan", "HorizontalWipe")
@@ -198,11 +222,11 @@ HorizontalWipePlugin::~HorizontalWipePlugin()
 
 void HorizontalWipePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new HorizontalWipePlugin;
+        _plugin = new HorizontalWipePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus HorizontalWipePlugin::mainEntryPoint(
@@ -211,18 +235,16 @@ OfxStatus HorizontalWipePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus HorizontalWipePlugin::_render(
     const OIIO::ImageBuf& sourceFromBuf,
     const OIIO::ImageBuf& sourceToBuf,
     OIIO::ImageBuf& outputBuf,
+    double value,
     OfxPropertySetHandle inArgs)
 {
-    double value = 0.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
     const int w = sourceFromBuf.spec().width;
     const int h = sourceFromBuf.spec().height;
     const int x = w * value;
@@ -278,7 +300,7 @@ OfxStatus HorizontalWipePlugin::_render(
     return kOfxStatOK;
 }
 
-VerticalWipePlugin* VerticalWipePlugin::_instance = nullptr;
+VerticalWipePlugin* VerticalWipePlugin::_plugin = nullptr;
 
 VerticalWipePlugin::VerticalWipePlugin() :
     TransitionPlugin("Toucan", "VerticalWipe")
@@ -289,11 +311,11 @@ VerticalWipePlugin::~VerticalWipePlugin()
 
 void VerticalWipePlugin::setHostFunc(OfxHost* host)
 {
-    if (!_instance)
+    if (!_plugin)
     {
-        _instance = new VerticalWipePlugin;
+        _plugin = new VerticalWipePlugin;
     }
-    _instance->_host = host;
+    _plugin->_host = host;
 }
 
 OfxStatus VerticalWipePlugin::mainEntryPoint(
@@ -302,18 +324,16 @@ OfxStatus VerticalWipePlugin::mainEntryPoint(
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
 {
-    return _instance->_entryPoint(action, handle, inArgs, outArgs);
+    return _plugin->_entryPoint(action, handle, inArgs, outArgs);
 }
 
 OfxStatus VerticalWipePlugin::_render(
     const OIIO::ImageBuf& sourceFromBuf,
     const OIIO::ImageBuf& sourceToBuf,
     OIIO::ImageBuf& outputBuf,
+    double value,
     OfxPropertySetHandle inArgs)
 {
-    double value = 0.0;
-    _propertySuite->propGetDouble(inArgs, "value", 0, &value);
-
     const int w = sourceFromBuf.spec().width;
     const int h = sourceFromBuf.spec().height;
     const int y = h * value;

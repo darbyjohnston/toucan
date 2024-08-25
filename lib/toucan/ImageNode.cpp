@@ -21,6 +21,16 @@ namespace toucan
         return _name;
     }
 
+    const std::vector<std::shared_ptr<IImageNode> >& IImageNode::getInputs() const
+    {
+        return _inputs;
+    }
+
+    void IImageNode::setInputs(const std::vector<std::shared_ptr<IImageNode> >& value)
+    {
+        _inputs = value;
+    }
+
     void IImageNode::setTimeOffset(const OTIO_NS::RationalTime& timeOffset)
     {
         _timeOffset = timeOffset;
