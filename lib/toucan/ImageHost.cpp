@@ -417,20 +417,43 @@ namespace toucan
         va_list args;
         va_start(args, handle);
         std::any* a = (std::any*)handle;
-        if (a->type() == typeid(int))
+        if (a->type() == typeid(bool))
+        {
+            const bool value = std::any_cast<bool>(*a);
+            *va_arg(args, bool*) = value;
+        }
+        else if (a->type() == typeid(int))
         {
             const int value = std::any_cast<int>(*a);
             *va_arg(args, int*) = value;
         }
-        if (a->type() == typeid(double))
+        else if (a->type() == typeid(double))
         {
             const double value = std::any_cast<double>(*a);
             *va_arg(args, double*) = value;
         }
-        if (a->type() == typeid(std::string))
+        else if (a->type() == typeid(std::string))
         {
             const std::string value = std::any_cast<std::string>(*a);
             *va_arg(args, std::string*) = value;
+        }
+        else if (a->type() == typeid(OTIO_NS::AnyVector))
+        {
+            const OTIO_NS::AnyVector value = std::any_cast<OTIO_NS::AnyVector>(*a);
+            if (!value.empty() && value[0].type() == typeid(double))
+            {
+                for (size_t i = 0; i < value.size(); ++i)
+                {
+                    *va_arg(args, double*) = std::any_cast<double>(value[i]);
+                }
+            }
+            else if (!value.empty() && value[0].type() == typeid(int64_t))
+            {
+                for (size_t i = 0; i < value.size(); ++i)
+                {
+                    *va_arg(args, int64_t*) = std::any_cast<int64_t>(value[i]);
+                }
+            }
         }
         va_end(args);
         return kOfxStatOK;

@@ -25,10 +25,14 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,
         OfxPropertySetHandle outArgs) override;
+
+private:
+    OfxParamHandle _sizeParam = nullptr;
 };
 
 class CheckersPlugin : public GeneratorPlugin
@@ -47,6 +51,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -54,6 +62,9 @@ protected:
 
 private:
     static CheckersPlugin* _instance;
+    OfxParamHandle _checkerSizeParam = nullptr;
+    OfxParamHandle _color1Param = nullptr;
+    OfxParamHandle _color2Param = nullptr;
 };
 
 class FillPlugin : public GeneratorPlugin
@@ -72,6 +83,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -79,6 +94,7 @@ protected:
 
 private:
     static FillPlugin* _instance;
+    OfxParamHandle _colorParam = nullptr;
 };
 
 class GradientPlugin : public GeneratorPlugin
@@ -97,6 +113,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -104,6 +124,9 @@ protected:
 
 private:
     static GradientPlugin* _instance;
+    OfxParamHandle _color1Param = nullptr;
+    OfxParamHandle _color2Param = nullptr;
+    OfxParamHandle _verticalParam = nullptr;
 };
 
 class NoisePlugin : public GeneratorPlugin
@@ -122,6 +145,10 @@ public:
         OfxPropertySetHandle outArgs);
 
 protected:
+    OfxStatus _describeInContextAction(
+        OfxImageEffectHandle,
+        OfxPropertySetHandle) override;
+    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OIIO::ImageBuf&,
         const OfxRectI& renderWindow,
@@ -129,4 +156,9 @@ protected:
 
 private:
     static NoisePlugin* _instance;
+    OfxParamHandle _typeParam = nullptr;
+    OfxParamHandle _aParam = nullptr;
+    OfxParamHandle _bParam = nullptr;
+    OfxParamHandle _monoParam = nullptr;
+    OfxParamHandle _seedParam = nullptr;
 };
