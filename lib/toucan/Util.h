@@ -29,6 +29,9 @@ namespace toucan
     void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V2i&);
     void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V4f&);
 
+    //! Split the URL protocol.
+    std::pair<std::string, std::string> splitURLProtocol(const std::string&);
+
     //! Get an image sequence frame path.
     std::filesystem::path getSequenceFrame(
         const std::filesystem::path&,

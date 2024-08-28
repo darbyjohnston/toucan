@@ -137,7 +137,7 @@ int main(int argc, char** argv)
             }
 
             // Execute the graph.
-            const auto buf = node->exec(time);
+            const auto buf = node->exec(time - startTime);
 
             // Save the image.
             if (!filmstrip)

@@ -87,6 +87,23 @@ namespace toucan
         }
     }
 
+    std::pair<std::string, std::string> splitURLProtocol(const std::string& url)
+    {
+        std::pair<std::string, std::string> out;
+        const size_t size = url.size();
+        size_t pos = url.find("://");
+        if (pos != std::string::npos)
+        {
+            out.first = url.substr(0, pos + 2);
+            out.second = url.substr(pos + 3);
+        }
+        else
+        {
+            out.second = url;
+        }
+        return out;
+    }
+
     std::filesystem::path getSequenceFrame(
         const std::filesystem::path& path,
         const std::string& namePrefix,

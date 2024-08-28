@@ -31,16 +31,16 @@ namespace toucan
         _timeline(timeline),
         _options(options)
     {
+        const auto globalStartTime = timeline->global_start_time();
+        _globalStartTime = globalStartTime.has_value() ? globalStartTime.value() :
+            OTIO_NS::RationalTime(0.0, timeline->duration().rate());
+
         // Get the image size from the first clip.
         for (auto clip : _timeline->find_clips())
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                std::filesystem::path path = externalRef->target_url();
-                if (!path.is_absolute())
-                {
-                    path = _path / path;
-                }
+                const std::filesystem::path path = _getMediaPath(externalRef->target_url());
                 const OIIO::ImageBuf buf(path.string());
                 const auto& spec = buf.spec();
                 if (spec.width > 0)
@@ -52,13 +52,8 @@ namespace toucan
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
-                std::filesystem::path path = sequenceRef->target_url_base();
-                if (!path.is_absolute())
-                {
-                    path = _path / path;
-                }
-                path = getSequenceFrame(
-                    path,
+                const std::filesystem::path path = getSequenceFrame(
+                    _getMediaPath(sequenceRef->target_url_base()),
                     sequenceRef->name_prefix(),
                     sequenceRef->start_frame(),
                     sequenceRef->frame_zero_padding(),
@@ -108,29 +103,32 @@ namespace toucan
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                // Process this track.
-                auto trackNode = _track(host, time, track);
+                if (track->kind() == OTIO_NS::Track::Kind::video)
+                {
+                    // Process this track.
+                    auto trackNode = _track(host, time - _globalStartTime, track);
 
-                // Get the track effects.
-                const auto& effects = track->effects();
-                if (!effects.empty())
-                {
-                    trackNode = _effects(host, effects, trackNode);
-                }
+                    // Get the track effects.
+                    const auto& effects = track->effects();
+                    if (!effects.empty())
+                    {
+                        trackNode = _effects(host, effects, trackNode);
+                    }
 
-                // Composite this track over the previous track.
-                std::vector<std::shared_ptr<IImageNode> > nodes;
-                if (trackNode)
-                {
-                    nodes.push_back(trackNode);
+                    // Composite this track over the previous track.
+                    std::vector<std::shared_ptr<IImageNode> > nodes;
+                    if (trackNode)
+                    {
+                        nodes.push_back(trackNode);
+                    }
+                    if (node)
+                    {
+                        nodes.push_back(node);
+                    }
+                    auto comp = std::make_shared<CompNode>(nodes);
+                    comp->setPremult(true);
+                    node = comp;
                 }
-                if (node)
-                {
-                    nodes.push_back(node);
-                }
-                auto comp = std::make_shared<CompNode>(nodes);
-                comp->setPremult(true);
-                node = comp;
             }
         }
 
@@ -207,9 +205,16 @@ namespace toucan
 
                         auto metaData = prevTransition->metadata();
                         metaData["value"] = value;
-                        if (auto node = host->createNode(
+                        auto node = host->createNode(
                             prevTransition->transition_type(),
-                            metaData))
+                            metaData);
+                        if (!node)
+                        {
+                            node = host->createNode(
+                                "Toucan:Dissolve",
+                                metaData);
+                        }
+                        if (node)
                         {
                             auto a = _item(
                                 host,
@@ -235,9 +240,16 @@ namespace toucan
 
                         auto metaData = nextTransition->metadata();
                         metaData["value"] = value;
-                        if (auto node = host->createNode(
+                        auto node = host->createNode(
                             nextTransition->transition_type(),
-                            metaData))
+                            metaData);
+                        if (!node)
+                        {
+                            node = host->createNode(
+                                "Toucan:Dissolve",
+                                metaData);
+                        }
+                        if (node)
                         {
                             auto b = _item(
                                 host,
@@ -268,17 +280,15 @@ namespace toucan
             // Get the media reference.
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                const std::string url = externalRef->target_url();
-                const std::filesystem::path path = _path / url;
+                const std::filesystem::path path = _getMediaPath(externalRef->target_url());
                 auto read = std::make_shared<ReadNode>(path);
                 out = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
-                const std::string url = sequenceRef->target_url_base();
-                const std::filesystem::path path = _path / url;
+                const std::filesystem::path path = _getMediaPath(sequenceRef->target_url_base());
                 auto read = std::make_shared<SequenceReadNode>(
-                    path.string(),
+                    path,
                     sequenceRef->name_prefix(),
                     sequenceRef->name_suffix(),
                     sequenceRef->start_frame(),
@@ -307,12 +317,9 @@ namespace toucan
         }
         if (out)
         {
-            OTIO_NS::RationalTime timeOffset = trimmedRangeInParent.start_time();
-            const auto& sourceRange = item->source_range();
-            if (sourceRange.has_value())
-            {
-                timeOffset -= sourceRange.value().start_time();
-            }
+            const OTIO_NS::RationalTime timeOffset =
+                trimmedRangeInParent.start_time() -
+                item->trimmed_range().start_time();
             out->setTimeOffset(timeOffset);
         }
 
@@ -352,4 +359,15 @@ namespace toucan
         }
         return out;
     }
+
+    std::filesystem::path ImageGraph::_getMediaPath(const std::string& url) const
+    {
+        std::filesystem::path path = splitURLProtocol(url).second;
+        if (!path.is_absolute())
+        {
+            path = _path / path;
+        }
+        return path;
+    }
+
 }

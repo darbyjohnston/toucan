@@ -47,18 +47,23 @@ namespace toucan
             const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&) const;
+
         std::shared_ptr<IImageNode> _item(
             const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
+
         std::shared_ptr<IImageNode> _effects(
             const std::shared_ptr<ImageEffectHost>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
             const std::shared_ptr<IImageNode>&) const;
 
+        std::filesystem::path _getMediaPath(const std::string&) const;
+
         std::filesystem::path _path;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
+        OTIO_NS::RationalTime _globalStartTime;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
     };

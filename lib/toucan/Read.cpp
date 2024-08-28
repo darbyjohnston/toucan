@@ -22,19 +22,69 @@ namespace toucan
     ReadNode::~ReadNode()
     {}
 
-    OIIO::ImageBuf ReadNode::exec(const OTIO_NS::RationalTime&)
+    OIIO::ImageBuf ReadNode::exec(const OTIO_NS::RationalTime& time)
     {
-        OIIO::ImageBuf buf(_path.string());
-        const auto& spec = buf.spec();
+        OIIO::ImageBuf out;
+
+        OTIO_NS::RationalTime offsetTime = time;
+        if (!_timeOffset.is_invalid_time())
+        {
+            offsetTime -= _timeOffset;
+        }
+
+        OIIO::ImageSpec spec;
+        int64_t frameCount = 0;
+        if (auto in = OIIO::ImageInput::open(_path.string()))
+        {
+            spec = in->spec();
+            if (auto param = spec.find_attribute("oiio:subimages"))
+            {
+                frameCount = param->get_int();
+            }
+            int fps[2] = { 0, 0 };
+            if (auto param = spec.find_attribute("FramesPerSecond"))
+            {
+                spec.getattribute("FramesPerSecond", OIIO::TypeDesc::TypeRational, &fps);
+            }
+            if (auto param = spec.find_attribute("timecode"))
+            {
+                const std::string timecode = param->get_string();
+                double rate = 24.0;
+                if (fps[0] > 0 && fps[1] > 0)
+                {
+                    rate = fps[0] / static_cast<double>(fps[1]);
+                }
+                const OTIO_NS::RationalTime timecodeTime = OTIO_NS::RationalTime::from_timecode(timecode, rate);
+                if (!time.is_invalid_time())
+                {
+                    offsetTime -= timecodeTime;
+                }
+            }
+        }
+
+        const int subImage = std::max(
+            static_cast<int64_t>(0),
+            std::min(static_cast<int64_t>(offsetTime.floor().value()), frameCount - 1));
+        out = OIIO::ImageBuf(_path.string(), subImage);
+
         if (3 == spec.nchannels)
         {
             // Add an alpha channel.
-            const int channelorder[] = { 0, 1, 2, -1 };
-            const float channelvalues[] = { 0, 0, 0, 1.0 };
-            const std::string channelnames[] = { "", "", "", "A" };
-            buf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+            //const int channelorder[] = { 0, 1, 2, -1 };
+            //const float channelvalues[] = { 0, 0, 0, 1.0 };
+            //const std::string channelnames[] = { "", "", "", "A" };
+            //out = OIIO::ImageBufAlgo::channels(out, 4, channelorder, channelvalues, channelnames);
+            OIIO::ImageBuf tmp(OIIO::ImageSpec(spec.width, spec.height, 4, spec.format));
+            OIIO::ImageBufAlgo::fill(tmp, { 0.F, 0.F, 0.F, 1.F });
+            OIIO::ImageBufAlgo::copy(
+                tmp,
+                out,
+                OIIO::TypeUnknown,
+                OIIO::ROI(0, spec.width, 0, spec.height, 0, 1, 0, 3));
+            out = tmp;
         }
-        return buf;
+
+        return out;
     }
 
     std::string ReadNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
@@ -73,13 +123,16 @@ namespace toucan
         {
             offsetTime -= _timeOffset;
         }
+
+        const int frame = offsetTime.floor().to_frames();
         const std::filesystem::path path = getSequenceFrame(
             _base,
             _namePrefix,
-            offsetTime.to_frames(),
+            frame,
             _frameZeroPadding,
             _nameSuffix);
         OIIO::ImageBuf buf(path.string());
+
         const auto& spec = buf.spec();
         if (3 == spec.nchannels)
         {

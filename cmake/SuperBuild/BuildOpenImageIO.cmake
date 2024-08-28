@@ -4,6 +4,14 @@ set(OpenImageIO_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/Ope
 # Commit : admin: Relicense code under Apache 2.0 (#3905)
 set(OpenImageIO_GIT_TAG "64f829febd352686538beaba10e4ca716a9403a1")
 
+set(OpenImageIO_GIT_REPOSITORY https://github.com/darbyjohnston/OpenImageIO.git)
+set(OpenImageIO_GIT_TAG ffmpeg_add_metadata)
+
+set(OpenImageIO_DEPS TIFF PNG libjpeg-turbo OpenEXR OpenColorIO Freetype)
+if(toucan_FFMPEG)
+    list(APPEND OpenImageIO_DEPS FFmpeg)
+endif()
+
 set(OpenImageIO_ARGS
     ${toucan_EXTERNAL_PROJECT_ARGS}
     -DOIIO_BUILD_TESTS=OFF
@@ -13,10 +21,10 @@ set(OpenImageIO_ARGS
     -DOIIO_INSTALL_FONTS=ON
     -DUSE_FREETYPE=ON
     -DUSE_PNG=ON
+    -DUSE_FFMPEG=${toucan_FFMPEG}
     -DUSE_OPENCOLORIO=ON
     -DUSE_BZIP2=OFF
     -DUSE_DCMTK=OFF
-    -DUSE_FFMPEG=OFF
     -DUSE_GIF=OFF
     -DUSE_JXL=OFF
     -DUSE_LIBHEIF=OFF
@@ -34,7 +42,10 @@ set(OpenImageIO_ARGS
 ExternalProject_Add(
     OpenImageIO
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/OpenImageIO
-    DEPENDS TIFF PNG libjpeg-turbo OpenEXR OpenColorIO Freetype
+    DEPENDS ${OpenImageIO_DEPS}
     GIT_REPOSITORY ${OpenImageIO_GIT_REPOSITORY}
     GIT_TAG ${OpenImageIO_GIT_TAG}
+    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/OpenImageIO-patch/ffmpeginput.cpp
+        ${CMAKE_CURRENT_BINARY_DIR}/OpenImageIO/src/OpenImageIO/src/ffmpeg.imageio/ffmpeginput.cpp
     CMAKE_ARGS ${OpenImageIO_ARGS})
