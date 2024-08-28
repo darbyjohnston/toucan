@@ -45,7 +45,4 @@ ExternalProject_Add(
     DEPENDS ${OpenImageIO_DEPS}
     GIT_REPOSITORY ${OpenImageIO_GIT_REPOSITORY}
     GIT_TAG ${OpenImageIO_GIT_TAG}
-    PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${CMAKE_CURRENT_SOURCE_DIR}/OpenImageIO-patch/ffmpeginput.cpp
-        ${CMAKE_CURRENT_BINARY_DIR}/OpenImageIO/src/OpenImageIO/src/ffmpeg.imageio/ffmpeginput.cpp
     CMAKE_ARGS ${OpenImageIO_ARGS})
