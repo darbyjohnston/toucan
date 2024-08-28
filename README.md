@@ -3,18 +3,18 @@
 Toucan
 ======
 
-Toucan is a project for experimenting with timeline rendering. The project
-currently consists of a command line renderer that can process timelines
-with image sequences, effects, and transitions.
+Toucan is a project for experimenting with rendering timelines. The project
+currently consists of a command line program that can render timelines into
+image sequences.
 
-Dependencies:
-* [OpenTimelineIO](https://github.com/AcademySoftwareFoundation/OpenTimelineIO) - Timelines
-* [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) - Image I/O and processing
-* [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) - Color space conversion
-* [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) - Plugins
+Features:
+* Composite multiple video tracks with effects and transitions
+* [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) transforms applied to individual clips and tracks
+* [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) based plugin system for image generators, effects, and transitions
+* [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) image I/O and processing
 
-Features
-========
+Image Effects
+=============
 * Generators: Checkers, Fill, Gradient, Noise
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
