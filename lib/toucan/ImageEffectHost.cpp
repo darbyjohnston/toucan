@@ -4,6 +4,8 @@
 
 #include "ImageEffectHost.h"
 
+#include "ImageEffect_p.h"
+
 #include "Util.h"
 
 #include <cstdarg>

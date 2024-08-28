@@ -10,7 +10,8 @@ set(HEADERS
     Read.h
     TimeWarp.h
     Util.h)
-set(HEADERS_PRIVATE)
+set(HEADERS_PRIVATE
+    ImageEffect_p.h)
 set(SOURCE
     Comp.cpp
     ImageEffect.cpp

@@ -15,22 +15,10 @@
 namespace toucan
 {
     //! Image effect plugin.
-    struct ImageEffectPlugin
-    {
-        std::shared_ptr<Plugin> plugin;
-        OfxPlugin* ofxPlugin = nullptr;
-        PropertySet propSet;
-        std::map<std::string, PropertySet> clipPropSets;
-        std::map<std::string, std::string> paramTypes;
-        std::map<std::string, PropertySet> paramDefs;
-    };
+    struct ImageEffectPlugin;
 
     //! Image effect instance.
-    struct ImageEffectInstance
-    {
-        std::map<std::string, std::any> params;
-        std::map<std::string, PropertySet> images;
-    };
+    struct ImageEffectInstance;
 
     //! Image effect handle.
     struct ImageEffectHandle
@@ -55,7 +43,7 @@ namespace toucan
 
     private:
         ImageEffectPlugin& _plugin;
-        ImageEffectInstance _instance;
+        std::unique_ptr<ImageEffectInstance> _instance;
         ImageEffectHandle _handle;
         OTIO_NS::AnyDictionary _metaData;
     };

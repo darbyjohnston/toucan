@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ImageEffect.h"
+#include "ImageEffect_p.h"
 
 #include "Util.h"
 
@@ -15,7 +15,8 @@ namespace toucan
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode(name, inputs),
         _plugin(plugin),
-        _handle{ &plugin, &_instance },
+        _instance(new ImageEffectInstance),
+        _handle{ &plugin, _instance.get() },
         _metaData(metaData)
     {
         // Set default values.
@@ -29,7 +30,7 @@ namespace toucan
                 param.second.getString(kOfxParamPropDefault, 0, &s);
                 if (s)
                 {
-                    _instance.params[param.first] = std::string(s);
+                    _instance->params[param.first] = std::string(s);
                 }
             }
             props = param.second.getDoubleProperties();
@@ -38,7 +39,7 @@ namespace toucan
             {
                 double d = 0.0;
                 param.second.getDouble(kOfxParamPropDefault, 0, &d);
-                _instance.params[param.first] = d;
+                _instance->params[param.first] = d;
             }
             props = param.second.getIntProperties();
             i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
@@ -46,14 +47,14 @@ namespace toucan
             {
                 int i = 0;
                 param.second.getInt(kOfxParamPropDefault, 0, &i);
-                _instance.params[param.first] = i;
+                _instance->params[param.first] = i;
             }
         }
 
         // Set values.
         for (const auto& i : metaData)
         {
-            _instance.params[i.first] = i.second;
+            _instance->params[i.first] = i.second;
         }
 
         // Create the plugin instance.
@@ -97,7 +98,7 @@ namespace toucan
         if (strcmp(context, kOfxImageEffectContextGenerator) == 0)
         {
             out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
-            _instance.images["Output"] = bufToPropSet(out);
+            _instance->images["Output"] = bufToPropSet(out);
         }
         else if (
             strcmp(context, kOfxImageEffectContextFilter) == 0 &&
@@ -112,8 +113,8 @@ namespace toucan
                 spec.height = size.y;
             }
             out = OIIO::ImageBuf(spec);
-            _instance.images["Source"] = bufToPropSet(inputs[0]);
-            _instance.images["Output"] = bufToPropSet(out);
+            _instance->images["Source"] = bufToPropSet(inputs[0]);
+            _instance->images["Output"] = bufToPropSet(out);
         }
         else if (
             strcmp(context, kOfxImageEffectContextTransition) == 0 &&
@@ -130,9 +131,9 @@ namespace toucan
                 spec.height = size.y;
             }
             out = OIIO::ImageBuf(spec);
-            _instance.images["SourceFrom"] = bufToPropSet(inputs[0]);
-            _instance.images["SourceTo"] = bufToPropSet(inputs[1]);
-            _instance.images["Output"] = bufToPropSet(out);
+            _instance->images["SourceFrom"] = bufToPropSet(inputs[0]);
+            _instance->images["SourceTo"] = bufToPropSet(inputs[1]);
+            _instance->images["Output"] = bufToPropSet(out);
         }
 
         // Render.
