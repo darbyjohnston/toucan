@@ -7,7 +7,7 @@ project(
     HOMEPAGE_URL "https://github.com/darbyjohnston/toucan"
     LANGUAGES CXX C)
 
-set(toucan_FFMPEG TRUE CACHE BOOL "Enable FFmpeg")
+set(toucan_FFMPEG FALSE CACHE BOOL "Enable FFmpeg")
 set(toucan_FFMPEG_MINIMAL TRUE CACHE BOOL "Enable a minimal set of FFmpeg codecs")
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
