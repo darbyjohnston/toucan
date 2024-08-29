@@ -124,7 +124,9 @@ int main(int argc, char** argv)
         time <= timeRange.end_time_inclusive();
         time += timeInc)
     {
-        std::cout << time.value() << "/" << timeRange.duration().value() << std::endl;
+        std::cout << (time - timeRange.start_time()).value() << "/" <<
+            timeRange.duration().value() << std::endl;
+
         if (auto node = graph->exec(host, time))
         {
             // Print the graph.

@@ -40,24 +40,24 @@ namespace toucan
         //! Get an image graph for the given time.
         std::shared_ptr<IImageNode> exec(
             const std::shared_ptr<ImageEffectHost>&,
-            const OTIO_NS::RationalTime&) const;
+            const OTIO_NS::RationalTime&);
 
     private:
         std::shared_ptr<IImageNode> _track(
             const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&) const;
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
 
         std::shared_ptr<IImageNode> _item(
             const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&) const;
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
 
         std::shared_ptr<IImageNode> _effects(
             const std::shared_ptr<ImageEffectHost>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
-            const std::shared_ptr<IImageNode>&) const;
+            const std::shared_ptr<IImageNode>&);
 
         std::filesystem::path _getMediaPath(const std::string&) const;
 
@@ -66,5 +66,6 @@ namespace toucan
         OTIO_NS::RationalTime _globalStartTime;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
+        std::map<OTIO_NS::MediaReference*, std::shared_ptr<IImageNode> > _loadCache;
     };
 }

@@ -89,7 +89,7 @@ namespace toucan
 
     std::shared_ptr<IImageNode> ImageGraph::exec(
         const std::shared_ptr<ImageEffectHost>& host,
-        const OTIO_NS::RationalTime& time) const
+        const OTIO_NS::RationalTime& time)
     {
         // Set the background color.
         OTIO_NS::AnyDictionary metaData;
@@ -145,7 +145,7 @@ namespace toucan
     std::shared_ptr<IImageNode> ImageGraph::_track(
         const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track) const
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
     {
         std::shared_ptr<IImageNode> out;
 
@@ -271,7 +271,7 @@ namespace toucan
         const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item) const
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item)
     {
         std::shared_ptr<IImageNode> out;
 
@@ -280,9 +280,18 @@ namespace toucan
             // Get the media reference.
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                const std::filesystem::path path = _getMediaPath(externalRef->target_url());
-                auto read = std::make_shared<ReadNode>(path);
-                out = read;
+                auto i = _loadCache.find(externalRef);
+                if (i != _loadCache.end())
+                {
+                    out = i->second;
+                }
+                else
+                {
+                    const std::filesystem::path path = _getMediaPath(externalRef->target_url());
+                    auto read = std::make_shared<ReadNode>(path);
+                    out = read;
+                    _loadCache[externalRef] = read;
+                }
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
@@ -329,17 +338,12 @@ namespace toucan
     std::shared_ptr<IImageNode> ImageGraph::_effects(
         const std::shared_ptr<ImageEffectHost>& host,
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
-        const std::shared_ptr<IImageNode>& input) const
+        const std::shared_ptr<IImageNode>& input)
     {
         std::shared_ptr<IImageNode> out = input;
         for (const auto& effect : effects)
         {
-            if (auto iEffect = dynamic_cast<IEffect*>(effect.value))
-            {
-                auto effectNode = iEffect->createNode(host, { out });
-                out = effectNode;
-            }
-            else if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+            if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
             {
                 auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
                     static_cast<float>(linearTimeWarp->time_scalar()),

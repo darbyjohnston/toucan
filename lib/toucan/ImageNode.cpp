@@ -86,14 +86,4 @@ namespace toucan
     {
         return _name;
     }
-
-    IEffect::IEffect(
-        std::string const& name,
-        std::string const& effect_name,
-        OTIO_NS::AnyDictionary const& metadata) :
-        Effect(name, effect_name, metadata)
-    {}
-
-    IEffect::~IEffect()
-    {}
 }

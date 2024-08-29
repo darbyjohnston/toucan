@@ -5,7 +5,6 @@
 #pragma once
 
 #include <opentimelineio/effect.h>
-#include <opentimelineio/generatorReference.h>
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -62,23 +61,5 @@ namespace toucan
         std::string _name;
         OTIO_NS::RationalTime _timeOffset;
         std::vector<std::shared_ptr<IImageNode> > _inputs;
-    };
-
-    //! Base class for OTIO effects.
-    class IEffect : public OTIO_NS::Effect
-    {
-    public:
-        IEffect(
-            std::string const& name = std::string(),
-            std::string const& effect_name = std::string(),
-            OTIO_NS::AnyDictionary const& metadata = OTIO_NS::AnyDictionary());
-
-        //! Create an image node.
-        virtual std::shared_ptr<IImageNode> createNode(
-            const std::shared_ptr<ImageEffectHost>&,
-            const std::vector<std::shared_ptr<IImageNode> >& inputs) = 0;
-
-    protected:
-        virtual ~IEffect() = 0;
     };
 }

@@ -27,6 +27,11 @@ namespace toucan
 
     private:
         std::filesystem::path _path;
+        std::unique_ptr<OIIO::ImageInput> _input;
+        OIIO::ImageSpec _spec;
+        int _frameCount = 0;
+        int _fps[2] = { 0, 0 };
+        OTIO_NS::RationalTime _startTime;
     };
 
     //! Sequence read node.
