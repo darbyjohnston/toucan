@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (c) 2024 Darby Johnston
+// All rights reserved.
+
+#pragma once
+
+#include "TimeWidget.h"
+
+#include <dtkUI/IntSlider.h>
+#include <dtkUI/RowLayout.h>
+
+#include <opentimelineio/timeline.h>
+
+namespace toucan
+{
+    class App;
+
+    class TimelineWidget : public dtk::ui::IWidget
+    {
+    protected:
+        void _init(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<App>&,
+            const std::shared_ptr<IWidget>& parent);
+
+    public:
+        virtual ~TimelineWidget();
+
+        static std::shared_ptr<TimelineWidget> create(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<App>&,
+            const std::shared_ptr<IWidget>& parent = nullptr);
+
+        void setGeometry(const dtk::core::Box2I&) override;
+        void sizeHintEvent(const dtk::ui::SizeHintEvent&) override;
+
+    private:
+        void _timelineUpdate();
+        void _timeRangeUpdate();
+        void _currentTimeUpdate();
+        void _playbackUpdate();
+
+        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> > > _timelineObserver;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
+        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
+        OTIO_NS::TimeRange _timeRange;
+        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        OTIO_NS::RationalTime _currentTime;
+        std::shared_ptr<dtk::core::ValueObserver<Playback> > _playbackObserver;
+        Playback _playback = Playback::Stop;
+
+        std::shared_ptr<dtk::ui::VerticalLayout> _layout;
+        std::shared_ptr<PlaybackButtons> _playbackButtons;
+        std::shared_ptr<TimeEdit> _timeEdit;
+        std::shared_ptr<dtk::ui::IntSlider> _slider;
+        std::shared_ptr<TimeLabel> _durationLabel;
+    };
+}

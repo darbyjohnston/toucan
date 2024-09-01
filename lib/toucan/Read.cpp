@@ -28,7 +28,7 @@ namespace toucan
         {
             _spec.getattribute("FramesPerSecond", OIIO::TypeDesc::TypeRational, &_fps);
         }
-        if (auto param = _spec.find_attribute("timecode"))
+        if (auto param = _spec.find_attribute("ffmpeg:TimeCode"))
         {
             const std::string timecode = param->get_string();
             double rate = 24.0;

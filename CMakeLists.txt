@@ -7,7 +7,9 @@ project(
     HOMEPAGE_URL "https://github.com/darbyjohnston/toucan"
     LANGUAGES CXX C)
 
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+set(toucan_VIEWER OFF CACHE BOOL "Build viewer application")
+
+list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 17)
@@ -37,18 +39,21 @@ set(TOUCAN_PLUGINS
 
 enable_testing()
 
-find_package(Imath REQUIRED)
-find_package(Freetype REQUIRED)
-find_package(ZLIB REQUIRED)
-find_package(PNG REQUIRED)
-find_package(JPEG REQUIRED)
-find_package(TIFF REQUIRED)
-find_package(OpenEXR REQUIRED)
-find_package(minizip REQUIRED)
-find_package(OpenColorIO REQUIRED)
-find_package(OpenImageIO REQUIRED)
-find_package(OTIO REQUIRED)
-find_package(OpenFX REQUIRED)
+find_package(Imath)
+find_package(Freetype)
+find_package(ZLIB)
+find_package(PNG)
+find_package(JPEG)
+find_package(TIFF)
+find_package(OpenEXR)
+find_package(minizip)
+find_package(OpenColorIO)
+find_package(OpenImageIO)
+find_package(OTIO)
+find_package(OpenFX)
+if(toucan_VIEWER)
+    find_package(dtk)
+endif()
 
 include_directories(lib)
 # \todo OpenTimelineIO doesn't use the "Imath" prefix for includes?

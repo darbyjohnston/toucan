@@ -94,7 +94,7 @@ set(FFmpeg_CONFIGURE_ARGS
     ${FFmpeg_CXXFLAGS}
     ${FFmpeg_OBJCFLAGS}
     ${FFmpeg_LDFLAGS})
-if(toucan_FFMPEG_MINIMAL)
+if(toucan_FFmpeg_MINIMAL)
     list(APPEND FFmpeg_CONFIGURE_ARGS
         --disable-decoders
         --enable-decoder=aac

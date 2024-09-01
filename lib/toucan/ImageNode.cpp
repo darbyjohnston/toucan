@@ -31,6 +31,11 @@ namespace toucan
         _inputs = value;
     }
 
+    const OTIO_NS::RationalTime& IImageNode::getTimeOffset() const
+    {
+        return _timeOffset;
+    }
+
     void IImageNode::setTimeOffset(const OTIO_NS::RationalTime& timeOffset)
     {
         _timeOffset = timeOffset;
