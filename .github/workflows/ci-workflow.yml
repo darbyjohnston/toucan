@@ -9,6 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: toucan
         submodules: recursive
 
     - name: Setup
@@ -18,12 +19,10 @@ jobs:
 
     - name: Build
       run: |
-        cd ..
         bash toucan/SuperBuild.sh Debug
 
     - name: Tests
       run: |
-        cd ..
         cmake --build build-Debug --target test
 
   macos-12-build:
@@ -32,16 +31,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: toucan
         submodules: recursive
 
     - name: Build
       run: |
-        cd ..
         bash toucan/SuperBuild.sh Debug
 
     - name: Tests
       run: |
-        cd ..
         cmake --build build-Debug --target test
 
   macos-14-build:
@@ -50,16 +48,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: toucan
         submodules: recursive
 
     - name: Build
       run: |
-        cd ..
         bash toucan/SuperBuild.sh Debug
 
     - name: Tests
       run: |
-        cd ..
         cmake --build build-Debug --target test
 
   windows-build:
@@ -68,16 +65,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
+        path: toucan
         submodules: recursive
     - uses: ilammy/setup-nasm@v1
         
     - name: Build
       shell: cmd
       run: |
-        cd ..
         toucan\SuperBuild.bat Debug
 
     - name: Tests
       run: |
-        cd ..
         cmake --build build-Debug --target RUN_TESTS
