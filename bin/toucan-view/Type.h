@@ -6,6 +6,14 @@
 
 namespace toucan
 {
+    enum FrameAction
+    {
+        Start,
+        Prev,
+        Next,
+        End
+    };
+
     enum class Playback
     {
         Stop,

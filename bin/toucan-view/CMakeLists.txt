@@ -1,7 +1,9 @@
 set(HEADERS
     App.h
+    FilesModel.h
     GraphWidget.h
     MenuBar.h
+    PlaybackModel.h
     TimeWidget.h
     TimelineWidget.h
     Type.h
@@ -10,8 +12,10 @@ set(HEADERS
 
 set(SOURCE
     App.cpp
+    FilesModel.cpp
     GraphWidget.cpp
     MenuBar.cpp
+    PlaybackModel.cpp
     TimeWidget.cpp
     TimelineWidget.cpp
     Window.cpp

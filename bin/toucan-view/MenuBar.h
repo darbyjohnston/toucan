@@ -29,6 +29,16 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
     private:
+        void _fileMenuInit(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<App>&);
+        void _frameMenuInit(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<App>&);
+        void _playbackMenuInit(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<App>&);
+
         void _fileOpenAction();
         void _fileCloseAction();
         void _exitAction();

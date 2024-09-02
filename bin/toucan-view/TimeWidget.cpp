@@ -14,6 +14,71 @@ using namespace dtk::ui;
 
 namespace toucan
 {
+    void FrameButtons::_init(
+        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<IWidget>& parent)
+    {
+        IWidget::_init(context, "toucan::FrameButtons", parent);
+
+        _layout = HorizontalLayout::create(context, shared_from_this());
+        _layout->setSpacingRole(SizeRole::SpacingTool);
+
+        auto startButton = ToolButton::create(context, _layout);
+        startButton->setIcon("FrameStart");
+        auto prevButton = ToolButton::create(context, _layout);
+        prevButton->setIcon("FramePrev");
+        prevButton->setRepeatClick(true);
+        auto nextButton = ToolButton::create(context, _layout);
+        nextButton->setIcon("FrameNext");
+        nextButton->setRepeatClick(true);
+        auto endButton = ToolButton::create(context, _layout);
+        endButton->setIcon("FrameEnd");
+
+        _buttonGroup = ButtonGroup::create(context, ButtonGroupType::Click);
+        _buttonGroup->addButton(startButton);
+        _buttonGroup->addButton(prevButton);
+        _buttonGroup->addButton(nextButton);
+        _buttonGroup->addButton(endButton);
+
+        _buttonGroup->setClickedCallback(
+            [this](int index)
+            {
+                if (_callback)
+                {
+                    _callback(static_cast<FrameAction>(index));
+                }
+            });
+    }
+
+    FrameButtons::~FrameButtons()
+    {}
+
+    std::shared_ptr<FrameButtons> FrameButtons::create(
+        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<IWidget>& parent)
+    {
+        auto out = std::shared_ptr<FrameButtons>(new FrameButtons);
+        out->_init(context, parent);
+        return out;
+    }
+
+    void FrameButtons::setCallback(const std::function<void(FrameAction)>& value)
+    {
+        _callback = value;
+    }
+
+    void FrameButtons::setGeometry(const Box2I& value)
+    {
+        IWidget::setGeometry(value);
+        _layout->setGeometry(value);
+    }
+
+    void FrameButtons::sizeHintEvent(const SizeHintEvent& value)
+    {
+        IWidget::sizeHintEvent(value);
+        _setSizeHint(_layout->getSizeHint());
+    }
+
     void PlaybackButtons::_init(
         const std::shared_ptr<Context>& context,
         const std::shared_ptr<IWidget>& parent)

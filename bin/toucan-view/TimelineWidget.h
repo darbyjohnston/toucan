@@ -40,8 +40,6 @@ namespace toucan
         void _currentTimeUpdate();
         void _playbackUpdate();
 
-        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> > > _timelineObserver;
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
         std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
         OTIO_NS::TimeRange _timeRange;
         std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
@@ -50,6 +48,7 @@ namespace toucan
         Playback _playback = Playback::Stop;
 
         std::shared_ptr<dtk::ui::VerticalLayout> _layout;
+        std::shared_ptr<FrameButtons> _frameButtons;
         std::shared_ptr<PlaybackButtons> _playbackButtons;
         std::shared_ptr<TimeEdit> _timeEdit;
         std::shared_ptr<dtk::ui::IntSlider> _slider;

@@ -16,6 +16,31 @@
 
 namespace toucan
 {
+    class FrameButtons : public dtk::ui::IWidget
+    {
+    protected:
+        void _init(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<IWidget>& parent);
+
+    public:
+        virtual ~FrameButtons();
+
+        static std::shared_ptr<FrameButtons> create(
+            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<IWidget>& parent = nullptr);
+
+        void setCallback(const std::function<void(FrameAction)>&);
+
+        void setGeometry(const dtk::core::Box2I&) override;
+        void sizeHintEvent(const dtk::ui::SizeHintEvent&) override;
+
+    private:
+        std::function<void(FrameAction)> _callback;
+        std::shared_ptr<dtk::ui::HorizontalLayout> _layout;
+        std::shared_ptr<dtk::ui::ButtonGroup> _buttonGroup;
+    };
+
     class PlaybackButtons : public dtk::ui::IWidget
     {
     protected:

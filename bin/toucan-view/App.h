@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "FilesModel.h"
+#include "PlaybackModel.h"
 #include "Type.h"
 #include "Window.h"
 
@@ -13,22 +15,6 @@
 #include <dtkUIApp/App.h>
 
 #include <dtkCore/Image.h>
-#include <dtkCore/Timer.h>
-
-#include <opentimelineio/timeline.h>
-
-#include <filesystem>
-
-namespace OTIO_NS
-{
-    //! \todo Add this to OpenTimelineIO?
-    inline bool operator == (
-        const SerializableObject::Retainer<Timeline>& a,
-        const SerializableObject::Retainer<Timeline>& b)
-    {
-        return a.value == b.value;
-    }
-}
 
 namespace toucan
 {
@@ -46,38 +32,32 @@ namespace toucan
             const std::shared_ptr<dtk::core::Context>&,
             std::vector<std::string>&);
 
+        const std::shared_ptr<FilesModel>& getFilesModel() const;
+
         void open(const std::filesystem::path&);
-        void close();
 
-        std::shared_ptr<dtk::core::IObservableValue<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> > > observeTimeline() const;
-
-        std::shared_ptr<dtk::core::IObservableValue<OTIO_NS::TimeRange> > observeTimeRange() const;
-
-        std::shared_ptr<dtk::core::IObservableValue<OTIO_NS::RationalTime> > observeCurrentTime() const;
-        void setCurrentTime(const OTIO_NS::RationalTime&);
-
-        std::shared_ptr<dtk::core::IObservableValue<Playback> > observePlayback() const;
-        void setPlayback(Playback);
+        const std::shared_ptr<PlaybackModel>& getPlaybackModel() const;
 
         std::shared_ptr<dtk::core::IObservableValue<std::shared_ptr<dtk::core::Image> > > observeCurrentImage() const;
 
     private:
-        void _playbackUpdate();
-        void _timerUpdate();
         void _render();
 
         std::shared_ptr<MessageLog> _messageLog;
         std::filesystem::path _path;
-        std::shared_ptr<dtk::core::ObservableValue<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> > > _timeline;
-        std::shared_ptr<dtk::core::ObservableValue<OTIO_NS::TimeRange> > _timeRange;
-        std::shared_ptr<dtk::core::ObservableValue<OTIO_NS::RationalTime> > _currentTime;
-        std::shared_ptr<dtk::core::ObservableValue<Playback> > _playback;
-        OIIO::ImageBuf _imageBuf;
+        std::shared_ptr<FilesModel> _filesModel;
+        std::shared_ptr<PlaybackModel> _playbackModel;
         std::shared_ptr<dtk::core::ObservableValue<std::shared_ptr<dtk::core::Image> > > _currentImage;
+        std::shared_ptr<dtk::core::ListObserver<File> > _filesObserver;
+        std::vector<File> _files;
+        std::shared_ptr<dtk::core::ValueObserver<int> > _currentFileObserver;
+        int _currentFile = -1;
+        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        OTIO_NS::RationalTime _currentTime;
+        OIIO::ImageBuf _imageBuf;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<ImageGraph> _graph;
         std::shared_ptr<Window> _window;
-        std::shared_ptr<dtk::core::Timer> _timer;
     };
 }
 

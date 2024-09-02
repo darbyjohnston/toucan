@@ -27,17 +27,27 @@ namespace toucan
         hLayout->setSpacingRole(SizeRole::SpacingSmall);
 
         _playbackButtons = PlaybackButtons::create(context, hLayout);
+        _frameButtons = FrameButtons::create(context, hLayout);
         _timeEdit = TimeEdit::create(context, hLayout);
         _slider = IntSlider::create(context, nullptr, hLayout);
         _durationLabel = TimeLabel::create(context, hLayout);
 
         auto weakApp = std::weak_ptr<App>(app);
+        _frameButtons->setCallback(
+            [weakApp](FrameAction value)
+            {
+                if (auto app = weakApp.lock())
+                {
+                    app->getPlaybackModel()->frameAction(value);
+                }
+            });
+
         _playbackButtons->setCallback(
             [weakApp](Playback value)
             {
                 if (auto app = weakApp.lock())
                 {
-                    app->setPlayback(value);
+                    app->getPlaybackModel()->setPlayback(value);
                 }
             });
 
@@ -46,7 +56,7 @@ namespace toucan
             {
                 if (auto app = weakApp.lock())
                 {
-                    app->setCurrentTime(value);
+                    app->getPlaybackModel()->setCurrentTime(value);
                 }
             });
 
@@ -55,22 +65,14 @@ namespace toucan
             {
                 if (auto app = weakApp.lock())
                 {
-                    app->setCurrentTime(OTIO_NS::RationalTime(
+                    app->getPlaybackModel()->setCurrentTime(OTIO_NS::RationalTime(
                         value,
                         _timeRange.duration().rate()));
                 }
             });
 
-        _timelineObserver = ValueObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> >::create(
-            app->observeTimeline(),
-            [this](const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> & value)
-            {
-                _timeline = value;
-                _timelineUpdate();
-            });
-
         _timeRangeObserver = ValueObserver<OTIO_NS::TimeRange>::create(
-            app->observeTimeRange(),
+            app->getPlaybackModel()->observeTimeRange(),
             [this](const OTIO_NS::TimeRange& value)
             {
                 _timeRange = value;
@@ -78,7 +80,7 @@ namespace toucan
             });
 
         _currentTimeObserver = ValueObserver<OTIO_NS::RationalTime>::create(
-            app->observeCurrentTime(),
+            app->getPlaybackModel()->observeCurrentTime(),
             [this](const OTIO_NS::RationalTime& value)
             {
                 _currentTime = value;
@@ -86,7 +88,7 @@ namespace toucan
             });
 
         _playbackObserver = ValueObserver<Playback>::create(
-            app->observePlayback(),
+            app->getPlaybackModel()->observePlayback(),
             [this](Playback value)
             {
                 _playback = value;

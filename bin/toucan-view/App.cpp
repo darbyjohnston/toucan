@@ -4,6 +4,9 @@
 
 #include "App.h"
 
+#include "FilesModel.h"
+#include "PlaybackModel.h"
+
 #include <dtkUI/FileBrowser.h>
 #include <dtkUI/MessageDialog.h>
 
@@ -36,11 +39,59 @@ namespace toucan
 
         _messageLog = std::make_shared<MessageLog>();
 
-        _timeline = ObservableValue<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> >::create();
-        _timeRange = ObservableValue<OTIO_NS::TimeRange>::create();
-        _playback = ObservableValue<Playback>::create(Playback::Stop);
-        _currentTime = ObservableValue<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
+        _filesModel = std::make_shared<FilesModel>(context);
+
+        _playbackModel = std::make_shared<PlaybackModel>(context);
+
         _currentImage = ObservableValue<std::shared_ptr<Image> >::create();
+
+        _filesObserver = ListObserver<File>::create(
+            _filesModel->observeFiles(),
+            [this](const std::vector<File>& value)
+            {
+                _files = value;
+            });
+
+        _currentFileObserver = ValueObserver<int>::create(
+            _filesModel->observeCurrent(),
+            [this](int value)
+            {
+                _currentFile = value;
+                if (value >= 0 && value < static_cast<int>(_files.size()))
+                {
+                    const auto& file = _files[value];
+                    const auto& globalStartTime = file.timeline->global_start_time();
+                    const OTIO_NS::RationalTime& duration = file.timeline->duration();
+                    const OTIO_NS::RationalTime startTime = globalStartTime.has_value() ?
+                        globalStartTime.value() :
+                        OTIO_NS::RationalTime(0.0, duration.rate());
+                    _playbackModel->setTimeRange(OTIO_NS::TimeRange(startTime, duration));
+                    _playbackModel->setCurrentTime(startTime);
+
+                    ImageGraphOptions graphOptions;
+                    _graph = std::make_shared<ImageGraph>(
+                        _path.parent_path(),
+                        file.timeline,
+                        graphOptions);
+                    _render();
+                }
+                else
+                {
+                    _playbackModel->setTimeRange(OTIO_NS::TimeRange());
+                    _playbackModel->setCurrentTime(OTIO_NS::RationalTime(-1.0, -1.0));
+                    _currentImage->setIfChanged(nullptr);
+                    _graph.reset();
+                    _imageBuf = OIIO::ImageBuf();
+                }
+            });
+
+        _currentTimeObserver = ValueObserver<OTIO_NS::RationalTime>::create(
+            _playbackModel->observeCurrentTime(),
+            [this](const OTIO_NS::RationalTime& value)
+            {
+                _currentTime = value;
+                _render();
+            });
 
         std::vector<std::filesystem::path> searchPath;
         const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
@@ -81,92 +132,27 @@ namespace toucan
         return out;
     }
 
+    const std::shared_ptr<FilesModel>& App::getFilesModel() const
+    {
+        return _filesModel;
+    }
+
     void App::open(const std::filesystem::path& path)
     {
-        setPlayback(Playback::Stop);
-
+        _playbackModel->setPlayback(Playback::Stop);
         try
         {
-            _path = path;
-
-            OTIO_NS::ErrorStatus errorStatus;
-            auto timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(
-                dynamic_cast<OTIO_NS::Timeline*>(OTIO_NS::Timeline::from_json_file(_path.string(), &errorStatus)));
-            if (!timeline)
-            {
-                std::stringstream ss;
-                ss << _path.string() << ": " << errorStatus.full_description << std::endl;
-                throw std::runtime_error(ss.str());
-            }
-
-            _timeline->setIfChanged(timeline);
-            const auto& globalStartTime = timeline->global_start_time();
-            const OTIO_NS::RationalTime& duration = timeline->duration();
-            const OTIO_NS::RationalTime startTime = globalStartTime.has_value() ?
-                globalStartTime.value() :
-                OTIO_NS::RationalTime(0.0, duration.rate());
-            const OTIO_NS::TimeRange timeRange(startTime, duration);
-            _timeRange->setIfChanged(timeRange);
-            _currentTime->setIfChanged(startTime);
-
-            ImageGraphOptions graphOptions;
-            _graph = std::make_shared<ImageGraph>(_path.parent_path(), timeline, graphOptions);
+            _filesModel->open(path);
         }
         catch (const std::exception& e)
         {
             _context->getSystem<MessageDialogSystem>()->message("ERROR", e.what(), _window);
         }
-
-        _render();
     }
 
-    void App::close()
+    const std::shared_ptr<PlaybackModel>& App::getPlaybackModel() const
     {
-        if (!_path.empty())
-        {
-            _timeline->setIfChanged(nullptr);
-            _timeRange->setIfChanged(OTIO_NS::TimeRange());
-            _currentTime->setIfChanged(OTIO_NS::RationalTime());
-            _currentImage->setIfChanged(nullptr);
-            _imageBuf = OIIO::ImageBuf();
-        }
-    }
-
-    std::shared_ptr<IObservableValue<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> > > App::observeTimeline() const
-    {
-        return _timeline;
-    }
-
-    std::shared_ptr<IObservableValue<OTIO_NS::TimeRange> > App::observeTimeRange() const
-    {
-        return _timeRange;
-    }
-
-    std::shared_ptr<IObservableValue<Playback> > App::observePlayback() const
-    {
-        return _playback;
-    }
-
-    void App::setPlayback(Playback value)
-    {
-        if (_playback->setIfChanged(value))
-        {
-            _playbackUpdate();
-        }
-    }
-
-    std::shared_ptr<IObservableValue<OTIO_NS::RationalTime> > App::observeCurrentTime() const
-    {
-        return _currentTime;
-    }
-
-    void App::setCurrentTime(const OTIO_NS::RationalTime& value)
-    {
-        const OTIO_NS::RationalTime tmp = _timeRange->get().clamped(value);
-        if (_currentTime->setIfChanged(tmp))
-        {
-            _render();
-        }
+        return _playbackModel;
     }
 
     std::shared_ptr<dtk::core::IObservableValue<std::shared_ptr<Image> > > App::observeCurrentImage() const
@@ -174,70 +160,20 @@ namespace toucan
         return _currentImage;
     }
 
-    void App::_playbackUpdate()
-    {
-        switch (_playback->get())
-        {
-        case Playback::Stop:
-            _timer.reset();
-            break;
-        case Playback::Forward:
-        case Playback::Reverse:
-            _timer = Timer::create(_context);
-            _timer->setRepeating(true);
-            _timer->start(
-                std::chrono::microseconds(static_cast<int>(1000 / _currentTime->get().rate())),
-                [this]
-                {
-                    _timerUpdate();
-                });
-            break;
-        default: break;
-        }
-    }
-
-    void App::_timerUpdate()
-    {
-        switch (_playback->get())
-        {
-        case Playback::Forward:
-        {
-            auto time = _currentTime->get() + OTIO_NS::RationalTime(1.0, _currentTime->get().rate());
-            if (time > _timeRange->get().end_time_inclusive())
-            {
-                time = _timeRange->get().start_time();
-            }
-            setCurrentTime(time);
-            break;
-        }
-        case Playback::Reverse:
-        {
-            auto time = _currentTime->get() - OTIO_NS::RationalTime(1.0, _currentTime->get().rate());
-            if (time < _timeRange->get().start_time())
-            {
-                time = _timeRange->get().end_time_inclusive();
-            }
-            setCurrentTime(time);
-            break;
-        }
-        default: break;
-        }
-    }
-
     void App::_render()
     {
         std::shared_ptr<Image> image;
-        if (_timeline->get() && _graph)
+        if (_graph)
         {
-            const OTIO_NS::RationalTime& currentTime = _currentTime->get();
-            auto node = _graph->exec(_host, currentTime);
+            auto node = _graph->exec(_host, _currentTime);
             /*for (auto i : node->graph(currentTime, "foo"))
             {
                 std::cout << i << std::endl;
             }
             std::cout << std::endl;*/
 
-            _imageBuf = node->exec(currentTime - _timeRange->get().start_time());
+            const OTIO_NS::TimeRange& timeRange = _playbackModel->getTimeRange();
+            _imageBuf = node->exec(_currentTime - timeRange.start_time());
             const auto& spec = _imageBuf.spec();
             ImageType imageType = ImageType::None;
             if (OIIO::TypeDesc::UINT8 == spec.format)
