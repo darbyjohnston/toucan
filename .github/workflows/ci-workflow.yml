@@ -11,10 +11,20 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Build 
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb
+
+    - name: Build
       run: |
         cd ..
         bash toucan/SuperBuild.sh Debug
+
+    - name: Tests
+      run: |
+        cd ..
+        cmake --build build-Debug --target test
 
   macos-12-build:
     runs-on: macos-12
@@ -29,6 +39,11 @@ jobs:
         cd ..
         bash toucan/SuperBuild.sh Debug
 
+    - name: Tests
+      run: |
+        cd ..
+        cmake --build build-Debug --target test
+
   macos-14-build:
     runs-on: macos-14
 
@@ -41,6 +56,11 @@ jobs:
       run: |
         cd ..
         bash toucan/SuperBuild.sh Debug
+
+    - name: Tests
+      run: |
+        cd ..
+        cmake --build build-Debug --target test
 
   windows-build:
     runs-on: windows-latest
@@ -57,3 +77,7 @@ jobs:
         cd ..
         toucan\SuperBuild.bat Debug
 
+    - name: Tests
+      run: |
+        cd ..
+        cmake --build build-Debug --target RUN_TESTS

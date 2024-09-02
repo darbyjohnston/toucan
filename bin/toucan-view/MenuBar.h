@@ -4,19 +4,19 @@
 
 #pragma once
 
-#include "Type.h"
+#include "PlaybackModel.h"
 
-#include <dtkUI/MenuBar.h>
+#include <dtk/ui/MenuBar.h>
 
 namespace toucan
 {
     class App;
 
-    class MenuBar : public dtk::ui::MenuBar
+    class MenuBar : public dtk::MenuBar
     {
     protected:
         void _init(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -24,19 +24,19 @@ namespace toucan
         virtual ~MenuBar();
 
         static std::shared_ptr<MenuBar> create(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
     private:
         void _fileMenuInit(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
         void _frameMenuInit(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
         void _playbackMenuInit(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
 
         void _fileOpenAction();
@@ -45,9 +45,9 @@ namespace toucan
         void _playbackAction(Playback);
 
         std::weak_ptr<App> _app;
-        std::map<std::string, std::shared_ptr<dtk::ui::Menu> > _menus;
-        std::map<std::string, std::shared_ptr<dtk::ui::Action> > _actions;
-        std::shared_ptr<dtk::core::ValueObserver<Playback> > _playbackObserver;
+        std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
+        std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
+        std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
     };
 }
 

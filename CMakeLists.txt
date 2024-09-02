@@ -7,7 +7,7 @@ project(
     HOMEPAGE_URL "https://github.com/darbyjohnston/toucan"
     LANGUAGES CXX C)
 
-set(toucan_VIEWER OFF CACHE BOOL "Build viewer application")
+set(toucan_VIEWER ON CACHE BOOL "Build viewer application")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 

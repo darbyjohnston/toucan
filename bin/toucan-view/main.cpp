@@ -4,15 +4,12 @@
 
 #include "App.h"
 
-using namespace dtk;
-using namespace dtk::core;
-
 DTK_MAIN()
 {
     try
     {
-        auto context = Context::create();
-        auto args = app::convert(argc, argv);
+        auto context = dtk::Context::create();
+        auto args = dtk::convert(argc, argv);
         auto app = toucan::App::create(context, args);
         if (app->getExit() != 0)
             return app->getExit();

@@ -4,9 +4,6 @@
 
 #include "FilesModel.h"
 
-using namespace dtk;
-using namespace dtk::core;
-
 namespace toucan
 {
     bool File::operator == (const File& other) const
@@ -16,11 +13,11 @@ namespace toucan
             timeline.value == other.timeline.value;
     }
 
-    FilesModel::FilesModel(const std::shared_ptr<Context>& context) :
+    FilesModel::FilesModel(const std::shared_ptr<dtk::Context>& context) :
         _context(context)
     {
-        _files = ObservableList<File>::create();
-        _current = ObservableValue<int>::create(-1);
+        _files = dtk::ObservableList<File>::create();
+        _current = dtk::ObservableValue<int>::create(-1);
     }
 
     FilesModel::~FilesModel()
@@ -55,12 +52,12 @@ namespace toucan
         }
     }
 
-    std::shared_ptr<dtk::core::IObservableList<File> > FilesModel::observeFiles() const
+    std::shared_ptr<dtk::IObservableList<File> > FilesModel::observeFiles() const
     {
         return _files;
     }
 
-    std::shared_ptr<dtk::core::IObservableValue<int> > FilesModel::observeCurrent() const
+    std::shared_ptr<dtk::IObservableValue<int> > FilesModel::observeCurrent() const
     {
         return _current;
     }

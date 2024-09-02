@@ -6,10 +6,9 @@
 
 #include "MenuBar.h"
 
-#include <dtkUIApp/Window.h>
-
-#include <dtkUI/RowLayout.h>
-#include <dtkUI/Splitter.h>
+#include <dtk/ui/RowLayout.h>
+#include <dtk/ui/Splitter.h>
+#include <dtk/ui/Window.h>
 
 namespace toucan
 {
@@ -18,34 +17,34 @@ namespace toucan
     class TimelineWidget;
     class Viewport;
 
-    class Window : public dtk::ui::Window
+    class Window : public dtk::Window
     {
     protected:
         void _init(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::string& name,
-            const dtk::core::Size2I&);
+            const dtk::Size2I&);
 
     public:
         virtual ~Window();
 
         static std::shared_ptr<Window> create(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::string& name,
-            const dtk::core::Size2I&);
+            const dtk::Size2I&);
 
-        void setGeometry(const dtk::core::Box2I&) override;
-        void sizeHintEvent(const dtk::ui::SizeHintEvent&) override;
-        void keyPressEvent(dtk::ui::KeyEvent&) override;
-        void keyReleaseEvent(dtk::ui::KeyEvent&) override;
+        void setGeometry(const dtk::Box2I&) override;
+        void sizeHintEvent(const dtk::SizeHintEvent&) override;
+        void keyPressEvent(dtk::KeyEvent&) override;
+        void keyReleaseEvent(dtk::KeyEvent&) override;
 
     private:
         std::weak_ptr<App> _app;
-        std::shared_ptr<dtk::ui::VerticalLayout> _layout;
-        std::shared_ptr<dtk::ui::Splitter> _vSplitter;
-        std::shared_ptr<dtk::ui::Splitter> _hSplitter;
+        std::shared_ptr<dtk::VerticalLayout> _layout;
+        std::shared_ptr<dtk::Splitter> _vSplitter;
+        std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<MenuBar> _menuBar;
         std::shared_ptr<Viewport> _viewport;
         std::shared_ptr<GraphWidget> _graphWidget;

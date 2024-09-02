@@ -6,22 +6,18 @@
 
 #include "App.h"
 
-using namespace dtk;
-using namespace dtk::core;
-using namespace dtk::ui;
-
 namespace toucan
 {
     void Viewport::_init(
-        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<IWidget>& parent)
+        const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::Viewport", parent);
 
-        _imageObserver = ValueObserver<std::shared_ptr<Image> >::create(
+        _imageObserver = dtk::ValueObserver<std::shared_ptr<dtk::Image> >::create(
             app->observeCurrentImage(),
-            [this](const std::shared_ptr<Image>& value)
+            [this](const std::shared_ptr<dtk::Image>& value)
             {
                 _image = value;
                 _setDrawUpdate();
@@ -32,22 +28,22 @@ namespace toucan
     {}
 
     std::shared_ptr<Viewport> Viewport::create(
-        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<IWidget>& parent)
+        const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<Viewport>(new Viewport);
         out->_init(context, app, parent);
         return out;
     }
 
-    void Viewport::drawEvent(const Box2I& drawRect, const DrawEvent& event)
+    void Viewport::drawEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)
     {
         IWidget::drawEvent(drawRect, event);
         if (_image)
         {
-            const Box2I& g = getGeometry();
-            event.render->drawImage(_image, Box2F(g.x(), g.y(), g.w(), g.h()));
+            const dtk::Box2I& g = getGeometry();
+            event.render->drawImage(_image, dtk::Box2F(g.x(), g.y(), g.w(), g.h()));
         }
     }
 }

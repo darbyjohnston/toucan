@@ -6,7 +6,6 @@ set(HEADERS
     PlaybackModel.h
     TimeWidget.h
     TimelineWidget.h
-    Type.h
     Viewport.h
     Window.h)
 
@@ -23,7 +22,7 @@ set(SOURCE
     main.cpp)
 
 add_executable(toucan-view ${HEADERS} ${SOURCE})
-target_link_libraries(toucan-view toucan dtk::dtkUIApp)
+target_link_libraries(toucan-view toucan dtk::dtkUI)
 set_target_properties(toucan-view PROPERTIES FOLDER bin)
 add_dependencies(toucan-view ${TOUCAN_PLUGINS})
 

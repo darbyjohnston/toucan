@@ -6,8 +6,8 @@
 
 #include "TimeWidget.h"
 
-#include <dtkUI/IntSlider.h>
-#include <dtkUI/RowLayout.h>
+#include <dtk/ui/IntSlider.h>
+#include <dtk/ui/RowLayout.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -15,11 +15,11 @@ namespace toucan
 {
     class App;
 
-    class TimelineWidget : public dtk::ui::IWidget
+    class TimelineWidget : public dtk::IWidget
     {
     protected:
         void _init(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -27,12 +27,12 @@ namespace toucan
         virtual ~TimelineWidget();
 
         static std::shared_ptr<TimelineWidget> create(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        void setGeometry(const dtk::core::Box2I&) override;
-        void sizeHintEvent(const dtk::ui::SizeHintEvent&) override;
+        void setGeometry(const dtk::Box2I&) override;
+        void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
         void _timelineUpdate();
@@ -40,18 +40,18 @@ namespace toucan
         void _currentTimeUpdate();
         void _playbackUpdate();
 
-        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
         OTIO_NS::TimeRange _timeRange;
-        std::shared_ptr<dtk::core::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
         OTIO_NS::RationalTime _currentTime;
-        std::shared_ptr<dtk::core::ValueObserver<Playback> > _playbackObserver;
+        std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
         Playback _playback = Playback::Stop;
 
-        std::shared_ptr<dtk::ui::VerticalLayout> _layout;
+        std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<FrameButtons> _frameButtons;
         std::shared_ptr<PlaybackButtons> _playbackButtons;
         std::shared_ptr<TimeEdit> _timeEdit;
-        std::shared_ptr<dtk::ui::IntSlider> _slider;
+        std::shared_ptr<dtk::IntSlider> _slider;
         std::shared_ptr<TimeLabel> _durationLabel;
     };
 }

@@ -4,19 +4,19 @@
 
 #pragma once
 
-#include <dtkUI/IWidget.h>
+#include <dtk/ui/IWidget.h>
 
-#include <dtkCore/Image.h>
+#include <dtk/core/Image.h>
 
 namespace toucan
 {
     class App;
 
-    class Viewport : public dtk::ui::IWidget
+    class Viewport : public dtk::IWidget
     {
     protected:
         void _init(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -24,15 +24,15 @@ namespace toucan
         virtual ~Viewport();
 
         static std::shared_ptr<Viewport> create(
-            const std::shared_ptr<dtk::core::Context>&,
+            const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        void drawEvent(const dtk::core::Box2I&, const dtk::ui::DrawEvent&) override;
+        void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
 
     private:
-        std::shared_ptr<dtk::core::ValueObserver<std::shared_ptr<dtk::core::Image> > > _imageObserver;
-        std::shared_ptr<dtk::core::Image> _image;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;
+        std::shared_ptr<dtk::Image> _image;
     };
 }
 

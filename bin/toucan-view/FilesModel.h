@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include <dtkCore/Context.h>
-#include <dtkCore/ObservableList.h>
-#include <dtkCore/ObservableValue.h>
+#include <dtk/core/Context.h>
+#include <dtk/core/ObservableList.h>
+#include <dtk/core/ObservableValue.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -26,7 +26,7 @@ namespace toucan
     class FilesModel : public std::enable_shared_from_this<FilesModel>
     {
     public:
-        FilesModel(const std::shared_ptr<dtk::core::Context>&);
+        FilesModel(const std::shared_ptr<dtk::Context>&);
 
         virtual ~FilesModel();
 
@@ -34,13 +34,13 @@ namespace toucan
 
         void close();
 
-        std::shared_ptr<dtk::core::IObservableList<File> > observeFiles() const;
+        std::shared_ptr<dtk::IObservableList<File> > observeFiles() const;
 
-        std::shared_ptr<dtk::core::IObservableValue<int> > observeCurrent() const;
+        std::shared_ptr<dtk::IObservableValue<int> > observeCurrent() const;
 
     private:
-        std::weak_ptr<dtk::core::Context> _context;
-        std::shared_ptr<dtk::core::ObservableList<File> > _files;
-        std::shared_ptr<dtk::core::ObservableValue<int> > _current;
+        std::weak_ptr<dtk::Context> _context;
+        std::shared_ptr<dtk::ObservableList<File> > _files;
+        std::shared_ptr<dtk::ObservableValue<int> > _current;
     };
 }

@@ -4,17 +4,14 @@
 
 #include "PlaybackModel.h"
 
-using namespace dtk;
-using namespace dtk::core;
-
 namespace toucan
 {
-    PlaybackModel::PlaybackModel(const std::shared_ptr<Context>& context) :
+    PlaybackModel::PlaybackModel(const std::shared_ptr<dtk::Context>& context) :
         _context(context)
     {
-        _timeRange = ObservableValue<OTIO_NS::TimeRange>::create();
-        _currentTime = ObservableValue<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
-        _playback = ObservableValue<Playback>::create(Playback::Stop);
+        _timeRange = dtk::ObservableValue<OTIO_NS::TimeRange>::create();
+        _currentTime = dtk::ObservableValue<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
+        _playback = dtk::ObservableValue<Playback>::create(Playback::Stop);
     }
 
     PlaybackModel::~PlaybackModel()
@@ -25,7 +22,7 @@ namespace toucan
         return _timeRange->get();
     }
 
-    std::shared_ptr<dtk::core::IObservableValue<OTIO_NS::TimeRange> > PlaybackModel::observeTimeRange() const
+    std::shared_ptr<dtk::IObservableValue<OTIO_NS::TimeRange> > PlaybackModel::observeTimeRange() const
     {
         return _timeRange;
     }
@@ -43,7 +40,7 @@ namespace toucan
         return _currentTime->get();
     }
 
-    std::shared_ptr<dtk::core::IObservableValue<OTIO_NS::RationalTime> > PlaybackModel::observeCurrentTime() const
+    std::shared_ptr<dtk::IObservableValue<OTIO_NS::RationalTime> > PlaybackModel::observeCurrentTime() const
     {
         return _currentTime;
     }
@@ -92,7 +89,7 @@ namespace toucan
         }
     }
 
-    std::shared_ptr<dtk::core::IObservableValue<Playback> > PlaybackModel::observePlayback() const
+    std::shared_ptr<dtk::IObservableValue<Playback> > PlaybackModel::observePlayback() const
     {
         return _playback;
     }
@@ -110,7 +107,7 @@ namespace toucan
             case Playback::Reverse:
                 if (auto context = _context.lock())
                 {
-                    _timer = Timer::create(context);
+                    _timer = dtk::Timer::create(context);
                     _timer->setRepeating(true);
                     _timer->start(
                         std::chrono::microseconds(static_cast<int>(1000 / _currentTime->get().rate())),

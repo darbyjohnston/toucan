@@ -7,35 +7,31 @@
 #include "FilesModel.h"
 #include "PlaybackModel.h"
 
-#include <dtkUI/FileBrowser.h>
-#include <dtkUI/MessageDialog.h>
+#include <dtk/ui/FileBrowser.h>
+#include <dtk/ui/MessageDialog.h>
 
-#include <dtkBaseApp/CmdLine.h>
-
-using namespace dtk;
-using namespace dtk::core;
-using namespace dtk::ui;
+#include <dtk/core/CmdLine.h>
 
 namespace toucan
 {
     void App::_init(
-        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<dtk::Context>& context,
         std::vector<std::string>& argv)
     {
-        ui::App::_init(
+        dtk::App::_init(
             context,
             argv,
             "toucan-view",
             "Toucan viewer",
             {
-                app::CmdLineValueArg<std::filesystem::path>::create(
+                dtk::CmdLineValueArg<std::filesystem::path>::create(
                     _path,
                     "input",
                     "Input timeline.",
                     true)
             });
 
-        context->getSystem<FileBrowserSystem>()->setNativeFileDialog(false);
+        context->getSystem<dtk::FileBrowserSystem>()->setNativeFileDialog(false);
 
         _messageLog = std::make_shared<MessageLog>();
 
@@ -43,16 +39,16 @@ namespace toucan
 
         _playbackModel = std::make_shared<PlaybackModel>(context);
 
-        _currentImage = ObservableValue<std::shared_ptr<Image> >::create();
+        _currentImage = dtk::ObservableValue<std::shared_ptr<dtk::Image> >::create();
 
-        _filesObserver = ListObserver<File>::create(
+        _filesObserver = dtk::ListObserver<File>::create(
             _filesModel->observeFiles(),
             [this](const std::vector<File>& value)
             {
                 _files = value;
             });
 
-        _currentFileObserver = ValueObserver<int>::create(
+        _currentFileObserver = dtk::ValueObserver<int>::create(
             _filesModel->observeCurrent(),
             [this](int value)
             {
@@ -70,7 +66,7 @@ namespace toucan
 
                     ImageGraphOptions graphOptions;
                     _graph = std::make_shared<ImageGraph>(
-                        _path.parent_path(),
+                        file.path.parent_path(),
                         file.timeline,
                         graphOptions);
                     _render();
@@ -85,7 +81,7 @@ namespace toucan
                 }
             });
 
-        _currentTimeObserver = ValueObserver<OTIO_NS::RationalTime>::create(
+        _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
             _playbackModel->observeCurrentTime(),
             [this](const OTIO_NS::RationalTime& value)
             {
@@ -109,7 +105,7 @@ namespace toucan
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
             "toucan-view",
-            Size2I(1920, 1080));
+            dtk::Size2I(1920, 1080));
         addWindow(_window);
 
         if (!_path.empty())
@@ -124,7 +120,7 @@ namespace toucan
     {}
 
     std::shared_ptr<App> App::create(
-        const std::shared_ptr<Context>& context,
+        const std::shared_ptr<dtk::Context>& context,
         std::vector<std::string>& argv)
     {
         auto out = std::shared_ptr<App>(new App);
@@ -146,7 +142,7 @@ namespace toucan
         }
         catch (const std::exception& e)
         {
-            _context->getSystem<MessageDialogSystem>()->message("ERROR", e.what(), _window);
+            _context->getSystem<dtk::MessageDialogSystem>()->message("ERROR", e.what(), _window);
         }
     }
 
@@ -155,14 +151,14 @@ namespace toucan
         return _playbackModel;
     }
 
-    std::shared_ptr<dtk::core::IObservableValue<std::shared_ptr<Image> > > App::observeCurrentImage() const
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > App::observeCurrentImage() const
     {
         return _currentImage;
     }
 
     void App::_render()
     {
-        std::shared_ptr<Image> image;
+        std::shared_ptr<dtk::Image> image;
         if (_graph)
         {
             auto node = _graph->exec(_host, _currentTime);
@@ -175,15 +171,15 @@ namespace toucan
             const OTIO_NS::TimeRange& timeRange = _playbackModel->getTimeRange();
             _imageBuf = node->exec(_currentTime - timeRange.start_time());
             const auto& spec = _imageBuf.spec();
-            ImageType imageType = ImageType::None;
+            dtk::ImageType imageType = dtk::ImageType::None;
             if (OIIO::TypeDesc::UINT8 == spec.format)
             {
                 switch (spec.nchannels)
                 {
-                case 1: imageType = ImageType::L_U8; break;
-                case 2: imageType = ImageType::LA_U8; break;
-                case 3: imageType = ImageType::RGB_U8; break;
-                case 4: imageType = ImageType::RGBA_U8; break;
+                case 1: imageType = dtk::ImageType::L_U8; break;
+                case 2: imageType = dtk::ImageType::LA_U8; break;
+                case 3: imageType = dtk::ImageType::RGB_U8; break;
+                case 4: imageType = dtk::ImageType::RGBA_U8; break;
                 default: break;
                 }
             }
@@ -191,10 +187,10 @@ namespace toucan
             {
                 switch (spec.nchannels)
                 {
-                case 1: imageType = ImageType::L_U16; break;
-                case 2: imageType = ImageType::LA_U16; break;
-                case 3: imageType = ImageType::RGB_U16; break;
-                case 4: imageType = ImageType::RGBA_U16; break;
+                case 1: imageType = dtk::ImageType::L_U16; break;
+                case 2: imageType = dtk::ImageType::LA_U16; break;
+                case 3: imageType = dtk::ImageType::RGB_U16; break;
+                case 4: imageType = dtk::ImageType::RGBA_U16; break;
                 default: break;
                 }
             }
@@ -202,10 +198,10 @@ namespace toucan
             {
                 switch (spec.nchannels)
                 {
-                case 1: imageType = ImageType::L_F16; break;
-                case 2: imageType = ImageType::LA_F16; break;
-                case 3: imageType = ImageType::RGB_F16; break;
-                case 4: imageType = ImageType::RGBA_F16; break;
+                case 1: imageType = dtk::ImageType::L_F16; break;
+                case 2: imageType = dtk::ImageType::LA_F16; break;
+                case 3: imageType = dtk::ImageType::RGB_F16; break;
+                case 4: imageType = dtk::ImageType::RGBA_F16; break;
                 default: break;
                 }
             }
@@ -213,16 +209,16 @@ namespace toucan
             {
                 switch (spec.nchannels)
                 {
-                case 1: imageType = ImageType::L_F32; break;
-                case 2: imageType = ImageType::LA_F32; break;
-                case 3: imageType = ImageType::RGB_F32; break;
-                case 4: imageType = ImageType::RGBA_F32; break;
+                case 1: imageType = dtk::ImageType::L_F32; break;
+                case 2: imageType = dtk::ImageType::LA_F32; break;
+                case 3: imageType = dtk::ImageType::RGB_F32; break;
+                case 4: imageType = dtk::ImageType::RGBA_F32; break;
                 default: break;
                 }
             }
-            ImageInfo info(spec.width, spec.height, imageType);
+            dtk::ImageInfo info(spec.width, spec.height, imageType);
             info.layout.mirror.y = true;
-            image = Image::create(info, reinterpret_cast<uint8_t*>(_imageBuf.localpixels()));
+            image = dtk::Image::create(info, reinterpret_cast<uint8_t*>(_imageBuf.localpixels()));
         }
         _currentImage->setIfChanged(image);
     }
