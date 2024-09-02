@@ -14,6 +14,8 @@ jobs:
 
     - name: Setup
       run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         sudo apt-get update
         sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb
 
@@ -34,6 +36,12 @@ jobs:
         path: toucan
         submodules: recursive
 
+    # \bug DYLD_LIBRARY_PATH is not being set here?
+    - name: Setup
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
     - name: Build
       run: |
         bash toucan/SuperBuild.sh Debug
@@ -50,6 +58,12 @@ jobs:
       with:
         path: toucan
         submodules: recursive
+
+    # \bug DYLD_LIBRARY_PATH is not being set here?
+    - name: Setup
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
     - name: Build
       run: |
@@ -69,6 +83,12 @@ jobs:
         submodules: recursive
     - uses: ilammy/setup-nasm@v1
         
+    # \bug Any spaces before the ">>" will be considered part of the path.
+    - name: Setup
+      run: |
+        echo %CD%\install-Debug\bin>> %GITHUB_PATH%
+        echo %CD%\install-Debug\lib>> %GITHUB_PATH%
+
     - name: Build
       shell: cmd
       run: |
