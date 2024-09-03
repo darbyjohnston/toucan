@@ -96,11 +96,13 @@ namespace toucan
 
     void PlaybackModel::setPlayback(Playback value)
     {
+        const Playback prev = _playback->get();
         if (_playback->setIfChanged(value))
         {
             switch (value)
             {
             case Playback::Stop:
+                _playbackPrev = prev;
                 _timer.reset();
                 break;
             case Playback::Forward:
@@ -120,6 +122,14 @@ namespace toucan
             default: break;
             }
         }
+    }
+
+    void PlaybackModel::togglePlayback()
+    {
+        setPlayback(
+            Playback::Stop == _playback->get() ?
+            _playbackPrev :
+            Playback::Stop);
     }
 
     void PlaybackModel::_timeUpdate()

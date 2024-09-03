@@ -39,12 +39,6 @@ namespace toucan
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
 
-        void _fileOpenAction();
-        void _fileCloseAction();
-        void _exitAction();
-        void _playbackAction(Playback);
-
-        std::weak_ptr<App> _app;
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;

@@ -113,4 +113,5 @@ jobs:
 
     - name: Tests
       run: |
-        cmake --build build-Debug --target RUN_TESTS
+        build-Debug\tests\Debug\toucan-test.exe toucan\data
+        #cmake --build build-Debug --target RUN_TESTS

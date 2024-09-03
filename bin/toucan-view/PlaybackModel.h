@@ -51,6 +51,8 @@ namespace toucan
 
         void setPlayback(Playback);
 
+        void togglePlayback();
+
     private:
         void _timeUpdate();
 
@@ -58,6 +60,7 @@ namespace toucan
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _timeRange;
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::RationalTime> > _currentTime;
         std::shared_ptr<dtk::ObservableValue<Playback> > _playback;
+        Playback _playbackPrev = Playback::Forward;
         std::shared_ptr<dtk::Timer> _timer;
     };
 }

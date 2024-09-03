@@ -17,7 +17,6 @@ namespace toucan
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         dtk::MenuBar::_init(context, parent);
-        _app = app;
         _fileMenuInit(context, app);
         _frameMenuInit(context, app);
         _playbackMenuInit(context, app);
@@ -43,12 +42,30 @@ namespace toucan
         _menus["File"] = dtk::Menu::create(context);
         addMenu("File", _menus["File"]);
 
+        auto appWeak = std::weak_ptr<App>(app);
         _actions["FileOpen"] = std::make_shared<dtk::Action>(
             "Open",
             "FileOpen",
             dtk::Key::O,
             static_cast<int>(dtk::KeyModifier::Control),
-            [this] { _fileOpenAction(); });
+            [this, appWeak]
+            {
+                if (auto context = _getContext().lock())
+                {
+                    if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
+                    {
+                        fileBrowserSystem->open(
+                            getWindow(),
+                            [appWeak](const std::filesystem::path& value)
+                            {
+                                if (auto app = appWeak.lock())
+                                {
+                                    app->open(value);
+                                }
+                            });
+                    }
+                }
+            });
         _menus["File"]->addItem(_actions["FileOpen"]);
 
         _actions["FileClose"] = std::make_shared<dtk::Action>(
@@ -56,7 +73,13 @@ namespace toucan
             "FileClose",
             dtk::Key::E,
             static_cast<int>(dtk::KeyModifier::Control),
-            [this] { _fileCloseAction(); });
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getFilesModel()->close();
+                }
+            });
         _menus["File"]->addItem(_actions["FileClose"]);
 
         _menus["File"]->addDivider();
@@ -65,7 +88,13 @@ namespace toucan
             "Exit",
             dtk::Key::Q,
             static_cast<int>(dtk::KeyModifier::Control),
-            [this] { _exitAction(); });
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->exit();
+                }
+            });
         _menus["File"]->addItem(_actions["Exit"]);
     }
 
@@ -141,12 +170,19 @@ namespace toucan
         _menus["Playback"] = dtk::Menu::create(context);
         addMenu("Playback", _menus["Playback"]);
 
+        auto appWeak = std::weak_ptr<App>(app);
         _actions["PlaybackStop"] = std::make_shared<dtk::Action>(
             "Stop",
             "PlaybackStop",
             dtk::Key::K,
             0,
-            [this] { _playbackAction(Playback::Stop); });
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getPlaybackModel()->setPlayback(Playback::Stop);
+                }
+            });
         _menus["Playback"]->addItem(_actions["PlaybackStop"]);
 
         _actions["PlaybackForward"] = std::make_shared<dtk::Action>(
@@ -154,7 +190,13 @@ namespace toucan
             "PlaybackForward",
             dtk::Key::L,
             0,
-            [this] { _playbackAction(Playback::Forward); });
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getPlaybackModel()->setPlayback(Playback::Forward);
+                }
+            });
         _menus["Playback"]->addItem(_actions["PlaybackForward"]);
 
         _actions["PlaybackReverse"] = std::make_shared<dtk::Action>(
@@ -162,8 +204,29 @@ namespace toucan
             "PlaybackReverse",
             dtk::Key::J,
             0,
-            [this] { _playbackAction(Playback::Reverse); });
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getPlaybackModel()->setPlayback(Playback::Reverse);
+                }
+            });
         _menus["Playback"]->addItem(_actions["PlaybackReverse"]);
+
+        _menus["Playback"]->addDivider();
+
+        _actions["TogglePlayback"] = std::make_shared<dtk::Action>(
+            "Toggle Playback",
+            dtk::Key::Space,
+            0,
+            [appWeak]
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getPlaybackModel()->togglePlayback();
+                }
+            });
+        _menus["Playback"]->addItem(_actions["TogglePlayback"]);
 
         _playbackObserver = dtk::ValueObserver<Playback>::create(
             app->getPlaybackModel()->observePlayback(),
@@ -173,48 +236,5 @@ namespace toucan
                 _menus["Playback"]->setItemChecked(_actions["PlaybackForward"], Playback::Forward == value);
                 _menus["Playback"]->setItemChecked(_actions["PlaybackReverse"], Playback::Reverse == value);
             });
-    }
-
-    void MenuBar::_fileOpenAction()
-    {
-        if (auto context = _getContext().lock())
-        {
-            if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
-            {
-                fileBrowserSystem->open(
-                    getWindow(),
-                    [this](const std::filesystem::path& value)
-                    {
-                        if (auto app = _app.lock())
-                        {
-                            app->open(value);
-                        }
-                    });
-            }
-        }
-    }
-
-    void MenuBar::_fileCloseAction()
-    {
-        if (auto app = _app.lock())
-        {
-            app->getFilesModel()->close();
-        }
-    }
-
-    void MenuBar::_exitAction()
-    {
-        if (auto app = _app.lock())
-        {
-            app->exit();
-        }
-    }
-
-    void MenuBar::_playbackAction(Playback value)
-    {
-        if (auto app = _app.lock())
-        {
-            app->getPlaybackModel()->setPlayback(value);
-        }
     }
 }
