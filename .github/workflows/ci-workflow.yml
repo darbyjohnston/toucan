@@ -100,6 +100,7 @@ jobs:
       run: |
         echo %CD%\install-Debug\bin>> %GITHUB_PATH%
         echo %CD%\install-Debug\lib>> %GITHUB_PATH%
+        echo CTEST_OUTPUT_ON_FAILURE=1 >> %GITHUB_ENV%
 
     - name: Build
       shell: cmd
