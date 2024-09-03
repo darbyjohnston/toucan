@@ -112,7 +112,9 @@ jobs:
         cmake --build build-Debug --target INSTALL
 
     - name: Tests
+      shell: cmd
       run: |
         dir build-Debug\tests\Debug
         dir toucan\data
+        build-Debug\tests\Debug\toucan-test.exe
         build-Debug\tests\Debug\toucan-test.exe toucan\data
