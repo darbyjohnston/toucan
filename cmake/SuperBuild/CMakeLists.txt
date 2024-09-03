@@ -21,7 +21,7 @@ set(toucan_OpenColorIO ON CACHE BOOL "Build OpenColorIO")
 set(toucan_OpenImageIO ON CACHE BOOL "Build OpenImageIO")
 set(toucan_OpenTimelineIO ON CACHE BOOL "Build OpenTimelineIO")
 set(toucan_OpenFX ON CACHE BOOL "Build OpenFX")
-set(toucan_dtk OFF CACHE BOOL "Build dtk")
+set(toucan_dtk ON CACHE BOOL "Build dtk")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 
