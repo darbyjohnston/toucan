@@ -97,6 +97,7 @@ jobs:
         
     # \bug Any spaces before the ">>" will be considered part of the path.
     - name: Setup
+      shell: cmd
       run: |
         echo %CD%\install-Debug\bin>> %GITHUB_PATH%
         echo %CD%\install-Debug\lib>> %GITHUB_PATH%
@@ -108,13 +109,12 @@ jobs:
         toucan\SuperBuild.bat Debug
 
     - name: Install
+      shell: cmd
       run: |
         cmake --build build-Debug --target INSTALL
 
     - name: Tests
       shell: cmd
       run: |
-        dir install-Debug\bin
-        dir install-Debug\lib
         echo %PATH%
         build-Debug\tests\Debug\toucan-test.exe toucan\data
