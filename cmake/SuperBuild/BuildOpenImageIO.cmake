@@ -1,7 +1,11 @@
 include(ExternalProject)
 
 set(OpenImageIO_GIT_REPOSITORY "https://github.com/AcademySoftwareFoundation/OpenImageIO.git")
-set(OpenImageIO_GIT_TAG "v2.5.15.0")
+# Commit : dev: span utility improvements (#4398)
+set(OpenImageIO_GIT_TAG "a534a392cd5aa027741f7359d3a7f4799d6b9fcc")
+
+set(OpenImageIO_GIT_REPOSITORY "https://github.com/darbyjohnston/OpenImageIO")
+set(OpenImageIO_GIT_TAG "ffmpeg_add_metadata")
 
 set(OpenImageIO_DEPS TIFF PNG libjpeg-turbo OpenEXR OpenColorIO Freetype)
 if(toucan_FFMPEG)
