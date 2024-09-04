@@ -89,6 +89,11 @@ namespace toucan
         }
     }
 
+    Playback PlaybackModel::getPlayback() const
+    {
+        return _playback->get();
+    }
+
     std::shared_ptr<dtk::IObservableValue<Playback> > PlaybackModel::observePlayback() const
     {
         return _playback;

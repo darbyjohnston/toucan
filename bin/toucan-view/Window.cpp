@@ -5,8 +5,12 @@
 #include "Window.h"
 
 #include "App.h"
+#include "BottomBar.h"
 #include "GraphWidget.h"
+#include "MenuBar.h"
+#include "StatusBar.h"
 #include "TimelineWidget.h"
+#include "ToolBar.h"
 #include "Viewport.h"
 
 #include <dtk/ui/Divider.h>
@@ -29,13 +33,23 @@ namespace toucan
         _menuBar = MenuBar::create(context, app, _layout);
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
+        _toolBar = ToolBar::create(context, app, _menuBar->getActions(), _layout);
+        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+
         _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, _layout);
         _vSplitter->setSplit({ .75F, .25F });
+        _vSplitter->setStretch(dtk::Stretch::Expanding);
         _hSplitter = dtk::Splitter::create(context, dtk::Orientation::Horizontal, _vSplitter);
         _hSplitter->setSplit({ .75F, .25F });
         _viewport = Viewport::create(context, app, _hSplitter);
         _graphWidget = GraphWidget::create(context, _hSplitter);
-        _timelineWidget = TimelineWidget::create(context, app, _vSplitter);
+
+        auto vLayout = dtk::VerticalLayout::create(context, _vSplitter);
+        vLayout->setSpacingRole(dtk::SizeRole::None);
+        _bottomBar = BottomBar::create(context, app, vLayout);
+        _timelineWidget = TimelineWidget::create(context, app, vLayout);
+        _timelineWidget->setVStretch(dtk::Stretch::Expanding);
+        _statusBar = StatusBar::create(context, app, vLayout);
     }
 
     Window::~Window()

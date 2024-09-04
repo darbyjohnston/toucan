@@ -31,16 +31,20 @@ namespace toucan
         virtual ~FilesModel();
 
         void open(const std::filesystem::path&);
-
         void close();
 
         std::shared_ptr<dtk::IObservableList<File> > observeFiles() const;
+        std::shared_ptr<dtk::IObservableValue<int> > observeCurrentIndex() const;
+        std::shared_ptr<dtk::IObservableValue<File> > observeCurrentFile() const;
+        void setCurrentIndex(int);
 
-        std::shared_ptr<dtk::IObservableValue<int> > observeCurrent() const;
+        void next();
+        void prev();
 
     private:
         std::weak_ptr<dtk::Context> _context;
         std::shared_ptr<dtk::ObservableList<File> > _files;
-        std::shared_ptr<dtk::ObservableValue<int> > _current;
+        std::shared_ptr<dtk::ObservableValue<int> > _currentIndex;
+        std::shared_ptr<dtk::ObservableValue<File> > _currentFile;
     };
 }

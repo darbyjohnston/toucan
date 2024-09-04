@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "TimeWidget.h"
+#include "TimeWidgets.h"
 
 #include <dtk/ui/ToolButton.h>
 
@@ -21,14 +21,21 @@ namespace toucan
 
         auto startButton = dtk::ToolButton::create(context, _layout);
         startButton->setIcon("FrameStart");
+        startButton->setTooltip("Go to the start frame");
+
         auto prevButton = dtk::ToolButton::create(context, _layout);
         prevButton->setIcon("FramePrev");
         prevButton->setRepeatClick(true);
+        prevButton->setTooltip("Go to the previous frame");
+
         auto nextButton = dtk::ToolButton::create(context, _layout);
         nextButton->setIcon("FrameNext");
         nextButton->setRepeatClick(true);
+        nextButton->setTooltip("Go to the next frame");
+
         auto endButton = dtk::ToolButton::create(context, _layout);
         endButton->setIcon("FrameEnd");
+        endButton->setTooltip("Go to the end frame");
 
         _buttonGroup = dtk::ButtonGroup::create(context, dtk::ButtonGroupType::Click);
         _buttonGroup->addButton(startButton);
@@ -86,10 +93,15 @@ namespace toucan
 
         auto reverseButton = dtk::ToolButton::create(context, _layout);
         reverseButton->setIcon("PlaybackReverse");
+        reverseButton->setTooltip("Reverse playback");
+
         auto stopButton = dtk::ToolButton::create(context, _layout);
         stopButton->setIcon("PlaybackStop");
+        stopButton->setTooltip("Stop playback");
+
         auto forwardButton = dtk::ToolButton::create(context, _layout);
         forwardButton->setIcon("PlaybackForward");
+        forwardButton->setTooltip("Forward playback");
 
         _buttonGroup = dtk::ButtonGroup::create(context, dtk::ButtonGroupType::Radio);
         _buttonGroup->addButton(stopButton);

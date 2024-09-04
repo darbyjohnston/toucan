@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "MenuBar.h"
-
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/Splitter.h>
 #include <dtk/ui/Window.h>
@@ -13,8 +11,12 @@
 namespace toucan
 {
     class App;
+    class BottomBar;
     class GraphWidget;
+    class MenuBar;
+    class StatusBar;
     class TimelineWidget;
+    class ToolBar;
     class Viewport;
 
     class Window : public dtk::Window
@@ -46,9 +48,12 @@ namespace toucan
         std::shared_ptr<dtk::Splitter> _vSplitter;
         std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<MenuBar> _menuBar;
+        std::shared_ptr<ToolBar> _toolBar;
         std::shared_ptr<Viewport> _viewport;
         std::shared_ptr<GraphWidget> _graphWidget;
         std::shared_ptr<TimelineWidget> _timelineWidget;
+        std::shared_ptr<BottomBar> _bottomBar;
+        std::shared_ptr<StatusBar> _statusBar;
     };
 }
 

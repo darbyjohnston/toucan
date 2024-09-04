@@ -4,15 +4,18 @@
 
 #pragma once
 
-#include <dtk/ui/ScrollWidget.h>
+#include "FilesModel.h"
 
-#include <opentimelineio/timeline.h>
+#include <dtk/ui/Label.h>
+#include <dtk/ui/RowLayout.h>
+
+#include <filesystem>
 
 namespace toucan
 {
     class App;
 
-    class TimelineWidget : public dtk::IWidget
+    class StatusBar : public dtk::IWidget
     {
     protected:
         void _init(
@@ -21,9 +24,9 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~TimelineWidget();
+        virtual ~StatusBar();
 
-        static std::shared_ptr<TimelineWidget> create(
+        static std::shared_ptr<StatusBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -32,6 +35,11 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
+        std::shared_ptr<dtk::HorizontalLayout> _layout;
+        std::shared_ptr<dtk::Label> _messageLabel;
+        std::shared_ptr<dtk::Label> _infoLabel;
+
+        std::shared_ptr<dtk::ValueObserver<File> > _fileObserver;
     };
 }
+

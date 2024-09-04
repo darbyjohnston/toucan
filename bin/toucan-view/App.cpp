@@ -34,11 +34,10 @@ namespace toucan
         context->getSystem<dtk::FileBrowserSystem>()->setNativeFileDialog(false);
 
         _messageLog = std::make_shared<MessageLog>();
-
+        _timeUnitsModel = std::make_shared<TimeUnitsModel>();
         _filesModel = std::make_shared<FilesModel>(context);
-
         _playbackModel = std::make_shared<PlaybackModel>(context);
-
+        _viewModel = std::make_shared<ViewModel>();
         _currentImage = dtk::ObservableValue<std::shared_ptr<dtk::Image> >::create();
 
         _filesObserver = dtk::ListObserver<File>::create(
@@ -48,11 +47,10 @@ namespace toucan
                 _files = value;
             });
 
-        _currentFileObserver = dtk::ValueObserver<int>::create(
-            _filesModel->observeCurrent(),
+        _currentIndexObserver = dtk::ValueObserver<int>::create(
+            _filesModel->observeCurrentIndex(),
             [this](int value)
             {
-                _currentFile = value;
                 if (value >= 0 && value < static_cast<int>(_files.size()))
                 {
                     const auto& file = _files[value];
@@ -128,6 +126,11 @@ namespace toucan
         return out;
     }
 
+    const std::shared_ptr<TimeUnitsModel>& App::getTimeUnitsModel() const
+    {
+        return _timeUnitsModel;
+    }
+
     const std::shared_ptr<FilesModel>& App::getFilesModel() const
     {
         return _filesModel;
@@ -149,6 +152,11 @@ namespace toucan
     const std::shared_ptr<PlaybackModel>& App::getPlaybackModel() const
     {
         return _playbackModel;
+    }
+
+    const std::shared_ptr<ViewModel>& App::getViewModel() const
+    {
+        return _viewModel;
     }
 
     std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > App::observeCurrentImage() const

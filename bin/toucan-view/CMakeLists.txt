@@ -1,24 +1,34 @@
 set(HEADERS
     App.h
+    BottomBar.h
     FilesModel.h
     GraphWidget.h
     MenuBar.h
     PlaybackModel.h
-    TimeWidget.h
+    StatusBar.h
+    TimeUnitsModel.h
+    TimeWidgets.h
     TimelineWidget.h
+    ToolBar.h
+    ViewModel.h
     Viewport.h
     Window.h)
 
 set(SOURCE
     App.cpp
+    BottomBar.cpp
     FilesModel.cpp
     GraphWidget.cpp
     MenuBar.cpp
     PlaybackModel.cpp
-    TimeWidget.cpp
+    StatusBar.cpp
+    TimeUnitsModel.cpp
+    TimeWidgets.cpp
     TimelineWidget.cpp
-    Window.cpp
+    ToolBar.cpp
+    ViewModel.cpp
     Viewport.cpp
+    Window.cpp
     main.cpp)
 
 add_executable(toucan-view ${HEADERS} ${SOURCE})

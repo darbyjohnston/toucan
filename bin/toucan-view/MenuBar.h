@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "FilesModel.h"
 #include "PlaybackModel.h"
 
 #include <dtk/ui/MenuBar.h>
@@ -28,6 +29,8 @@ namespace toucan
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        const std::map<std::string, std::shared_ptr<dtk::Action> >& getActions() const;
+
     private:
         void _fileMenuInit(
             const std::shared_ptr<dtk::Context>&,
@@ -38,10 +41,27 @@ namespace toucan
         void _playbackMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
+        void _viewMenuInit(
+            const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&);
+        void _windowMenuInit(
+            const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&);
+        void _toolsMenuInit(
+            const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&);
+
+        std::shared_ptr<FilesModel> _filesModel;
+        std::vector<File> _files;
 
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
+        std::vector<std::shared_ptr<dtk::Action> > _filesActions;
+
+        std::shared_ptr<dtk::ListObserver<File> > _filesObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
     };
 }
 

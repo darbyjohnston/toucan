@@ -34,23 +34,18 @@ namespace toucan
         virtual ~PlaybackModel();
 
         const OTIO_NS::TimeRange& getTimeRange() const;
-
         std::shared_ptr<dtk::IObservableValue<OTIO_NS::TimeRange> > observeTimeRange() const;
-
         void setTimeRange(const OTIO_NS::TimeRange&);
 
         const OTIO_NS::RationalTime& getCurrentTime() const;
-
         std::shared_ptr<dtk::IObservableValue<OTIO_NS::RationalTime> > observeCurrentTime() const;
-
         void setCurrentTime(const OTIO_NS::RationalTime&);
 
         void frameAction(FrameAction);
 
+        Playback getPlayback() const;
         std::shared_ptr<dtk::IObservableValue<Playback> > observePlayback() const;
-
         void setPlayback(Playback);
-
         void togglePlayback();
 
     private:
