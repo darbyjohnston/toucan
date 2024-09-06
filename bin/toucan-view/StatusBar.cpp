@@ -5,6 +5,7 @@
 #include "StatusBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/core/String.h>
@@ -30,12 +31,17 @@ namespace toucan
         _infoLabel = dtk::Label::create(context, _layout);
         _infoLabel->setMarginRole(dtk::SizeRole::MarginInside);
 
-        _fileObserver = dtk::ValueObserver<File>::create(
-            app->getFilesModel()->observeCurrentFile(),
-            [this](const File& value)
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this](const std::shared_ptr<Document>& document)
             {
-                _infoLabel->setText(dtk::elide(value.path.filename().string()));
-                _infoLabel->setTooltip(value.path.string());
+                std::filesystem::path path;
+                if (document)
+                {
+                    path = document->getPath();
+                }
+                _infoLabel->setText(dtk::elide(path.filename().string()));
+                _infoLabel->setTooltip(path.string());
             });
     }
 

@@ -167,6 +167,7 @@ namespace toucan
 
     void TimeEdit::_init(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
         const std::shared_ptr<IWidget>& parent)
     {
         IWidget::_init(context, "toucan::TimeEdit", parent);
@@ -201,6 +202,14 @@ namespace toucan
             {
                 _timeDec();
             });
+
+        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
+            timeUnitsModel->observeTimeUnits(),
+            [this](TimeUnits value)
+            {
+                _timeUnits = value;
+                _timeUpdate();
+            });
     }
 
     TimeEdit::~TimeEdit()
@@ -208,10 +217,11 @@ namespace toucan
 
     std::shared_ptr<TimeEdit> TimeEdit::create(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<TimeEdit>(new TimeEdit);
-        out->_init(context, parent);
+        out->_init(context, timeUnitsModel, parent);
         return out;
     }
 
@@ -294,7 +304,13 @@ namespace toucan
     void TimeEdit::_timeUpdate()
     {
         std::stringstream ss;
-        ss << _time.to_timecode();
+        switch (_timeUnits)
+        {
+        case TimeUnits::Timecode: ss << _time.to_timecode(); break;
+        case TimeUnits::Frames: ss << _time.to_frames(); break;
+        case TimeUnits::Seconds: ss << _time.to_seconds(); break;
+        default: break;
+        }
         _lineEdit->setText(ss.str());
     }
 
@@ -318,6 +334,7 @@ namespace toucan
 
     void TimeLabel::_init(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::TimeLabel", parent);
@@ -326,6 +343,14 @@ namespace toucan
         _label->setMarginRole(dtk::SizeRole::MarginInside);
 
         _timeUpdate();
+
+        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
+            timeUnitsModel->observeTimeUnits(),
+            [this](TimeUnits value)
+            {
+                _timeUnits = value;
+                _timeUpdate();
+            });
     }
 
     TimeLabel::~TimeLabel()
@@ -333,10 +358,11 @@ namespace toucan
 
     std::shared_ptr<TimeLabel> TimeLabel::create(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<TimeLabel>(new TimeLabel);
-        out->_init(context, parent);
+        out->_init(context, timeUnitsModel, parent);
         return out;
     }
 
@@ -368,7 +394,13 @@ namespace toucan
     void TimeLabel::_timeUpdate()
     {
         std::stringstream ss;
-        ss << _time.to_timecode();
+        switch (_timeUnits)
+        {
+        case TimeUnits::Timecode: ss << _time.to_timecode(); break;
+        case TimeUnits::Frames: ss << _time.to_frames(); break;
+        case TimeUnits::Seconds: ss << _time.to_seconds(); break;
+        default: break;
+        }
         _label->setText(ss.str());
     }
 }

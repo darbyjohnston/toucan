@@ -11,6 +11,7 @@
 namespace toucan
 {
     class App;
+    class Window;
 
     class ToolBar : public dtk::IWidget
     {
@@ -18,6 +19,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Window>&,
             const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -27,6 +29,7 @@ namespace toucan
         static std::shared_ptr<ToolBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Window>&,
             const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
@@ -36,6 +39,8 @@ namespace toucan
     private:
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::map<std::string, std::shared_ptr<dtk::ToolButton> > _buttons;
+
+        std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
     };
 }
 

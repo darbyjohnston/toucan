@@ -1,7 +1,8 @@
 set(HEADERS
     App.h
     BottomBar.h
-    FilesModel.h
+    Document.h
+    DocumentsModel.h
     GraphWidget.h
     MenuBar.h
     PlaybackModel.h
@@ -17,7 +18,8 @@ set(HEADERS
 set(SOURCE
     App.cpp
     BottomBar.cpp
-    FilesModel.cpp
+    Document.cpp
+    DocumentsModel.cpp
     GraphWidget.cpp
     MenuBar.cpp
     PlaybackModel.cpp

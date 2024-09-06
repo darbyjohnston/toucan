@@ -6,11 +6,14 @@
 
 #include "App.h"
 
+#include <dtk/ui/Divider.h>
+
 namespace toucan
 {
     void ToolBar::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Window>& window,
         const std::map<std::string, std::shared_ptr<dtk::Action> >& actions,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
@@ -19,30 +22,51 @@ namespace toucan
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
-        auto i = actions.find("FileOpen");
+        const std::vector<std::string> actionNames =
+        {
+            "FileOpen",
+            "FileClose",
+            "FileCloseAll"
+        };
+        for (const auto& name : actionNames)
+        {
+            auto i = actions.find(name);
+            auto button = dtk::ToolButton::create(context, _layout);
+            button->setIcon(i->second->icon);
+            button->setTooltip(i->second->toolTip);
+            button->setClickedCallback(
+                [i]
+                {
+                    if (i->second->callback)
+                    {
+                        i->second->callback();
+                    }
+                });
+            _buttons[name] = button;
+        }
+
+        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
+
+        auto i = actions.find("FullScreen");
         auto button = dtk::ToolButton::create(context, _layout);
         button->setIcon(i->second->icon);
+        button->setCheckable(true);
         button->setTooltip(i->second->toolTip);
-        button->setClickedCallback(
-            [i]
+        button->setCheckedCallback(
+            [i](bool value)
             {
-                if (i->second->callback)
+                if (i->second->checkedCallback)
                 {
-                    i->second->callback();
+                    i->second->checkedCallback(value);
                 }
             });
+        _buttons["FullScreen"] = button;
 
-        i = actions.find("FileClose");
-        button = dtk::ToolButton::create(context, _layout);
-        button->setIcon(i->second->icon);
-        button->setTooltip(i->second->toolTip);
-        button->setClickedCallback(
-            [i]
+        _fullScreenObserver = dtk::ValueObserver<bool>::create(
+            window->observeFullScreen(),
+            [this](bool value)
             {
-                if (i->second->callback)
-                {
-                    i->second->callback();
-                }
+                _buttons["FullScreen"]->setChecked(value);
             });
     }
 
@@ -52,11 +76,12 @@ namespace toucan
     std::shared_ptr<ToolBar> ToolBar::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Window>& window,
         const std::map<std::string, std::shared_ptr<dtk::Action> >& actions,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<ToolBar>(new ToolBar);
-        out->_init(context, app, actions, parent);
+        out->_init(context, app, window, actions, parent);
         return out;
     }
 

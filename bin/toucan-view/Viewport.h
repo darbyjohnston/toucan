@@ -11,7 +11,7 @@
 namespace toucan
 {
     class App;
-    class ViewModel;
+    class Document;
 
     class Viewport : public dtk::IWidget
     {
@@ -31,7 +31,7 @@ namespace toucan
 
         void setGeometry(const dtk::Box2I&) override;
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
-        void mouseEnterEvent() override;
+        void mouseEnterEvent(dtk::MouseEnterEvent&) override;
         void mouseLeaveEvent() override;
         void mouseMoveEvent(dtk::MouseMoveEvent&) override;
         void mousePressEvent(dtk::MouseClickEvent&) override;
@@ -39,12 +39,13 @@ namespace toucan
         void scrollEvent(dtk::ScrollEvent&) override;
 
     private:
-        std::shared_ptr<ViewModel> _viewModel;
+        std::shared_ptr<Document> _document;
         std::shared_ptr<dtk::Image> _image;
         dtk::V2I _viewPos;
         float _viewZoom = 1.F;
         bool _frameView = true;
 
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;
         std::shared_ptr<dtk::ValueObserver<dtk::V2I> > _viewPosObserver;
         std::shared_ptr<dtk::ValueObserver<float> > _viewZoomObserver;

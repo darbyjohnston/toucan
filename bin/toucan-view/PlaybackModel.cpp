@@ -6,12 +6,13 @@
 
 namespace toucan
 {
-    PlaybackModel::PlaybackModel(const std::shared_ptr<dtk::Context>& context) :
-        _context(context)
+    PlaybackModel::PlaybackModel(const std::shared_ptr<dtk::Context>& context)
     {
         _timeRange = dtk::ObservableValue<OTIO_NS::TimeRange>::create();
         _currentTime = dtk::ObservableValue<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
         _playback = dtk::ObservableValue<Playback>::create(Playback::Stop);
+        _timer = dtk::Timer::create(context);
+        _timer->setRepeating(true);
     }
 
     PlaybackModel::~PlaybackModel()
@@ -107,22 +108,17 @@ namespace toucan
             switch (value)
             {
             case Playback::Stop:
+                _timer->stop();
                 _playbackPrev = prev;
-                _timer.reset();
                 break;
             case Playback::Forward:
             case Playback::Reverse:
-                if (auto context = _context.lock())
-                {
-                    _timer = dtk::Timer::create(context);
-                    _timer->setRepeating(true);
-                    _timer->start(
-                        std::chrono::microseconds(static_cast<int>(1000 / _currentTime->get().rate())),
-                        [this]
-                        {
-                            _timeUpdate();
-                        });
-                }
+                _timer->start(
+                    std::chrono::microseconds(static_cast<int>(1000 / _currentTime->get().rate())),
+                    [this]
+                    {
+                        _timeUpdate();
+                    });
                 break;
             default: break;
             }

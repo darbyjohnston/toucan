@@ -16,81 +16,131 @@ namespace toucan
         dtk::IWidget::_init(context, "toucan::BottomBar", parent);
 
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
+        _layout->setMarginRole(dtk::SizeRole::MarginInside);
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
         _playbackButtons = PlaybackButtons::create(context, _layout);
 
         _frameButtons = FrameButtons::create(context, _layout);
 
-        _timeEdit = TimeEdit::create(context, _layout);
+        _timeEdit = TimeEdit::create(context, app->getTimeUnitsModel(), _layout);
         _timeEdit->setTooltip("Current time");
 
         _slider = dtk::IntSlider::create(context, nullptr, _layout);
 
-        _durationLabel = TimeLabel::create(context, _layout);
+        _durationLabel = TimeLabel::create(context, app->getTimeUnitsModel(), _layout);
         _durationLabel->setTooltip("Timeline duration");
 
-        auto weakApp = std::weak_ptr<App>(app);
+        _timeUnitsComboBox = dtk::ComboBox::create(context, _layout);
+        _timeUnitsComboBox->setItems({ "Timecode", "Frames", "Seconds" });
+        _timeUnitsComboBox->setTooltip("Time units");
+
         _frameButtons->setCallback(
-            [weakApp](FrameAction value)
+            [this](FrameAction value)
             {
-                if (auto app = weakApp.lock())
+                if (_document)
                 {
-                    app->getPlaybackModel()->frameAction(value);
+                    _document->getPlaybackModel()->frameAction(value);
                 }
             });
 
         _playbackButtons->setCallback(
-            [weakApp](Playback value)
+            [this](Playback value)
             {
-                if (auto app = weakApp.lock())
+                if (_document)
                 {
-                    app->getPlaybackModel()->setPlayback(value);
+                    _document->getPlaybackModel()->setPlayback(value);
                 }
             });
 
         _timeEdit->setCallback(
-            [weakApp, this](const OTIO_NS::RationalTime& value)
+            [this](const OTIO_NS::RationalTime& value)
             {
-                if (auto app = weakApp.lock())
+                if (_document)
                 {
-                    app->getPlaybackModel()->setCurrentTime(value);
+                    _document->getPlaybackModel()->setCurrentTime(value);
                 }
             });
 
         _slider->setCallback(
-            [weakApp, this](double value)
+            [this](double value)
             {
-                if (auto app = weakApp.lock())
+                if (_document)
                 {
-                    app->getPlaybackModel()->setCurrentTime(OTIO_NS::RationalTime(
+                    _document->getPlaybackModel()->setCurrentTime(OTIO_NS::RationalTime(
                         value,
                         _timeRange.duration().rate()));
                 }
             });
 
-        _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
-            app->getPlaybackModel()->observeTimeRange(),
-            [this](const OTIO_NS::TimeRange& value)
+        std::weak_ptr<App> appWeak(app);
+        _timeUnitsComboBox->setIndexCallback(
+            [appWeak](int index)
             {
-                _timeRange = value;
-                _timeRangeUpdate();
+                if (auto app = appWeak.lock())
+                {
+                    app->getTimeUnitsModel()->setTimeUnits(static_cast<TimeUnits>(index));
+                }
             });
 
-        _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
-            app->getPlaybackModel()->observeCurrentTime(),
-            [this](const OTIO_NS::RationalTime& value)
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this](const std::shared_ptr<Document>& document)
             {
-                _currentTime = value;
-                _currentTimeUpdate();
+                _document = document;
+                if (document)
+                {
+                    _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
+                        document->getPlaybackModel()->observeTimeRange(),
+                        [this](const OTIO_NS::TimeRange& value)
+                        {
+                            _timeRange = value;
+                            _timeRangeUpdate();
+                        });
+
+                    _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
+                        document->getPlaybackModel()->observeCurrentTime(),
+                        [this](const OTIO_NS::RationalTime& value)
+                        {
+                            _currentTime = value;
+                            _currentTimeUpdate();
+                        });
+
+                    _playbackObserver = dtk::ValueObserver<Playback>::create(
+                        document->getPlaybackModel()->observePlayback(),
+                        [this](Playback value)
+                        {
+                            _playback = value;
+                            _playbackUpdate();
+                        });
+                }
+                else
+                {
+                    _timeRange = OTIO_NS::TimeRange();
+                    _currentTime = OTIO_NS::RationalTime();
+                    _playback = Playback::Stop;
+
+                    _timeRangeUpdate();
+                    _currentTimeUpdate();
+                    _playbackUpdate();
+
+                    _timeRangeObserver.reset();
+                    _currentTimeObserver.reset();
+                    _playbackObserver.reset();
+                }
+
+                _frameButtons->setEnabled(document.get());
+                _playbackButtons->setEnabled(document.get());
+                _timeEdit->setEnabled(document.get());
+                _slider->setEnabled(document.get());
+                _durationLabel->setEnabled(document.get());
             });
 
-        _playbackObserver = dtk::ValueObserver<Playback>::create(
-            app->getPlaybackModel()->observePlayback(),
-            [this](Playback value)
+        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
+            app->getTimeUnitsModel()->observeTimeUnits(),
+            [this](TimeUnits value)
             {
-                _playback = value;
-                _playbackUpdate();
+                _timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
             });
     }
 

@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include "FilesModel.h"
-
 #include <dtk/ui/Label.h>
 #include <dtk/ui/RowLayout.h>
 
@@ -14,6 +12,7 @@
 namespace toucan
 {
     class App;
+    class Document;
 
     class StatusBar : public dtk::IWidget
     {
@@ -39,7 +38,7 @@ namespace toucan
         std::shared_ptr<dtk::Label> _messageLabel;
         std::shared_ptr<dtk::Label> _infoLabel;
 
-        std::shared_ptr<dtk::ValueObserver<File> > _fileObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
     };
 }
 

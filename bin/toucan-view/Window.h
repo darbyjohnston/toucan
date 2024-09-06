@@ -6,12 +6,15 @@
 
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/Splitter.h>
+#include <dtk/ui/TabBar.h>
 #include <dtk/ui/Window.h>
+#include <dtk/core/ObservableList.h>
 
 namespace toucan
 {
     class App;
     class BottomBar;
+    class Document;
     class GraphWidget;
     class MenuBar;
     class StatusBar;
@@ -42,18 +45,26 @@ namespace toucan
         void keyPressEvent(dtk::KeyEvent&) override;
         void keyReleaseEvent(dtk::KeyEvent&) override;
 
+    protected:
+        void _drop(const std::vector<std::string>&) override;
+
     private:
         std::weak_ptr<App> _app;
+
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::Splitter> _vSplitter;
         std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<MenuBar> _menuBar;
         std::shared_ptr<ToolBar> _toolBar;
+        std::shared_ptr<dtk::TabBar> _tabBar;
         std::shared_ptr<Viewport> _viewport;
         std::shared_ptr<GraphWidget> _graphWidget;
         std::shared_ptr<TimelineWidget> _timelineWidget;
         std::shared_ptr<BottomBar> _bottomBar;
         std::shared_ptr<StatusBar> _statusBar;
+
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _documentObserver;
     };
 }
 

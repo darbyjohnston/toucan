@@ -5,6 +5,7 @@
 #pragma once
 
 #include "PlaybackModel.h"
+#include "TimeUnitsModel.h"
 
 #include <dtk/ui/ButtonGroup.h>
 #include <dtk/ui/IncButtons.h>
@@ -76,6 +77,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<TimeUnitsModel>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -83,6 +85,7 @@ namespace toucan
 
         static std::shared_ptr<TimeEdit> create(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setTime(const OTIO_NS::RationalTime&);
@@ -102,10 +105,14 @@ namespace toucan
 
         OTIO_NS::RationalTime _time;
         OTIO_NS::TimeRange _timeRange;
+        TimeUnits _timeUnits = TimeUnits::Timecode;
+
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::LineEdit> _lineEdit;
         std::shared_ptr<dtk::IncButtons> _incButtons;
         std::function<void(const OTIO_NS::RationalTime&)> _callback;
+
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 
     class TimeLabel : public dtk::IWidget
@@ -113,6 +120,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<TimeUnitsModel>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -120,6 +128,7 @@ namespace toucan
 
         static std::shared_ptr<TimeLabel> create(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setTime(const OTIO_NS::RationalTime&);
@@ -133,7 +142,11 @@ namespace toucan
         void _timeUpdate();
 
         OTIO_NS::RationalTime _time;
+        TimeUnits _timeUnits = TimeUnits::Timecode;
+
         std::shared_ptr<dtk::Label> _label;
+
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }
 

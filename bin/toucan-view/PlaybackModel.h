@@ -51,7 +51,6 @@ namespace toucan
     private:
         void _timeUpdate();
 
-        std::weak_ptr<dtk::Context> _context;
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _timeRange;
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::RationalTime> > _currentTime;
         std::shared_ptr<dtk::ObservableValue<Playback> > _playback;
