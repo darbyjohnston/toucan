@@ -105,7 +105,7 @@ namespace toucan
 
         OTIO_NS::RationalTime _time;
         OTIO_NS::TimeRange _timeRange;
-        TimeUnits _timeUnits = TimeUnits::Timecode;
+        std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
 
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::LineEdit> _lineEdit;
@@ -142,7 +142,7 @@ namespace toucan
         void _timeUpdate();
 
         OTIO_NS::RationalTime _time;
-        TimeUnits _timeUnits = TimeUnits::Timecode;
+        std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
 
         std::shared_ptr<dtk::Label> _label;
 

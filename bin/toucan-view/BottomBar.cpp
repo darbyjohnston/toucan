@@ -26,8 +26,6 @@ namespace toucan
         _timeEdit = TimeEdit::create(context, app->getTimeUnitsModel(), _layout);
         _timeEdit->setTooltip("Current time");
 
-        _slider = dtk::IntSlider::create(context, nullptr, _layout);
-
         _durationLabel = TimeLabel::create(context, app->getTimeUnitsModel(), _layout);
         _durationLabel->setTooltip("Timeline duration");
 
@@ -59,17 +57,6 @@ namespace toucan
                 if (_document)
                 {
                     _document->getPlaybackModel()->setCurrentTime(value);
-                }
-            });
-
-        _slider->setCallback(
-            [this](double value)
-            {
-                if (_document)
-                {
-                    _document->getPlaybackModel()->setCurrentTime(OTIO_NS::RationalTime(
-                        value,
-                        _timeRange.duration().rate()));
                 }
             });
 
@@ -132,7 +119,6 @@ namespace toucan
                 _frameButtons->setEnabled(document.get());
                 _playbackButtons->setEnabled(document.get());
                 _timeEdit->setEnabled(document.get());
-                _slider->setEnabled(document.get());
                 _durationLabel->setEnabled(document.get());
             });
 
@@ -176,18 +162,12 @@ namespace toucan
     {
         _timeEdit->setTimeRange(_timeRange);
 
-        _slider->setRange(dtk::RangeI(
-            _timeRange.start_time().value(),
-            _timeRange.end_time_inclusive().value()));
-
         _durationLabel->setTime(_timeRange.duration());
     }
 
     void BottomBar::_currentTimeUpdate()
     {
         _timeEdit->setTime(_currentTime);
-
-        _slider->setValue(_currentTime.value());
     }
 
     void BottomBar::_playbackUpdate()

@@ -7,7 +7,6 @@
 #include "TimeWidgets.h"
 
 #include <dtk/ui/ComboBox.h>
-#include <dtk/ui/IntSlider.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ToolButton.h>
 
@@ -50,7 +49,6 @@ namespace toucan
         std::shared_ptr<FrameButtons> _frameButtons;
         std::shared_ptr<PlaybackButtons> _playbackButtons;
         std::shared_ptr<TimeEdit> _timeEdit;
-        std::shared_ptr<dtk::IntSlider> _slider;
         std::shared_ptr<TimeLabel> _durationLabel;
         std::shared_ptr<dtk::ComboBox> _timeUnitsComboBox;
 

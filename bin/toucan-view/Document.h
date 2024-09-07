@@ -32,6 +32,8 @@ namespace toucan
 
         const std::filesystem::path& getPath() const;
 
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& getTimeline() const;
+
         const std::shared_ptr<PlaybackModel>& getPlaybackModel() const;
 
         const std::shared_ptr<ViewModel>& getViewModel() const;

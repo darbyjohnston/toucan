@@ -5,6 +5,7 @@
 #pragma once
 
 #include "PlaybackModel.h"
+#include "WindowModel.h"
 
 #include <dtk/ui/MenuBar.h>
 #include <dtk/core/ObservableList.h>
@@ -77,6 +78,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
     };
 }
 

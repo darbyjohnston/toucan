@@ -172,6 +172,8 @@ namespace toucan
     {
         IWidget::_init(context, "toucan::TimeEdit", parent);
 
+        _timeUnitsModel = timeUnitsModel;
+
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
@@ -205,9 +207,8 @@ namespace toucan
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
             timeUnitsModel->observeTimeUnits(),
-            [this](TimeUnits value)
+            [this](TimeUnits)
             {
-                _timeUnits = value;
                 _timeUpdate();
             });
     }
@@ -303,15 +304,7 @@ namespace toucan
 
     void TimeEdit::_timeUpdate()
     {
-        std::stringstream ss;
-        switch (_timeUnits)
-        {
-        case TimeUnits::Timecode: ss << _time.to_timecode(); break;
-        case TimeUnits::Frames: ss << _time.to_frames(); break;
-        case TimeUnits::Seconds: ss << _time.to_seconds(); break;
-        default: break;
-        }
-        _lineEdit->setText(ss.str());
+        _lineEdit->setText(_timeUnitsModel->getLabel(_time));
     }
 
     void TimeEdit::_timeInc(int value)
@@ -339,6 +332,8 @@ namespace toucan
     {
         IWidget::_init(context, "toucan::TimeLabel", parent);
 
+        _timeUnitsModel = timeUnitsModel;
+
         _label = dtk::Label::create(context, shared_from_this());
         _label->setMarginRole(dtk::SizeRole::MarginInside);
 
@@ -348,7 +343,6 @@ namespace toucan
             timeUnitsModel->observeTimeUnits(),
             [this](TimeUnits value)
             {
-                _timeUnits = value;
                 _timeUpdate();
             });
     }
@@ -393,14 +387,6 @@ namespace toucan
 
     void TimeLabel::_timeUpdate()
     {
-        std::stringstream ss;
-        switch (_timeUnits)
-        {
-        case TimeUnits::Timecode: ss << _time.to_timecode(); break;
-        case TimeUnits::Frames: ss << _time.to_frames(); break;
-        case TimeUnits::Seconds: ss << _time.to_seconds(); break;
-        default: break;
-        }
-        _label->setText(ss.str());
+        _label->setText(_timeUnitsModel->getLabel(_time));
     }
 }

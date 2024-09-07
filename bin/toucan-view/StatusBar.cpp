@@ -5,9 +5,7 @@
 #include "StatusBar.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
 
-#include <dtk/ui/Divider.h>
 #include <dtk/core/String.h>
 
 namespace toucan
@@ -25,24 +23,6 @@ namespace toucan
         _messageLabel = dtk::Label::create(context, _layout);
         _messageLabel->setHStretch(dtk::Stretch::Expanding);
         _messageLabel->setMarginRole(dtk::SizeRole::MarginInside);
-
-        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
-
-        _infoLabel = dtk::Label::create(context, _layout);
-        _infoLabel->setMarginRole(dtk::SizeRole::MarginInside);
-
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
-            {
-                std::filesystem::path path;
-                if (document)
-                {
-                    path = document->getPath();
-                }
-                _infoLabel->setText(dtk::elide(path.filename().string()));
-                _infoLabel->setTooltip(path.string());
-            });
     }
 
     StatusBar::~StatusBar()

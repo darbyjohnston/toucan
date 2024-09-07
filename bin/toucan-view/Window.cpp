@@ -8,12 +8,10 @@
 #include "BottomBar.h"
 #include "GraphWidget.h"
 #include "MenuBar.h"
-#include "StatusBar.h"
 #include "TimelineWidget.h"
 #include "ToolBar.h"
 #include "Viewport.h"
 
-#include <dtk/ui/Divider.h>
 #include <dtk/ui/MessageDialog.h>
 #include <dtk/core/String.h>
 
@@ -45,7 +43,7 @@ namespace toucan
             std::dynamic_pointer_cast<Window>(shared_from_this()),
             _menuBar->getActions(),
             _layout);
-        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+        _toolBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, _layout);
         _vSplitter->setSplit({ .75F, .25F });
@@ -59,12 +57,11 @@ namespace toucan
         _viewport->setStretch(dtk::Stretch::Expanding);
         _graphWidget = GraphWidget::create(context, _hSplitter);
 
-        vLayout = dtk::VerticalLayout::create(context, _vSplitter);
-        vLayout->setSpacingRole(dtk::SizeRole::None);
-        _bottomBar = BottomBar::create(context, app, vLayout);
-        _timelineWidget = TimelineWidget::create(context, app, vLayout);
+        _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
+        _bottomLayout->setSpacingRole(dtk::SizeRole::None);
+        _bottomBar = BottomBar::create(context, app, _bottomLayout);
+        _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
-        _statusBar = StatusBar::create(context, app, vLayout);
 
         std::weak_ptr<App> appWeak(app);
         _tabBar->setCallback(
@@ -83,8 +80,9 @@ namespace toucan
                 _tabBar->clearTabs();
                 for (const auto& document : documents)
                 {
-                    std::string s = dtk::elide(document->getPath().filename().string());
-                    _tabBar->addTab(s);
+                    _tabBar->addTab(
+                        dtk::elide(document->getPath().filename().string()),
+                        document->getPath().string());
                 }
                 _tabBar->setVisible(documents.size());
             });
@@ -94,6 +92,24 @@ namespace toucan
             [this](int index)
             {
                 _tabBar->setCurrentTab(index);
+            });
+
+        _controlsObserver = dtk::MapObserver<WindowControl, bool>::create(
+            app->getWindowModel()->observeControls(),
+            [this](const std::map<WindowControl, bool>& value)
+            {
+                auto i = value.find(WindowControl::ToolBar);
+                _toolBar->setVisible(i->second);
+                _toolBarDivider->setVisible(i->second);
+                i = value.find(WindowControl::Tabs);
+                _tabBar->setVisible(i->second);
+                i = value.find(WindowControl::BottomBar);
+                _bottomBar->setVisible(i->second);
+                auto j = value.find(WindowControl::TimelineWidget);
+                _timelineWidget->setVisible(j->second);
+                _bottomLayout->setVisible(i->second || j->second);
+                i = value.find(WindowControl::Tools);
+                _graphWidget->setVisible(i->second);
             });
     }
 

@@ -64,6 +64,11 @@ namespace toucan
         return _path;
     }
 
+    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& Document::getTimeline() const
+    {
+        return _timeline;
+    }
+
     const std::shared_ptr<PlaybackModel>& Document::getPlaybackModel() const
     {
         return _playbackModel;

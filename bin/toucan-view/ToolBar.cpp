@@ -24,9 +24,9 @@ namespace toucan
 
         const std::vector<std::string> actionNames =
         {
-            "FileOpen",
-            "FileClose",
-            "FileCloseAll"
+            "File/Open",
+            "File/Close",
+            "File/CloseAll"
         };
         for (const auto& name : actionNames)
         {
@@ -47,7 +47,7 @@ namespace toucan
 
         dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
 
-        auto i = actions.find("FullScreen");
+        auto i = actions.find("Window/FullScreen");
         auto button = dtk::ToolButton::create(context, _layout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
@@ -60,13 +60,13 @@ namespace toucan
                     i->second->checkedCallback(value);
                 }
             });
-        _buttons["FullScreen"] = button;
+        _buttons["Window/FullScreen"] = button;
 
         _fullScreenObserver = dtk::ValueObserver<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
             {
-                _buttons["FullScreen"]->setChecked(value);
+                _buttons["Window/FullScreen"]->setChecked(value);
             });
     }
 

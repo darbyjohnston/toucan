@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "WindowModel.h"
+
+#include <dtk/ui/Divider.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/Splitter.h>
 #include <dtk/ui/TabBar.h>
@@ -56,15 +59,17 @@ namespace toucan
         std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<MenuBar> _menuBar;
         std::shared_ptr<ToolBar> _toolBar;
+        std::shared_ptr<dtk::Divider> _toolBarDivider;
         std::shared_ptr<dtk::TabBar> _tabBar;
         std::shared_ptr<Viewport> _viewport;
         std::shared_ptr<GraphWidget> _graphWidget;
-        std::shared_ptr<TimelineWidget> _timelineWidget;
+        std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<BottomBar> _bottomBar;
-        std::shared_ptr<StatusBar> _statusBar;
+        std::shared_ptr<TimelineWidget> _timelineWidget;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _documentObserver;
+        std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
     };
 }
 

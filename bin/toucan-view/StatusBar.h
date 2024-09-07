@@ -12,7 +12,6 @@
 namespace toucan
 {
     class App;
-    class Document;
 
     class StatusBar : public dtk::IWidget
     {
@@ -36,9 +35,6 @@ namespace toucan
     private:
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::Label> _messageLabel;
-        std::shared_ptr<dtk::Label> _infoLabel;
-
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
     };
 }
 

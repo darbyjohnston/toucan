@@ -6,6 +6,8 @@
 
 #include <dtk/core/ObservableValue.h>
 
+#include <opentimelineio/timeline.h>
+
 namespace toucan
 {
     enum class TimeUnits
@@ -25,6 +27,8 @@ namespace toucan
         TimeUnits getTimeUnits() const;
         std::shared_ptr<dtk::IObservableValue<TimeUnits> > observeTimeUnits() const;
         void setTimeUnits(TimeUnits);
+
+        std::string getLabel(const OTIO_NS::RationalTime&) const;
 
     private:
         std::shared_ptr<dtk::ObservableValue<TimeUnits> > _timeUnits;

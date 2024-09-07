@@ -13,7 +13,8 @@ set(HEADERS
     ToolBar.h
     ViewModel.h
     Viewport.h
-    Window.h)
+    Window.h
+    WindowModel.h)
 
 set(SOURCE
     App.cpp
@@ -31,6 +32,7 @@ set(SOURCE
     ViewModel.cpp
     Viewport.cpp
     Window.cpp
+    WindowModel.cpp
     main.cpp)
 
 add_executable(toucan-view ${HEADERS} ${SOURCE})

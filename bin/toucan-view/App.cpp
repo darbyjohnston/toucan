@@ -48,6 +48,8 @@ namespace toucan
 
         _documentsModel = std::make_shared<DocumentsModel>(context, _host);
 
+        _windowModel = std::make_shared<WindowModel>();
+
         _window = Window::create(
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
@@ -90,5 +92,10 @@ namespace toucan
     const std::shared_ptr<DocumentsModel>& App::getDocumentsModel() const
     {
         return _documentsModel;
+    }
+
+    const std::shared_ptr<WindowModel>& App::getWindowModel() const
+    {
+        return _windowModel;
     }
 }
