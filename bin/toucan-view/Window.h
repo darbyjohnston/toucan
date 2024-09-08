@@ -10,6 +10,7 @@
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/Splitter.h>
 #include <dtk/ui/TabBar.h>
+#include <dtk/ui/TabWidget.h>
 #include <dtk/ui/Window.h>
 #include <dtk/core/ObservableList.h>
 
@@ -18,7 +19,7 @@ namespace toucan
     class App;
     class BottomBar;
     class Document;
-    class GraphWidget;
+    class IToolWidget;
     class MenuBar;
     class StatusBar;
     class TimelineWidget;
@@ -62,7 +63,8 @@ namespace toucan
         std::shared_ptr<dtk::Divider> _toolBarDivider;
         std::shared_ptr<dtk::TabBar> _tabBar;
         std::shared_ptr<Viewport> _viewport;
-        std::shared_ptr<GraphWidget> _graphWidget;
+        std::shared_ptr<dtk::TabWidget> _toolWidget;
+        std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<BottomBar> _bottomBar;
         std::shared_ptr<TimelineWidget> _timelineWidget;

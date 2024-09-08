@@ -5,6 +5,7 @@
 #include "Document.h"
 
 #include "PlaybackModel.h"
+#include "SelectionModel.h"
 #include "ViewModel.h"
 
 #include <dtk/core/Math.h>
@@ -37,6 +38,8 @@ namespace toucan
         _playbackModel->setCurrentTime(startTime);
 
         _viewModel = std::make_shared<ViewModel>();
+
+        _selectionModel = std::make_shared<SelectionModel>();
 
         _currentImage = dtk::ObservableValue<std::shared_ptr<dtk::Image> >::create();
 
@@ -77,6 +80,11 @@ namespace toucan
     const std::shared_ptr<ViewModel>& Document::getViewModel() const
     {
         return _viewModel;
+    }
+
+    const std::shared_ptr<SelectionModel>& Document::getSelectionModel() const
+    {
+        return _selectionModel;
     }
 
     std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > Document::observeCurrentImage() const

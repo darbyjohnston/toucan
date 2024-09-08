@@ -3,14 +3,21 @@ set(HEADERS
     BottomBar.h
     Document.h
     DocumentsModel.h
+    ClipItem.h
     GraphWidget.h
+    IItem.h
+    IToolWidget.h
+    InspectorTool.h
     MenuBar.h
     PlaybackModel.h
+    SelectionModel.h
     StatusBar.h
     TimeUnitsModel.h
     TimeWidgets.h
+    TimelineItem.h
     TimelineWidget.h
     ToolBar.h
+    TrackItem.h
     ViewModel.h
     Viewport.h
     Window.h
@@ -19,16 +26,23 @@ set(HEADERS
 set(SOURCE
     App.cpp
     BottomBar.cpp
+    ClipItem.cpp
     Document.cpp
     DocumentsModel.cpp
     GraphWidget.cpp
+    IItem.cpp
+    IToolWidget.cpp
+    InspectorTool.cpp
     MenuBar.cpp
     PlaybackModel.cpp
+    SelectionModel.cpp
     StatusBar.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
+    TimelineItem.cpp
     TimelineWidget.cpp
     ToolBar.cpp
+    TrackItem.cpp
     ViewModel.cpp
     Viewport.cpp
     Window.cpp

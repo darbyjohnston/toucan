@@ -6,7 +6,7 @@
 
 #include "App.h"
 #include "BottomBar.h"
-#include "GraphWidget.h"
+#include "InspectorTool.h"
 #include "MenuBar.h"
 #include "TimelineWidget.h"
 #include "ToolBar.h"
@@ -55,7 +55,13 @@ namespace toucan
         _tabBar = dtk::TabBar::create(context, vLayout);
         _viewport = Viewport::create(context, app, vLayout);
         _viewport->setStretch(dtk::Stretch::Expanding);
-        _graphWidget = GraphWidget::create(context, _hSplitter);
+
+        _toolWidget = dtk::TabWidget::create(context, _hSplitter);
+        _toolWidgets.push_back(InspectorTool::create(context, app));
+        for (const auto& toolWidget : _toolWidgets)
+        {
+            _toolWidget->addTab(toolWidget->getText(), toolWidget);
+        }
 
         _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
         _bottomLayout->setSpacingRole(dtk::SizeRole::None);
@@ -109,7 +115,7 @@ namespace toucan
                 _timelineWidget->setVisible(j->second);
                 _bottomLayout->setVisible(i->second || j->second);
                 i = value.find(WindowControl::Tools);
-                _graphWidget->setVisible(i->second);
+                _toolWidget->setVisible(i->second);
             });
     }
 
