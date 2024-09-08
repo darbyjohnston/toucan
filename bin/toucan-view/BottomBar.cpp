@@ -17,7 +17,7 @@ namespace toucan
 
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setMarginRole(dtk::SizeRole::MarginInside);
-        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+        _layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
 
         _playbackButtons = PlaybackButtons::create(context, _layout);
 

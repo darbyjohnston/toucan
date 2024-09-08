@@ -9,11 +9,17 @@
 
 #include "App.h"
 
+#include <dtk/core/Format.h>
 #include <dtk/core/Random.h>
 #include <dtk/core/RenderUtil.h>
 
 namespace toucan
 {
+    namespace
+    {
+        const float marginPercentage = .1F;
+    }
+
     void IItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const OTIO_NS::TimeRange& timeRange,
@@ -55,7 +61,14 @@ namespace toucan
             parent);
 
         _text = clip->name();
-        setTooltip(_text);
+
+        setTooltip(dtk::Format(
+            "Clip: {0}\n"
+            "Range: {1}-{2}@{3}").
+            arg(clip->name()).
+            arg(_timeRange.start_time().value()).
+            arg(_timeRange.end_time_inclusive().value()).
+            arg(_timeRange.duration().rate()));
     }
     
     ClipItem::~ClipItem()
@@ -246,7 +259,7 @@ namespace toucan
             parent);
 
         _setMouseHoverEnabled(true);
-        _setMousePressEnabled(true);
+        _setMousePressEnabled(true, 0, 0);
 
         _timeline = timeline;
         _timeUnitsModel = timeUnitsModel;
@@ -296,6 +309,35 @@ namespace toucan
         _currentTimeCallback = value;
     }
 
+    OTIO_NS::RationalTime TimelineItem::posToTime(double value) const
+    {
+        OTIO_NS::RationalTime out;
+        const dtk::Box2I& g = getGeometry();
+        if (g.w() > 0)
+        {
+            const double normalized = (value - g.min.x) /
+                static_cast<double>(_timeRange.duration().rescaled_to(1.0).value() * _scale);
+            out = OTIO_NS::RationalTime(
+                _timeRange.start_time() +
+                OTIO_NS::RationalTime(
+                    _timeRange.duration().value() * normalized,
+                    _timeRange.duration().rate())).
+                round();
+            out = dtk::clamp(
+                out,
+                _timeRange.start_time(),
+                _timeRange.end_time_inclusive());
+        }
+        return out;
+    }
+
+    int TimelineItem::timeToPos(const OTIO_NS::RationalTime& value) const
+    {
+        const dtk::Box2I& g = getGeometry();
+        const OTIO_NS::RationalTime t = value - _timeRange.start_time();
+        return g.min.x + t.rescaled_to(1.0).value() * _scale;
+    }
+
     void TimelineItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);
@@ -324,6 +366,7 @@ namespace toucan
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.spacing = event.style->getSizeRole(dtk::SizeRole::SpacingTool, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
+            _size.handle = event.style->getSizeRole(dtk::SizeRole::Handle, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
         }
@@ -357,7 +400,10 @@ namespace toucan
             dtk::Box2F(g2.min.x, g2.min.y, g2.w(), g2.h()),
             event.style->getColorRole(dtk::ColorRole::Base));
 
-        int pos = _timeToPos(_currentTime);
+        _drawTimeTicks(drawRect, event);
+        _drawTimeLabels(drawRect, event);
+
+        int pos = timeToPos(_currentTime);
         event.render->drawRect(
             dtk::Box2F(pos, g.min.y + _size.scrollPos.y, _size.border * 2, g.h()),
             event.style->getColorRole(dtk::ColorRole::Red));
@@ -386,7 +432,7 @@ namespace toucan
         IItem::mouseMoveEvent(event);
         if (_isMousePressed())
         {
-            _currentTime = _posToTime(_getMousePos().x);
+            _currentTime = posToTime(_getMousePos().x);
             if (_currentTimeCallback)
             {
                 _currentTimeCallback(_currentTime);
@@ -398,41 +444,194 @@ namespace toucan
     void TimelineItem::mousePressEvent(dtk::MouseClickEvent& event)
     {
         IItem::mousePressEvent(event);
-        _currentTime = _posToTime(_getMousePos().x);
-        if (_currentTimeCallback)
+        if (0 == event.button && 0 == event.modifiers)
         {
-            _currentTimeCallback(_currentTime);
+            _currentTime = posToTime(_getMousePos().x);
+            if (_currentTimeCallback)
+            {
+                _currentTimeCallback(_currentTime);
+            }
+            _setDrawUpdate();
         }
-        _setDrawUpdate();
     }
 
-    OTIO_NS::RationalTime TimelineItem::_posToTime(double value) const
+    dtk::Size2I TimelineItem::_getLabelMaxSize(
+        const std::shared_ptr<dtk::FontSystem>& fontSystem) const
     {
-        OTIO_NS::RationalTime out;
-        const dtk::Box2I& g = getGeometry();
-        if (g.w() > 0)
-        {
-            const double normalized = (value - g.min.x) /
-                static_cast<double>(_timeRange.duration().rescaled_to(1.0).value() * _scale);
-            out = OTIO_NS::RationalTime(
-                _timeRange.start_time() +
-                OTIO_NS::RationalTime(
-                    _timeRange.duration().value() * normalized,
-                    _timeRange.duration().rate())).
-                round();
-            out = dtk::clamp(
-                out,
-                _timeRange.start_time(),
-                _timeRange.end_time_inclusive());
-        }
-        return out;
+        const std::string labelMax = _timeUnitsModel->getLabel(_timeRange.duration());
+        const dtk::Size2I labelMaxSize = fontSystem->getSize(labelMax, _size.fontInfo);
+        return labelMaxSize;
     }
 
-    int TimelineItem::_timeToPos(const OTIO_NS::RationalTime& value) const
+    void TimelineItem::_getTimeTicks(
+        const std::shared_ptr<dtk::FontSystem>& fontSystem,
+        double& seconds,
+        int& tick)
     {
-        const dtk::Box2I& g = getGeometry();
-        const OTIO_NS::RationalTime t = value - _timeRange.start_time();
-        return g.min.x + t.rescaled_to(1.0).value() * _scale;
+        const int w = getSizeHint().w;
+        const float duration = _timeRange.duration().rescaled_to(1.0).value();
+        const int secondsTick = 1.0 / duration * w;
+        const int minutesTick = 60.0 / duration * w;
+        const int hoursTick = 3600.0 / duration * w;
+        const dtk::Size2I labelMaxSize = _getLabelMaxSize(fontSystem);
+        const int distanceMin = _size.border + _size.margin + labelMaxSize.w;
+        seconds = 0.0;
+        tick = 0;
+        if (secondsTick >= distanceMin)
+        {
+            seconds = 1.0;
+            tick = secondsTick;
+        }
+        else if (minutesTick >= distanceMin)
+        {
+            seconds = 60.0;
+            tick = minutesTick;
+        }
+        else if (hoursTick >= distanceMin)
+        {
+            seconds = 3600.0;
+            tick = hoursTick;
+        }
+    }
+
+    void TimelineItem::_drawTimeTicks(
+        const dtk::Box2I& drawRect,
+        const dtk::DrawEvent& event)
+    {
+        if (_timeRange != OTIO_NS::TimeRange())
+        {
+            const dtk::Box2I& g = getGeometry();
+            const int w = getSizeHint().w;
+            const float duration = _timeRange.duration().rescaled_to(1.0).value();
+            const int frameTick = 1.0 / _timeRange.duration().value() * w;
+            if (duration > 0.0 && frameTick >= _size.handle)
+            {
+                dtk::TriMesh2F mesh;
+                size_t i = 1;
+                const OTIO_NS::RationalTime t0 = posToTime(g.min.x) - _timeRange.start_time();
+                const OTIO_NS::RationalTime t1 = posToTime(g.max.x) - _timeRange.start_time();
+                const double inc = 1.0 / _timeRange.duration().rate();
+                const double x0 = static_cast<int>(t0.rescaled_to(1.0).value() / inc) * inc;
+                const double x1 = static_cast<int>(t1.rescaled_to(1.0).value() / inc) * inc;
+                for (double t = x0; t <= x1; t += inc)
+                {
+                    const dtk::Box2I box(
+                        g.min.x +
+                        t / duration * w,
+                        _size.scrollPos.y +
+                        g.min.y +
+                        _size.fontMetrics.lineHeight,
+                        _size.border,
+                        _size.margin * 2);
+                    if (intersects(box, drawRect))
+                    {
+                        mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
+                        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
+                        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
+                        mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
+                        mesh.triangles.push_back({ i + 0, i + 1, i + 2 });
+                        mesh.triangles.push_back({ i + 2, i + 3, i + 0 });
+                        i += 4;
+                    }
+                }
+                if (!mesh.v.empty())
+                {
+                    event.render->drawMesh(
+                        mesh,
+                        event.style->getColorRole(dtk::ColorRole::Button));
+                }
+            }
+
+            double seconds = 0;
+            int tick = 0;
+            _getTimeTicks(event.fontSystem, seconds, tick);
+            if (duration > 0.0 && seconds > 0.0 && tick > 0)
+            {
+                dtk::TriMesh2F mesh;
+                size_t i = 1;
+                const OTIO_NS::RationalTime t0 = posToTime(g.min.x) - _timeRange.start_time();
+                const OTIO_NS::RationalTime t1 = posToTime(g.max.x) - _timeRange.start_time();
+                const double inc = seconds;
+                const double x0 = static_cast<int>(t0.rescaled_to(1.0).value() / inc) * inc;
+                const double x1 = static_cast<int>(t1.rescaled_to(1.0).value() / inc) * inc;
+                for (double t = x0; t <= x1; t += inc)
+                {
+                    const dtk::Box2I box(
+                        g.min.x +
+                        t / duration * w,
+                        _size.scrollPos.y +
+                        g.min.y,
+                        _size.border,
+                        _size.margin +
+                        _size.fontMetrics.lineHeight +
+                        _size.margin * 2);
+                    if (intersects(box, drawRect))
+                    {
+                        mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
+                        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
+                        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
+                        mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
+                        mesh.triangles.push_back({ i + 0, i + 1, i + 2 });
+                        mesh.triangles.push_back({ i + 2, i + 3, i + 0 });
+                        i += 4;
+                    }
+                }
+                if (!mesh.v.empty())
+                {
+                    event.render->drawMesh(
+                        mesh,
+                        event.style->getColorRole(dtk::ColorRole::Button));
+                }
+            }
+        }
+    }
+
+    void TimelineItem::_drawTimeLabels(
+        const dtk::Box2I& drawRect,
+        const dtk::DrawEvent& event)
+    {
+        if (_timeRange != OTIO_NS::TimeRange())
+        {
+            const dtk::Box2I& g = getGeometry();
+            const int w = getSizeHint().w;
+            const float duration = _timeRange.duration().rescaled_to(1.0).value();
+            double seconds = 0;
+            int tick = 0;
+            _getTimeTicks(event.fontSystem, seconds, tick);
+            if (seconds > 0.0 && tick > 0)
+            {
+                const dtk::Size2I labelMaxSize = _getLabelMaxSize(event.fontSystem);
+                const OTIO_NS::RationalTime t0 = posToTime(g.min.x) - _timeRange.start_time();
+                const OTIO_NS::RationalTime t1 = posToTime(g.max.x) - _timeRange.start_time();
+                const double inc = seconds;
+                const double x0 = static_cast<int>(t0.rescaled_to(1.0).value() / inc) * inc;
+                const double x1 = static_cast<int>(t1.rescaled_to(1.0).value() / inc) * inc;
+                for (double t = x0; t <= x1; t += inc)
+                {
+                    const OTIO_NS::RationalTime time = _timeRange.start_time() +
+                        OTIO_NS::RationalTime(t, 1.0).rescaled_to(_timeRange.duration().rate());
+                    const dtk::Box2I box(
+                        g.min.x +
+                        t / duration * w +
+                        _size.border +
+                        _size.margin,
+                        _size.scrollPos.y +
+                        g.min.y +
+                        _size.margin,
+                        labelMaxSize.w,
+                        _size.fontMetrics.lineHeight);
+                    if (time != _currentTime && intersects(box, drawRect))
+                    {
+                        const std::string label = _timeUnitsModel->getLabel(time);
+                        event.render->drawText(
+                            event.fontSystem->getGlyphs(label, _size.fontInfo),
+                            _size.fontMetrics,
+                            dtk::V2F(box.min.x, box.min.y),
+                            event.style->getColorRole(dtk::ColorRole::TextDisabled));
+                    }
+                }
+            }
+        }
     }
 
     void TimelineWidget::_init(
@@ -442,7 +641,13 @@ namespace toucan
     {
         IWidget::_init(context, "toucan::TimelineWidget", parent);
 
+        _setMouseHoverEnabled(true);
+        _setMousePressEnabled(true, 0, static_cast<int>(dtk::KeyModifier::Control));
+
+        _frameView = dtk::ObservableValue<bool>::create(true);
+
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
+        _scrollWidget->setScrollEventsEnabled(false);
 
         std::weak_ptr<App> appWeak(app);
         _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
@@ -455,7 +660,6 @@ namespace toucan
                 if (document)
                 {
                     auto timeline = _document->getTimeline();
-                    _duration = timeline->duration();
                     _timelineItem = TimelineItem::create(
                         context,
                         timeline,
@@ -466,19 +670,29 @@ namespace toucan
                             _document->getPlaybackModel()->setCurrentTime(value);
                         });
 
+                    _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
+                        _document->getPlaybackModel()->observeTimeRange(),
+                        [this](const OTIO_NS::TimeRange& value)
+                        {
+                            _timeRange = value;
+                        });
+
                     _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
                         _document->getPlaybackModel()->observeCurrentTime(),
                         [this](const OTIO_NS::RationalTime& value)
                         {
+                            _currentTime = value;
                             if (_timelineItem)
                             {
                                 _timelineItem->setCurrentTime(value);
                             }
+                            _scrollUpdate();
                         });
                 }
                 else
                 {
-                    _duration = OTIO_NS::RationalTime();
+                    _timeRange = OTIO_NS::TimeRange();
+                    _currentTime = OTIO_NS::RationalTime();
                     _timelineItem.reset();
                     _currentTimeObserver.reset();
                 }
@@ -499,15 +713,73 @@ namespace toucan
         return out;
     }
 
+    void TimelineWidget::setViewZoom(double value)
+    {
+        const dtk::Box2I& g = getGeometry();
+        setViewZoom(value, dtk::V2I(g.w() / 2, g.h() / 2));
+    }
+
+    void TimelineWidget::setViewZoom(double zoom, const dtk::V2I& focus)
+    {
+        _setViewZoom(
+            zoom,
+            _scale,
+            focus,
+            _scrollWidget->getScrollPos());
+    }
+
+    void TimelineWidget::frameView()
+    {
+        _scrollWidget->setScrollPos(dtk::V2I());
+        const double scale = _getTimelineScale();
+        if (scale != _scale)
+        {
+            _scale = scale;
+            if (_timelineItem)
+            {
+                _timelineItem->setScale(_scale);
+            }
+            _setSizeUpdate();
+            _setDrawUpdate();
+        }
+    }
+
+    bool TimelineWidget::hasFrameView() const
+    {
+        return _frameView->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<bool> > TimelineWidget::observeFrameView() const
+    {
+        return _frameView;
+    }
+
+    void TimelineWidget::setFrameView(bool value)
+    {
+        if (_frameView->setIfChanged(value))
+        {
+            if (value)
+            {
+                frameView();
+            }
+        }
+    }
+
     void TimelineWidget::setGeometry(const dtk::Box2I& value)
     {
+        const bool changed = value != getGeometry();
         IWidget::setGeometry(value);
         _scrollWidget->setGeometry(value);
-        if (_timelineItem)
+        if (_sizeInit || (changed && _frameView->get()))
         {
-            _timelineItem->setScale(
-                _scrollWidget->getViewport().w() /
-                _duration.rescaled_to(1.0).value());
+            _sizeInit = false;
+            frameView();
+        }
+        else if (_timelineItem &&
+            _timelineItem->getSizeHint().w <
+            _scrollWidget->getViewport().w())
+        {
+            setFrameView(true);
         }
     }
 
@@ -515,5 +787,165 @@ namespace toucan
     {
         IWidget::sizeHintEvent(event);
         _setSizeHint(_scrollWidget->getSizeHint());
+    }
+
+    void TimelineWidget::mouseMoveEvent(dtk::MouseMoveEvent& event)
+    {
+        IWidget::mouseMoveEvent(event);
+        switch (_mouse.mode)
+        {
+        case MouseMode::Scroll:
+        {
+            const dtk::V2I d = event.pos - _getMousePressPos();
+            _scrollWidget->setScrollPos(_mouse.scrollPos - d);
+            setFrameView(false);
+            break;
+        }
+        default: break;
+        }
+    }
+
+    void TimelineWidget::mousePressEvent(dtk::MouseClickEvent& event)
+    {
+        IWidget::mousePressEvent(event);
+        if (0 == event.button &&
+            static_cast<int>(dtk::KeyModifier::Control) == event.modifiers)
+        {
+            takeKeyFocus();
+            _mouse.mode = MouseMode::Scroll;
+            _mouse.scrollPos = _scrollWidget->getScrollPos();
+        }
+        else
+        {
+            _mouse.mode = MouseMode::None;
+            _mouse.mode = MouseMode::None;
+        }
+    }
+
+    void TimelineWidget::mouseReleaseEvent(dtk::MouseClickEvent& event)
+    {
+        IWidget::mouseReleaseEvent(event);
+    }
+
+    void TimelineWidget::scrollEvent(dtk::ScrollEvent& event)
+    {
+        IWidget::scrollEvent(event);
+        event.accept = true;
+        if (event.value.y > 0)
+        {
+            const double zoom = _scale * 1.1;
+            setViewZoom(zoom, event.pos);
+        }
+        else
+        {
+            const double zoom = _scale / 1.1;
+            setViewZoom(zoom, event.pos);
+        }
+    }
+
+    void TimelineWidget::keyPressEvent(dtk::KeyEvent& event)
+    {
+        if (0 == event.modifiers)
+        {
+            switch (event.key)
+            {
+            case dtk::Key::Equal:
+                event.accept = true;
+                setViewZoom(_scale * 2.0, event.pos);
+                break;
+            case dtk::Key::Minus:
+                event.accept = true;
+                setViewZoom(_scale / 2.0, event.pos);
+                break;
+            case dtk::Key::Backspace:
+                event.accept = true;
+                setFrameView(true);
+                break;
+            default: break;
+            }
+        }
+    }
+
+    void TimelineWidget::keyReleaseEvent(dtk::KeyEvent& event)
+    {
+        event.accept = true;
+    }
+
+    void TimelineWidget::_setViewZoom(
+        double zoomNew,
+        double zoomPrev,
+        const dtk::V2I& focus,
+        const dtk::V2I& scrollPos)
+    {
+        const int w = getGeometry().w();
+        const double zoomMin = _getTimelineScale();
+        const double zoomMax = _getTimelineScaleMax();
+        const double zoomClamped = dtk::clamp(zoomNew, zoomMin, zoomMax);
+        if (zoomClamped != _scale)
+        {
+            _scale = zoomClamped;
+            if (_timelineItem)
+            {
+                _timelineItem->setScale(_scale);
+            }
+            const double s = zoomClamped / zoomPrev;
+            const dtk::V2I scrollPosNew(
+                (scrollPos.x + focus.x) * s - focus.x,
+                scrollPos.y);
+            _scrollWidget->setScrollPos(scrollPosNew, false);
+
+            setFrameView(zoomNew <= zoomMin);
+        }
+    }
+
+    double TimelineWidget::_getTimelineScale() const
+    {
+        double out = 1.0;
+        const double duration = _timeRange.duration().rescaled_to(1.0).value();
+        if (duration > 0.0)
+        {
+            const dtk::Box2I scrollViewport = _scrollWidget->getViewport();
+            out = scrollViewport.w() / duration;
+        }
+        return out;
+    }
+
+    double TimelineWidget::_getTimelineScaleMax() const
+    {
+        double out = 1.0;
+        const dtk::Box2I scrollViewport = _scrollWidget->getViewport();
+        const double duration = _timeRange.duration().rescaled_to(1.0).value();
+        if (duration < 1.0)
+        {
+            if (duration > 0.0)
+            {
+                out = scrollViewport.w() / duration;
+            }
+        }
+        else
+        {
+            out = scrollViewport.w();
+        }
+        return out;
+    }
+
+    void TimelineWidget::_scrollUpdate()
+    {
+        if (_timelineItem &&
+            MouseMode::None == _mouse.mode)
+        {
+            const int pos = _timelineItem->timeToPos(_currentTime);
+            const dtk::Box2I vp = _scrollWidget->getViewport();
+            const int margin = vp.w() * marginPercentage;
+            if (pos < (vp.min.x + margin) || pos >(vp.max.x - margin))
+            {
+                const int offset = pos < (vp.min.x + margin) ? (vp.min.x + margin) : (vp.max.x - margin);
+                const OTIO_NS::RationalTime t = _currentTime - _timeRange.start_time();
+                dtk::V2I scrollPos = _scrollWidget->getScrollPos();
+                const dtk::Box2I& g = getGeometry();
+                scrollPos.x = g.min.x - offset + t.rescaled_to(1.0).value() * _scale;
+                _scrollWidget->setScrollPos(scrollPos);
+            }
+        }
     }
 }
