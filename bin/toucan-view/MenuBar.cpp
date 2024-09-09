@@ -89,6 +89,9 @@ namespace toucan
                         {
                             fileBrowserSystem->setPath(_document->getPath().parent_path());
                         }
+                        dtk::FileBrowserOptions options;
+                        options.extensions.push_back(".otio");
+                        fileBrowserSystem->setOptions(options);
                         fileBrowserSystem->open(
                             getWindow(),
                             [this](const std::filesystem::path& path)
