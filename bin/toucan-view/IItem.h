@@ -28,6 +28,8 @@ namespace toucan
 
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& getItem() const;
 
+        const OTIO_NS::TimeRange& getTimeRange();
+
         void setScale(double);
         
         bool isSelected() const;

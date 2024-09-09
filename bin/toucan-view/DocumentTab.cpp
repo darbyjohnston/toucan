@@ -6,6 +6,7 @@
 
 #include "App.h"
 #include "BottomBar.h"
+#include "GraphTool.h"
 #include "InspectorTool.h"
 #include "TimelineWidget.h"
 #include "Viewport.h"
@@ -21,7 +22,7 @@ namespace toucan
         dtk::IWidget::_init(context, "toucan::DocumentTab", parent);
 
         _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, shared_from_this());
-        _vSplitter->setSplit({ .6F, .4F });
+        _vSplitter->setSplit({ .7F, .3F });
         _vSplitter->setStretch(dtk::Stretch::Expanding);
         _hSplitter = dtk::Splitter::create(context, dtk::Orientation::Horizontal, _vSplitter);
         _hSplitter->setSplit({ .75F, .25F });
@@ -31,6 +32,7 @@ namespace toucan
 
         _toolWidget = dtk::TabWidget::create(context, _hSplitter);
         _toolWidgets.push_back(InspectorTool::create(context, app, document));
+        _toolWidgets.push_back(GraphTool::create(context, app, document));
         for (const auto& toolWidget : _toolWidgets)
         {
             _toolWidget->addTab(toolWidget->getText(), toolWidget);

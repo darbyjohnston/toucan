@@ -28,6 +28,9 @@ namespace toucan
         //! Get the name.
         const std::string& getName() const;
 
+        //! Get the label.
+        virtual std::string getLabel() const;
+
         //! Get the inputs.
         const std::vector<std::shared_ptr<IImageNode> >& getInputs() const;
 
@@ -55,8 +58,7 @@ namespace toucan
             OTIO_NS::RationalTime,
             const std::shared_ptr<IImageNode>&,
             std::vector<std::string>&);
-        static std::string _getGraphName(const std::shared_ptr<IImageNode>&);
-        virtual std::string _getGraphLabel(const OTIO_NS::RationalTime&) const;
+        std::string _getGraphName() const;
 
         std::string _name;
         OTIO_NS::RationalTime _timeOffset;

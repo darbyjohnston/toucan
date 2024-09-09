@@ -44,13 +44,16 @@ namespace toucan
         _timeUnitsModel = app->getTimeUnitsModel();
         _selectionModel = document->getSelectionModel();
 
-        for (const auto& track : timeline->video_tracks())
+        for (const auto& child : timeline->tracks()->children())
         {
-            auto trackItem = TrackItem::create(
-                context,
-                app,
-                track,
-                shared_from_this());
+            if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
+            {
+                auto trackItem = TrackItem::create(
+                    context,
+                    app,
+                    track,
+                    shared_from_this());
+            }
         }
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(

@@ -21,6 +21,11 @@ namespace toucan
         return _name;
     }
 
+    std::string IImageNode::getLabel() const
+    {
+        return _name;
+    }
+
     const std::vector<std::shared_ptr<IImageNode> >& IImageNode::getInputs() const
     {
         return _inputs;
@@ -65,30 +70,25 @@ namespace toucan
             time -= node->_timeOffset;
         }
         std::stringstream ss;
-        const std::string graphName = _getGraphName(node);
-        ss << "    " << graphName << " [label=\"" << node->_getGraphLabel(time) << "\"]";
+        const std::string graphName = node->_getGraphName();
+        ss << "    " << graphName << " [label=\"" << node->getLabel() << "\"]";
         out.push_back(ss.str());
         for (const auto& input : node->_inputs)
         {
             if (input)
             {
                 std::stringstream ss;
-                ss << "    " << _getGraphName(input) << " -> " << graphName;
+                ss << "    " << input->_getGraphName() << " -> " << graphName;
                 out.push_back(ss.str());
                 _graph(time, input, out);
             }
         }
     }
 
-    std::string IImageNode::_getGraphName(const std::shared_ptr<IImageNode>& node)
+    std::string IImageNode::_getGraphName() const
     {
         std::stringstream ss;
-        ss << node->getName() << "_" << int64_t(node.get());
+        ss << getName() << "_" << int64_t(shared_from_this().get());
         return ss.str();
-    }
-
-    std::string IImageNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
-    {
-        return _name;
     }
 }

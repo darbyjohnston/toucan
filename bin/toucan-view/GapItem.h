@@ -6,26 +6,26 @@
 
 #include "IItem.h"
 
-#include <opentimelineio/clip.h>
+#include <opentimelineio/gap.h>
 
 namespace toucan
 {
-    class ClipItem : public IItem
+    class GapItem : public IItem
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~ClipItem();
+        virtual ~GapItem();
 
-        static std::shared_ptr<ClipItem> create(
+        static std::shared_ptr<GapItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
@@ -33,9 +33,9 @@ namespace toucan
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
 
     private:
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> _clip;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap> _gap;
         std::string _text;
-        dtk::Color4F _color;
+        dtk::Color4F _color = dtk::Color4F(.3F, .3F, .3F);
 
         struct SizeData
         {

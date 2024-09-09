@@ -41,6 +41,10 @@ namespace toucan
 
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > observeCurrentImage() const;
 
+        std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > observeRootNode() const;
+        std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > observeCurrentNode() const;
+        void setCurrentNode(const std::shared_ptr<IImageNode>&);
+
     private:
         void _render();
 
@@ -54,6 +58,8 @@ namespace toucan
         OTIO_NS::RationalTime _currentTime;
 
         std::shared_ptr<ImageGraph> _graph;
+        std::shared_ptr<dtk::ObservableValue<std::shared_ptr<IImageNode> > > _rootNode;
+        std::shared_ptr<dtk::ObservableValue<std::shared_ptr<IImageNode> > > _currentNode;
         OIIO::ImageBuf _imageBuf;
 
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;

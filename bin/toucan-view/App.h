@@ -33,7 +33,7 @@ namespace toucan
 
     private:
         std::shared_ptr<MessageLog> _messageLog;
-        std::filesystem::path _path;
+        std::string _path;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<DocumentsModel> _documentsModel;

@@ -45,6 +45,13 @@ namespace toucan
         _input->close();
     }
 
+    std::string ReadNode::getLabel() const
+    {
+        std::stringstream ss;
+        ss << _name << ": " << _path.filename().string();
+        return ss.str();
+    }
+
     OIIO::ImageBuf ReadNode::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf out;
@@ -95,13 +102,6 @@ namespace toucan
         return out;
     }
 
-    std::string ReadNode::_getGraphLabel(const OTIO_NS::RationalTime&) const
-    {
-        std::stringstream ss;
-        ss << _name << ": " << _path.filename().string();
-        return ss.str();
-    }
-
     SequenceReadNode::SequenceReadNode(
         const std::filesystem::path& base,
         const std::string& namePrefix,
@@ -123,6 +123,18 @@ namespace toucan
 
     SequenceReadNode::~SequenceReadNode()
     {}
+
+    std::string SequenceReadNode::getLabel() const
+    {
+        std::stringstream ss;
+        ss << "Read: " << getSequenceFrame(
+            std::filesystem::path(),
+            _namePrefix,
+            _startFrame,
+            _frameZeroPadding,
+            _nameSuffix).string();
+        return ss.str();
+    }
 
     OIIO::ImageBuf SequenceReadNode::exec(const OTIO_NS::RationalTime& time)
     {
@@ -151,17 +163,5 @@ namespace toucan
             buf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
         }
         return buf;
-    }
-
-    std::string SequenceReadNode::_getGraphLabel(const OTIO_NS::RationalTime& time) const
-    {
-        std::stringstream ss;
-        ss << "Read: " << getSequenceFrame(
-            std::filesystem::path(),
-            _namePrefix,
-            time.to_frames(),
-            _frameZeroPadding,
-            _nameSuffix).string();
-        return ss.str();
     }
 }

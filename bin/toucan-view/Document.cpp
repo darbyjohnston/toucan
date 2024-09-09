@@ -43,6 +43,9 @@ namespace toucan
 
         _currentImage = dtk::ObservableValue<std::shared_ptr<dtk::Image> >::create();
 
+        _rootNode = dtk::ObservableValue<std::shared_ptr<IImageNode> >::create();
+        _currentNode = dtk::ObservableValue<std::shared_ptr<IImageNode> >::create();
+
         ImageGraphOptions graphOptions;
         _graph = std::make_shared<ImageGraph>(
             path.parent_path(),
@@ -54,6 +57,9 @@ namespace toucan
             [this](const OTIO_NS::RationalTime& value)
             {
                 _currentTime = value;
+                auto node = _graph->exec(_host, _currentTime);
+                _rootNode->setAlways(node);
+                _currentNode->setAlways(node);
                 _render();
             });
 
@@ -92,20 +98,33 @@ namespace toucan
         return _currentImage;
     }
 
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > Document::observeRootNode() const
+    {
+        return _rootNode;
+    }
+
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > Document::observeCurrentNode() const
+    {
+        return _currentNode;
+    }
+    
+    void Document::setCurrentNode(const std::shared_ptr<IImageNode>& value)
+    {
+        if (_currentNode->setIfChanged(value))
+        {
+            _render();
+        }
+    }
+
     void Document::_render()
     {
         std::shared_ptr<dtk::Image> image;
-        if (_graph)
+        if (_currentNode->get())
         {
-            auto node = _graph->exec(_host, _currentTime);
-            /*for (auto i : node->graph(currentTime, "foo"))
-            {
-                std::cout << i << std::endl;
-            }
-            std::cout << std::endl;*/
-
+            //! \todo Can we remove this time arg?
             const OTIO_NS::TimeRange& timeRange = _playbackModel->getTimeRange();
-            _imageBuf = node->exec(_currentTime - timeRange.start_time());
+            _imageBuf = _currentNode->get()->exec(_currentTime - timeRange.start_time());
+
             const auto& spec = _imageBuf.spec();
             dtk::ImageType imageType = dtk::ImageType::None;
             if (OIIO::TypeDesc::UINT8 == spec.format)

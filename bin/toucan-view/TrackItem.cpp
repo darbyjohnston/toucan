@@ -5,6 +5,7 @@
 #include "TrackItem.h"
 
 #include "ClipItem.h"
+#include "GapItem.h"
 
 namespace toucan
 {
@@ -29,11 +30,11 @@ namespace toucan
         {
             if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(child))
             {
-                auto clipItem = ClipItem::create(
-                    context,
-                    app,
-                    clip,
-                    shared_from_this());
+                ClipItem::create(context, app, clip, shared_from_this());
+            }
+            else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(child))
+            {
+                GapItem::create( context, app, gap, shared_from_this());
             }
         }
     }
@@ -50,14 +51,6 @@ namespace toucan
         auto out = std::make_shared<TrackItem>();
         out->_init(context, app, track, parent);
         return out;
-    }
-
-    void TrackItem::setColor(const dtk::Color4F& value)
-    {
-        if (value == _color)
-            return;
-        _color = value;
-        _setDrawUpdate();
     }
 
     void TrackItem::setGeometry(const dtk::Box2I& value)

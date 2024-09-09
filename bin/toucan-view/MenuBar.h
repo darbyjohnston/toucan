@@ -42,6 +42,9 @@ namespace toucan
         void _fileMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
+        void _editMenuInit(
+            const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&);
         void _timeMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
@@ -60,6 +63,7 @@ namespace toucan
             const std::shared_ptr<App>&);
 
         void _fileMenuUpdate();
+        void _editMenuUpdate();
         void _timeMenuUpdate();
         void _playbackMenuUpdate();
         void _viewMenuUpdate();

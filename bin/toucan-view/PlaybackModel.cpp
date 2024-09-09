@@ -58,7 +58,7 @@ namespace toucan
             }
             else if (time < range.start_time())
             {
-                time = range.end_time_exclusive();
+                time = range.end_time_inclusive();
             }
         }
         if (time != _currentTime->get())

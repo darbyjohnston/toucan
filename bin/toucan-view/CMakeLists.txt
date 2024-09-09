@@ -1,11 +1,12 @@
 set(HEADERS
     App.h
     BottomBar.h
+    ClipItem.h
     DocumentTab.h
     Document.h
     DocumentsModel.h
-    ClipItem.h
-    GraphWidget.h
+    GapItem.h
+    GraphTool.h
     IItem.h
     IToolWidget.h
     InspectorTool.h
@@ -30,7 +31,8 @@ set(SOURCE
     DocumentTab.cpp
     Document.cpp
     DocumentsModel.cpp
-    GraphWidget.cpp
+    GapItem.cpp
+    GraphTool.cpp
     IItem.cpp
     IToolWidget.cpp
     InspectorTool.cpp

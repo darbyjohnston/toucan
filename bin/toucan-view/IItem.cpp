@@ -27,6 +27,11 @@ namespace toucan
         return _item;
     }
 
+    const OTIO_NS::TimeRange& IItem::getTimeRange()
+    {
+        return _timeRange;
+    }
+
     void IItem::setScale(double value)
     {
         if (value == _scale)

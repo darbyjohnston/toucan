@@ -5,6 +5,7 @@
 #include "MenuBar.h"
 
 #include "App.h"
+#include "SelectionModel.h"
 #include "ViewModel.h"
 
 #include <dtk/ui/Action.h>
@@ -26,6 +27,7 @@ namespace toucan
         _documentsModel = app->getDocumentsModel();
 
         _fileMenuInit(context, app);
+        _editMenuInit(context, app);
         _timeMenuInit(context, app);
         _playbackMenuInit(context, app);
         _viewMenuInit(context, app);
@@ -38,6 +40,7 @@ namespace toucan
             {
                 _document = document;
                 _fileMenuUpdate();
+                _editMenuUpdate();
                 _timeMenuUpdate();
                 _playbackMenuUpdate();
                 _viewMenuUpdate();
@@ -84,6 +87,10 @@ namespace toucan
                 {
                     if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
                     {
+                        if (_document)
+                        {
+                            fileBrowserSystem->setPath(_document->getPath().parent_path());
+                        }
                         fileBrowserSystem->open(
                             getWindow(),
                             [this](const std::filesystem::path& path)
@@ -189,6 +196,54 @@ namespace toucan
                     _menus["Files"]->setItemChecked(_filesActions[i], i == index);
                 }
             });
+    }
+
+    void MenuBar::_editMenuInit(
+        const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<App>& app)
+    {
+        _menus["Edit"] = dtk::Menu::create(context);
+        addMenu("Edit", _menus["Edit"]);
+
+        _actions["Edit/SelectAll"] = std::make_shared<dtk::Action>(
+            "Select All",
+            dtk::Key::A,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getSelectionModel()->selectAll(_document->getTimeline());
+                }
+            });
+        _menus["Edit"]->addItem(_actions["Edit/SelectAll"]);
+
+        _actions["Edit/SelectNone"] = std::make_shared<dtk::Action>(
+            "Select None",
+            dtk::Key::A,
+            static_cast<int>(dtk::KeyModifier::Shift) |
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getSelectionModel()->clearSelection();
+                }
+            });
+        _menus["Edit"]->addItem(_actions["Edit/SelectNone"]);
+
+        _actions["Edit/SelectInvert"] = std::make_shared<dtk::Action>(
+            "Invert Selection",
+            dtk::Key::I,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getSelectionModel()->invertSelection(_document->getTimeline());
+                }
+            });
+        _menus["Edit"]->addItem(_actions["Edit/SelectInvert"]);
     }
 
     void MenuBar::_timeMenuInit(
@@ -521,6 +576,13 @@ namespace toucan
         _menus["File"]->setSubMenuEnabled(_menus["Files"], _document.get());
         _menus["File"]->setItemEnabled(_actions["File/Next"], _filesActions.size() > 1);
         _menus["File"]->setItemEnabled(_actions["File/Prev"], _filesActions.size() > 1);
+    }
+
+    void MenuBar::_editMenuUpdate()
+    {
+        _menus["Edit"]->setItemEnabled(_actions["Edit/SelectAll"], _document.get());
+        _menus["Edit"]->setItemEnabled(_actions["Edit/SelectNone"], _document.get());
+        _menus["Edit"]->setItemEnabled(_actions["Edit/SelectInvert"], _document.get());
     }
 
     void MenuBar::_timeMenuUpdate()

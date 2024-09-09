@@ -4,6 +4,8 @@
 
 #include "SelectionModel.h"
 
+#include <opentimelineio/gap.h>
+
 #include <set>
 
 namespace OTIO_NS
@@ -50,5 +52,44 @@ namespace toucan
         std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > tmp;
         tmp.insert(tmp.end(), set.begin(), set.end());
         _selection->setIfChanged(tmp);
+    }
+
+    void SelectionModel::selectAll(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
+    {
+        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > items;
+        for (auto& item : timeline->find_children<OTIO_NS::Item>())
+        {
+            items.push_back(item);
+        }
+        _selection->setIfChanged(items);
+    }
+
+    void SelectionModel::clearSelection()
+    {
+        _selection->setIfChanged({});
+    }
+
+    void SelectionModel::invertSelection(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
+    {
+        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > items;
+        for (auto& item : timeline->find_children<OTIO_NS::Item>())
+        {
+            items.push_back(item);
+        }
+        const auto& selection = _selection->get();
+        auto i = items.begin();
+        while (i != items.end())
+        {
+            auto j = std::find(selection.begin(), selection.end(), *i);
+            if (j != selection.end())
+            {
+                i = items.erase(i);
+            }
+            else
+            {
+                ++i;
+            }
+        }
+        _selection->setIfChanged(items);
     }
 }

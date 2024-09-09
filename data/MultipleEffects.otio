@@ -8,7 +8,9 @@
             {
                 "OTIO_SCHEMA": "Effect.1",
                 "effect_name": "Toucan:Pow",
-                "value": 2
+                "metadata": {
+                    "value": 3.0
+                }
             }
         ],
         "children": [
@@ -48,7 +50,9 @@
                             {
                                 "OTIO_SCHEMA": "Effect.1",
                                 "effect_name": "Toucan:Blur",
-                                "radius": 50
+                                "metadata": {
+                                    "radius": 20.0
+                                }
                             }
                         ],
                         "source_range": {

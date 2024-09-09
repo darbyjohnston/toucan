@@ -7,7 +7,6 @@
 #include "App.h"
 
 #include <dtk/ui/Label.h>
-#include <dtk/core/Format.h>
 
 namespace toucan
 {

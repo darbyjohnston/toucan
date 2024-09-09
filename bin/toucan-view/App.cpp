@@ -21,7 +21,7 @@ namespace toucan
             "toucan-view",
             "Toucan viewer",
             {
-                dtk::CmdLineValueArg<std::filesystem::path>::create(
+                dtk::CmdLineValueArg<std::string>::create(
                     _path,
                     "input",
                     "Input timeline.",

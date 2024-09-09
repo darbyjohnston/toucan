@@ -20,10 +20,9 @@ namespace toucan
 
         virtual ~ReadNode();
         
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        std::string getLabel() const override;
 
-    protected:
-        std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         std::filesystem::path _path;
@@ -50,10 +49,9 @@ namespace toucan
 
         virtual ~SequenceReadNode();
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        std::string getLabel() const override;
 
-    protected:
-        std::string _getGraphLabel(const OTIO_NS::RationalTime&) const override;
+        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         std::filesystem::path _base;

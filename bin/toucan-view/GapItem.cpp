@@ -2,58 +2,52 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ClipItem.h"
+#include "GapItem.h"
 
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/Random.h>
 #include <dtk/core/RenderUtil.h>
 
-#include <opentimelineio/clip.h>
+#include <opentimelineio/gap.h>
 
 namespace toucan
 {
-    void ClipItem::_init(
+    void GapItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto opt = clip->trimmed_range_in_parent();
+        auto opt = gap->trimmed_range_in_parent();
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(clip),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(gap),
             opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
             "toucan::ClipItem",
             parent);
 
-        setTooltip(clip->name());
-        _setMousePressEnabled(0, 0);
+        setTooltip(gap->name());
 
-        _clip = clip;
-        _text = clip->name();
-        dtk::Random random;
-        _color = dtk::Color4F(
-            random.getF(.5F) + .2F,
-            random.getF(.5F) + .2F,
-            random.getF(.5F) + .2F);
+        _gap = gap;
+        _text = gap->name();
     }
     
-    ClipItem::~ClipItem()
+    GapItem::~GapItem()
     {}
 
-    std::shared_ptr<ClipItem> ClipItem::create(
+    std::shared_ptr<GapItem> GapItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto out = std::make_shared<ClipItem>();
-        out->_init(context, app, clip, parent);
+        auto out = std::make_shared<GapItem>();
+        out->_init(context, app, gap, parent);
         return out;
     }
 
-    void ClipItem::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void GapItem::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IItem::sizeHintEvent(event);
         const bool displayScaleChanged = event.displayScale != _size.displayScale;
@@ -75,7 +69,7 @@ namespace toucan
         _setSizeHint(sizeHint);
     }
 
-    void ClipItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
+    void GapItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
     {
         IItem::clipEvent(clipRect, clipped);
         if (clipped)
@@ -83,8 +77,8 @@ namespace toucan
             _draw.glyphs.clear();
         }
     }
-    
-    void ClipItem::drawEvent(
+
+    void GapItem::drawEvent(
         const dtk::Box2I& drawRect,
         const dtk::DrawEvent& event)
     {
@@ -111,7 +105,7 @@ namespace toucan
         dtk::ClipRectEnabledState clipRectEnabledState(event.render);
         dtk::ClipRectState clipRectState(event.render);
         event.render->setClipRectEnabled(true);
-        event.render->setClipRect(intersect(g3, drawRect));
+        event.render->setClipRect(g3);
         event.render->drawText(
             _draw.glyphs,
             _size.fontMetrics,

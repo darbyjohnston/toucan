@@ -6,7 +6,7 @@
 
 #include <dtk/core/ObservableList.h>
 
-#include <opentimelineio/item.h>
+#include <opentimelineio/timeline.h>
 
 namespace OTIO_NS
 {
@@ -31,6 +31,10 @@ namespace toucan
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& getSelection() const;
         std::shared_ptr<dtk::IObservableList<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > observeSelection() const;
         void setSelection(const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
+
+        void selectAll(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+        void clearSelection();
+        void invertSelection(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
     private:
         std::shared_ptr<dtk::ObservableList<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selection;

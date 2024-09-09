@@ -28,8 +28,6 @@ namespace toucan
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        void setColor(const dtk::Color4F&);
-
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
