@@ -45,6 +45,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -53,6 +54,7 @@ namespace toucan
         static std::shared_ptr<InspectorTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -63,7 +65,6 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::vector<std::shared_ptr<InspectorWidget> > _widgets;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
     };
 }

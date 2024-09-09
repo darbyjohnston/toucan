@@ -5,12 +5,9 @@
 #include "Window.h"
 
 #include "App.h"
-#include "BottomBar.h"
-#include "InspectorTool.h"
+#include "DocumentTab.h"
 #include "MenuBar.h"
-#include "TimelineWidget.h"
 #include "ToolBar.h"
-#include "Viewport.h"
 
 #include <dtk/ui/MessageDialog.h>
 #include <dtk/core/String.h>
@@ -45,32 +42,11 @@ namespace toucan
             _layout);
         _toolBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
-        _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, _layout);
-        _vSplitter->setSplit({ .75F, .25F });
-        _vSplitter->setStretch(dtk::Stretch::Expanding);
-        _hSplitter = dtk::Splitter::create(context, dtk::Orientation::Horizontal, _vSplitter);
-        _hSplitter->setSplit({ .75F, .25F });
-        auto vLayout = dtk::VerticalLayout::create(context, _hSplitter);
-        vLayout->setSpacingRole(dtk::SizeRole::None);
-        _tabBar = dtk::TabBar::create(context, vLayout);
-        _viewport = Viewport::create(context, app, vLayout);
-        _viewport->setStretch(dtk::Stretch::Expanding);
-
-        _toolWidget = dtk::TabWidget::create(context, _hSplitter);
-        _toolWidgets.push_back(InspectorTool::create(context, app));
-        for (const auto& toolWidget : _toolWidgets)
-        {
-            _toolWidget->addTab(toolWidget->getText(), toolWidget);
-        }
-
-        _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
-        _bottomLayout->setSpacingRole(dtk::SizeRole::None);
-        _bottomBar = BottomBar::create(context, app, _bottomLayout);
-        _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
-        _timelineWidget->setVStretch(dtk::Stretch::Expanding);
+        _tabWidget = dtk::TabWidget::create(context, _layout);
+        _tabWidget->setVStretch(dtk::Stretch::Expanding);
 
         std::weak_ptr<App> appWeak(app);
-        _tabBar->setCallback(
+        _tabWidget->setCallback(
             [appWeak](int index)
             {
                 if (auto app = appWeak.lock())
@@ -79,25 +55,40 @@ namespace toucan
                 }
             });
 
-        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeDocuments(),
-            [this](const std::vector<std::shared_ptr<Document> >& documents)
+        _addObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeAdd(),
+            [this, appWeak](const std::shared_ptr<Document>& document)
             {
-                _tabBar->clearTabs();
-                for (const auto& document : documents)
+                if (document)
                 {
-                    _tabBar->addTab(
+                    auto context = _getContext().lock();
+                    auto app = appWeak.lock();
+                    auto tab = DocumentTab::create(context, app, document);
+                    _tabWidget->addTab(
                         dtk::elide(document->getPath().filename().string()),
+                        tab,
                         document->getPath().string());
+                    _documentTabs[document] = tab;
                 }
-                _tabBar->setVisible(documents.size());
+            });
+
+        _removeObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeRemove(),
+            [this, appWeak](const std::shared_ptr<Document>& document)
+            {
+                const auto i = _documentTabs.find(document);
+                if (i != _documentTabs.end())
+                {
+                    _tabWidget->removeTab(i->second);
+                    _documentTabs.erase(i);
+                }
             });
 
         _documentObserver = dtk::ValueObserver<int>::create(
             app->getDocumentsModel()->observeCurrentIndex(),
             [this](int index)
             {
-                _tabBar->setCurrentTab(index);
+                _tabWidget->setCurrentTab(index);
             });
 
         _controlsObserver = dtk::MapObserver<WindowControl, bool>::create(
@@ -107,15 +98,6 @@ namespace toucan
                 auto i = value.find(WindowControl::ToolBar);
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
-                i = value.find(WindowControl::Tabs);
-                _tabBar->setVisible(i->second);
-                i = value.find(WindowControl::BottomBar);
-                _bottomBar->setVisible(i->second);
-                auto j = value.find(WindowControl::TimelineWidget);
-                _timelineWidget->setVisible(j->second);
-                _bottomLayout->setVisible(i->second || j->second);
-                i = value.find(WindowControl::Tools);
-                _toolWidget->setVisible(i->second);
             });
     }
 

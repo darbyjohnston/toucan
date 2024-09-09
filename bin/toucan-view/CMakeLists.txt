@@ -1,6 +1,7 @@
 set(HEADERS
     App.h
     BottomBar.h
+    DocumentTab.h
     Document.h
     DocumentsModel.h
     ClipItem.h
@@ -11,7 +12,6 @@ set(HEADERS
     MenuBar.h
     PlaybackModel.h
     SelectionModel.h
-    StatusBar.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
@@ -27,6 +27,7 @@ set(SOURCE
     App.cpp
     BottomBar.cpp
     ClipItem.cpp
+    DocumentTab.cpp
     Document.cpp
     DocumentsModel.cpp
     GraphWidget.cpp
@@ -36,7 +37,6 @@ set(SOURCE
     MenuBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
-    StatusBar.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
     TimelineItem.cpp

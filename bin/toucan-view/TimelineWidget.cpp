@@ -19,6 +19,7 @@ namespace toucan
     void TimelineWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<IWidget>& parent)
     {
         IWidget::_init(context, "toucan::TimelineWidget", parent);
@@ -26,59 +27,35 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(true, 0, static_cast<int>(dtk::KeyModifier::Control));
 
+        _document = document;
+        _timeRange = document->getPlaybackModel()->getTimeRange();
         _frameView = dtk::ObservableValue<bool>::create(true);
 
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
 
-        std::weak_ptr<App> appWeak(app);
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this, appWeak](const std::shared_ptr<Document>& document)
+        _timelineItem = TimelineItem::create(
+            context,
+            app,
+            document);
+        _scrollWidget->setWidget(_timelineItem);
+
+        _timelineItem->setCurrentTimeCallback(
+            [this](const OTIO_NS::RationalTime& value)
             {
-                auto context = _getContext().lock();
-                auto app = appWeak.lock();
-                _document = document;
-                if (document)
-                {
-                    auto timeline = _document->getTimeline();
-                    _timelineItem = TimelineItem::create(
-                        context,
-                        app,
-                        document);
-                    _timelineItem->setCurrentTimeCallback(
-                        [this](const OTIO_NS::RationalTime& value)
-                        {
-                            _document->getPlaybackModel()->setCurrentTime(value);
-                        });
+                _document->getPlaybackModel()->setCurrentTime(value);
+            });
 
-                    _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
-                        _document->getPlaybackModel()->observeTimeRange(),
-                        [this](const OTIO_NS::TimeRange& value)
-                        {
-                            _timeRange = value;
-                        });
-
-                    _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
-                        _document->getPlaybackModel()->observeCurrentTime(),
-                        [this](const OTIO_NS::RationalTime& value)
-                        {
-                            _currentTime = value;
-                            if (_timelineItem)
-                            {
-                                _timelineItem->setCurrentTime(value);
-                            }
-                            _scrollUpdate();
-                        });
-                }
-                else
+        _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
+            document->getPlaybackModel()->observeCurrentTime(),
+            [this](const OTIO_NS::RationalTime& value)
+            {
+                _currentTime = value;
+                if (_timelineItem)
                 {
-                    _timeRange = OTIO_NS::TimeRange();
-                    _currentTime = OTIO_NS::RationalTime();
-                    _timelineItem.reset();
-                    _currentTimeObserver.reset();
+                    _timelineItem->setCurrentTime(value);
                 }
-                _scrollWidget->setWidget(_timelineItem);
+                _scrollUpdate();
             });
     }
 
@@ -88,10 +65,11 @@ namespace toucan
     std::shared_ptr<TimelineWidget> TimelineWidget::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::shared_ptr<TimelineWidget>(new TimelineWidget);
-        out->_init(context, app, parent);
+        out->_init(context, app, document, parent);
         return out;
     }
 

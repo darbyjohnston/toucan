@@ -5,13 +5,14 @@
 #include "Viewport.h"
 
 #include "App.h"
+#include "Document.h"
 #include "ViewModel.h"
 
 namespace toucan
 {
     void Viewport::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::Viewport", parent);
@@ -19,68 +20,54 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(true);
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _viewModel = document->getViewModel();
+        _pos = dtk::ObservableValue<dtk::V2I>::create();
+        _zoom = dtk::ObservableValue<float>::create(1.F);
+        _frame = dtk::ObservableValue<bool>::create(true);
+
+        _imageObserver = dtk::ValueObserver<std::shared_ptr<dtk::Image> >::create(
+            document->observeCurrentImage(),
+            [this](const std::shared_ptr<dtk::Image>& value)
             {
-                _document = document;
-                if (document)
+                _image = value;
+                _setDrawUpdate();
+            });
+
+        _zoomInObserver = dtk::ValueObserver<bool>::create(
+            _viewModel->observeZoomIn(),
+            [this](bool value)
+            {
+                if (value)
                 {
-                    document->getViewModel()->setViewportSize(getGeometry().size());
-                    document->getViewModel()->setMouseInside(_isMouseInside());
-                    document->getViewModel()->setMousePos(_getMousePos());
-                    document->getViewModel()->setMousePress(false);
-
-                    _imageObserver = dtk::ValueObserver<std::shared_ptr<dtk::Image> >::create(
-                        document->observeCurrentImage(),
-                        [this](const std::shared_ptr<dtk::Image>& value)
-                        {
-                            _image = value;
-                            if (_document)
-                            {
-                                _document->getViewModel()->setImageSize(value ? value->getSize() : dtk::Size2I());
-                            }
-                            _setDrawUpdate();
-                        });
-
-                    _viewPosObserver = dtk::ValueObserver<dtk::V2I>::create(
-                        document->getViewModel()->observePos(),
-                        [this](const dtk::V2I& value)
-                        {
-                            _viewPos = value;
-                            _setDrawUpdate();
-                        });
-
-                    _viewZoomObserver = dtk::ValueObserver<float>::create(
-                        document->getViewModel()->observeZoom(),
-                        [this](float value)
-                        {
-                            _viewZoom = value;
-                            _setDrawUpdate();
-                        });
-
-                    _frameViewObserver = dtk::ValueObserver<bool>::create(
-                        document->getViewModel()->observeFrame(),
-                        [this](bool value)
-                        {
-                            _frameView = value;
-                            _setDrawUpdate();
-                        });
+                    zoomIn();
                 }
-                else
+            });
+
+        _zoomOutObserver = dtk::ValueObserver<bool>::create(
+            _viewModel->observeZoomOut(),
+            [this](bool value)
+            {
+                if (value)
                 {
-                    _image.reset();
-                    _viewPos = dtk::V2I();
-                    _viewZoom = 1.F;
-                    _frameView = true;
-
-                    _setDrawUpdate();
-
-                    _imageObserver.reset();
-                    _viewPosObserver.reset();
-                    _viewZoomObserver.reset();
-                    _frameViewObserver.reset();
+                    zoomOut();
                 }
+            });
+
+        _zoomResetObserver = dtk::ValueObserver<bool>::create(
+            _viewModel->observeZoomReset(),
+            [this](bool value)
+            {
+                if (value)
+                {
+                    zoomReset();
+                }
+            });
+
+        _frameObserver = dtk::ValueObserver<bool>::create(
+            _viewModel->observeFrame(),
+            [this](bool value)
+            {
+                setFrame(value);
             });
     }
 
@@ -89,20 +76,92 @@ namespace toucan
 
     std::shared_ptr<Viewport> Viewport::create(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<Viewport>(new Viewport);
-        out->_init(context, app, parent);
+        out->_init(context, document, parent);
         return out;
     }
 
-    void Viewport::setGeometry(const dtk::Box2I& value)
+    const dtk::V2I& Viewport::getPos() const
     {
-        IWidget::setGeometry(value);
-        if (_document)
+        return _pos->get();
+    }
+
+    float Viewport::getZoom() const
+    {
+        return _zoom->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<dtk::V2I> > Viewport::observePos() const
+    {
+        return _pos;
+    }
+
+    std::shared_ptr<dtk::IObservableValue<float> > Viewport::observeZoom() const
+    {
+        return _zoom;
+    }
+
+    void Viewport::setPosZoom(const dtk::V2I& pos, float zoom)
+    {
+        setFrame(false);
+        bool changed = _pos->setIfChanged(pos);
+        changed |= _zoom->setIfChanged(zoom);
+        if (changed)
         {
-            _document->getViewModel()->setViewportSize(value.size());
+            _setDrawUpdate();
+        }
+    }
+
+    void Viewport::setZoom(float value)
+    {
+        const dtk::Box2I& g = getGeometry();
+        const dtk::V2I viewportCenter(g.w() / 2, g.h() / 2);
+        setZoom(value, _isMouseInside() ? (_getMousePos() - g.min) : viewportCenter);
+    }
+
+    void Viewport::setZoom(float zoom, const dtk::V2I& focus)
+    {
+        dtk::V2I pos = _pos->get();
+        const float zoomPrev = _zoom->get();
+        pos.x = focus.x + (pos.x - focus.x) * (zoom / zoomPrev);
+        pos.y = focus.y + (pos.y - focus.y) * (zoom / zoomPrev);
+        setPosZoom(pos, zoom);
+    }
+
+    void Viewport::zoomIn(double amount)
+    {
+        setZoom(_zoom->get() * amount);
+    }
+
+    void Viewport::zoomOut(double amount)
+    {
+        setZoom(_zoom->get() / amount);
+    }
+
+    void Viewport::zoomReset()
+    {
+        setZoom(1.F);
+    }
+
+    bool Viewport::getFrame() const
+    {
+        return _frame->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<bool> > Viewport::observeFrame() const
+    {
+        return _frame;
+    }
+
+    void Viewport::setFrame(bool value)
+    {
+        if (_frame->setIfChanged(value))
+        {
+            _viewModel->setFrame(value);
+            _setDrawUpdate();
         }
     }
 
@@ -111,12 +170,16 @@ namespace toucan
         IWidget::drawEvent(drawRect, event);
         if (_image)
         {
+            if (_frame->get())
+            {
+                _frameUpdate();
+            }
             const dtk::Box2I& g = getGeometry();
             const dtk::Size2I& imageSize = _image->getSize();
             dtk::M44F vm;
             vm = vm * dtk::translate(dtk::V3F(g.min.x, g.min.y, 0.F));
-            vm = vm * dtk::translate(dtk::V3F(_viewPos.x, _viewPos.y, 0.F));
-            vm = vm * dtk::scale(dtk::V3F(_viewZoom, _viewZoom, 1.F));
+            vm = vm * dtk::translate(dtk::V3F(_pos->get().x, _pos->get().y, 0.F));
+            vm = vm * dtk::scale(dtk::V3F(_zoom->get(), _zoom->get(), 1.F));
             const auto m = event.render->getTransform();
             event.render->setTransform(m * vm);
             dtk::ImageOptions options;
@@ -130,69 +193,72 @@ namespace toucan
         }
     }
 
-    void Viewport::mouseEnterEvent(dtk::MouseEnterEvent& event)
-    {
-        IWidget::mouseEnterEvent(event);
-        if (_document)
-        {
-            _document->getViewModel()->setMouseInside(true);
-        }
-    }
-
-    void Viewport::mouseLeaveEvent()
-    {
-        IWidget::mouseLeaveEvent();
-        if (_document)
-        {
-            _document->getViewModel()->setMouseInside(false);
-        }
-    }
-
     void Viewport::mouseMoveEvent(dtk::MouseMoveEvent& event)
     {
         IWidget::mouseMoveEvent(event);
-        if (_document)
+        if (_isMousePressed())
         {
             event.accept = true;
-            const dtk::Box2I& g = getGeometry();
-            _document->getViewModel()->setMousePos(event.pos - g.min);
+            const dtk::V2I& mousePressPos = _getMousePressPos();
+            _pos->setIfChanged(dtk::V2I(
+                _viewMousePress.x + (event.pos.x - mousePressPos.x),
+                _viewMousePress.y + (event.pos.y - mousePressPos.y)));
+            _setDrawUpdate();
         }
     }
 
     void Viewport::mousePressEvent(dtk::MouseClickEvent& event)
     {
         IWidget::mousePressEvent(event);
-        if (_document && 0 == event.button && 0 == event.modifiers)
+        if (0 == event.button && 0 == event.modifiers)
         {
             event.accept = true;
-            _document->getViewModel()->setMousePress(true);
+            setFrame(false);
+            _viewMousePress = _pos->get();
         }
     }
 
     void Viewport::mouseReleaseEvent(dtk::MouseClickEvent& event)
     {
         IWidget::mouseReleaseEvent(event);
-        if (_document && 0 == event.button && 0 == event.modifiers)
-        {
-            event.accept = true;
-            _document->getViewModel()->setMousePress(false);
-        }
+        event.accept = true;
     }
 
     void Viewport::scrollEvent(dtk::ScrollEvent& event)
     {
         IWidget::scrollEvent(event);
-        if (_document && 0 == event.modifiers)
+        if (0 == event.modifiers)
         {
             event.accept = true;
             if (event.value.y > 0)
             {
-                _document->getViewModel()->zoomOut(.9F);
+                zoomOut(.9F);
             }
             else if (event.value.y < 0)
             {
-                _document->getViewModel()->zoomIn(.9F);
+                zoomIn(.9F);
             }
+        }
+    }
+
+    void Viewport::_frameUpdate()
+    {
+        if (_frame && _image)
+        {
+            const dtk::Box2I& g = getGeometry();
+            const dtk::Size2I imageSize = _image->getSize();
+            float zoom = g.w() / static_cast<float>(imageSize.w);
+            if (zoom * imageSize.h > g.h())
+            {
+                zoom = g.h() / static_cast<double>(imageSize.h);
+            }
+            const dtk::V2I c(imageSize.w / 2, imageSize.h / 2);
+            const dtk::V2I pos = dtk::V2I(
+                g.w() / 2.F - c.x * zoom,
+                g.h() / 2.F - c.y * zoom);
+
+            _pos->setIfChanged(pos);
+            _zoom->setIfChanged(zoom);
         }
     }
 }

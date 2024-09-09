@@ -23,6 +23,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -31,6 +32,7 @@ namespace toucan
         static std::shared_ptr<TimelineWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setViewZoom(double);
@@ -65,7 +67,7 @@ namespace toucan
         std::shared_ptr<Document> _document;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime;
-        double _scale = 0.0;
+        double _scale = 100.0;
         bool _sizeInit = true;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
 
@@ -85,8 +87,6 @@ namespace toucan
         };
         MouseData _mouse;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
-        std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
     };
 }

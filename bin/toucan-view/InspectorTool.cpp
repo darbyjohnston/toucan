@@ -6,7 +6,6 @@
 
 #include "App.h"
 
-#include <dtk/ui/GridLayout.h>
 #include <dtk/ui/Label.h>
 #include <dtk/core/Format.h>
 
@@ -21,39 +20,12 @@ namespace toucan
 
         _item = item;
 
-        auto layout = dtk::GridLayout::create(context);
-        layout->setMarginRole(dtk::SizeRole::MarginSmall);
-        layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
-
-        int row = 0;
-        auto opt = item->trimmed_range_in_parent();
-        if (opt.has_value())
-        {
-            OTIO_NS::TimeRange range = opt.value();
-            auto label = dtk::Label::create(context, "Range:", layout);
-            layout->setGridPos(label, row, 0);
-            std::string text = dtk::Format("{0}-{1}@{2}").
-                arg(range.start_time().value()).
-                arg(range.end_time_inclusive().value()).
-                arg(range.duration().rate());
-            label = dtk::Label::create(context, text, layout);
-            layout->setGridPos(label, row, 1);
-            ++row;
-        }
-
-        auto label = dtk::Label::create(context, "Item range:", layout);
-        layout->setGridPos(label, row, 0);
-        OTIO_NS::TimeRange range = item->trimmed_range();
-        std::string text = dtk::Format("{0}-{1}@{2}").
-            arg(range.start_time().value()).
-            arg(range.end_time_inclusive().value()).
-            arg(range.duration().rate());
-        label = dtk::Label::create(context, text, layout);
-        layout->setGridPos(label, row, 1);
-        ++row;
+        std::string text = item->to_json_string();
+        auto label = dtk::Label::create(context, text);
+        label->setMarginRole(dtk::SizeRole::MarginSmall);
 
         _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
-        _bellows->setWidget(layout);
+        _bellows->setWidget(label);
         _bellows->setOpen(true);
     }
 
@@ -85,6 +57,7 @@ namespace toucan
     void InspectorTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IToolWidget::_init(context, app, "toucan::InspectorTool", "Inspector", parent);
@@ -95,37 +68,20 @@ namespace toucan
         _layout->setSpacingRole(dtk::SizeRole::None);
         _scrollWidget->setWidget(_layout);
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
+            document->getSelectionModel()->observeSelection(),
+            [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
             {
-                if (document)
+                for (const auto& widget : _widgets)
                 {
-                    _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
-                        document->getSelectionModel()->observeSelection(),
-                        [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
-                        {
-                            for (const auto& widget : _widgets)
-                            {
-                                widget->setParent(nullptr);
-                            }
-                            _widgets.clear();
-                            auto context = _getContext().lock();
-                            for (const auto& item : selection)
-                            {
-                                auto widget = InspectorWidget::create(context, item, _layout);
-                                _widgets.push_back(widget);
-                            }
-                        });
+                    widget->setParent(nullptr);
                 }
-                else
+                _widgets.clear();
+                auto context = _getContext().lock();
+                for (const auto& item : selection)
                 {
-                    for (const auto& widget : _widgets)
-                    {
-                        widget->setParent(nullptr);
-                    }
-                    _widgets.clear();
-                    _selectionObserver.reset();
+                    auto widget = InspectorWidget::create(context, item, _layout);
+                    _widgets.push_back(widget);
                 }
             });
     }
@@ -136,10 +92,11 @@ namespace toucan
     std::shared_ptr<InspectorTool> InspectorTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<InspectorTool>(new InspectorTool);
-        out->_init(context, app, parent);
+        out->_init(context, app, document, parent);
         return out;
     }
 
