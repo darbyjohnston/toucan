@@ -58,9 +58,6 @@ namespace toucan
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<Window>&);
-        void _toolsMenuInit(
-            const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&);
 
         void _fileMenuUpdate();
         void _editMenuUpdate();
@@ -68,7 +65,6 @@ namespace toucan
         void _playbackMenuUpdate();
         void _viewMenuUpdate();
         void _windowMenuUpdate();
-        void _toolsMenuUpdate();
 
         std::weak_ptr<App> _app;
         std::shared_ptr<DocumentsModel> _documentsModel;
@@ -85,6 +81,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
+        std::shared_ptr<dtk::ValueObserver<float> > _displayScaleObserver;
         std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }

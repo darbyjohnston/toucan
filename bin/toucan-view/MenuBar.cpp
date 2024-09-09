@@ -32,7 +32,6 @@ namespace toucan
         _playbackMenuInit(context, app);
         _viewMenuInit(context, app);
         _windowMenuInit(context, app, window);
-        _toolsMenuInit(context, app);
 
         _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
             _documentsModel->observeCurrent(),
@@ -45,7 +44,6 @@ namespace toucan
                 _playbackMenuUpdate();
                 _viewMenuUpdate();
                 _windowMenuUpdate();
-                _toolsMenuUpdate();
             });
     }
 
@@ -538,6 +536,54 @@ namespace toucan
             _menus["Window"]->addItem(_actions[actionName]);
         }
 
+        _menus["Window"]->addDivider();
+
+        _menus["Window/DisplayScale"] = _menus["Window"]->addSubMenu("Display Scale");
+
+        _actions["Window/DisplayScale/Auto"] = std::make_shared<dtk::Action>(
+            "Automatic",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(0.F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/Auto"]);
+
+        _actions["Window/DisplayScale/1.0"] = std::make_shared<dtk::Action>(
+            "1.0",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(1.F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/1.0"]);
+
+        _actions["Window/DisplayScale/2.0"] = std::make_shared<dtk::Action>(
+            "2.0",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(2.F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/2.0"]);
+
+        _actions["Window/DisplayScale/3.0"] = std::make_shared<dtk::Action>(
+            "3.0",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(3.F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/3.0"]);
+
         _fullScreenObserver = dtk::ValueObserver<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
@@ -559,14 +605,16 @@ namespace toucan
                 i = value.find(WindowControl::Tools);
                 _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
             });
-    }
 
-    void MenuBar::_toolsMenuInit(
-        const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app)
-    {
-        _menus["Tools"] = dtk::Menu::create(context);
-        addMenu("Tools", _menus["Tools"]);
+        _displayScaleObserver = dtk::ValueObserver<float>::create(
+            window->observeDisplayScale(),
+            [this](float value)
+            {
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/Auto"], 0.F == value);
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/1.0"], 1.F == value);
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/2.0"], 2.F == value);
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/3.0"], 3.F == value);
+            });
     }
 
     void MenuBar::_fileMenuUpdate()
@@ -643,7 +691,4 @@ namespace toucan
     void MenuBar::_windowMenuUpdate()
     {
     }
-
-    void MenuBar::_toolsMenuUpdate()
-    {}
 }
