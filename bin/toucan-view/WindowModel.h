@@ -11,7 +11,6 @@ namespace toucan
     enum class WindowControl
     {
         ToolBar,
-        Tabs,
         BottomBar,
         TimelineWidget,
         Tools

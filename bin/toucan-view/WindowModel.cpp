@@ -11,7 +11,6 @@ namespace toucan
         std::map<WindowControl, bool> values =
         {
             { WindowControl::ToolBar, true },
-            { WindowControl::Tabs, true },
             { WindowControl::BottomBar, true },
             { WindowControl::TimelineWidget, true },
             { WindowControl::Tools, true }

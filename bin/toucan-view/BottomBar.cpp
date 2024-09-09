@@ -29,10 +29,6 @@ namespace toucan
         _durationLabel = TimeLabel::create(context, app->getTimeUnitsModel(), _layout);
         _durationLabel->setTooltip("Timeline duration");
 
-        _timeUnitsComboBox = dtk::ComboBox::create(context, _layout);
-        _timeUnitsComboBox->setItems({ "Timecode", "Frames", "Seconds" });
-        _timeUnitsComboBox->setTooltip("Time units");
-
         _frameButtons->setCallback(
             [this](FrameAction value)
             {
@@ -57,16 +53,6 @@ namespace toucan
                 if (_document)
                 {
                     _document->getPlaybackModel()->setCurrentTime(value);
-                }
-            });
-
-        std::weak_ptr<App> appWeak(app);
-        _timeUnitsComboBox->setIndexCallback(
-            [appWeak](int index)
-            {
-                if (auto app = appWeak.lock())
-                {
-                    app->getTimeUnitsModel()->setTimeUnits(static_cast<TimeUnits>(index));
                 }
             });
 
@@ -120,13 +106,6 @@ namespace toucan
                 _playbackButtons->setEnabled(document.get());
                 _timeEdit->setEnabled(document.get());
                 _durationLabel->setEnabled(document.get());
-            });
-
-        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
-            app->getTimeUnitsModel()->observeTimeUnits(),
-            [this](TimeUnits value)
-            {
-                _timeUnitsComboBox->setCurrentIndex(static_cast<int>(value));
             });
     }
 

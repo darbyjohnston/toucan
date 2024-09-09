@@ -49,6 +49,9 @@ namespace toucan
             {
                 auto i = value.find(WindowControl::TimelineWidget);
                 _timelineWidget->setVisible(i->second);
+                auto j = value.find(WindowControl::BottomBar);
+                _bottomBar->setVisible(j->second);
+                _bottomLayout->setVisible(i->second || j->second);
                 i = value.find(WindowControl::Tools);
                 _toolWidget->setVisible(i->second);
             });

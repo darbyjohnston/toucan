@@ -6,6 +6,7 @@
 
 #include "PlaybackModel.h"
 #include "WindowModel.h"
+#include "TimeUnitsModel.h"
 
 #include <dtk/ui/MenuBar.h>
 #include <dtk/core/ObservableList.h>
@@ -41,7 +42,7 @@ namespace toucan
         void _fileMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
-        void _frameMenuInit(
+        void _timeMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);
         void _playbackMenuInit(
@@ -59,12 +60,13 @@ namespace toucan
             const std::shared_ptr<App>&);
 
         void _fileMenuUpdate();
-        void _frameMenuUpdate();
+        void _timeMenuUpdate();
         void _playbackMenuUpdate();
         void _viewMenuUpdate();
         void _windowMenuUpdate();
         void _toolsMenuUpdate();
 
+        std::weak_ptr<App> _app;
         std::shared_ptr<DocumentsModel> _documentsModel;
         std::shared_ptr<Document> _document;
 
@@ -79,6 +81,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }
 
