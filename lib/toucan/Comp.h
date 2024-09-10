@@ -19,9 +19,13 @@ namespace toucan
         //! Set whether images are pre-multiplied before compositing.
         void setPremult(bool);
 
+        //! Set whether images are resized before compositing.
+        void setResize(bool);
+
         OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
 
     private:
         bool _premult = false;
+        bool _resize = true;
     };
 }

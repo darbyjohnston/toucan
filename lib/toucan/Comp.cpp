@@ -20,6 +20,11 @@ namespace toucan
         _premult = premult;
     }
 
+    void CompNode::setResize(bool resize)
+    {
+        _resize = resize;
+    }
+
     OIIO::ImageBuf CompNode::exec(const OTIO_NS::RationalTime& time)
     {
         OIIO::ImageBuf buf;
@@ -35,6 +40,17 @@ namespace toucan
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);
+            }
+            const auto& fgSpec = fg.spec();
+            const auto& bgSpec = bg.spec();
+            if (fgSpec.width != bgSpec.width ||
+                fgSpec.height != bgSpec.height)
+            {
+                fg = OIIO::ImageBufAlgo::resize(
+                    fg,
+                    "",
+                    0.0, 
+                    OIIO::ROI(0, bgSpec.width, 0, bgSpec.height));
             }
             buf = OIIO::ImageBufAlgo::over(fg, bg);
         }
