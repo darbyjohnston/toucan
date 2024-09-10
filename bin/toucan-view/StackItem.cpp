@@ -2,54 +2,72 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "ClipItem.h"
+#include "StackItem.h"
+
+#include "TrackItem.h"
 
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/RenderUtil.h>
 
 namespace toucan
 {
-    void ClipItem::_init(
+    void StackItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
-        const dtk::Color4F& color,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto opt = clip->trimmed_range_in_parent();
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(clip),
-            opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
-            "toucan::ClipItem",
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(stack),
+            stack->trimmed_range(),
+            "toucan::StackItem",
             parent);
 
-        _setMousePressEnabled(0, 0);
+        _stack = stack;
+        _text = !stack->name().empty() ? stack->name() : "Stack";
+        _color = dtk::Color4F(.2F, .2F, .2F);
 
-        _clip = clip;
-        _text = !clip->name().empty() ? clip->name() : "Clip";
-        _color = color;
-
-        setTooltip(_text);
+        for (const auto& child : stack->children())
+        {
+            if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
+            {
+                TrackItem::create(context, app, track, shared_from_this());
+            }
+        }
     }
-    
-    ClipItem::~ClipItem()
+
+    StackItem::~StackItem()
     {}
 
-    std::shared_ptr<ClipItem> ClipItem::create(
+    std::shared_ptr<StackItem> StackItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
-        const dtk::Color4F& color,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto out = std::make_shared<ClipItem>();
-        out->_init(context, app, clip, color, parent);
+        auto out = std::make_shared<StackItem>();
+        out->_init(context, app, stack, parent);
         return out;
     }
 
-    void ClipItem::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void StackItem::setGeometry(const dtk::Box2I& value)
+    {
+        IItem::setGeometry(value);
+        const dtk::Box2I g = dtk::margin(
+            value, 0, -_size.borderFocus, 0, -_size.borderFocus);
+        dtk::V2I pos = g.min;
+        pos.y += _size.fontMetrics.lineHeight + _size.margin * 2;
+        for (const auto& child : getChildren())
+        {
+            const dtk::Size2I& sizeHint = child->getSizeHint();
+            child->setGeometry(dtk::Box2I(pos.x, pos.y, sizeHint.w, sizeHint.h));
+            pos.y += sizeHint.h + _size.spacing;
+        }
+    }
+
+    void StackItem::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IItem::sizeHintEvent(event);
         const bool displayScaleChanged = event.displayScale != _size.displayScale;
@@ -58,20 +76,33 @@ namespace toucan
             _size.init = false;
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
+            _size.spacing = event.style->getSizeRole(dtk::SizeRole::SpacingTool, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
             _size.borderFocus = event.style->getSizeRole(dtk::SizeRole::BorderFocus, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label , event.displayScale);
+            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
             _draw.glyphs.clear();
         }
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.textSize.h + _size.margin * 2 + _size.borderFocus * 2);
+            0);
+        const auto& children = getChildren();
+        for (const auto& child : children)
+        {
+            const dtk::Size2I& childSizeHint = child->getSizeHint();
+            sizeHint.h += childSizeHint.h;
+        }
+        if (!children.empty())
+        {
+            sizeHint.h += _size.spacing * (children.size() - 1);
+        }
+        sizeHint.h += _size.textSize.h + _size.margin * 2;
+        sizeHint.h += _size.borderFocus * 2;
         _setSizeHint(sizeHint);
     }
 
-    void ClipItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
+    void StackItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
     {
         IItem::clipEvent(clipRect, clipped);
         if (clipped)
@@ -79,8 +110,8 @@ namespace toucan
             _draw.glyphs.clear();
         }
     }
-    
-    void ClipItem::drawEvent(
+
+    void StackItem::drawEvent(
         const dtk::Box2I& drawRect,
         const dtk::DrawEvent& event)
     {
@@ -109,7 +140,7 @@ namespace toucan
         event.render->drawText(
             _draw.glyphs,
             _size.fontMetrics,
-            dtk::V2F(g3.min.x, g3.min.y + g3.h() / 2 - _size.fontMetrics.lineHeight / 2),
+            g3.min,
             event.style->getColorRole(dtk::ColorRole::Text));
     }
 }

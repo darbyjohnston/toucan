@@ -6,7 +6,7 @@
 
 #include "App.h"
 #include "DocumentsModel.h"
-#include "TrackItem.h"
+#include "StackItem.h"
 
 #include <dtk/ui/ScrollArea.h>
 
@@ -44,17 +44,7 @@ namespace toucan
         _timeUnitsModel = app->getTimeUnitsModel();
         _selectionModel = document->getSelectionModel();
 
-        for (const auto& child : timeline->tracks()->children())
-        {
-            if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
-            {
-                auto trackItem = TrackItem::create(
-                    context,
-                    app,
-                    track,
-                    shared_from_this());
-            }
-        }
+        StackItem::create(context, app, _timeline->tracks(), shared_from_this());
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
             _timeUnitsModel->observeTimeUnits(),
@@ -136,13 +126,16 @@ namespace toucan
     void TimelineItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);
-        dtk::V2I pos = value.min;
-        pos.y += _size.fontMetrics.lineHeight + _size.margin * 2;
+        const dtk::Box2I& g = getGeometry();
+        const int timeHeight = _size.fontMetrics.lineHeight + _size.margin * 2;
         for (const auto& child : getChildren())
         {
             const dtk::Size2I& sizeHint = child->getSizeHint();
-            child->setGeometry(dtk::Box2I(pos.x, pos.y, sizeHint.w, sizeHint.h));
-            pos.y += sizeHint.h + _size.spacing;
+            child->setGeometry(dtk::Box2I(
+                g.min.x,
+                g.min.y + timeHeight,
+                sizeHint.w,
+                sizeHint.h));
         }
         if (auto scrollArea = getParentT<dtk::ScrollArea>())
         {
@@ -159,25 +152,19 @@ namespace toucan
             _size.init = false;
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
-            _size.spacing = event.style->getSizeRole(dtk::SizeRole::SpacingTool, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
             _size.handle = event.style->getSizeRole(dtk::SizeRole::Handle, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
         }
+        int childSizeHint = 0;
+        for (const auto& child : getChildren())
+        {
+            childSizeHint = std::max(childSizeHint, child->getSizeHint().h);
+        }
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.fontMetrics.lineHeight + _size.margin * 2);
-        const auto& children = getChildren();
-        for (const auto& child : children)
-        {
-            const dtk::Size2I& childSizeHint = child->getSizeHint();
-            sizeHint.h += childSizeHint.h;
-        }
-        if (!children.empty())
-        {
-            sizeHint.h += _size.spacing * (children.size() - 1);
-        }
+            _size.fontMetrics.lineHeight + _size.margin * 2 + childSizeHint);
         _setSizeHint(sizeHint);
     }
 
@@ -243,9 +230,13 @@ namespace toucan
                 static_cast<int>(dtk::KeyModifier::Control) == event.modifiers))
         {
             event.accept = true;
-            std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > selection;
-            _select(shared_from_this(), event.pos, selection);
-            if (!selection.empty())
+            auto selection = _select(shared_from_this(), event.pos);
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
+            if (selection)
+            {
+                item = selection->getItem();
+            }
+            if (selection && item)
             {
                 _mouse.mode = MouseMode::Select;
                 auto selectionPrev = _selectionModel->getSelection();
@@ -253,23 +244,20 @@ namespace toucan
                 if (static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers)
                 {
                     selectionNew = selectionPrev;
-                    selectionNew.insert(selectionNew.end(), selection.begin(), selection.end());
+                    selectionNew.insert(selectionNew.end(), item);
                 }
                 else if (static_cast<int>(dtk::KeyModifier::Control) == event.modifiers)
                 {
                     selectionNew = selectionPrev;
-                    for (const auto& item : selection)
+                    auto i = std::find(selectionNew.begin(), selectionNew.end(), item);
+                    if (i != selectionNew.end())
                     {
-                        auto i = std::find(selectionNew.begin(), selectionNew.end(), item);
-                        if (i != selectionNew.end())
-                        {
-                            selectionNew.erase(i);
-                        }
+                        selectionNew.erase(i);
                     }
                 }
-                else
+                else if (!selection->isSelected())
                 {
-                    selectionNew = selection;
+                    selectionNew.insert(selectionNew.end(), item);
                 }
                 _selectionModel->setSelection(selectionNew);
             }
@@ -403,7 +391,6 @@ namespace toucan
                         _size.scrollPos.y +
                         g.min.y,
                         _size.border,
-                        _size.margin +
                         _size.fontMetrics.lineHeight +
                         _size.margin * 2);
                     if (intersects(box, drawRect))
@@ -475,28 +462,24 @@ namespace toucan
         }
     }
 
-    bool TimelineItem::_select(
+    std::shared_ptr<IItem> TimelineItem::_select(
         const std::shared_ptr<dtk::IWidget>& widget,
-        const dtk::V2I& pos,
-        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+        const dtk::V2I& pos)
     {
-        bool out = false;
-        if (dtk::contains(widget->getGeometry(), pos))
+        std::shared_ptr<IItem> out;
+        if (auto iitem = std::dynamic_pointer_cast<IItem>(widget))
         {
-            for (const auto& child : widget->getChildren())
+            out = iitem;
+        }
+        for (const auto& child : widget->getChildren())
+        {
+            if (dtk::contains(child->getGeometry(), pos))
             {
-                out |= _select(child, pos, selection);
-            }
-            if (!out)
-            {
-                if (auto iitem = std::dynamic_pointer_cast<IItem>(widget))
-                {
-                    selection.push_back(iitem->getItem());
-                    out = true;
-                }
+                out = _select(child, pos);
+                break;
             }
         }
-        return true;
+        return out;
     }
 
     void TimelineItem::_select(

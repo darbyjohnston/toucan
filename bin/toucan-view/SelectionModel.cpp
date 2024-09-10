@@ -4,8 +4,6 @@
 
 #include "SelectionModel.h"
 
-#include <opentimelineio/gap.h>
-
 #include <set>
 
 namespace OTIO_NS

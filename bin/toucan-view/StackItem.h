@@ -6,26 +6,26 @@
 
 #include "IItem.h"
 
-#include <opentimelineio/track.h>
+#include <opentimelineio/stack.h>
 
 namespace toucan
 {
-    class TrackItem : public IItem
+    class StackItem : public IItem
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~TrackItem();
+        virtual ~StackItem();
 
-        static std::shared_ptr<TrackItem> create(
+        static std::shared_ptr<StackItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -34,7 +34,7 @@ namespace toucan
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
 
     private:
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> _track;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack> _stack;
         std::string _text;
         dtk::Color4F _color;
 
@@ -43,6 +43,7 @@ namespace toucan
             bool init = true;
             float displayScale = 0.F;
             int margin = 0;
+            int spacing = 0;
             int border = 0;
             int borderFocus = 0;
             dtk::FontInfo fontInfo;

@@ -17,6 +17,7 @@ namespace toucan
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
+            const dtk::Color4F&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -26,6 +27,7 @@ namespace toucan
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
+            const dtk::Color4F&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void sizeHintEvent(const dtk::SizeHintEvent&) override;

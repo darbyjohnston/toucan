@@ -58,10 +58,9 @@ namespace toucan
             const dtk::Box2I&,
             const dtk::DrawEvent&);
 
-        bool _select(
+        std::shared_ptr<IItem> _select(
             const std::shared_ptr<dtk::IWidget>&,
-            const dtk::V2I&,
-            std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
+            const dtk::V2I&);
         void _select(
             const std::shared_ptr<dtk::IWidget>&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
@@ -77,7 +76,6 @@ namespace toucan
             bool init = true;
             float displayScale = 0.F;
             int margin = 0;
-            int spacing = 0;
             int border = 0;
             int handle = 0;
             dtk::FontInfo fontInfo;

@@ -13,6 +13,7 @@ set(HEADERS
     MenuBar.h
     PlaybackModel.h
     SelectionModel.h
+    StackItem.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
@@ -39,6 +40,7 @@ set(SOURCE
     MenuBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
+    StackItem.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
     TimelineItem.cpp
