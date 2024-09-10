@@ -99,9 +99,7 @@ namespace toucan
         }
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);
-        event.render->drawRect(
-            dtk::Box2F(g2.min.x, g2.min.y, g2.w(), g2.h()),
-            _color);
+        event.render->drawRect(g2, _color);
 
         const dtk::Box2I g3 = dtk::margin(g2, -_size.margin);
         if (!_text.empty() && _draw.glyphs.empty())

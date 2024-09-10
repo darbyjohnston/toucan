@@ -140,7 +140,7 @@ namespace toucan
         {
             dtk::Box2I g = i->second->getGeometry();
             const dtk::V2I start = dtk::center(g);
-            std::vector<std::pair<dtk::V2F, dtk::V2F> > lines;
+            std::vector<std::pair<dtk::V2I, dtk::V2I> > lines;
             for (const auto& input : node->getInputs())
             {
                 auto j = _nodeToButton.find(input);
@@ -150,15 +150,9 @@ namespace toucan
                     const dtk::V2I end = dtk::center(g);
                     const dtk::V2I v0(start.x, (start.y + end.y) / 2);
                     const dtk::V2I v1(end.x, (start.y + end.y) / 2);
-                    lines.push_back(std::make_pair(
-                        dtk::V2F(start.x, start.y),
-                        dtk::V2F(v0.x, v0.y)));
-                    lines.push_back(std::make_pair(
-                        dtk::V2F(v0.x, v0.y),
-                        dtk::V2F(v1.x, v1.y)));
-                    lines.push_back(std::make_pair(
-                        dtk::V2F(v1.x, v1.y),
-                        dtk::V2F(end.x, end.y)));
+                    lines.push_back(std::make_pair(start, v0));
+                    lines.push_back(std::make_pair(v0, v1));
+                    lines.push_back(std::make_pair(v1, end));
                 }
             }
             event.render->drawLines(

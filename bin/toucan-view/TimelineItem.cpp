@@ -191,9 +191,7 @@ namespace toucan
             g.min.y + _size.scrollPos.y,
             g.w(),
             _size.fontMetrics.lineHeight + _size.margin * 2);
-        event.render->drawRect(
-            dtk::Box2F(g2.min.x, g2.min.y, g2.w(), g2.h()),
-            event.style->getColorRole(dtk::ColorRole::Base));
+        event.render->drawRect(g2, event.style->getColorRole(dtk::ColorRole::Base));
 
         _drawTimeTicks(drawRect, event);
         _drawTimeLabels(drawRect, event);
@@ -218,7 +216,7 @@ namespace toucan
         event.render->drawText(
             event.fontSystem->getGlyphs(s, _size.fontInfo),
             _size.fontMetrics,
-            dtk::V2F(g3.min.x, g3.min.y),
+            g3.min,
             event.style->getColorRole(dtk::ColorRole::Text));
     }
 
@@ -469,7 +467,7 @@ namespace toucan
                         event.render->drawText(
                             event.fontSystem->getGlyphs(label, _size.fontInfo),
                             _size.fontMetrics,
-                            dtk::V2F(box.min.x, box.min.y),
+                            box.min,
                             event.style->getColorRole(dtk::ColorRole::TextDisabled));
                     }
                 }
