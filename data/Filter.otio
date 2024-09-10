@@ -30,7 +30,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:ColorMap",
+                                "effect_name": "toucan:ColorMap",
                                 "metadata": {
                                     "map_name": "plasma"
                                 }
@@ -73,7 +73,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Invert"
+                                "effect_name": "toucan:Invert"
                             }
                         ],
                         "source_range": {
@@ -113,7 +113,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Pow",
+                                "effect_name": "toucan:Pow",
                                 "metadata": {
                                     "value": 2.0
                                 }
@@ -156,7 +156,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Saturate",
+                                "effect_name": "toucan:Saturate",
                                 "metadata": {
                                     "value": 0.0
                                 }
@@ -199,7 +199,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Blur",
+                                "effect_name": "toucan:Blur",
                                 "metadata": {
                                     "radius": 50.0
                                 }
@@ -242,7 +242,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:UnsharpMask",
+                                "effect_name": "toucan:UnsharpMask",
                                 "metadata": {
                                     "kernel": "gaussian",
                                     "width": 50.0,

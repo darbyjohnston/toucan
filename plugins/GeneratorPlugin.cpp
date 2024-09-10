@@ -122,7 +122,7 @@ OfxStatus GeneratorPlugin::_renderAction(
 CheckersPlugin* CheckersPlugin::_plugin = nullptr;
 
 CheckersPlugin::CheckersPlugin() :
-    GeneratorPlugin("Toucan", "Checkers")
+    GeneratorPlugin("toucan", "Checkers")
 {}
 
 CheckersPlugin::~CheckersPlugin()
@@ -227,7 +227,7 @@ OfxStatus CheckersPlugin::_render(
 FillPlugin* FillPlugin::_plugin = nullptr;
 
 FillPlugin::FillPlugin() :
-    GeneratorPlugin("Toucan", "Fill")
+    GeneratorPlugin("toucan", "Fill")
 {}
 
 FillPlugin::~FillPlugin()
@@ -309,7 +309,7 @@ OfxStatus FillPlugin::_render(
 GradientPlugin* GradientPlugin::_plugin = nullptr;
 
 GradientPlugin::GradientPlugin() :
-    GeneratorPlugin("Toucan", "Gradient")
+    GeneratorPlugin("toucan", "Gradient")
 {}
 
 GradientPlugin::~GradientPlugin()
@@ -437,7 +437,7 @@ OfxStatus GradientPlugin::_render(
 NoisePlugin* NoisePlugin::_plugin = nullptr;
 
 NoisePlugin::NoisePlugin() :
-    GeneratorPlugin("Toucan", "Noise")
+    GeneratorPlugin("toucan", "Noise")
 {}
 
 NoisePlugin::~NoisePlugin()
@@ -538,10 +538,10 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:Checkers", 1, 0, CheckersPlugin::setHostFunc, CheckersPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Fill", 1, 0, FillPlugin::setHostFunc, FillPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Gradient", 1, 0, GradientPlugin::setHostFunc, GradientPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Noise", 1, 0, NoisePlugin::setHostFunc, NoisePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:Checkers", 1, 0, CheckersPlugin::setHostFunc, CheckersPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Fill", 1, 0, FillPlugin::setHostFunc, FillPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Gradient", 1, 0, GradientPlugin::setHostFunc, GradientPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Noise", 1, 0, NoisePlugin::setHostFunc, NoisePlugin::mainEntryPoint }
     };
 }
 

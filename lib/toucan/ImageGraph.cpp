@@ -95,7 +95,7 @@ namespace toucan
         OTIO_NS::AnyDictionary metaData;
         metaData["size"] = vecToAny(_imageSize);
         metaData["color"] = vecToAny(IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F));
-        std::shared_ptr<IImageNode> node = host->createNode("Toucan:Fill", metaData);
+        std::shared_ptr<IImageNode> node = host->createNode("toucan:Fill", metaData);
 
         // Loop over the tracks.
         auto stack = _timeline->tracks();
@@ -211,7 +211,7 @@ namespace toucan
                         if (!node)
                         {
                             node = host->createNode(
-                                "Toucan:Dissolve",
+                                "toucan:Dissolve",
                                 metaData);
                         }
                         if (node)
@@ -246,7 +246,7 @@ namespace toucan
                         if (!node)
                         {
                             node = host->createNode(
-                                "Toucan:Dissolve",
+                                "toucan:Dissolve",
                                 metaData);
                         }
                         if (node)
@@ -315,7 +315,7 @@ namespace toucan
         {
             OTIO_NS::AnyDictionary metaData;
             metaData["size"] = vecToAny(_imageSize);
-            out = host->createNode("Toucan:Fill", metaData);
+            out = host->createNode("toucan:Fill", metaData);
         }
 
         // Get the effects.

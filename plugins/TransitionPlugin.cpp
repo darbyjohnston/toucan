@@ -166,7 +166,7 @@ OfxStatus TransitionPlugin::_renderAction(
 DissolvePlugin* DissolvePlugin::_plugin = nullptr;
 
 DissolvePlugin::DissolvePlugin() :
-    TransitionPlugin("Toucan", "Dissolve")
+    TransitionPlugin("toucan", "Dissolve")
 {}
 
 DissolvePlugin::~DissolvePlugin()
@@ -214,7 +214,7 @@ OfxStatus DissolvePlugin::_render(
 HorizontalWipePlugin* HorizontalWipePlugin::_plugin = nullptr;
 
 HorizontalWipePlugin::HorizontalWipePlugin() :
-    TransitionPlugin("Toucan", "HorizontalWipe")
+    TransitionPlugin("toucan", "HorizontalWipe")
 {}
 
 HorizontalWipePlugin::~HorizontalWipePlugin()
@@ -303,7 +303,7 @@ OfxStatus HorizontalWipePlugin::_render(
 VerticalWipePlugin* VerticalWipePlugin::_plugin = nullptr;
 
 VerticalWipePlugin::VerticalWipePlugin() :
-    TransitionPlugin("Toucan", "VerticalWipe")
+    TransitionPlugin("toucan", "VerticalWipe")
 {}
 
 VerticalWipePlugin::~VerticalWipePlugin()
@@ -394,9 +394,9 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:Dissolve", 1, 0, DissolvePlugin::setHostFunc, DissolvePlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:HorizontalWipe", 1, 0, HorizontalWipePlugin::setHostFunc, HorizontalWipePlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:VerticalWipe", 1, 0, VerticalWipePlugin::setHostFunc, VerticalWipePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:Dissolve", 1, 0, DissolvePlugin::setHostFunc, DissolvePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:HorizontalWipe", 1, 0, HorizontalWipePlugin::setHostFunc, HorizontalWipePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:VerticalWipe", 1, 0, VerticalWipePlugin::setHostFunc, VerticalWipePlugin::mainEntryPoint }
     };
 }
 

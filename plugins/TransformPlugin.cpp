@@ -125,7 +125,7 @@ OfxStatus TransformPlugin::_renderAction(
 CropPlugin* CropPlugin::_plugin = nullptr;
 
 CropPlugin::CropPlugin() :
-    TransformPlugin("Toucan", "Crop")
+    TransformPlugin("toucan", "Crop")
 {}
 
 CropPlugin::~CropPlugin()
@@ -206,7 +206,7 @@ OfxStatus CropPlugin::_render(
 FlipPlugin* FlipPlugin::_plugin = nullptr;
 
 FlipPlugin::FlipPlugin() :
-    TransformPlugin("Toucan", "Flip")
+    TransformPlugin("toucan", "Flip")
 {}
 
 FlipPlugin::~FlipPlugin()
@@ -251,7 +251,7 @@ OfxStatus FlipPlugin::_render(
 FlopPlugin* FlopPlugin::_plugin = nullptr;
 
 FlopPlugin::FlopPlugin() :
-    TransformPlugin("Toucan", "Flop")
+    TransformPlugin("toucan", "Flop")
 {}
 
 FlopPlugin::~FlopPlugin()
@@ -296,7 +296,7 @@ OfxStatus FlopPlugin::_render(
 ResizePlugin* ResizePlugin::_plugin = nullptr;
 
 ResizePlugin::ResizePlugin() :
-    TransformPlugin("Toucan", "Resize")
+    TransformPlugin("toucan", "Resize")
 {}
 
 ResizePlugin::~ResizePlugin()
@@ -385,7 +385,7 @@ OfxStatus ResizePlugin::_render(
 RotatePlugin* RotatePlugin::_plugin = nullptr;
 
 RotatePlugin::RotatePlugin() :
-    TransformPlugin("Toucan", "Rotate")
+    TransformPlugin("toucan", "Rotate")
 {}
 
 RotatePlugin::~RotatePlugin()
@@ -474,11 +474,11 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:Crop", 1, 0, CropPlugin::setHostFunc, CropPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Flip", 1, 0, FlipPlugin::setHostFunc, FlipPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Flop", 1, 0, FlopPlugin::setHostFunc, FlopPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Resize", 1, 0, ResizePlugin::setHostFunc, ResizePlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Rotate", 1, 0, RotatePlugin::setHostFunc, RotatePlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:Crop", 1, 0, CropPlugin::setHostFunc, CropPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Flip", 1, 0, FlipPlugin::setHostFunc, FlipPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Flop", 1, 0, FlopPlugin::setHostFunc, FlopPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Resize", 1, 0, ResizePlugin::setHostFunc, ResizePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Rotate", 1, 0, RotatePlugin::setHostFunc, RotatePlugin::mainEntryPoint }
     };
 }
 

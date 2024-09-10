@@ -7,7 +7,7 @@
         "effects": [
             {
                 "OTIO_SCHEMA": "Effect.1",
-                "effect_name": "Toucan:Pow",
+                "effect_name": "toucan:Pow",
                 "metadata": {
                     "value": 3.0
                 }
@@ -19,7 +19,7 @@
                 "effects": [
                     {
                         "OTIO_SCHEMA": "Effect.1",
-                        "effect_name": "Toucan:Invert"
+                        "effect_name": "toucan:Invert"
                     }
                 ],
                 "children": [
@@ -45,11 +45,11 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Flip"
+                                "effect_name": "toucan:Flip"
                             },
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Blur",
+                                "effect_name": "toucan:Blur",
                                 "metadata": {
                                     "radius": 20.0
                                 }
@@ -92,11 +92,11 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Flop"
+                                "effect_name": "toucan:Flop"
                             },
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:ColorMap",
+                                "effect_name": "toucan:ColorMap",
                                 "metadata": {
                                     "map_name": "plasma"
                                 }

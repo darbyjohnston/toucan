@@ -122,7 +122,7 @@ OfxStatus ColorSpacePlugin::_renderAction(
 ColorConvertPlugin* ColorConvertPlugin::_plugin = nullptr;
 
 ColorConvertPlugin::ColorConvertPlugin() :
-    ColorSpacePlugin("Toucan", "ColorConvert")
+    ColorSpacePlugin("toucan", "ColorConvert")
 {}
 
 ColorConvertPlugin::~ColorConvertPlugin()
@@ -253,7 +253,7 @@ OfxStatus ColorConvertPlugin::_render(
 PremultPlugin* PremultPlugin::_plugin = nullptr;
 
 PremultPlugin::PremultPlugin() :
-    ColorSpacePlugin("Toucan", "Premult")
+    ColorSpacePlugin("toucan", "Premult")
 {}
 
 PremultPlugin::~PremultPlugin()
@@ -291,7 +291,7 @@ OfxStatus PremultPlugin::_render(
 UnpremultPlugin* UnpremultPlugin::_plugin = nullptr;
 
 UnpremultPlugin::UnpremultPlugin() :
-    ColorSpacePlugin("Toucan", "Unpremult")
+    ColorSpacePlugin("toucan", "Unpremult")
 {}
 
 UnpremultPlugin::~UnpremultPlugin()
@@ -330,9 +330,9 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:ColorConvert", 1, 0, ColorConvertPlugin::setHostFunc, ColorConvertPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Premult", 1, 0, PremultPlugin::setHostFunc, PremultPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Unpremult", 1, 0, UnpremultPlugin::setHostFunc, UnpremultPlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:ColorConvert", 1, 0, ColorConvertPlugin::setHostFunc, ColorConvertPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Premult", 1, 0, PremultPlugin::setHostFunc, PremultPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Unpremult", 1, 0, UnpremultPlugin::setHostFunc, UnpremultPlugin::mainEntryPoint }
     };
 }
 

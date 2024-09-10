@@ -25,7 +25,7 @@
                                     "value": 0
                                 }
                             },
-                            "generator_kind": "Toucan:Fill",
+                            "generator_kind": "toucan:Fill",
                             "parameters": {
                                 "size": [ 1280, 720 ],
                                 "color": [ 0.0, 0.0, 0.0, 1.0 ]
@@ -34,7 +34,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Box",
+                                "effect_name": "toucan:Box",
                                 "metadata": {
                                     "pos1": [ 200, 200 ],
                                     "pos2": [ 1080, 520 ],
@@ -44,7 +44,7 @@
                             },
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Text",
+                                "effect_name": "toucan:Text",
                                 "metadata": {
                                     "pos": [ 320, 420 ],
                                     "text": "toucan",
@@ -55,7 +55,7 @@
                             },
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Text",
+                                "effect_name": "toucan:Text",
                                 "metadata": {
                                     "pos": [ 315, 415 ],
                                     "text": "toucan",
@@ -66,7 +66,7 @@
                             },
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Line",
+                                "effect_name": "toucan:Line",
                                 "metadata": {
                                     "pos1": [ 200, 450 ],
                                     "pos2": [ 1080, 450 ],

@@ -125,7 +125,7 @@ OfxStatus FilterPlugin::_renderAction(
 BlurPlugin* BlurPlugin::_plugin = nullptr;
 
 BlurPlugin::BlurPlugin() :
-    FilterPlugin("Toucan", "Blur")
+    FilterPlugin("toucan", "Blur")
 {}
 
 BlurPlugin::~BlurPlugin()
@@ -208,7 +208,7 @@ OfxStatus BlurPlugin::_render(
 ColorMapPlugin* ColorMapPlugin::_plugin = nullptr;
 
 ColorMapPlugin::ColorMapPlugin() :
-    FilterPlugin("Toucan", "ColorMap")
+    FilterPlugin("toucan", "ColorMap")
 {}
 
 ColorMapPlugin::~ColorMapPlugin()
@@ -301,7 +301,7 @@ OfxStatus ColorMapPlugin::_render(
 InvertPlugin* InvertPlugin::_plugin = nullptr;
 
 InvertPlugin::InvertPlugin() :
-    FilterPlugin("Toucan", "Invert")
+    FilterPlugin("toucan", "Invert")
 {}
 
 InvertPlugin::~InvertPlugin()
@@ -367,7 +367,7 @@ OfxStatus InvertPlugin::_render(
 PowPlugin* PowPlugin::_plugin = nullptr;
 
 PowPlugin::PowPlugin() :
-    FilterPlugin("Toucan", "Pow")
+    FilterPlugin("toucan", "Pow")
 {}
 
 PowPlugin::~PowPlugin()
@@ -444,7 +444,7 @@ OfxStatus PowPlugin::_render(
 SaturatePlugin* SaturatePlugin::_plugin = nullptr;
 
 SaturatePlugin::SaturatePlugin() :
-    FilterPlugin("Toucan", "Saturate")
+    FilterPlugin("toucan", "Saturate")
 {}
 
 SaturatePlugin::~SaturatePlugin()
@@ -522,7 +522,7 @@ OfxStatus SaturatePlugin::_render(
 UnsharpMaskPlugin* UnsharpMaskPlugin::_plugin = nullptr;
 
 UnsharpMaskPlugin::UnsharpMaskPlugin() :
-    FilterPlugin("Toucan", "UnsharpMask")
+    FilterPlugin("toucan", "UnsharpMask")
 {}
 
 UnsharpMaskPlugin::~UnsharpMaskPlugin()
@@ -624,12 +624,12 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:Blur", 1, 0, BlurPlugin::setHostFunc, BlurPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:ColorMap", 1, 0, ColorMapPlugin::setHostFunc, ColorMapPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Invert", 1, 0, InvertPlugin::setHostFunc, InvertPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Pow", 1, 0, PowPlugin::setHostFunc, PowPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:UnsharpMask", 1, 0, UnsharpMaskPlugin::setHostFunc, UnsharpMaskPlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:Blur", 1, 0, BlurPlugin::setHostFunc, BlurPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:ColorMap", 1, 0, ColorMapPlugin::setHostFunc, ColorMapPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Invert", 1, 0, InvertPlugin::setHostFunc, InvertPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Pow", 1, 0, PowPlugin::setHostFunc, PowPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Saturate", 1, 0, SaturatePlugin::setHostFunc, SaturatePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:UnsharpMask", 1, 0, UnsharpMaskPlugin::setHostFunc, UnsharpMaskPlugin::mainEntryPoint }
     };
 }
 

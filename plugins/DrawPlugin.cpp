@@ -125,7 +125,7 @@ OfxStatus DrawPlugin::_renderAction(
 BoxPlugin* BoxPlugin::_plugin = nullptr;
 
 BoxPlugin::BoxPlugin() :
-    DrawPlugin("Toucan", "Box")
+    DrawPlugin("toucan", "Box")
 {}
 
 BoxPlugin::~BoxPlugin()
@@ -233,7 +233,7 @@ OfxStatus BoxPlugin::_render(
 LinePlugin* LinePlugin::_plugin = nullptr;
 
 LinePlugin::LinePlugin() :
-    DrawPlugin("Toucan", "Line")
+    DrawPlugin("toucan", "Line")
 {}
 
 LinePlugin::~LinePlugin()
@@ -341,7 +341,7 @@ OfxStatus LinePlugin::_render(
 TextPlugin* TextPlugin::_plugin = nullptr;
 
 TextPlugin::TextPlugin() :
-    DrawPlugin("Toucan", "Text")
+    DrawPlugin("toucan", "Text")
 {}
 
 TextPlugin::~TextPlugin()
@@ -456,9 +456,9 @@ namespace
 {
     std::vector<OfxPlugin> plugins =
     {
-        { kOfxImageEffectPluginApi, 1, "Toucan:Box", 1, 0, BoxPlugin::setHostFunc, BoxPlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Line", 1, 0, LinePlugin::setHostFunc, LinePlugin::mainEntryPoint },
-        { kOfxImageEffectPluginApi, 1, "Toucan:Text", 1, 0, TextPlugin::setHostFunc, TextPlugin::mainEntryPoint }
+        { kOfxImageEffectPluginApi, 1, "toucan:Box", 1, 0, BoxPlugin::setHostFunc, BoxPlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Line", 1, 0, LinePlugin::setHostFunc, LinePlugin::mainEntryPoint },
+        { kOfxImageEffectPluginApi, 1, "toucan:Text", 1, 0, TextPlugin::setHostFunc, TextPlugin::mainEntryPoint }
     };
 }
 

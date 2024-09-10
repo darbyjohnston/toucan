@@ -30,7 +30,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Crop",
+                                "effect_name": "toucan:Crop",
                                 "metadata": {
                                     "pos": [ 640, 360 ],
                                     "size": [ 640, 360 ]
@@ -74,7 +74,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Flip"
+                                "effect_name": "toucan:Flip"
                             }
                         ],
                         "source_range": {
@@ -114,7 +114,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Flop"
+                                "effect_name": "toucan:Flop"
                             }
                         ],
                         "source_range": {
@@ -154,7 +154,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Resize",
+                                "effect_name": "toucan:Resize",
                                 "metadata": {
                                     "size": [ 640, 360 ],
                                     "filter_name": "",
@@ -199,7 +199,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:Rotate",
+                                "effect_name": "toucan:Rotate",
                                 "metadata": {
                                     "angle": 45.0,
                                     "filter_name": "",

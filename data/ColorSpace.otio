@@ -64,7 +64,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:ColorConvert",
+                                "effect_name": "toucan:ColorConvert",
                                 "metadata": {
                                     "fromspace": "Linear Rec.709 (sRGB)",
                                     "tospace": "ACEScct",
@@ -112,7 +112,7 @@
                         "effects": [
                             {
                                 "OTIO_SCHEMA": "Effect.1",
-                                "effect_name": "Toucan:ColorConvert",
+                                "effect_name": "toucan:ColorConvert",
                                 "metadata": {
                                     "fromspace": "Gamma 2.4 Rec.709 - Texture",
                                     "tospace": "Linear P3-D65",
