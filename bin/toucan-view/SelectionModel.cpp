@@ -55,6 +55,8 @@ namespace toucan
     void SelectionModel::selectAll(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
     {
         std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > items;
+        //! \bug The stack is not returned by find_children<Item>?
+        items.push_back(timeline->tracks());
         for (auto& item : timeline->find_children<OTIO_NS::Item>())
         {
             items.push_back(item);

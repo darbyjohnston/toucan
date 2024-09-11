@@ -60,7 +60,6 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
-            _size.borderFocus = event.style->getSizeRole(dtk::SizeRole::BorderFocus, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label , event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
@@ -68,7 +67,7 @@ namespace toucan
         }
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.textSize.h + _size.margin * 2 + _size.borderFocus * 2);
+            _size.textSize.h + _size.margin * 2 + _size.border * 2);
         _setSizeHint(sizeHint);
     }
 
@@ -88,15 +87,10 @@ namespace toucan
         IItem::drawEvent(drawRect, event);
         const dtk::Box2I& g = getGeometry();
 
-        if (_selected)
-        {
-            event.render->drawMesh(
-                dtk::border(g, _size.borderFocus),
-                event.style->getColorRole(dtk::ColorRole::Yellow));
-        }
-
-        const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);
-        event.render->drawRect(g2, _color);
+        const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
+        event.render->drawRect(
+            g2,
+            _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
 
         const dtk::Box2I g3 = dtk::margin(g2, -_size.margin);
         if (!_text.empty() && _draw.glyphs.empty())

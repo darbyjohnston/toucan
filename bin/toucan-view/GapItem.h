@@ -43,7 +43,6 @@ namespace toucan
             float displayScale = 0.F;
             int margin = 0;
             int border = 0;
-            int borderFocus = 0;
             dtk::FontInfo fontInfo;
             dtk::FontMetrics fontMetrics;
             dtk::Size2I textSize;
