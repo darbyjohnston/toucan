@@ -7,6 +7,8 @@
 #include "App.h"
 
 #include <dtk/ui/Label.h>
+#include <dtk/ui/Spacer.h>
+#include <dtk/ui/ToolButton.h>
 
 namespace toucan
 {
@@ -41,6 +43,11 @@ namespace toucan
         return out;
     }
 
+    void InspectorWidget::setOpen(bool value)
+    {
+        _bellows->setOpen(value);
+    }
+
     void InspectorWidget::setGeometry(const dtk::Box2I& value)
     {
         IWidget::setGeometry(value);
@@ -61,11 +68,47 @@ namespace toucan
     {
         IToolWidget::_init(context, app, "toucan::InspectorTool", "Inspector", parent);
 
-        _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
-
-        _layout = dtk::VerticalLayout::create(context);
+        _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
-        _scrollWidget->setWidget(_layout);
+
+        auto hLayout = dtk::HorizontalLayout::create(context, _layout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
+        auto spacer = dtk::Spacer::create(context, dtk::Orientation::Horizontal, hLayout);
+        spacer->setSpacingRole(dtk::SizeRole::None);
+        spacer->setStretch(dtk::Stretch::Expanding);
+        auto openButton = dtk::ToolButton::create(context, hLayout);
+        openButton->setMarginRole(dtk::SizeRole::MarginSmall);
+        openButton->setIcon("BellowsOpen");
+        openButton->setTooltip("Open all");
+        auto closeButton = dtk::ToolButton::create(context, hLayout);
+        closeButton->setMarginRole(dtk::SizeRole::MarginSmall);
+        closeButton->setIcon("BellowsClosed");
+        closeButton->setTooltip("Close all");
+
+        _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, _layout);
+        _scrollWidget->setVStretch(dtk::Stretch::Expanding);
+
+        _scrollLayout = dtk::VerticalLayout::create(context);
+        _scrollLayout->setSpacingRole(dtk::SizeRole::None);
+        _scrollWidget->setWidget(_scrollLayout);
+
+        openButton->setClickedCallback(
+            [this]
+            {
+                for (const auto& widget : _widgets)
+                {
+                    widget->setOpen(true);
+                }
+            });
+
+        closeButton->setClickedCallback(
+            [this]
+            {
+                for (const auto& widget : _widgets)
+                {
+                    widget->setOpen(false);
+                }
+            });
 
         _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
             document->getSelectionModel()->observeSelection(),
@@ -79,7 +122,7 @@ namespace toucan
                 auto context = _getContext().lock();
                 for (const auto& item : selection)
                 {
-                    auto widget = InspectorWidget::create(context, item, _layout);
+                    auto widget = InspectorWidget::create(context, item, _scrollLayout);
                     _widgets.push_back(widget);
                 }
             });
@@ -102,12 +145,12 @@ namespace toucan
     void InspectorTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
-        _scrollWidget->setGeometry(value);
+        _layout->setGeometry(value);
     }
 
     void InspectorTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_scrollWidget->getSizeHint());
+        _setSizeHint(_layout->getSizeHint());
     }
 }

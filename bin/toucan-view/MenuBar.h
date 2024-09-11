@@ -82,6 +82,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
         std::shared_ptr<dtk::ValueObserver<float> > _displayScaleObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
         std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }

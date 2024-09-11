@@ -91,7 +91,7 @@ namespace toucan
         {
             event.render->drawMesh(
                 dtk::border(g, _size.borderFocus),
-                event.style->getColorRole(dtk::ColorRole::KeyFocus));
+                event.style->getColorRole(dtk::ColorRole::Yellow));
         }
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);

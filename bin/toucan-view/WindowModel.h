@@ -5,6 +5,7 @@
 #pragma once
 
 #include <dtk/core/ObservableMap.h>
+#include <dtk/core/ObservableValue.h>
 
 namespace toucan
 {
@@ -30,7 +31,12 @@ namespace toucan
         bool getControl(WindowControl) const;
         void setControl(WindowControl, bool);
 
+        bool getTooltips() const;
+        std::shared_ptr<dtk::IObservableValue<bool> > observeTooltips() const;
+        void setTooltips(bool);
+
     private:
         std::shared_ptr<dtk::ObservableMap<WindowControl, bool> > _controls;
+        std::shared_ptr<dtk::ObservableValue<bool> > _tooltips;
     };
 }

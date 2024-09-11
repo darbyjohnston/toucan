@@ -43,15 +43,19 @@ namespace toucan
 
     void DocumentsModel::close()
     {
+        close(_currentIndex->get());
+    }
+
+    void DocumentsModel::close(int index)
+    {
         auto documents = _documents->get();
-        int current = _currentIndex->get();
-        if (current >= 0 && current < documents.size())
+        if (index >= 0 && index < documents.size())
         {
-            auto document = *(documents.begin() + current);
-            documents.erase(documents.begin() + current);
+            auto document = *(documents.begin() + index);
+            documents.erase(documents.begin() + index);
             _documents->setIfChanged(documents);
             _remove->setAlways(document);
-            current = std::min(current, static_cast<int>(documents.size()) - 1);
+            int current = std::min(index, static_cast<int>(documents.size()) - 1);
             _current->setAlways(
                 (current >= 0 && current < documents.size()) ?
                 documents[current] :

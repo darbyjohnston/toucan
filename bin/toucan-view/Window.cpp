@@ -43,6 +43,7 @@ namespace toucan
         _toolBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _tabWidget = dtk::TabWidget::create(context, _layout);
+        _tabWidget->setTabsClosable(true);
         _tabWidget->setVStretch(dtk::Stretch::Expanding);
 
         std::weak_ptr<App> appWeak(app);
@@ -52,6 +53,14 @@ namespace toucan
                 if (auto app = appWeak.lock())
                 {
                     app->getDocumentsModel()->setCurrentIndex(index);
+                }
+            });
+        _tabWidget->setTabCloseCallback(
+            [appWeak](int index)
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getDocumentsModel()->close(index);
                 }
             });
 
@@ -98,6 +107,13 @@ namespace toucan
                 auto i = value.find(WindowControl::ToolBar);
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
+            });
+
+        _tooltipsObserver = dtk::ValueObserver<bool>::create(
+            app->getWindowModel()->observeTooltips(),
+            [this](bool value)
+            {
+                setTooltipsEnabled(value);
             });
     }
 

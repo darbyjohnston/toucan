@@ -30,7 +30,10 @@ namespace toucan
         setTooltip(gap->name());
 
         _gap = gap;
-        _text = gap->name();
+        _text = !gap->name().empty() ? gap->name() : "Gap";
+        _color = dtk::Color4F(.3F, .3F, .3F);
+
+        setTooltip(_text);
     }
     
     GapItem::~GapItem()
@@ -65,7 +68,7 @@ namespace toucan
         }
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.textSize.h + _size.margin + _size.borderFocus);
+            _size.textSize.h + _size.margin * 2 + _size.borderFocus * 2);
         _setSizeHint(sizeHint);
     }
 
@@ -89,7 +92,7 @@ namespace toucan
         {
             event.render->drawMesh(
                 dtk::border(g, _size.borderFocus),
-                event.style->getColorRole(dtk::ColorRole::KeyFocus));
+                event.style->getColorRole(dtk::ColorRole::Yellow));
         }
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);
@@ -103,7 +106,7 @@ namespace toucan
         dtk::ClipRectEnabledState clipRectEnabledState(event.render);
         dtk::ClipRectState clipRectState(event.render);
         event.render->setClipRectEnabled(true);
-        event.render->setClipRect(g3);
+        event.render->setClipRect(intersect(g3, drawRect));
         event.render->drawText(
             _draw.glyphs,
             _size.fontMetrics,

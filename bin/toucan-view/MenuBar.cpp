@@ -541,6 +541,41 @@ namespace toucan
 
         _menus["Window"]->addDivider();
 
+        _menus["Window/Resize"] = _menus["Window"]->addSubMenu("Resize");
+
+        _actions["Window/Resize/1280x720"] = std::make_shared<dtk::Action>(
+            "1280x720",
+            [windowWeak]
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setSize(dtk::Size2I(1280, 720));
+                }
+            });
+        _menus["Window/Resize"]->addItem(_actions["Window/Resize/1280x720"]);
+
+        _actions["Window/Resize/1920x1080"] = std::make_shared<dtk::Action>(
+            "1920x1080",
+            [windowWeak]
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setSize(dtk::Size2I(1920, 1080));
+                }
+            });
+        _menus["Window/Resize"]->addItem(_actions["Window/Resize/1920x1080"]);
+
+        _actions["Window/Resize/3840x2160"] = std::make_shared<dtk::Action>(
+            "3840x2160",
+            [windowWeak]
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setSize(dtk::Size2I(3840, 2160));
+                }
+            });
+        _menus["Window/Resize"]->addItem(_actions["Window/Resize/3840x2160"]);
+
         _menus["Window/DisplayScale"] = _menus["Window"]->addSubMenu("Display Scale");
 
         _actions["Window/DisplayScale/Auto"] = std::make_shared<dtk::Action>(
@@ -587,11 +622,21 @@ namespace toucan
             });
         _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/3.0"]);
 
+        _actions["Window/Tooltips"] = std::make_shared<dtk::Action>(
+            "Tooltips",
+            [appWeak](bool value)
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getWindowModel()->setTooltips(value);
+                }
+            });
+        _menus["Window"]->addItem(_actions["Window/Tooltips"]);
+
         _fullScreenObserver = dtk::ValueObserver<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
             {
-                _actions["Window/FullScreen"]->checked = value;
                 _menus["Window"]->setItemChecked(_actions["Window/FullScreen"], value);
             });
 
@@ -617,6 +662,13 @@ namespace toucan
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/1.0"], 1.F == value);
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/2.0"], 2.F == value);
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/3.0"], 3.F == value);
+            });
+
+        _tooltipsObserver = dtk::ValueObserver<bool>::create(
+            app->getWindowModel()->observeTooltips(),
+            [this](bool value)
+            {
+                _menus["Window"]->setItemChecked(_actions["Window/Tooltips"], value);
             });
     }
 
@@ -676,7 +728,6 @@ namespace toucan
                 _document->getViewModel()->observeFrame(),
                 [this](bool value)
                 {
-                    _actions["View/FrameView"]->checked = value;
                     _menus["View"]->setItemChecked(_actions["View/FrameView"], value);
                 });
         }

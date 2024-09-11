@@ -35,7 +35,7 @@ namespace toucan
     private:
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap> _gap;
         std::string _text;
-        dtk::Color4F _color = dtk::Color4F(.3F, .3F, .3F);
+        dtk::Color4F _color;
 
         struct SizeData
         {

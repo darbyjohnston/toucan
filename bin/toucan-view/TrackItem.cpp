@@ -103,8 +103,7 @@ namespace toucan
             const dtk::Size2I& childSizeHint = child->getSizeHint();
             sizeHint.h = std::max(sizeHint.h, childSizeHint.h);
         }
-        sizeHint.h += _size.textSize.h + _size.margin * 2;
-        sizeHint.h += _size.borderFocus * 2;
+        sizeHint.h += _size.textSize.h + _size.margin * 2 + _size.borderFocus * 2;
         _setSizeHint(sizeHint);
     }
 
@@ -128,7 +127,7 @@ namespace toucan
         {
             event.render->drawMesh(
                 dtk::border(g, _size.borderFocus),
-                event.style->getColorRole(dtk::ColorRole::KeyFocus));
+                event.style->getColorRole(dtk::ColorRole::Yellow));
         }
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);

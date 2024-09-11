@@ -23,7 +23,7 @@ int main(int argc, char** argv)
         std::cout << "Options:" << std::endl;
         std::cout << std::endl;
         std::cout << "* -filmstrip - Render the timeline as thumbnails to a single image." << std::endl;
-        std::cout << "* -graph - Print a Graphviz graph for each frame." << std::endl;
+        std::cout << "* -graph - Write a Graphviz graph for each frame." << std::endl;
         std::cout << "* -v - Print verbose output." << std::endl;
         std::cout << std::endl;
         return 1;
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     const int outputStartFrame = atoi(outputSplit.second.c_str());
     const size_t outputNumberPadding = getNumberPadding(outputSplit.second);
     bool filmstrip = false;
-    bool printGraph = false;
+    bool writeGraph = false;
     bool verbose = false;
     for (int i = 3; i < argc; ++i)
     {
@@ -46,7 +46,7 @@ int main(int argc, char** argv)
         }
         else if ("-graph" == arg)
         {
-            printGraph = true;
+            writeGraph = true;
         }
         else if ("-v" == arg)
         {
@@ -129,15 +129,6 @@ int main(int argc, char** argv)
 
         if (auto node = graph->exec(host, time))
         {
-            // Print the graph.
-            if (printGraph)
-            {
-                for (const auto& line : node->graph(time, inputPath.stem().string()))
-                {
-                    std::cout << line << std::endl;
-                }
-            }
-
             // Execute the graph.
             const auto buf = node->exec(time - startTime);
 
@@ -167,6 +158,27 @@ int main(int argc, char** argv)
                     0,
                     thumbnailBuf);
                 filmstripX += thumbnailSize.x + thumbnailSpacing;
+            }
+
+            // Write the graph.
+            if (writeGraph)
+            {
+                const std::filesystem::path path = getSequenceFrame(
+                    outputPath.parent_path(),
+                    outputSplit.first,
+                    outputStartFrame + time.to_frames(),
+                    outputNumberPadding,
+                    ".dot");
+                const std::vector<std::string> lines = node->graph(time, inputPath.stem().string());
+                if (FILE* f = fopen(path.string().c_str(), "w"))
+                {
+                    for (const auto& line : lines)
+                    {
+                        fprintf(f, line.c_str());
+                        fprintf(f, "\n");
+                    }
+                    fclose(f);
+                }
             }
         }
     }

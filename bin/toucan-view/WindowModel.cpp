@@ -16,6 +16,7 @@ namespace toucan
             { WindowControl::Tools, true }
         };
         _controls = dtk::ObservableMap<WindowControl, bool>::create(values);
+        _tooltips = dtk::ObservableValue<bool>::create(true);
     }
 
     WindowModel::~WindowModel()
@@ -44,5 +45,20 @@ namespace toucan
     void WindowModel::setControl(WindowControl control, bool value)
     {
         _controls->setItemOnlyIfChanged(control, value);
+    }
+
+    bool WindowModel::getTooltips() const
+    {
+        return _tooltips->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<bool> > WindowModel::observeTooltips() const
+    {
+        return _tooltips;
+    }
+
+    void WindowModel::setTooltips(bool value)
+    {
+        _tooltips->setIfChanged(value);
     }
 }

@@ -63,7 +63,7 @@ namespace toucan
         {
             const dtk::Size2I& sizeHint = child->getSizeHint();
             child->setGeometry(dtk::Box2I(pos.x, pos.y, sizeHint.w, sizeHint.h));
-            pos.y += sizeHint.h + _size.spacing;
+            pos.y += sizeHint.h;
         }
     }
 
@@ -76,7 +76,6 @@ namespace toucan
             _size.init = false;
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
-            _size.spacing = event.style->getSizeRole(dtk::SizeRole::SpacingTool, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
             _size.borderFocus = event.style->getSizeRole(dtk::SizeRole::BorderFocus, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
@@ -93,12 +92,7 @@ namespace toucan
             const dtk::Size2I& childSizeHint = child->getSizeHint();
             sizeHint.h += childSizeHint.h;
         }
-        if (!children.empty())
-        {
-            sizeHint.h += _size.spacing * (children.size() - 1);
-        }
-        sizeHint.h += _size.textSize.h + _size.margin * 2;
-        sizeHint.h += _size.borderFocus * 2;
+        sizeHint.h += _size.textSize.h + _size.margin * 2 + _size.borderFocus * 2;
         _setSizeHint(sizeHint);
     }
 
@@ -122,7 +116,7 @@ namespace toucan
         {
             event.render->drawMesh(
                 dtk::border(g, _size.borderFocus),
-                event.style->getColorRole(dtk::ColorRole::KeyFocus));
+                event.style->getColorRole(dtk::ColorRole::Yellow));
         }
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.borderFocus);

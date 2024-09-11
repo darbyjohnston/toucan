@@ -27,6 +27,7 @@ namespace toucan
 
         void open(const std::filesystem::path&);
         void close();
+        void close(int);
         void closeAll();
 
         std::shared_ptr<dtk::IObservableList<std::shared_ptr<Document> > > observeDocuments() const;

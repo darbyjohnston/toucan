@@ -31,6 +31,8 @@ namespace toucan
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        void setOpen(bool);
+
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
@@ -61,8 +63,9 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _layout;
+        std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
+        std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
         std::vector<std::shared_ptr<InspectorWidget> > _widgets;
 
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
