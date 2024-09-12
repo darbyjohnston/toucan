@@ -14,6 +14,7 @@ set(HEADERS
     PlaybackModel.h
     SelectionModel.h
     StackItem.h
+    ThumbnailGenerator.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
@@ -41,6 +42,7 @@ set(SOURCE
     PlaybackModel.cpp
     SelectionModel.cpp
     StackItem.cpp
+    ThumbnailGenerator.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
     TimelineItem.cpp

@@ -29,6 +29,8 @@ namespace toucan
         _text = !stack->name().empty() ? stack->name() : "Stack";
         _color = dtk::Color4F(.2F, .2F, .2F);
 
+        setTooltip(_text);
+
         for (const auto& child : stack->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))

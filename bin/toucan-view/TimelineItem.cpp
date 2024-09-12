@@ -43,6 +43,7 @@ namespace toucan
         _timeline = timeline;
         _timeUnitsModel = app->getTimeUnitsModel();
         _selectionModel = document->getSelectionModel();
+        _thumbnailGenerator = document->getThumbnailGenerator();
 
         StackItem::create(context, app, _timeline->tracks(), shared_from_this());
 
@@ -133,13 +134,28 @@ namespace toucan
             const dtk::Size2I& sizeHint = child->getSizeHint();
             child->setGeometry(dtk::Box2I(
                 g.min.x,
-                g.min.y + timeHeight,
+                g.min.y + timeHeight + _size.thumbnailSize.h,
                 sizeHint.w,
                 sizeHint.h));
         }
         if (auto scrollArea = getParentT<dtk::ScrollArea>())
         {
             _size.scrollPos = scrollArea->getScrollPos();
+        }
+    }
+
+    void TimelineItem::tickEvent(
+        bool parentsVisible,
+        bool parentsEnabled,
+        const dtk::TickEvent& event)
+    {
+        IItem::tickEvent(parentsVisible, parentsEnabled, event);
+        if (_thumbnailFuture.valid() &&
+            _thumbnailFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+        {
+            const auto thumbnail = _thumbnailFuture.get();
+            _thumbnails[thumbnail.time] = thumbnail.image;
+            _setDrawUpdate();
         }
     }
 
@@ -154,8 +170,12 @@ namespace toucan
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
             _size.handle = event.style->getSizeRole(dtk::SizeRole::Handle, event.displayScale);
+            _size.thumbnailSize.h = 2 * event.style->getSizeRole(dtk::SizeRole::SwatchLarge, event.displayScale);
+            _size.thumbnailSize.w = _size.thumbnailSize.h * _thumbnailGenerator->getAspect();
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
+            _thumbnailFuture = std::future<Thumbnail>();
+            _thumbnails.clear();
         }
         int childSizeHint = 0;
         for (const auto& child : getChildren())
@@ -164,8 +184,39 @@ namespace toucan
         }
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.fontMetrics.lineHeight + _size.margin * 2 + childSizeHint);
+            _size.fontMetrics.lineHeight + _size.margin * 2);
+        sizeHint.h += _size.thumbnailSize.h;
+        sizeHint.h += childSizeHint;
         _setSizeHint(sizeHint);
+    }
+
+    void TimelineItem::drawEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)
+    {
+        IItem::drawEvent(drawRect, event);
+        const dtk::Box2I& g = getGeometry();
+        const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2;
+        for (int x = g.min.x; x < g.max.x; x += _size.thumbnailSize.w)
+        {
+            const dtk::Box2I g2(x, y, _size.thumbnailSize.w, _size.thumbnailSize.h);
+            if (dtk::intersects(g2, drawRect))
+            {
+                const OTIO_NS::RationalTime t = posToTime(x);
+                const auto i = _thumbnails.find(t);
+                if (i != _thumbnails.end())
+                {
+                    if (i->second)
+                    {
+                        event.render->drawImage(
+                            i->second,
+                            dtk::Box2I(x, y, i->second->getWidth(), i->second->getHeight()));
+                    }
+                }
+                else if (!_thumbnailFuture.valid())
+                {
+                    _thumbnailFuture = _thumbnailGenerator->getThumbnail(t, _size.thumbnailSize.h);
+                }
+            }
+        }
     }
 
     void TimelineItem::drawOverlayEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)

@@ -19,6 +19,7 @@ namespace toucan
 {
     class PlaybackModel;
     class SelectionModel;
+    class ThumbnailGenerator;
     class ViewModel;
 
     class Document : std::enable_shared_from_this<Document>
@@ -38,6 +39,7 @@ namespace toucan
         const std::shared_ptr<PlaybackModel>& getPlaybackModel() const;
         const std::shared_ptr<ViewModel>& getViewModel() const;
         const std::shared_ptr<SelectionModel>& getSelectionModel() const;
+        const std::shared_ptr<ThumbnailGenerator>& getThumbnailGenerator() const;
 
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > observeCurrentImage() const;
 
@@ -54,6 +56,7 @@ namespace toucan
         std::shared_ptr<PlaybackModel> _playbackModel;
         std::shared_ptr<ViewModel> _viewModel;
         std::shared_ptr<SelectionModel> _selectionModel;
+        std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
         std::shared_ptr<dtk::ObservableValue<std::shared_ptr<dtk::Image> > > _currentImage;
         OTIO_NS::RationalTime _currentTime;
 

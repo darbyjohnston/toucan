@@ -102,8 +102,8 @@ int main(int argc, char** argv)
 
     // Initialize the filmstrip.
     OIIO::ImageBuf filmstripBuf;
-    const int thumbnailWidth = 120;
-    const int thumbnailSpacing = 20;
+    const int thumbnailWidth = 360;
+    const int thumbnailSpacing = 0;
     IMATH_NAMESPACE::V2d thumbnailSize;
     if (filmstrip && imageSize.x > 0 && imageSize.y > 0)
     {

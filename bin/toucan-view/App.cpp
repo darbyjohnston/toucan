@@ -54,7 +54,7 @@ namespace toucan
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
             "toucan-view",
-            dtk::Size2I(1920, 1080));
+            dtk::Size2I(1820 * 2, 910 * 2));
         addWindow(_window);
 
         if (!_path.empty())
@@ -87,6 +87,11 @@ namespace toucan
     const std::shared_ptr<TimeUnitsModel>& App::getTimeUnitsModel() const
     {
         return _timeUnitsModel;
+    }
+
+    const std::shared_ptr<ImageEffectHost>& App::getHost() const
+    {
+        return _host;
     }
 
     const std::shared_ptr<DocumentsModel>& App::getDocumentsModel() const

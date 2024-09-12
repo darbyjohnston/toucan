@@ -6,6 +6,7 @@
 
 #include "PlaybackModel.h"
 #include "SelectionModel.h"
+#include "ThumbnailGenerator.h"
 #include "ViewModel.h"
 
 #include <dtk/core/Math.h>
@@ -40,6 +41,11 @@ namespace toucan
         _viewModel = std::make_shared<ViewModel>();
 
         _selectionModel = std::make_shared<SelectionModel>();
+
+        _thumbnailGenerator = std::make_shared<ThumbnailGenerator>(
+            _path.parent_path(),
+            _timeline,
+            _host);
 
         _currentImage = dtk::ObservableValue<std::shared_ptr<dtk::Image> >::create();
 
@@ -91,6 +97,11 @@ namespace toucan
     const std::shared_ptr<SelectionModel>& Document::getSelectionModel() const
     {
         return _selectionModel;
+    }
+
+    const std::shared_ptr<ThumbnailGenerator>& Document::getThumbnailGenerator() const
+    {
+        return _thumbnailGenerator;
     }
 
     std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > Document::observeCurrentImage() const

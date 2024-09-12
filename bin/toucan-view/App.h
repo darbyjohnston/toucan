@@ -28,6 +28,7 @@ namespace toucan
             std::vector<std::string>&);
 
         const std::shared_ptr<TimeUnitsModel>& getTimeUnitsModel() const;
+        const std::shared_ptr<ImageEffectHost>& getHost() const;
         const std::shared_ptr<DocumentsModel>& getDocumentsModel() const;
         const std::shared_ptr<WindowModel>& getWindowModel() const;
 

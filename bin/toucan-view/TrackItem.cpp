@@ -33,6 +33,8 @@ namespace toucan
             dtk::Color4F(.2F, .2F, .3F) :
             dtk::Color4F(.2F, .3F, .2F);
 
+        setTooltip(_text);
+
         for (const auto& child : track->children())
         {
             if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(child))

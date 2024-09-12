@@ -6,6 +6,7 @@
 
 #include "IItem.h"
 #include "SelectionModel.h"
+#include "ThumbnailGenerator.h"
 #include "TimeUnitsModel.h"
 
 namespace toucan
@@ -38,7 +39,12 @@ namespace toucan
         int timeToPos(const OTIO_NS::RationalTime&) const;
 
         void setGeometry(const dtk::Box2I&) override;
+        void tickEvent(
+            bool parentsVisible,
+            bool parentsEnabled,
+            const dtk::TickEvent&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
+        void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
         void drawOverlayEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
         void mouseMoveEvent(dtk::MouseMoveEvent&) override;
         void mousePressEvent(dtk::MouseClickEvent&) override;
@@ -70,6 +76,9 @@ namespace toucan
         std::function<void(const OTIO_NS::RationalTime&)> _currentTimeCallback;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<SelectionModel> _selectionModel;
+        std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
+        std::future<Thumbnail> _thumbnailFuture;
+        std::map<OTIO_NS::RationalTime, std::shared_ptr<dtk::Image> > _thumbnails;
 
         struct SizeData
         {
@@ -78,6 +87,7 @@ namespace toucan
             int margin = 0;
             int border = 0;
             int handle = 0;
+            dtk::Size2I thumbnailSize;
             dtk::FontInfo fontInfo;
             dtk::FontMetrics fontMetrics;
             dtk::V2I scrollPos;
