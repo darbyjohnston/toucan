@@ -34,7 +34,11 @@ else()
 endif()
 
 add_library(toucan ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(toucan PUBLIC OTIO::opentimelineio OTIO::opentime OpenImageIO::OpenImageIO MINIZIP::minizip)
+set(LIBS PUBLIC OTIO::opentimelineio OTIO::opentime OpenImageIO::OpenImageIO)
+if(TARGET MINIZIP::minizip)
+    list(APPEND LIBS MINIZIP::minizip)
+endif()
+target_link_libraries(toucan ${LIBS})
 set_target_properties(toucan PROPERTIES FOLDER lib)
 set_target_properties(toucan PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

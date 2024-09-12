@@ -3,7 +3,11 @@ foreach(PLUGIN ColorSpace Draw Filter Generator Transform Transition)
         toucan${PLUGIN} MODULE
         ${PLUGIN}Plugin.h Plugin.h Util.h
         ${PLUGIN}Plugin.cpp Plugin.cpp Util.cpp)
-    target_link_libraries(toucan${PLUGIN} PUBLIC OpenImageIO::OpenImageIO MINIZIP::minizip)
+    set(LIBS OpenImageIO::OpenImageIO)
+    if(TARGET MINIZIP::minizip)
+        list(APPEND LIBS MINIZIP::minizip)
+    endif()
+    target_link_libraries(toucan${PLUGIN} PUBLIC ${LIBS})
     set_target_properties(
         toucan${PLUGIN} PROPERTIES
         FOLDER plugin

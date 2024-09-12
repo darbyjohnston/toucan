@@ -7,9 +7,27 @@ set(OpenImageIO_GIT_TAG "a534a392cd5aa027741f7359d3a7f4799d6b9fcc")
 set(OpenImageIO_GIT_REPOSITORY "https://github.com/darbyjohnston/OpenImageIO")
 set(OpenImageIO_GIT_TAG "ffmpeg_add_metadata")
 
-set(OpenImageIO_DEPS TIFF PNG libjpeg-turbo OpenEXR OpenColorIO Freetype)
+set(OpenImageIO_DEPS)
+if(toucan_PNG)
+    list(APPEND OpenImageIO_DEPS PNG)
+endif()
+if(toucan_TIFF)
+    list(APPEND OpenImageIO_DEPS TIFF)
+endif()
+if(toucan_JPEG)
+    list(APPEND OpenImageIO_DEPS libjpeg-turbo)
+endif()
+if(toucan_OpenEXR)
+    list(APPEND OpenImageIO_DEPS OpenEXR)
+endif()
+if(toucan_Freetype)
+    list(APPEND OpenImageIO_DEPS Freetype)
+endif()
 if(toucan_FFMPEG)
     list(APPEND OpenImageIO_DEPS FFmpeg)
+endif()
+if(toucan_OpenColorIO)
+    list(APPEND OpenImageIO_DEPS OpenColorIO)
 endif()
 
 set(OpenImageIO_ARGS
@@ -21,7 +39,7 @@ set(OpenImageIO_ARGS
     -DOIIO_INSTALL_FONTS=ON
     -DUSE_FREETYPE=ON
     -DUSE_PNG=ON
-    -DUSE_FFMPEG=${toucan_FFMPEG}
+    -DUSE_FFMPEG=ON
     -DUSE_OPENCOLORIO=ON
     -DUSE_BZIP2=OFF
     -DUSE_DCMTK=OFF
