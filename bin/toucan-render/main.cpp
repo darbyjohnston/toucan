@@ -174,8 +174,7 @@ int main(int argc, char** argv)
                 {
                     for (const auto& line : lines)
                     {
-                        fprintf(f, line.c_str());
-                        fprintf(f, "\n");
+                        fprintf(f, "%s\n", line.c_str());
                     }
                     fclose(f);
                 }

@@ -158,7 +158,7 @@ namespace toucan
         const auto& children = track->children();
         for (size_t i = 0; i < children.size(); ++i)
         {
-            if (item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(children[i]))
+            if ((item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(children[i])))
             {
                 const auto trimmedRangeInParent = item->trimmed_range_in_parent();
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
