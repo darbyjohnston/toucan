@@ -89,7 +89,7 @@ Example command line for piping images to FFmpeg:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
-* <pre>Transition.otio</pre>: The input timeline file.
+* `Transition.otio`: The input timeline file.
 * "-": Write to standard out instead of a file.
 * "-raw rgba": Set the pixel format of the output frames. This should
 match the "-pix_fmt" option given to FFmpeg. One exception is that toucan
