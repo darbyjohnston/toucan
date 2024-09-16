@@ -89,22 +89,24 @@ Example command line for piping images to FFmpeg:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
-* The "-" argument uses standard out instead of an output file.
-* The "-raw rgba" option sets the pixel format of the frames. This should
+Descriptions of the options:
+* "Transition.otio": The input timeline file.
+* "-": Write to standard out instead of a file.
+* "-raw rgba": Set the pixel format of the output frames. This should
 match the "-pix_fmt" option given to FFmpeg. One exception is that toucan
 options do not specify the endian, the endian of the current machine is used.
 So for example the toucan option "-raw rgbaf16" might match the FFmpeg option
-"-pix_fmt rgbaf16le" for the current machine. Check the toucan-render command
+"-pix_fmt rgbaf16le" on the current machine. Check the toucan-render command
 line help for the list of available formats.
-* The "-y" option overwrites the output file if it already exists.
-* The "-f rawvideo" option sets the input to raw video frames.
-* The "-pix_fmt rgba" option sets the input pixel format as described above.
-* The "-s 1280x720" option sets the size of the input frames. The toucan-render
-can be used to find the image size with the "-print_size" option.
-* The "-r 24" option sets the frame rate. The toucan-render can be used to
-find the frame rate with the "-print_rate" option.
-* The "-i pipe:" option uses standard input instead of a file.
-* The "output.mov" is the output movie file.
+* "-y": Overwrite the output file if it already exists.
+* "-f rawvideo": Set the input to raw video frames.
+* "-pix_fmt rgba": Set the input pixel format as described above.
+* "-s 1280x720": Set the size of the input frames. The image size
+can be found by running toucan-render with the "-print_size" option.
+* "-r 24": Set the frame rate. The frame rate can be found by running
+toucan-render with the "-print_rate" option.
+* "-i pipe:": Read from standard input instead of a file.
+* "output.mov": The output movie file.
 
 Building
 ========
