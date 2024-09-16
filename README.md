@@ -82,26 +82,27 @@ FFmpeg
 ======
 The toucan command line renderer can output raw frames to standard out.
 These frames can be piped to FFmpeg for encoding as a movie file.
+
 Example command line:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
 Notes:
-* The `-` tells `toucan-render` to use standard out instead of an output file.
-* The `-raw` option specifies the pixel format of the frames. This should match
-the `-pix_fmt` option given to `ffmpeg`. One exception to this is that the
-`toucan-render` options do not specify the endian, the endian of the current machine
-is used. So for example the option `-raw rgbaf16` might match the `ffmpeg` option
-`-pix_fmt rgbaf16le`.
-* The `-y` flag tells `ffmpeg` to overwrite the output file.
-* The `-f` flag tells `ffmpeg` the input is raw video frames.
-* The `-pix_fmt` option specifies the input pixel format as described above.
-* The `-size` options specifies the size of the input frames. The `toucan-render` can
-print the image size of a timeline with the `-print_size` option.
-* The `-r` option specfies the frame rate.  The `toucan-render` can print the rate
-of a timeline with the `-print_rate` option.
-* The `-i pipe:` option tells `ffmpeg` to use standard input.
-* Finally, `output.mov` specifies the output movie file.
+* The "-" tells toucan to use standard out instead of an output file.
+* The "-raw" option specifies the pixel format of the frames. This should match
+the "-pix_fmt" option given to FFmpeg. One exception to this is that the
+toucan options do not specify the endian, the endian of the current machine
+is used. So for example the option "-raw rgbaf16" might match the FFmpeg option
+"-pix_fmt rgbaf16le".
+* The "-y" flag tells FFmpeg to overwrite the output file.
+* The "-f" flag tells FFmpeg the input is raw video frames.
+* The "-pix_fmt" option specifies the input pixel format as described above.
+* The "-size" options specifies the size of the input frames. The toucan can
+print the image size of a timeline with the "-print_size" option.
+* The "-r" option specfies the frame rate.  The toucan can print the rate
+of a timeline with the "-print_rate" option.
+* The "-i pipe:" option tells FFmpeg to use standard input.
+* Finally, "output.mov" specifies the output movie file.
 
 Building
 ========
