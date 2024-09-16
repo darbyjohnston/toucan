@@ -3,18 +3,16 @@
 Toucan
 ======
 
-Toucan is a project for experimenting with rendering timelines. The project
-currently consists of a command line program that can render timelines into
-image sequences.
+Toucan is an experimental project for rendering timelines. The project
+currently consists of:
+* C++ library for rendering timelines
+* OpenFX image effect plugins
+* Command line renderer
+* Interactive viewer
+* Example .otio files
 
-Features:
-* Composite multiple video tracks with effects and transitions
-* [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO) transforms applied to individual clips and tracks
-* [OpenFX](https://github.com/AcademySoftwareFoundation/openfx) based plugin system for image generators, effects, and transitions
-* [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO) image I/O and processing
-
-Image Effects
-=============
+OpenFX Image Effect Plugins
+===========================
 * Generators: Checkers, Fill, Gradient, Noise
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
@@ -80,6 +78,31 @@ Multiple effects on clips, tracks, and stacks:
 
 ![Multiple Effects Graph](images/MultipleEffectsGraph.svg)
 
+FFmpeg
+======
+The toucan command line renderer can output raw frames to standard out.
+These frames can be piped to FFmpeg for encoding as a movie file.
+Example command line:
+```
+toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
+```
+Notes:
+* The `-` tells `toucan-render` to use standard out instead of an output file.
+* The `-raw` option specifies the pixel format of the frames. This should match
+the `-pix_fmt` option given to `ffmpeg`. One exception to this is that the
+`toucan-render` options do not specify the endian, the endian of the current machine
+is used. So for example the option `-raw rgbaf16` might match the `ffmpeg` option
+`-pix_fmt rgbaf16le`.
+* The `-y` flag tells `ffmpeg` to overwrite the output file.
+* The `-f` flag tells `ffmpeg` the input is raw video frames.
+* The `-pix_fmt` option specifies the input pixel format as described above.
+* The `-size` options specifies the size of the input frames. The `toucan-render` can
+print the image size of a timeline with the `-print_size` option.
+* The `-r` option specfies the frame rate.  The `toucan-render` can print the rate
+of a timeline with the `-print_rate` option.
+* The `-i pipe:` option tells `ffmpeg` to use standard input.
+* Finally, `output.mov` specifies the output movie file.
+
 Building
 ========
 
@@ -93,6 +116,13 @@ Run the super build:
 ```
 sh toucan/SuperBuild.sh Release
 ```
+Run the viewer application:
+```
+export LD_LIBRARY_PATH=$PWD/install-Release/lib:$LD_LIBRARY_PATH
+```
+```
+install-Release/bin/toucan-view toucan/data/Transition.otio
+```
 
 Building on macOS
 -----------------
@@ -103,6 +133,10 @@ git clone https://github.com/darbyjohnston/toucan.git
 Run the super build:
 ```
 sh toucan/SuperBuild.sh Release
+```
+Run the viewer application:
+```
+install-Release/bin/toucan-view toucan/data/Transition.otio
 ```
 
 Building on Windows
@@ -115,3 +149,11 @@ Run the super build:
 ```
 toucan\SuperBuild.bat Release
 ```
+Run the viewer application:
+```
+set PATH=%CD%\install-Release\bin;%PATH%
+```
+```
+install-Release\bin\toucan-view.exe toucan\data\Transition.otio
+```
+

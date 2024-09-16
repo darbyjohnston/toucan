@@ -7,7 +7,7 @@ project(
     HOMEPAGE_URL "https://github.com/darbyjohnston/toucan"
     LANGUAGES CXX C)
 
-set(toucan_VIEWER ON CACHE BOOL "Build viewer application")
+set(toucan_VIEW ON CACHE BOOL "Build viewer application")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -51,7 +51,7 @@ find_package(OpenColorIO)
 find_package(OpenImageIO)
 find_package(OTIO)
 find_package(OpenFX)
-if(toucan_VIEWER)
+if(toucan_VIEW)
     find_package(dtk)
 endif()
 

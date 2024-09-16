@@ -50,7 +50,6 @@ if(FFmpeg_DEBUG)
 endif()
 set(FFmpeg_CONFIGURE_ARGS
     --prefix=${CMAKE_INSTALL_PREFIX}
-    --disable-programs
     --disable-doc
     --disable-postproc
     --disable-avfilter
@@ -309,7 +308,8 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-protocol=http
         --enable-protocol=httpproxy
         --enable-protocol=https
-        --enable-protocol=md5)
+        --enable-protocol=md5
+        --enable-protocol=pipe)
 endif()
 if(NOT WIN32)
     list(APPEND FFmpeg_CONFIGURE_ARGS
