@@ -102,7 +102,7 @@ be used to find the image size of a timeline with the "-print_size" option.
 * The "-r 24" option specfies the frame rate. Toucan can be used to find the
 frame rate of a timeline with the "-print_rate" option.
 * The "-i pipe:" option tells FFmpeg to use standard input.
-* Finally, "output.mov" specifies the output movie file.
+* Finally "output.mov" specifies the output movie file.
 
 Building
 ========
