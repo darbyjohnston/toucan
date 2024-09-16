@@ -78,31 +78,33 @@ Multiple effects on clips, tracks, and stacks:
 
 ![Multiple Effects Graph](images/MultipleEffectsGraph.svg)
 
-FFmpeg
-======
-The toucan command line renderer can output raw frames to standard out.
-These frames can be piped to FFmpeg for encoding as a movie file.
+FFmpeg Encoding
+===============
+Toucan currently only writes image sequences, but these can be converted
+into movie files with FFmpeg. The image sequences can be written to disk
+and then converted with FFmpeg, or they can be piped directly to FFmpeg
+without the overhead of disk I/O.
 
-Example command line:
+Example command line for piping images to FFmpeg:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
-Notes:
-* The "-" tells toucan to use standard out instead of an output file.
-* The "-raw" option specifies the pixel format of the frames. This should match
-the "-pix_fmt" option given to FFmpeg. One exception to this is the toucan
+* The "-" argument uses standard out instead of an output file.
+* The "-raw rgba" option sets the pixel format of the frames. This should
+match the "-pix_fmt" option given to FFmpeg. One exception is that toucan
 options do not specify the endian, the endian of the current machine is used.
 So for example the toucan option "-raw rgbaf16" might match the FFmpeg option
-"-pix_fmt rgbaf16le" for the current machine.
-* The "-y" flag tells FFmpeg to overwrite the output file.
-* The "-f rawvideo" flag tells FFmpeg the input is raw video frames.
-* The "-pix_fmt rgba" option specifies the input pixel format as described above.
-* The "-s 1280x720" option specifies the size of the input frames. Toucan can
-be used to find the image size of a timeline with the "-print_size" option.
-* The "-r 24" option specfies the frame rate. Toucan can be used to find the
-frame rate of a timeline with the "-print_rate" option.
-* The "-i pipe:" option tells FFmpeg to use standard input.
-* Finally "output.mov" specifies the output movie file.
+"-pix_fmt rgbaf16le" for the current machine. Check the toucan-render command
+line help for the list of available formats.
+* The "-y" option overwrites the output file if it already exists.
+* The "-f rawvideo" option sets the input to raw video frames.
+* The "-pix_fmt rgba" option sets the input pixel format as described above.
+* The "-s 1280x720" option sets the size of the input frames. The toucan-render
+can be used to find the image size with the "-print_size" option.
+* The "-r 24" option sets the frame rate. The toucan-render can be used to
+find the frame rate with the "-print_rate" option.
+* The "-i pipe:" option uses standard input instead of a file.
+* The "output.mov" is the output movie file.
 
 Building
 ========
