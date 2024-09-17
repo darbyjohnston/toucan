@@ -59,10 +59,6 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            if (!_timeRange.start_time().is_invalid_time())
-            {
-                offsetTime -= _timeRange.start_time();
-            }
 
             out = _ffRead->getImage(offsetTime);
 

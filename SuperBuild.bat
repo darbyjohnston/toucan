@@ -6,5 +6,5 @@ cmake --build superbuild-%BUILD_TYPE% -j 4 --config %BUILD_TYPE%
 
 cmake -S toucan -B build-%BUILD_TYPE% -DCMAKE_INSTALL_PREFIX=%CD%\install-%BUILD_TYPE% -DCMAKE_PREFIX_PATH=%CD%\install-%BUILD_TYPE% -DCMAKE_BUILD_TYPE=%BUILD_TYPE%
 cmake --build build-%BUILD_TYPE% -j 4 --config %BUILD_TYPE%
-cmake --build build-%BUILD_TYPE% --target INSTALL
+cmake --build build-%BUILD_TYPE% --config %BUILD_TYPE% --target INSTALL
 

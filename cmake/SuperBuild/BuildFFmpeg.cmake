@@ -51,11 +51,8 @@ endif()
 set(FFmpeg_CONFIGURE_ARGS
     --prefix=${CMAKE_INSTALL_PREFIX}
     --disable-doc
-    --disable-postproc
-    --disable-avfilter
     --disable-hwaccels
     --disable-devices
-    --disable-filters
     --disable-alsa
     --disable-appkit
     --disable-avfoundation
@@ -99,7 +96,6 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=aac
         --enable-decoder=ac3
         --enable-decoder=av1
-        --enable-decoder=ayuv
         --enable-decoder=dnxhd
         --enable-decoder=eac3
         --enable-decoder=flac
@@ -110,7 +106,6 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=mpeg2video
         --enable-decoder=mpeg4
         --enable-decoder=pcm_alaw
-        --enable-decoder=pcm_alaw_at
         --enable-decoder=pcm_bluray
         --enable-decoder=pcm_dvd
         --enable-decoder=pcm_f16le
@@ -121,7 +116,6 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=pcm_f64le
         --enable-decoder=pcm_lxf
         --enable-decoder=pcm_mulaw
-        --enable-decoder=pcm_mulaw_at
         --enable-decoder=pcm_s16be
         --enable-decoder=pcm_s16be_planar
         --enable-decoder=pcm_s16le
@@ -158,14 +152,12 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-encoders
         --enable-encoder=aac
         --enable-encoder=ac3
-        --enable-encoder=ayuv
         --enable-encoder=dnxhd
         --enable-encoder=eac3
         --enable-encoder=mjpeg
         --enable-encoder=mpeg2video
         --enable-encoder=mpeg4
         --enable-encoder=pcm_alaw
-        --enable-encoder=pcm_alaw_at
         --enable-encoder=pcm_bluray
         --enable-encoder=pcm_dvd
         --enable-encoder=pcm_f32be
@@ -173,7 +165,6 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-encoder=pcm_f64be
         --enable-encoder=pcm_f64le
         --enable-encoder=pcm_mulaw
-        --enable-encoder=pcm_mulaw_at
         --enable-encoder=pcm_s16be
         --enable-encoder=pcm_s16be_planar
         --enable-encoder=pcm_s16le
@@ -309,7 +300,8 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-protocol=httpproxy
         --enable-protocol=https
         --enable-protocol=md5
-        --enable-protocol=pipe)
+        --enable-protocol=pipe
+        --enable-protocol=tls)
 endif()
 if(NOT WIN32)
     list(APPEND FFmpeg_CONFIGURE_ARGS

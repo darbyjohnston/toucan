@@ -39,10 +39,11 @@ namespace toucan
             _args.input,
             "input",
             "Input .otio file."));
-        _args.list.push_back(std::make_shared<CmdLineValueArg<std::string> >(
+        auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
             _args.output,
             "output",
-            "Output image file. Use a dash ('-') to write raw frames to stdout."));
+            "Output image file. Use a dash ('-') to write raw frames to stdout.");
+        _args.list.push_back(outArg);
 
         std::vector<std::string> rawList;
         for (const auto& spec : rawSpecs)
@@ -83,26 +84,48 @@ namespace toucan
             _options.verbose,
             std::vector<std::string>{ "-v" },
             "Print verbose output."));
+        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+            _options.help,
+            std::vector<std::string>{ "-h" },
+            "Print help."));
 
         if (!argv.empty())
         {
-            for (const auto& arg : _args.list)
-            {
-                arg->parse(argv);
-            }
             for (const auto& option : _options.list)
             {
                 option->parse(argv);
             }
-            _args.outputRaw = "-" == _args.output;
-            if (_args.outputRaw)
+            if (_options.printStart ||
+                _options.printDuration ||
+                _options.printRate ||
+                _options.printSize)
             {
-                _options.verbose = false;
+                auto i = std::find(_args.list.begin(), _args.list.end(), outArg);
+                if (i != _args.list.end())
+                {
+                    _args.list.erase(i);
+                }
             }
-            if (argv.size())
+            if (!_options.help)
             {
-                _options.help = true;
+                for (const auto& arg : _args.list)
+                {
+                    arg->parse(argv);
+                }
+                _args.outputRaw = "-" == _args.output;
+                if (_args.outputRaw)
+                {
+                    _options.verbose = false;
+                }
+                if (argv.size())
+                {
+                    _options.help = true;
+                }
             }
+        }
+        else
+        {
+            _options.help = true;
         }
     }
         
@@ -111,7 +134,7 @@ namespace toucan
     
     int App::run()
     {
-        if (_args.input.empty() || _args.output.empty() || _options.help)
+        if (_options.help)
         {
             _printHelp();
             return 1;
@@ -326,8 +349,12 @@ namespace toucan
                 buf);
             p = &tmp;
         }
-        
-        fwrite(p->localpixels(), spec.width * spec.height * spec.nchannels, 1, stdout);
+
+        fwrite(
+            p->localpixels(),
+            spec.image_bytes(),
+            1,
+            stdout);
     }
     
     void App::_printHelp()
