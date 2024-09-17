@@ -17,8 +17,8 @@ namespace toucan
         _host(host)
     {
         _documents = dtk::ObservableList< std::shared_ptr<Document> >::create();
-        _add = dtk::ObservableValue< std::shared_ptr<Document> >::create(nullptr);
-        _remove = dtk::ObservableValue< std::shared_ptr<Document> >::create(nullptr);
+        _add = dtk::ObservableValue<int>::create(-1);
+        _remove = dtk::ObservableValue<int>::create(-1);
         _current = dtk::ObservableValue< std::shared_ptr<Document> >::create(nullptr);
         _currentIndex = dtk::ObservableValue<int>::create(-1);
     }
@@ -34,8 +34,8 @@ namespace toucan
             auto document = std::make_shared<Document>(context, _host, path);
             documents.push_back(document);
             _documents->setIfChanged(documents);
-            _add->setAlways(document);
             const int index = documents.size() - 1;
+            _add->setAlways(index);
             _current->setIfChanged(documents[index]);
             _currentIndex->setIfChanged(index);
         }
@@ -53,8 +53,8 @@ namespace toucan
         {
             auto document = *(documents.begin() + index);
             documents.erase(documents.begin() + index);
+            _remove->setAlways(index);
             _documents->setIfChanged(documents);
-            _remove->setAlways(document);
             int current = std::min(index, static_cast<int>(documents.size()) - 1);
             _current->setAlways(
                 (current >= 0 && current < documents.size()) ?
@@ -67,11 +67,11 @@ namespace toucan
     void DocumentsModel::closeAll()
     {
         auto documents = _documents->get();
-        _documents->setIfChanged({});
-        for (const auto& document : documents)
+        for (size_t i = 0; i < documents.size(); ++i)
         {
-            _remove->setAlways(document);
+            _remove->setAlways(0);
         }
+        _documents->setIfChanged({});
         _current->setIfChanged(nullptr);
         _currentIndex->setIfChanged(-1);
     }
@@ -81,12 +81,12 @@ namespace toucan
         return _documents;
     }
 
-    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<Document> > > DocumentsModel::observeAdd() const
+    std::shared_ptr<dtk::IObservableValue<int> > DocumentsModel::observeAdd() const
     {
         return _add;
     }
 
-    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<Document> > > DocumentsModel::observeRemove() const
+    std::shared_ptr<dtk::IObservableValue<int> > DocumentsModel::observeRemove() const
     {
         return _remove;
     }

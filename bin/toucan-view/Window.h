@@ -48,6 +48,7 @@ namespace toucan
 
     private:
         std::weak_ptr<App> _app;
+        std::vector<std::shared_ptr<Document> > _documents;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<MenuBar> _menuBar;
@@ -56,8 +57,9 @@ namespace toucan
         std::shared_ptr<dtk::TabWidget> _tabWidget;
         std::map<std::shared_ptr<Document>, std::shared_ptr<DocumentTab> > _documentTabs;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _addObserver;
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _removeObserver;
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _addObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _removeObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _documentObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;

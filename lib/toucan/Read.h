@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <toucan/FFmpegRead.h>
 #include <toucan/ImageNode.h>
 
 #include <filesystem>
@@ -26,11 +27,10 @@ namespace toucan
 
     private:
         std::filesystem::path _path;
+        std::shared_ptr<FFmpegRead> _ffRead;
         std::unique_ptr<OIIO::ImageInput> _input;
         OIIO::ImageSpec _spec;
-        int _frameCount = 0;
-        int _fps[2] = { 0, 0 };
-        OTIO_NS::RationalTime _startTime;
+        OTIO_NS::TimeRange _timeRange;
     };
 
     //! Sequence read node.

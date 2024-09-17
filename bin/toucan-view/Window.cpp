@@ -64,12 +64,20 @@ namespace toucan
                 }
             });
 
-        _addObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeAdd(),
-            [this, appWeak](const std::shared_ptr<Document>& document)
+        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeDocuments(),
+            [this](const std::vector<std::shared_ptr<Document> >& documents)
             {
-                if (document)
+                _documents = documents;
+            });
+
+        _addObserver = dtk::ValueObserver<int>::create(
+            app->getDocumentsModel()->observeAdd(),
+            [this, appWeak](int index)
+            {
+                if (index >= 0 && index < _documents.size())
                 {
+                    auto& document = _documents[index];
                     auto context = _getContext().lock();
                     auto app = appWeak.lock();
                     auto tab = DocumentTab::create(context, app, document);
@@ -81,15 +89,19 @@ namespace toucan
                 }
             });
 
-        _removeObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+        _removeObserver = dtk::ValueObserver<int>::create(
             app->getDocumentsModel()->observeRemove(),
-            [this, appWeak](const std::shared_ptr<Document>& document)
+            [this, appWeak](int index)
             {
-                const auto i = _documentTabs.find(document);
-                if (i != _documentTabs.end())
+                if (index >= 0 && index < _documents.size())
                 {
-                    _tabWidget->removeTab(i->second);
-                    _documentTabs.erase(i);
+                    auto& document = _documents[index];
+                    const auto i = _documentTabs.find(document);
+                    if (i != _documentTabs.end())
+                    {
+                        _tabWidget->removeTab(i->second);
+                        _documentTabs.erase(i);
+                    }
                 }
             });
 

@@ -16,33 +16,29 @@ namespace toucan
         const std::filesystem::path& path,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode("Read", inputs),
-        _path(path),
-        _input(OIIO::ImageInput::open(_path.string())),
-        _spec(_input->spec())
+        _path(path)
     {
-        if (auto param = _spec.find_attribute("oiio:subimages"))
+        try
         {
-            _frameCount = param->get_int();
+            _ffRead = std::make_shared<FFmpegRead>(path);
+            _spec = _ffRead->getSpec();
+            _timeRange = _ffRead->getTimeRange();
         }
-        if (auto param = _spec.find_attribute("FramesPerSecond"))
+        catch (const std::exception&)
+        {}
+        if (!_ffRead)
         {
-            _spec.getattribute("FramesPerSecond", OIIO::TypeDesc::TypeRational, &_fps);
-        }
-        if (auto param = _spec.find_attribute("ffmpeg:TimeCode"))
-        {
-            const std::string timecode = param->get_string();
-            double rate = 24.0;
-            if (_fps[0] > 0 && _fps[1] > 0)
-            {
-                rate = _fps[0] / static_cast<double>(_fps[1]);
-            }
-            _startTime = OTIO_NS::RationalTime::from_timecode(timecode, rate);
+            _input = OIIO::ImageInput::open(_path.string());
+            _spec = _input->spec();
         }
     }
 
     ReadNode::~ReadNode()
     {
-        _input->close();
+        if (_input)
+        {
+            _input->close();
+        }
     }
 
     std::string ReadNode::getLabel() const
@@ -56,48 +52,61 @@ namespace toucan
     {
         OIIO::ImageBuf out;
 
-        OTIO_NS::RationalTime offsetTime = time;
-        if (!_timeOffset.is_invalid_time())
+        if (_ffRead)
         {
-            offsetTime -= _timeOffset;
-        }
-        if (!_startTime.is_invalid_time())
-        {
-            offsetTime -= _startTime;
-        }
-        const int subImage = std::max(
-            static_cast<int>(0),
-            std::min(static_cast<int>(offsetTime.floor().value()), _frameCount - 1));
-        _input->seek_subimage(subImage, 0);
+            OTIO_NS::RationalTime offsetTime = time;
+            if (!_timeOffset.is_invalid_time())
+            {
+                offsetTime -= _timeOffset;
+            }
+            if (!_timeRange.start_time().is_invalid_time())
+            {
+                offsetTime -= _timeRange.start_time();
+            }
 
-        auto pixels = std::unique_ptr<unsigned char[]>(
-            new unsigned char[_spec.width * _spec.height * _spec.nchannels * _spec.channel_bytes()]);
-        _input->read_image(
-            subImage,
-            0,
-            0,
-            _spec.nchannels,
-            _spec.format,
-            &pixels[0]);
+            out = _ffRead->getImage(offsetTime);
 
-        OIIO::ImageBuf buf(
-            OIIO::ImageSpec(_spec.width, _spec.height, _spec.nchannels, _spec.format),
-            pixels.get(),
-            _spec.nchannels * _spec.channel_bytes(),
-            _spec.width * _spec.nchannels * _spec.channel_bytes(),
-            0);
-        if (3 == _spec.nchannels)
-        {
-            // Add an alpha channel.
-            const int channelOrder[] = { 0, 1, 2, -1 };
-            const float channelValues[] = { 0, 0, 0, 1.0 };
-            const std::string channelNames[] = { "", "", "", "A" };
-            out = OIIO::ImageBufAlgo::channels(buf, 4, channelOrder, channelValues, channelNames);
+            if (3 == _spec.nchannels)
+            {
+                // Add an alpha channel.
+                const int channelOrder[] = { 0, 1, 2, -1 };
+                const float channelValues[] = { 0, 0, 0, 1.0 };
+                const std::string channelNames[] = { "", "", "", "A" };
+                out = OIIO::ImageBufAlgo::channels(out, 4, channelOrder, channelValues, channelNames);
+            }
         }
         else
         {
-            OIIO::ImageBufAlgo::copy(out, buf);
+            auto pixels = std::unique_ptr<unsigned char[]>(
+                new unsigned char[_spec.width * _spec.height * _spec.nchannels * _spec.channel_bytes()]);
+            _input->read_image(
+                0,
+                0,
+                0,
+                _spec.nchannels,
+                _spec.format,
+                &pixels[0]);
+
+            OIIO::ImageBuf buf(
+                OIIO::ImageSpec(_spec.width, _spec.height, _spec.nchannels, _spec.format),
+                pixels.get(),
+                _spec.nchannels * _spec.channel_bytes(),
+                _spec.width * _spec.nchannels * _spec.channel_bytes(),
+                0);
+
+            if (3 == _spec.nchannels)
+            {
+                // Add an alpha channel.
+                const int channelOrder[] = { 0, 1, 2, -1 };
+                const float channelValues[] = { 0, 0, 0, 1.0 };
+                const std::string channelNames[] = { "", "", "", "A" };
+                out = OIIO::ImageBufAlgo::channels(buf, 4, channelOrder, channelValues, channelNames);
             }
+            else
+            {
+                OIIO::ImageBufAlgo::copy(out, buf);
+            }
+        }
 
         return out;
     }

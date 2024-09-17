@@ -1,5 +1,6 @@
 set(HEADERS
     Comp.h
+    FFmpegRead.h
     ImageEffect.h
     ImageEffectHost.h
     ImageGraph.h
@@ -14,6 +15,7 @@ set(HEADERS_PRIVATE
     ImageEffect_p.h)
 set(SOURCE
     Comp.cpp
+    FFmpegRead.cpp
     ImageEffect.cpp
     ImageEffectHost.cpp
     ImageGraph.cpp

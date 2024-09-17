@@ -6,10 +6,22 @@
 
 #include <OpenFX/ofxImageEffect.h>
 
+#include <algorithm>
+#include <cctype>
 #include <iomanip>
 
 namespace toucan
 {
+    std::string toLower(std::string value)
+    {
+        std::transform(
+            value.begin(),
+            value.end(),
+            value.begin(),
+            [](unsigned char c) { return std::tolower(c); });
+        return value;
+    }
+
     namespace
     {
         void _findPlugins(

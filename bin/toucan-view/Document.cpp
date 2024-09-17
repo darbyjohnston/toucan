@@ -68,7 +68,6 @@ namespace toucan
                 _currentNode->setAlways(node);
                 _render();
             });
-
     }
 
     Document::~Document()

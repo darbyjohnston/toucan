@@ -18,6 +18,9 @@
 
 namespace toucan
 {
+    //! Convert a string to lowercase.
+    std::string toLower(std::string);
+
     //! Find plugins.
     void findPlugins(const std::filesystem::path&, std::vector<std::filesystem::path>&);
 
