@@ -186,17 +186,17 @@ namespace toucan
             std::cout << timeRange.start_time().value() << std::endl;
             return 0;
         }
-        if (_options.printDuration)
+        else if (_options.printDuration)
         {
             std::cout << timeRange.duration().value() << std::endl;
             return 0;
         }
-        if (_options.printRate)
+        else if (_options.printRate)
         {
             std::cout << timeRange.duration().rate() << std::endl;
             return 0;
         }
-        if (_options.printSize)
+        else if (_options.printSize)
         {
             std::cout << imageSize.x << "x" << imageSize.y << std::endl;
             return 0;
@@ -361,6 +361,7 @@ namespace toucan
     {
         std::cout << "Usage:" << std::endl;
         std::cout << "    toucan-render (input) (output) [options...]" << std::endl;
+        std::cout << "    toucan-render (input) (-print_start|-print_duration|-print_rate|-print_size)" << std::endl;
         std::cout << std::endl;
         std::cout << "Arguments:" << std::endl;
         for (const auto& arg : _args.list)

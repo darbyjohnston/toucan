@@ -74,9 +74,9 @@ namespace toucan
     FFmpegRead::FFmpegRead(const std::filesystem::path& path) :
         _path(path)
     {
-        //av_log_set_level(AV_LOG_QUIET);
-        av_log_set_level(AV_LOG_VERBOSE);
-        av_log_set_callback(logCallback);
+        av_log_set_level(AV_LOG_QUIET);
+        //av_log_set_level(AV_LOG_VERBOSE);
+        //av_log_set_callback(logCallback);
 
         const std::string fileName = path.string();
         int r = avformat_open_input(
