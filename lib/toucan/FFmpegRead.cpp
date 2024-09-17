@@ -47,12 +47,12 @@ namespace toucan
         class Packet
         {
         public:
-            Packet::Packet()
+            Packet()
             {
                 p = av_packet_alloc();
             }
 
-            Packet::~Packet()
+            ~Packet()
             {
                 av_packet_free(&p);
             }
