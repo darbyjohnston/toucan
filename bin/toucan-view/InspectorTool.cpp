@@ -6,6 +6,7 @@
 
 #include "App.h"
 
+#include <dtk/ui/Divider.h>
 #include <dtk/ui/Label.h>
 #include <dtk/ui/Spacer.h>
 #include <dtk/ui/ToolButton.h>
@@ -85,7 +86,10 @@ namespace toucan
         closeButton->setIcon("BellowsClosed");
         closeButton->setTooltip("Close all");
 
+        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, _layout);
+        _scrollWidget->setBorder(false);
         _scrollWidget->setVStretch(dtk::Stretch::Expanding);
 
         _scrollLayout = dtk::VerticalLayout::create(context);

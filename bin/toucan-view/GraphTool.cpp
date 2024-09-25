@@ -207,6 +207,7 @@ namespace toucan
         IToolWidget::_init(context, app, "toucan::GraphTool", "Graph", parent);
 
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
+        _scrollWidget->setBorder(false);
 
         _widget = GraphWidget::create(context, app, document);
         _scrollWidget->setWidget(_widget);

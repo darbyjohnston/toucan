@@ -55,7 +55,7 @@ namespace toucan
             documents.erase(documents.begin() + index);
             _remove->setAlways(index);
             _documents->setIfChanged(documents);
-            int current = std::min(index, static_cast<int>(documents.size()) - 1);
+            int current = std::min(_currentIndex->get(), static_cast<int>(documents.size()) - 1);
             _current->setAlways(
                 (current >= 0 && current < documents.size()) ?
                 documents[current] :
@@ -69,7 +69,7 @@ namespace toucan
         auto documents = _documents->get();
         for (size_t i = 0; i < documents.size(); ++i)
         {
-            _remove->setAlways(0);
+            _remove->setAlways(i);
         }
         _documents->setIfChanged({});
         _current->setIfChanged(nullptr);

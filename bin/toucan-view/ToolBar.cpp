@@ -62,6 +62,16 @@ namespace toucan
             });
         _buttons["Window/FullScreen"] = button;
 
+        _widgetUpdate();
+
+        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeDocuments(),
+            [this](const std::vector<std::shared_ptr<Document> >& documents)
+            {
+                _documentsSize = documents.size();
+                _widgetUpdate();
+            });
+
         _fullScreenObserver = dtk::ValueObserver<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
@@ -95,5 +105,11 @@ namespace toucan
     {
         IWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());
+    }
+
+    void ToolBar::_widgetUpdate()
+    {
+        _buttons["File/Close"]->setEnabled(_documentsSize > 0);
+        _buttons["File/CloseAll"]->setEnabled(_documentsSize > 0);
     }
 }

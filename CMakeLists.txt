@@ -8,6 +8,7 @@ project(
     LANGUAGES CXX C)
 
 set(toucan_VIEW ON CACHE BOOL "Build viewer application")
+set(toucan_EDIT ON CACHE BOOL "Build editor application")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -51,7 +52,7 @@ find_package(OpenColorIO)
 find_package(OpenImageIO)
 find_package(OTIO)
 find_package(OpenFX)
-if(toucan_VIEW)
+if(toucan_VIEW OR toucan_EDIT)
     find_package(dtk)
 endif()
 

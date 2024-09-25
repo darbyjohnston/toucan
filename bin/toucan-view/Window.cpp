@@ -77,7 +77,7 @@ namespace toucan
             {
                 if (index >= 0 && index < _documents.size())
                 {
-                    auto& document = _documents[index];
+                    auto document = _documents[index];
                     auto context = _getContext().lock();
                     auto app = appWeak.lock();
                     auto tab = DocumentTab::create(context, app, document);
@@ -95,7 +95,7 @@ namespace toucan
             {
                 if (index >= 0 && index < _documents.size())
                 {
-                    auto& document = _documents[index];
+                    auto document = _documents[index];
                     const auto i = _documentTabs.find(document);
                     if (i != _documentTabs.end())
                     {

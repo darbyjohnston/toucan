@@ -33,6 +33,7 @@ namespace toucan
 
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
+        _scrollWidget->setBorder(false);
 
         _timelineItem = TimelineItem::create(
             context,
