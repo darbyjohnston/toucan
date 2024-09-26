@@ -19,12 +19,16 @@ namespace toucan
 
         virtual ~IItem() = 0;
 
+        const std::string& getName() const;
+        void setName(const std::string&);
+
         const OTIO_NS::TimeRange& getRange() const;
         void setRange(const OTIO_NS::TimeRange&);
 
         const std::weak_ptr<IContainer>& getParent() const;
 
     private:
+        std::string _name;
         OTIO_NS::TimeRange _range;
         std::weak_ptr<IContainer> _parent;
 

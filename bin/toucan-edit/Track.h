@@ -10,12 +10,22 @@
 
 namespace toucan
 {
+    struct TrackKind
+    {
+        static const std::string video;
+        static const std::string audio;
+    };
     class Track : public IContainer
     {
     public:
-        Track();
+        Track(const std::string& kind);
 
         virtual ~Track();
+
+        const std::string& getKind() const;
+
+    private:
+        std::string _kind;
     };
 }
 

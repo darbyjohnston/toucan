@@ -5,11 +5,16 @@
 #pragma once
 
 #include <dtk/ui/RowLayout.h>
+#include <dtk/ui/TabWidget.h>
 #include <dtk/ui/Window.h>
+#include <dtk/core/ObservableList.h>
 
 namespace toucan
 {
     class App;
+    class Document;
+    class DocumentTab;
+    class MenuBar;
 
     class Window : public dtk::Window
     {
@@ -39,8 +44,17 @@ namespace toucan
 
     private:
         std::weak_ptr<App> _app;
+        std::vector<std::shared_ptr<Document> > _documents;
 
         std::shared_ptr<dtk::RowLayout> _layout;
+        std::shared_ptr<MenuBar> _menuBar;
+        std::shared_ptr<dtk::TabWidget> _tabWidget;
+        std::map<std::shared_ptr<Document>, std::shared_ptr<DocumentTab> > _documentTabs;
+
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _addObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _removeObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _documentObserver;
     };
 }
 

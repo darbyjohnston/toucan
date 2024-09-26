@@ -2,13 +2,13 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "Clip.h"
+#include "Gap.h"
 
 namespace toucan
 {
-    Clip::Clip()
+    Gap::Gap()
     {}
 
-    Clip::~Clip()
+    Gap::~Gap()
     {}
 }

@@ -14,6 +14,16 @@ namespace toucan
     IItem::~IItem()
     {}
 
+    const std::string& IItem::getName() const
+    {
+        return _name;
+    }
+
+    void IItem::setName(const std::string& name)
+    {
+        _name = name;
+    }
+
     const OTIO_NS::TimeRange& IItem::getRange() const
     {
         return _range;

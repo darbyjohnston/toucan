@@ -4,11 +4,10 @@
 
 #include "App.h"
 
-#include "Clip.h"
-#include "Stack.h"
 #include "Timeline.h"
-#include "Track.h"
 
+#include <dtk/ui/FileBrowser.h>
+#include <dtk/ui/MessageDialog.h>
 #include <dtk/core/CmdLine.h>
 
 namespace toucan
@@ -30,12 +29,44 @@ namespace toucan
                     true)
             });
 
+        context->getSystem<dtk::FileBrowserSystem>()->setNativeFileDialog(false);
+
+        _messageLog = std::make_shared<MessageLog>();
+
+        _timeUnitsModel = std::make_shared<TimeUnitsModel>();
+
+        std::vector<std::filesystem::path> searchPath;
+        const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
+        searchPath.push_back(parentPath);
+#if defined(_WINDOWS)
+        searchPath.push_back(parentPath / ".." / ".." / "..");
+#else // _WINDOWS
+        searchPath.push_back(parentPath / ".." / "..");
+#endif // _WINDOWS
+        ImageEffectHostOptions hostOptions;
+        //hostOptions.log = _messageLog;
+        _host = std::make_shared<ImageEffectHost>(searchPath, hostOptions);
+
+        _documentsModel = std::make_shared<DocumentsModel>(context, _host);
+
         _window = Window::create(
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
             "toucan-edit",
             dtk::Size2I(1920, 1080));
         addWindow(_window);
+
+        if (!_path.empty())
+        {
+            try
+            {
+                _documentsModel->open(_path);
+            }
+            catch (const std::exception& e)
+            {
+                _context->getSystem<dtk::MessageDialogSystem>()->message("ERROR", e.what(), _window);
+            }
+        }
 
         _window->show();
     }
@@ -50,5 +81,20 @@ namespace toucan
         auto out = std::shared_ptr<App>(new App);
         out->_init(context, argv);
         return out;
+    }
+
+    const std::shared_ptr<TimeUnitsModel>& App::getTimeUnitsModel() const
+    {
+        return _timeUnitsModel;
+    }
+
+    const std::shared_ptr<ImageEffectHost>& App::getHost() const
+    {
+        return _host;
+    }
+
+    const std::shared_ptr<DocumentsModel>& App::getDocumentsModel() const
+    {
+        return _documentsModel;
     }
 }

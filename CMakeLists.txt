@@ -8,7 +8,7 @@ project(
     LANGUAGES CXX C)
 
 set(toucan_VIEW ON CACHE BOOL "Build viewer application")
-set(toucan_EDIT ON CACHE BOOL "Build editor application")
+set(toucan_EDIT OFF CACHE BOOL "Build editor application")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
