@@ -6,8 +6,6 @@
 
 #include "IContainer.h"
 
-#include <vector>
-
 namespace toucan
 {
     class Stack : public IContainer

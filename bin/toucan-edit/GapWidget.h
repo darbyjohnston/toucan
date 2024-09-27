@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "Gap.h"
 #include "IItemWidget.h"
 
 namespace toucan
 {
+    class Gap;
+
     class GapWidget : public IItemWidget
     {
     protected:

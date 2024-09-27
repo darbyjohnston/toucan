@@ -5,10 +5,11 @@
 #pragma once
 
 #include "IItemWidget.h"
-#include "Track.h"
 
 namespace toucan
 {
+    class Track;
+
     class TrackWidget : public IItemWidget
     {
     protected:

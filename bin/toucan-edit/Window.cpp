@@ -6,6 +6,7 @@
 
 #include "App.h"
 #include "DocumentTab.h"
+#include "DocumentsModel.h"
 #include "MenuBar.h"
 
 #include <dtk/ui/Divider.h>

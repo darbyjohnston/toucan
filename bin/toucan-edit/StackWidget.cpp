@@ -4,6 +4,8 @@
 
 #include "StackWidget.h"
 
+#include "Stack.h"
+
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/RenderUtil.h>
 

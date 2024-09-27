@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "TimeWidgets.h"
+#include "PlaybackModel.h"
 
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ToolButton.h>
@@ -13,6 +13,10 @@ namespace toucan
 {
     class App;
     class Document;
+    class FrameButtons;
+    class PlaybackButtons;
+    class TimeEdit;
+    class TimeLabel;
 
     class BottomBar : public dtk::IWidget
     {

@@ -4,8 +4,10 @@
 
 #include "Document.h"
 
+#include "ImageGraph.h"
 #include "PlaybackModel.h"
 #include "SelectionModel.h"
+#include "Timeline.h"
 #include "ThumbnailGenerator.h"
 #include "ViewModel.h"
 

@@ -4,9 +4,6 @@
 
 #pragma once
 
-#include "ImageGraph.h"
-#include "Timeline.h"
-
 #include <toucan/ImageEffectHost.h>
 
 #include <dtk/core/Context.h>
@@ -17,8 +14,10 @@
 
 namespace toucan
 {
+    class ImageGraph;
     class PlaybackModel;
     class SelectionModel;
+    class Timeline;
     class ThumbnailGenerator;
     class ViewModel;
 

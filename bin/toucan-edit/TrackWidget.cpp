@@ -4,6 +4,8 @@
 
 #include "TrackWidget.h"
 
+#include "Track.h"
+
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/RenderUtil.h>
 

@@ -4,6 +4,8 @@
 
 #include "App.h"
 
+#include <dtk/core/Context.h>
+
 DTK_MAIN()
 {
     try

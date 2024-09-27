@@ -6,8 +6,6 @@
 
 #include "IContainer.h"
 
-#include <vector>
-
 namespace toucan
 {
     struct TrackKind

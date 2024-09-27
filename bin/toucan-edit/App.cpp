@@ -4,7 +4,10 @@
 
 #include "App.h"
 
+#include "DocumentsModel.h"
+#include "TimeUnitsModel.h"
 #include "Timeline.h"
+#include "Window.h"
 
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>

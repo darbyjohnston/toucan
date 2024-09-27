@@ -5,8 +5,10 @@
 #include "MenuBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
 #include "SelectionModel.h"
 #include "ViewModel.h"
+#include "Window.h"
 
 #include <dtk/ui/Action.h>
 #include <dtk/ui/FileBrowser.h>

@@ -6,8 +6,6 @@
 
 #include "IItem.h"
 
-#include <vector>
-
 namespace toucan
 {
     class Gap : public IItem

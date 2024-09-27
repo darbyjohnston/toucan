@@ -4,6 +4,8 @@
 
 #include "ClipWidget.h"
 
+#include "Clip.h"
+
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/RenderUtil.h>
 

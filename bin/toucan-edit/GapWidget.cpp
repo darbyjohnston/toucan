@@ -4,6 +4,8 @@
 
 #include "GapWidget.h"
 
+#include "Gap.h"
+
 #include <dtk/ui/DrawUtil.h>
 #include <dtk/core/Random.h>
 #include <dtk/core/RenderUtil.h>

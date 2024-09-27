@@ -4,11 +4,12 @@
 
 #pragma once
 
-#include "Clip.h"
 #include "IItemWidget.h"
 
 namespace toucan
 {
+    class Clip;
+
     class ClipWidget : public IItemWidget
     {
     protected:

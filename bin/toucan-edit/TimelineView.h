@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "TimeUnitsModel.h"
-
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/core/ObservableList.h>
+
+#include <opentimelineio/version.h>
 
 namespace toucan
 {

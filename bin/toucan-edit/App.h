@@ -4,14 +4,16 @@
 
 #pragma once
 
-#include "DocumentsModel.h"
-#include "TimeUnitsModel.h"
-#include "Window.h"
+#include <toucan/ImageEffectHost.h>
 
 #include <dtk/ui/App.h>
 
 namespace toucan
 {
+    class DocumentsModel;
+    class TimeUnitsModel;
+    class Window;
+
     class App : public dtk::App
     {
     protected:

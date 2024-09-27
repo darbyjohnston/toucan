@@ -6,8 +6,6 @@
 
 #include "IContainer.h"
 
-#include <vector>
-
 namespace toucan
 {
     struct TrackKind
@@ -15,6 +13,7 @@ namespace toucan
         static const std::string video;
         static const std::string audio;
     };
+
     class Track : public IContainer
     {
     public:

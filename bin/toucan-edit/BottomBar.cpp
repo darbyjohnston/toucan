@@ -5,6 +5,8 @@
 #include "BottomBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
+#include "TimeWidgets.h"
 
 namespace toucan
 {
