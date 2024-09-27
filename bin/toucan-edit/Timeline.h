@@ -24,10 +24,6 @@ namespace toucan
 
         ~Timeline();
 
-        static std::shared_ptr<Timeline> create(
-            const std::filesystem::path&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
-
         const std::filesystem::path& getPath() const;
 
         const OTIO_NS::TimeRange& getRange() const;
@@ -45,5 +41,12 @@ namespace toucan
         std::shared_ptr<Stack> _stack;
         std::shared_ptr<dtk::ObservableList<std::shared_ptr<IItem> > > _itemRanges;
     };
+
+    OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> convertTo(
+        const std::shared_ptr<Timeline>&);
+
+    std::shared_ptr<Timeline> convertFrom(
+        const std::filesystem::path&,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 }
 

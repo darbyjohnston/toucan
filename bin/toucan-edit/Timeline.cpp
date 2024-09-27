@@ -4,13 +4,7 @@
 
 #include "Timeline.h"
 
-#include "Clip.h"
-#include "Gap.h"
 #include "Stack.h"
-#include "Track.h"
-
-#include <opentimelineio/clip.h>
-#include <opentimelineio/gap.h>
 
 namespace toucan
 {
@@ -24,55 +18,6 @@ namespace toucan
 
     Timeline::~Timeline()
     {}
-
-    std::shared_ptr<Timeline> Timeline::create(
-        const std::filesystem::path& path,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& otioTimeline)
-    {
-        auto out = std::make_shared<Timeline>(path);
-
-        const OTIO_NS::RationalTime& duration = otioTimeline->duration();
-        OTIO_NS::RationalTime startTime(0.0, duration.rate());
-        auto opt = otioTimeline->global_start_time();
-        if (opt.has_value())
-        {
-            startTime = opt.value();
-        }
-        out->setRange(OTIO_NS::TimeRange(startTime, duration));
-
-        out->getStack()->setRange(otioTimeline->tracks()->trimmed_range());
-
-        for (const auto& otioItem : otioTimeline->tracks()->children())
-        {
-            if (auto otioTrack = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(otioItem))
-            {
-                auto track = std::make_shared<Track>(otioTrack->kind());
-                track->setName(otioTrack->name());
-                track->setRange(otioTrack->trimmed_range());
-                out->getStack()->addChild(track);
-
-                for (const auto& otioItem : otioTrack->children())
-                {
-                    if (auto otioClip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(otioItem))
-                    {
-                        auto clip = std::make_shared<Clip>();
-                        clip->setName(otioClip->name());
-                        clip->setRange(otioClip->trimmed_range());
-                        track->addChild(clip);
-                    }
-                    else if (auto otioGap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(otioItem))
-                    {
-                        auto gap = std::make_shared<Gap>();
-                        gap->setName(otioGap->name());
-                        gap->setRange(otioGap->trimmed_range());
-                        out->getStack()->addChild(gap);
-                    }
-                }
-            }
-        }
-
-        return out;
-    }
 
     const std::filesystem::path& Timeline::getPath() const
     {

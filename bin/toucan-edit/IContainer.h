@@ -10,6 +10,12 @@
 
 namespace toucan
 {
+    enum class Find
+    {
+        Recurse,
+        Shallow
+    };
+
     class IContainer : public IItem
     {
     public:
@@ -21,8 +27,18 @@ namespace toucan
         void addChild(const std::shared_ptr<IItem>&);
         void removeChild(const std::shared_ptr<IItem>&);
 
+        template<typename T>
+        std::shared_ptr<T> find(Find find = Find::Recurse) const;
+        template<typename T>
+        std::vector<std::shared_ptr<T> > findAll(Find find = Find::Recurse) const;
+
     private:
+        template<typename T>
+        void _findAll(Find, std::vector<std::shared_ptr<T> >&) const;
+
         std::vector<std::shared_ptr<IItem> > _children;
     };
 }
+
+#include "IContainerInline.h"
 

@@ -9,9 +9,11 @@ set(HEADERS
     Gap.h
     GapWidget.h
     IContainer.h
+    IContainerInline.h
     IItem.h
     IItemWidget.h
     ImageGraph.h
+    MediaReference.h
     MenuBar.h
     PlaybackModel.h
     SelectionModel.h
@@ -19,6 +21,7 @@ set(HEADERS
     StackWidget.h
     ThumbnailGenerator.h
     Timeline.h
+    TimelineConvert.h
     TimelineView.h
     TimelineWidget.h
     TimeUnitsModel.h
@@ -43,6 +46,7 @@ set(SOURCE
     IItem.cpp
     IItemWidget.cpp
     ImageGraph.cpp
+    MediaReference.cpp
     MenuBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
@@ -50,6 +54,7 @@ set(SOURCE
     StackWidget.cpp
     ThumbnailGenerator.cpp
     Timeline.cpp
+    TimelineConvert.cpp
     TimelineView.cpp
     TimelineWidget.cpp
     TimeUnitsModel.cpp

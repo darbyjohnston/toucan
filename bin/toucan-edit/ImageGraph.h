@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <toucan/ImageEffectHost.h>
 #include <toucan/ImageNode.h>
 #include <toucan/MessageLog.h>
 
@@ -11,7 +12,9 @@
 
 namespace toucan
 {
+    class IItem;
     class Timeline;
+    class Track;
 
     //! Image graph options.
     struct ImageGraphOptions
@@ -38,6 +41,21 @@ namespace toucan
             const OTIO_NS::RationalTime&);
 
     private:
+        std::shared_ptr<IImageNode> _track(
+            const std::shared_ptr<ImageEffectHost>&,
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<Track>&);
+
+        std::shared_ptr<IImageNode> _item(
+            const std::shared_ptr<ImageEffectHost>&,
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<IItem>&);
+
+        //std::shared_ptr<IImageNode> _effects(
+        //    const std::shared_ptr<ImageEffectHost>&,
+        //    const std::vector<std::shared_ptr<Effect> >&,
+        //    const std::shared_ptr<IImageNode>&);
+
         std::shared_ptr<Timeline> _timeline;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);

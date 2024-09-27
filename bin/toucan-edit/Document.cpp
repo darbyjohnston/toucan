@@ -27,7 +27,7 @@ namespace toucan
         {
             throw std::runtime_error(errorStatus.full_description);
         }
-        _timeline = Timeline::create(path, otioTimeline);
+        _timeline = convertFrom(path, otioTimeline);
         
         const auto& globalStartTime = otioTimeline->global_start_time();
         const OTIO_NS::RationalTime& duration = otioTimeline->duration();
