@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IItem.h"
+#include <toucanEdit/IItem.h>
 
 #include <vector>
 
@@ -26,6 +26,8 @@ namespace toucan
         const std::vector<std::shared_ptr<IItem> >& getChildren() const;
         void addChild(const std::shared_ptr<IItem>&);
         void removeChild(const std::shared_ptr<IItem>&);
+
+        OTIO_NS::TimeRange getChildRange(const std::shared_ptr<IItem>&);
 
         template<typename T>
         std::shared_ptr<T> find(Find find = Find::Recurse) const;

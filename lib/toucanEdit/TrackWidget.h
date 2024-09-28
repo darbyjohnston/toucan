@@ -4,36 +4,37 @@
 
 #pragma once
 
-#include "IItemWidget.h"
+#include <toucanEdit/IItemWidget.h>
 
 namespace toucan
 {
-    class Gap;
+    class Track;
 
-    class GapWidget : public IItemWidget
+    class TrackWidget : public IItemWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Gap>&,
+            const std::shared_ptr<Track>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~GapWidget();
+        virtual ~TrackWidget();
 
-        static std::shared_ptr<GapWidget> create(
+        static std::shared_ptr<TrackWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Gap>&,
+            const std::shared_ptr<Track>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
         void clipEvent(const dtk::Box2I&, bool) override;
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
 
     private:
-        std::shared_ptr<Gap> _gap;
+        std::shared_ptr<Track> _track;
         std::string _text;
         dtk::Color4F _color;
 

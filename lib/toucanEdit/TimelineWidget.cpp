@@ -6,11 +6,14 @@
 
 #include "App.h"
 #include "DocumentsModel.h"
+#include "Clip.h"
 #include "ClipWidget.h"
+#include "Gap.h"
 #include "GapWidget.h"
+#include "Stack.h"
 #include "StackWidget.h"
-#include "TrackWidget.h"
 #include "Timeline.h"
+#include "TrackWidget.h"
 #include "Track.h"
 
 #include <dtk/ui/ScrollArea.h>

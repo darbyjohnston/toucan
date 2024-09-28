@@ -13,6 +13,7 @@
 namespace toucan
 {
     class IItem;
+    class MediaReference;
     class Timeline;
     class Track;
 
@@ -59,5 +60,6 @@ namespace toucan
         std::shared_ptr<Timeline> _timeline;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
+        std::map<std::shared_ptr<MediaReference>, std::shared_ptr<IImageNode> > _loadCache;
     };
 }

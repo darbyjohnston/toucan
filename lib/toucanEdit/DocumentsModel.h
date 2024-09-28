@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "Document.h"
+#include <toucanEdit/Document.h>
 
 #include <toucan/ImageEffectHost.h>
 

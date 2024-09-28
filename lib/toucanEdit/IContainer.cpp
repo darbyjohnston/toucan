@@ -40,4 +40,22 @@ namespace toucan
             _children.erase(i);
         }
     }
+
+    OTIO_NS::TimeRange IContainer::getChildRange(const std::shared_ptr<IItem>& item)
+    {
+        const OTIO_NS::TimeRange& range = getRange();
+        OTIO_NS::RationalTime t = range.start_time();
+        const auto& children = getChildren();
+        auto i = children.begin();
+        for (; i != children.end() && *i != item; ++i)
+        {
+            t += (*i)->getRange().duration();
+        }
+        OTIO_NS::RationalTime d(0.0, t.rate());
+        if (i != children.end())
+        {
+            d = (*i)->getRange().duration();
+        }
+        return OTIO_NS::TimeRange(t, d);
+    }
 }

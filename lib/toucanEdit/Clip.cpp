@@ -19,6 +19,13 @@ namespace toucan
         return _mediaReferences;
     }
 
+    std::shared_ptr<MediaReference> Clip::getMediaReference() const
+    {
+        std::shared_ptr<MediaReference> out;
+        auto i = _mediaReferences.find(_activeMediaReference);
+        return i != _mediaReferences.end() ? i->second : nullptr;
+    }
+
     void Clip::setMediaReferences(const MediaReferences& value)
     {
         _mediaReferences = value;

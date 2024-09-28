@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IItem.h"
+#include <toucanEdit/IItem.h>
 
 #include <dtk/ui/IWidget.h>
 

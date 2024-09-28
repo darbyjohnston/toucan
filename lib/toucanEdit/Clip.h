@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IItem.h"
+#include <toucanEdit/IItem.h>
 
 #include <map>
 
@@ -22,6 +22,7 @@ namespace toucan
         using MediaReferences = std::map<std::string, std::shared_ptr<MediaReference> >;
 
         const MediaReferences& getMediaReferences() const;
+        std::shared_ptr<MediaReference> getMediaReference() const;
         void setMediaReferences(const MediaReferences&);
 
         static const std::string defaultMediaKey;

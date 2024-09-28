@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "PlaybackModel.h"
-#include "TimeUnitsModel.h"
+#include <toucanEdit/PlaybackModel.h>
+#include <toucanEdit/TimeUnitsModel.h>
 
 #include <dtk/ui/MenuBar.h>
 #include <dtk/core/ObservableList.h>

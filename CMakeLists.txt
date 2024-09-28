@@ -29,6 +29,9 @@ if(APPLE)
     set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew)
 endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+if(toucan_EDIT)
+    add_definitions(-Dtoucan_EDIT)
+endif()
 
 set(TOUCAN_PLUGINS
     toucanColorSpace
@@ -57,10 +60,11 @@ if(toucan_VIEW OR toucan_EDIT)
 endif()
 
 include_directories(lib)
+include_directories(tests)
 # \todo OpenTimelineIO doesn't use the "Imath" prefix for includes?
 include_directories(${CMAKE_INSTALL_PREFIX}/include/Imath)
 
-add_subdirectory(lib/toucan)
+add_subdirectory(lib)
 add_subdirectory(plugins)
 add_subdirectory(bin)
 add_subdirectory(tests)

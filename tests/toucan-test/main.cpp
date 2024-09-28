@@ -2,11 +2,15 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "CompTest.h"
-#include "ImageGraphTest.h"
-#include "PropertySetTest.h"
-#include "ReadTest.h"
-#include "UtilTest.h"
+#if defined(toucan_EDIT)
+#include <toucanEditTest/StackTest.h>
+#endif // toucan_EDIT
+
+#include <toucanTest/CompTest.h>
+#include <toucanTest/ImageGraphTest.h>
+#include <toucanTest/PropertySetTest.h>
+#include <toucanTest/ReadTest.h>
+#include <toucanTest/UtilTest.h>
 
 #include <toucan/ImageEffectHost.h>
 
@@ -33,11 +37,15 @@ int main(int argc, char** argv)
 #endif // _WINDOWS
     auto host = std::make_shared<ImageEffectHost>(searchPath);
     
-    compTest(path);
-    propertySetTest();
-    readTest(path);
-    imageGraphTest(path, host);
-    utilTest(path);
+    //compTest(path);
+    //propertySetTest();
+    //readTest(path);
+    //imageGraphTest(path, host);
+    //utilTest(path);
+
+#if defined(toucan_EDIT)
+    stackTest();
+#endif // toucan_EDIT
     
     return 0;
 }

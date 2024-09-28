@@ -4,16 +4,7 @@
 
 #pragma once
 
-#include "IItem.h"
-
 namespace toucan
 {
-    class Gap : public IItem
-    {
-    public:
-        Gap();
-
-        virtual ~Gap();
-    };
+    void stackTest();
 }
-

@@ -46,7 +46,7 @@ namespace toucan
 
     void Timeline::setItemDuration(const std::shared_ptr<IItem>& item, const OTIO_NS::RationalTime& duration)
     {
-        if (auto parent = item->getParent().lock())
+        if (auto parent = item->getParent())
         {
             std::vector<std::shared_ptr<IItem> > items;
 

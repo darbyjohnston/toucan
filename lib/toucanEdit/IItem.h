@@ -25,7 +25,17 @@ namespace toucan
         const OTIO_NS::TimeRange& getRange() const;
         void setRange(const OTIO_NS::TimeRange&);
 
-        const std::weak_ptr<IContainer>& getParent() const;
+        std::shared_ptr<IContainer> getParent() const;
+
+        std::shared_ptr<IContainer> getRoot();
+
+        OTIO_NS::RationalTime transform(
+            const OTIO_NS::RationalTime&,
+            const std::shared_ptr<IItem>&);
+
+        OTIO_NS::TimeRange transform(
+            const OTIO_NS::TimeRange&,
+            const std::shared_ptr<IItem>&);
 
     private:
         std::string _name;

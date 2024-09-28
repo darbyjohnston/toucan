@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "PlaybackModel.h"
+#include <toucanEdit/PlaybackModel.h>
 
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ToolButton.h>

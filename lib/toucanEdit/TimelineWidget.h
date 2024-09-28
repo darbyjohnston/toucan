@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include "IItemWidget.h"
-#include "SelectionModel.h"
-#include "ThumbnailGenerator.h"
-#include "TimeUnitsModel.h"
+#include <toucanEdit/IItemWidget.h>
+#include <toucanEdit/SelectionModel.h>
+#include <toucanEdit/ThumbnailGenerator.h>
+#include <toucanEdit/TimeUnitsModel.h>
 
 namespace toucan
 {

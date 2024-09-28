@@ -29,7 +29,10 @@ namespace toucan
         if (!_ffRead)
         {
             _input = OIIO::ImageInput::open(_path.string());
-            _spec = _input->spec();
+            if (_input)
+            {
+                _spec = _input->spec();
+            }
         }
     }
 

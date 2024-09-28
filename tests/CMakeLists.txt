@@ -1,23 +1,5 @@
-set(HEADERS
-    CompTest.h
-    ImageGraphTest.h
-    PropertySetTest.h
-    ReadTest.h
-    UtilTest.h)
-
-set(SOURCE
-    CompTest.cpp
-    ImageGraphTest.cpp
-    PropertySetTest.cpp
-    ReadTest.cpp
-    UtilTest.cpp
-    main.cpp)
-
-add_executable(toucan-test ${SOURCE} ${HEADERS})
-target_link_libraries(toucan-test toucan)
-set_target_properties(toucan-test PROPERTIES FOLDER tests)
-add_dependencies(toucan-test ${TOUCAN_PLUGINS})
-
-add_test(
-    toucan-test
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toucan-test${CMAKE_EXECUTABLE_SUFFIX} ${PROJECT_SOURCE_DIR}/data)
+add_subdirectory(toucanTest)
+if(toucan_EDIT)
+    add_subdirectory(toucanEditTest)
+endif()
+add_subdirectory(toucan-test)

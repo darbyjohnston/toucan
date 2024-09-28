@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "IContainer.h"
+#include <toucanEdit/IContainer.h>
 
 namespace toucan
 {
@@ -13,6 +13,7 @@ namespace toucan
         static const std::string video;
         static const std::string audio;
     };
+
     class Track : public IContainer
     {
     public:

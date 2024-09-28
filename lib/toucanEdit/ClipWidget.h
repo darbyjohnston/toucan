@@ -4,37 +4,38 @@
 
 #pragma once
 
-#include "IItemWidget.h"
+#include <toucanEdit/IItemWidget.h>
 
 namespace toucan
 {
-    class Track;
+    class Clip;
 
-    class TrackWidget : public IItemWidget
+    class ClipWidget : public IItemWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Track>&,
+            const std::shared_ptr<Clip>&,
+            const dtk::Color4F&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~TrackWidget();
+        virtual ~ClipWidget();
 
-        static std::shared_ptr<TrackWidget> create(
+        static std::shared_ptr<ClipWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Track>&,
+            const std::shared_ptr<Clip>&,
+            const dtk::Color4F&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
         void clipEvent(const dtk::Box2I&, bool) override;
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
 
     private:
-        std::shared_ptr<Track> _track;
+        std::shared_ptr<Clip> _clip;
         std::string _text;
         dtk::Color4F _color;
 

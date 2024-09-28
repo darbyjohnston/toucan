@@ -2,7 +2,7 @@
 // Copyright (c) 2024 Darby Johnston
 // All rights reserved.
 
-#include "App.h"
+#include <toucanEdit/App.h>
 
 #include <dtk/core/Context.h>
 
