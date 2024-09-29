@@ -11,7 +11,10 @@ namespace toucan
     class Gap : public IItem
     {
     public:
-        Gap();
+        Gap(
+            const std::string& name = std::string(),
+            const OTIO_NS::TimeRange& range = OTIO_NS::TimeRange(),
+            const OTIO_NS::AnyDictionary& metadata = OTIO_NS::AnyDictionary());
 
         virtual ~Gap();
     };

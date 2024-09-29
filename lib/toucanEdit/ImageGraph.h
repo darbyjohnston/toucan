@@ -12,8 +12,9 @@
 
 namespace toucan
 {
+    class Effect;
     class IItem;
-    class MediaReference;
+    class IMediaReference;
     class Timeline;
     class Track;
 
@@ -52,14 +53,14 @@ namespace toucan
             const OTIO_NS::RationalTime&,
             const std::shared_ptr<IItem>&);
 
-        //std::shared_ptr<IImageNode> _effects(
-        //    const std::shared_ptr<ImageEffectHost>&,
-        //    const std::vector<std::shared_ptr<Effect> >&,
-        //    const std::shared_ptr<IImageNode>&);
+        std::shared_ptr<IImageNode> _effects(
+            const std::shared_ptr<ImageEffectHost>&,
+            const std::vector<std::shared_ptr<Effect> >&,
+            const std::shared_ptr<IImageNode>&);
 
         std::shared_ptr<Timeline> _timeline;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
-        std::map<std::shared_ptr<MediaReference>, std::shared_ptr<IImageNode> > _loadCache;
+        std::map<std::shared_ptr<IMediaReference>, std::shared_ptr<IImageNode> > _loadCache;
     };
 }

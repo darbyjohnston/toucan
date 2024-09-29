@@ -8,8 +8,11 @@
 
 namespace toucan
 {
-    Timeline::Timeline(const std::filesystem::path& path) :
-        _path(path)
+    Timeline::Timeline(
+        const std::filesystem::path& path,
+        const OTIO_NS::AnyDictionary& metadata) :
+        _path(path),
+        _metadata(metadata)
     {
         _range = dtk::ObservableValue<OTIO_NS::TimeRange>::create();
         _stack = std::make_shared<Stack>();
@@ -24,6 +27,16 @@ namespace toucan
         return _path;
     }
 
+    const OTIO_NS::AnyDictionary& Timeline::getMetadata() const
+    {
+        return _metadata;
+    }
+
+    void Timeline::setMetadata(const OTIO_NS::AnyDictionary& value)
+    {
+        _metadata = value;
+    }
+
     const OTIO_NS::TimeRange& Timeline::getRange() const
     {
         return _range->get();
@@ -36,7 +49,10 @@ namespace toucan
 
     void Timeline::setRange(const OTIO_NS::TimeRange& range)
     {
-        _range->setIfChanged(range);
+        if (_range->setIfChanged(range))
+        {
+            _stack->setRange(range);
+        }
     }
 
     const std::shared_ptr<Stack>& Timeline::getStack() const

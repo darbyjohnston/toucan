@@ -6,7 +6,11 @@
 
 namespace toucan
 {
-    IContainer::IContainer()
+    IContainer::IContainer(
+        const std::string& name,
+        const OTIO_NS::TimeRange& range,
+        const OTIO_NS::AnyDictionary& metadata) :
+        IItem(name, range, metadata)
     {}
 
     IContainer::~IContainer()

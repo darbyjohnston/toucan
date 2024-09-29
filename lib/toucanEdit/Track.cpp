@@ -9,7 +9,12 @@ namespace toucan
     const std::string TrackKind::video = "Video";
     const std::string TrackKind::audio = "Audio";
 
-    Track::Track(const std::string& kind) :
+    Track::Track(
+        const std::string& name,
+        const OTIO_NS::TimeRange& range,
+        const OTIO_NS::AnyDictionary& metadata,
+        const std::string& kind) :
+        IContainer(name, range, metadata),
         _kind(kind)
     {}
 

@@ -5,14 +5,17 @@
 #include "ImageGraph.h"
 
 #include "Clip.h"
+#include "Effects.h"
 #include "Gap.h"
-#include "MediaReference.h"
+#include "MediaReferences.h"
 #include "Stack.h"
 #include "Timeline.h"
 #include "Track.h"
+#include "Transitions.h"
 
 #include <toucan/Comp.h>
 #include <toucan/Read.h>
+#include <toucan/TimeWarp.h>
 #include <toucan/Util.h>
 
 namespace toucan
@@ -26,15 +29,9 @@ namespace toucan
         // Get the image size from the first clip.
         for (const auto& clip : timeline->getStack()->findAll<Clip>())
         {
-            auto refs = clip->getMediaReferences();
-            auto i = refs.find(clip->getActiveMediaReference());
-            if (i == refs.end())
+            if (auto ref = clip->getMediaReference())
             {
-                i = refs.begin();
-            }
-            if (i != refs.end())
-            {
-                if (auto externalRef = std::dynamic_pointer_cast<ExternalReference>(i->second))
+                if (auto externalRef = std::dynamic_pointer_cast<ExternalReference>(ref))
                 {
                     const std::filesystem::path path = getMediaPath(
                         timeline->getPath().parent_path(),
@@ -46,6 +43,32 @@ namespace toucan
                         _imageSize.x = spec.width;
                         _imageSize.y = spec.height;
                         break;
+                    }
+                }
+                else if (auto sequenceRef = std::dynamic_pointer_cast<ImageSequenceReference>(ref))
+                {
+                    const std::filesystem::path path = getSequenceFrame(
+                        getMediaPath(timeline->getPath().parent_path(), sequenceRef->getTargetURLBase()),
+                        sequenceRef->getNamePrefix(),
+                        sequenceRef->getStartFrame(),
+                        sequenceRef->getFrameZeroPadding(),
+                        sequenceRef->getNameSuffix());
+                    const OIIO::ImageBuf buf(path.string());
+                    const auto& spec = buf.spec();
+                    if (spec.width > 0)
+                    {
+                        _imageSize.x = spec.width;
+                        _imageSize.y = spec.height;
+                        break;
+                    }
+                }
+                else if (auto generatorRef = std::dynamic_pointer_cast<GeneratorReference>(ref))
+                {
+                    auto parameters = generatorRef->getParameters();
+                    auto i = parameters.find("size");
+                    if (i != parameters.end() && i->second.has_value())
+                    {
+                        anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), _imageSize);
                     }
                 }
             }
@@ -77,14 +100,15 @@ namespace toucan
             if (TrackKind::video == track->getKind())
             {
                 // Process this track.
-                auto trackNode = _track(host, stack->transform(time, track), track);
+                const OTIO_NS::RationalTime trackTime = stack->transform(time, track);
+                auto trackNode = _track(host, trackTime, track);
 
                 // Get the track effects.
-                //const auto& effects = track->effects();
-                //if (!effects.empty())
-                //{
-                //    trackNode = _effects(host, effects, trackNode);
-                //}
+                const auto& effects = track->getEffects();
+                if (!effects.empty())
+                {
+                    trackNode = _effects(host, effects, trackNode);
+                }
 
                 // Composite this track over the previous track.
                 std::vector<std::shared_ptr<IImageNode> > nodes;
@@ -104,11 +128,11 @@ namespace toucan
 
 
         // Get the stack effects.
-        //const auto& effects = stack->effects();
-        //if (!effects.empty())
-        //{
-        //    node = _effects(host, effects, node);
-        //}
+        const auto& effects = stack->getEffects();
+        if (!effects.empty())
+        {
+            node = _effects(host, effects, node);
+        }
 
         return node;
     }
@@ -129,108 +153,106 @@ namespace toucan
         const auto& children = track->getChildren();
         for (size_t i = 0; i < children.size(); ++i)
         {
-            if ((item = std::dynamic_pointer_cast<IItem>(children[i])))
+            item = children[i];
+            const OTIO_NS::RationalTime itemTime = track->transform(time, item);
+            const OTIO_NS::TimeRange& range = item->getRange();
+            if (range.contains(itemTime))
             {
-                const OTIO_NS::RationalTime itemTime = track->transform(time, item);
-                const OTIO_NS::TimeRange& range = item->getRange();
-                if (range.contains(itemTime))
+                out = _item(host, itemTime, item);
+                if (i > 0)
                 {
-                    out = _item(host, itemTime, item);
-                    if (i > 0)
-                    {
-                        prev = children[i - 1];
-                    }
-                    if (i > 1)
-                    {
-                        prev2 = children[i - 2];
-                    }
-                    if (i < (children.size() - 1))
-                    {
-                        next = children[i + 1];
-                    }
-                    if (children.size() > 1 && i < (children.size() - 2))
-                    {
-                        next2 = children[i + 2];
-                    }
-                    break;
+                    prev = children[i - 1];
                 }
+                if (i > 1)
+                {
+                    prev2 = children[i - 2];
+                }
+                if (i < (children.size() - 1))
+                {
+                    next = children[i + 1];
+                }
+                if (children.size() > 1 && i < (children.size() - 2))
+                {
+                    next2 = children[i + 2];
+                }
+                break;
             }
         }
 
         // Handle transitions.
-        /*if (item)
+        if (item)
         {
-            if (auto prevTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(prev))
+            if (auto prevTransition = std::dynamic_pointer_cast<Transition>(prev))
             {
-                const auto trimmedRangeInParent = prevTransition->trimmed_range_in_parent();
-                if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                OTIO_NS::TimeRange rangeInParent = prevTransition->transform(
+                    OTIO_NS::TimeRange(
+                        -prevTransition->getInOffset(),
+                        prevTransition->getInOffset() + prevTransition->getOutOffset()),
+                    track);
+                if (rangeInParent.contains(time) && prev2)
                 {
-                    if (auto prevItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(prev2))
-                    {
-                        const double value =
-                            (time - trimmedRangeInParent.value().start_time()).value() /
-                            trimmedRangeInParent.value().duration().value();
+                    const double value =
+                        (time - rangeInParent.start_time()).value() /
+                        rangeInParent.duration().value();
 
-                        auto metaData = prevTransition->metadata();
-                        metaData["value"] = value;
-                        auto node = host->createNode(
-                            prevTransition->transition_type(),
+                    auto metaData = prevTransition->getMetadata();
+                    metaData["value"] = value;
+                    auto node = host->createNode(
+                        prevTransition->getTransitionType(),
+                        metaData);
+                    if (!node)
+                    {
+                        node = host->createNode(
+                            "toucan:Dissolve",
                             metaData);
-                        if (!node)
-                        {
-                            node = host->createNode(
-                                "toucan:Dissolve",
-                                metaData);
-                        }
-                        if (node)
-                        {
-                            auto a = _item(
-                                host,
-                                prevItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, prevItem),
-                                prevItem);
-                            node->setInputs({ a, out });
-                            out = node;
-                        }
+                    }
+                    if (node)
+                    {
+                        auto a = _item(
+                            host,
+                            track->transform(time, prev2),
+                            prev2);
+                        node->setInputs({ a, out });
+                        out = node;
                     }
                 }
             }
-            if (auto nextTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(next))
+            if (auto nextTransition = std::dynamic_pointer_cast<Transition>(next))
             {
-                const auto trimmedRangeInParent = nextTransition->trimmed_range_in_parent();
-                if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
+                OTIO_NS::TimeRange rangeInParent = nextTransition->transform(
+                    OTIO_NS::TimeRange(
+                        -nextTransition->getInOffset(),
+                        nextTransition->getInOffset() + nextTransition->getOutOffset()),
+                    track);
+                if (rangeInParent.contains(time) && next2)
                 {
-                    if (auto nextItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(next2))
-                    {
-                        const double value =
-                            (time - trimmedRangeInParent.value().start_time()).value() /
-                            trimmedRangeInParent.value().duration().value();
+                    const double value =
+                        (time - rangeInParent.start_time()).value() /
+                        rangeInParent.duration().value();
 
-                        auto metaData = nextTransition->metadata();
-                        metaData["value"] = value;
-                        auto node = host->createNode(
-                            nextTransition->transition_type(),
+                    auto metaData = nextTransition->getMetadata();
+                    metaData["value"] = value;
+                    auto node = host->createNode(
+                        nextTransition->getTransitionType(),
+                        metaData);
+                    if (!node)
+                    {
+                        node = host->createNode(
+                            "toucan:Dissolve",
                             metaData);
-                        if (!node)
-                        {
-                            node = host->createNode(
-                                "toucan:Dissolve",
-                                metaData);
-                        }
-                        if (node)
-                        {
-                            auto b = _item(
-                                host,
-                                nextItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, nextItem),
-                                nextItem);
-                            node->setInputs({ out, b });
-                            out = node;
-                        }
+                    }
+                    if (node)
+                    {
+                        auto b = _item(
+                            host,
+                            track->transform(time, next2),
+                            next2);
+                        node->setInputs({ out, b });
+                        out = node;
                     }
                 }
             }
-        }*/
+        }
 
         return out;
     }
@@ -263,6 +285,27 @@ namespace toucan
                     _loadCache[externalRef] = read;
                 }
             }
+            else if (auto sequenceRef = std::dynamic_pointer_cast<ImageSequenceReference>(ref))
+            {
+                const std::filesystem::path path = getMediaPath(
+                    _timeline->getPath().parent_path(),
+                    sequenceRef->getTargetURLBase());
+                auto read = std::make_shared<SequenceReadNode>(
+                    path,
+                    sequenceRef->getNamePrefix(),
+                    sequenceRef->getNameSuffix(),
+                    sequenceRef->getStartFrame(),
+                    sequenceRef->getFrameStep(),
+                    sequenceRef->getRate(),
+                    sequenceRef->getFrameZeroPadding());
+                out = read;
+            }
+            else if (auto generatorRef = std::dynamic_pointer_cast<GeneratorReference>(ref))
+            {
+                out = host->createNode(
+                    generatorRef->getGeneratorKind(),
+                    generatorRef->getParameters());
+            }
         }
         else if (auto gap = std::dynamic_pointer_cast<Gap>(item))
         {
@@ -272,19 +315,48 @@ namespace toucan
         }
 
         // Get the effects.
-        /*const auto& effects = item->effects();
+        const auto& effects = item->getEffects();
         if (!effects.empty())
         {
             out = _effects(host, effects, out);
         }
         if (out)
         {
-            const OTIO_NS::RationalTime timeOffset =
-                trimmedRangeInParent.start_time() -
-                item->trimmed_range().start_time();
+            const OTIO_NS::RationalTime timeOffset = item->transform(
+                item->getRange().start_time(),
+                _timeline->getStack());
             out->setTimeOffset(timeOffset);
-        }*/
+        }
 
+        return out;
+    }
+
+    std::shared_ptr<IImageNode> ImageGraph::_effects(
+        const std::shared_ptr<ImageEffectHost>& host,
+        const std::vector<std::shared_ptr<Effect> >& effects,
+        const std::shared_ptr<IImageNode>& input)
+    {
+        std::shared_ptr<IImageNode> out = input;
+        for (const auto& effect : effects)
+        {
+            if (auto linearTimeWarp = std::dynamic_pointer_cast<LinearTimeWarp>(effect))
+            {
+                auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
+                    static_cast<float>(linearTimeWarp->getTimeScalar()),
+                    std::vector<std::shared_ptr<IImageNode> >{ out });
+                out = linearTimeWarpNode;
+            }
+            else
+            {
+                if (auto imageEffect = host->createNode(
+                    effect->getEffectName(),
+                    effect->getMetadata(),
+                    { out }))
+                {
+                    out = imageEffect;
+                }
+            }
+        }
         return out;
     }
 }

@@ -6,6 +6,7 @@ set(HEADERS
     Document.h
     DocumentsModel.h
     DocumentTab.h
+    Effects.h
     Gap.h
     GapWidget.h
     IContainer.h
@@ -13,7 +14,7 @@ set(HEADERS
     IItem.h
     IItemWidget.h
     ImageGraph.h
-    MediaReference.h
+    MediaReferences.h
     MenuBar.h
     PlaybackModel.h
     SelectionModel.h
@@ -28,6 +29,7 @@ set(HEADERS
     TimeWidgets.h
     Track.h
     TrackWidget.h
+    Transitions.h
     Viewport.h
     ViewModel.h
     Window.h)
@@ -40,13 +42,14 @@ set(SOURCE
     Document.cpp
     DocumentsModel.cpp
     DocumentTab.cpp
+    Effects.cpp
     Gap.cpp
     GapWidget.cpp
     IContainer.cpp
     IItem.cpp
     IItemWidget.cpp
     ImageGraph.cpp
-    MediaReference.cpp
+    MediaReferences.cpp
     MenuBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
@@ -61,6 +64,7 @@ set(SOURCE
     TimeWidgets.cpp
     Track.cpp
     TrackWidget.cpp
+    Transitions.cpp
     Viewport.cpp
     ViewModel.cpp
     Window.cpp)

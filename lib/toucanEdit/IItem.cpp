@@ -8,7 +8,13 @@
 
 namespace toucan
 {
-    IItem::IItem()
+    IItem::IItem(
+        const std::string& name,
+        const OTIO_NS::TimeRange& range,
+        const OTIO_NS::AnyDictionary& metadata) :
+        _name(name),
+        _range(range),
+        _metadata(metadata)
     {}
 
     IItem::~IItem()
@@ -34,6 +40,16 @@ namespace toucan
         _range = range;
     }
 
+    const OTIO_NS::AnyDictionary& IItem::getMetadata() const
+    {
+        return _metadata;
+    }
+
+    void IItem::setMetadata(const OTIO_NS::AnyDictionary& value)
+    {
+        _metadata = value;
+    }
+
     std::shared_ptr<IContainer> IItem::getParent() const
     {
         return _parent.lock();
@@ -45,6 +61,16 @@ namespace toucan
         for (; item->getParent(); item = item->getParent())
             ;
         return std::dynamic_pointer_cast<IContainer>(item);
+    }
+
+    const std::vector<std::shared_ptr<Effect> >& IItem::getEffects() const
+    {
+        return _effects;
+    }
+
+    void IItem::setEffects(const std::vector<std::shared_ptr<Effect> >& value)
+    {
+        _effects = value;
     }
 
     OTIO_NS::RationalTime IItem::transform(

@@ -16,7 +16,11 @@ namespace toucan
     class Track : public IContainer
     {
     public:
-        Track(const std::string& kind);
+        Track(
+            const std::string& name = std::string(),
+            const OTIO_NS::TimeRange& range = OTIO_NS::TimeRange(),
+            const OTIO_NS::AnyDictionary& metadata = OTIO_NS::AnyDictionary(),
+            const std::string& kind = TrackKind::video);
 
         virtual ~Track();
 

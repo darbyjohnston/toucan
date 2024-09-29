@@ -20,11 +20,16 @@ namespace toucan
     class Timeline : std::enable_shared_from_this<Timeline>
     {
     public:
-        Timeline(const std::filesystem::path&);
+        Timeline(
+            const std::filesystem::path&,
+            const OTIO_NS::AnyDictionary& metadata = OTIO_NS::AnyDictionary());
 
         ~Timeline();
 
         const std::filesystem::path& getPath() const;
+
+        const OTIO_NS::AnyDictionary& getMetadata() const;
+        void setMetadata(const OTIO_NS::AnyDictionary&);
 
         const OTIO_NS::TimeRange& getRange() const;
         std::shared_ptr<dtk::IObservableValue<OTIO_NS::TimeRange> > observeRange() const;
@@ -37,6 +42,7 @@ namespace toucan
 
     private:
         std::filesystem::path _path;
+        OTIO_NS::AnyDictionary _metadata;
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _range;
         std::shared_ptr<Stack> _stack;
         std::shared_ptr<dtk::ObservableList<std::shared_ptr<IItem> > > _itemRanges;

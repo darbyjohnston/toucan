@@ -4,11 +4,15 @@
 
 #include "Clip.h"
 
-#include "MediaReference.h"
+#include "MediaReferences.h"
 
 namespace toucan
 {
-    Clip::Clip()
+    Clip::Clip(
+        const std::string& name,
+        const OTIO_NS::TimeRange& range,
+        const OTIO_NS::AnyDictionary& metadata) :
+        IItem(name, range, metadata)
     {}
 
     Clip::~Clip()
@@ -19,9 +23,9 @@ namespace toucan
         return _mediaReferences;
     }
 
-    std::shared_ptr<MediaReference> Clip::getMediaReference() const
+    std::shared_ptr<IMediaReference> Clip::getMediaReference() const
     {
-        std::shared_ptr<MediaReference> out;
+        std::shared_ptr<IMediaReference> out;
         auto i = _mediaReferences.find(_activeMediaReference);
         return i != _mediaReferences.end() ? i->second : nullptr;
     }

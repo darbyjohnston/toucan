@@ -6,8 +6,6 @@
 
 #include <toucanEdit/IItem.h>
 
-#include <vector>
-
 namespace toucan
 {
     enum class Find
@@ -19,7 +17,10 @@ namespace toucan
     class IContainer : public IItem
     {
     public:
-        IContainer();
+        IContainer(
+            const std::string& name = std::string(),
+            const OTIO_NS::TimeRange& range = OTIO_NS::TimeRange(),
+            const OTIO_NS::AnyDictionary& metadata = OTIO_NS::AnyDictionary());
 
         virtual ~IContainer() = 0;
 
@@ -27,7 +28,7 @@ namespace toucan
         void addChild(const std::shared_ptr<IItem>&);
         void removeChild(const std::shared_ptr<IItem>&);
 
-        OTIO_NS::TimeRange getChildRange(const std::shared_ptr<IItem>&);
+        virtual OTIO_NS::TimeRange getChildRange(const std::shared_ptr<IItem>&);
 
         template<typename T>
         std::shared_ptr<T> find(Find find = Find::Recurse) const;

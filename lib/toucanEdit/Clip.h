@@ -10,19 +10,22 @@
 
 namespace toucan
 {
-    class MediaReference;
+    class IMediaReference;
 
     class Clip : public IItem
     {
     public:
-        Clip();
+        Clip(
+            const std::string& name = std::string(),
+            const OTIO_NS::TimeRange& range = OTIO_NS::TimeRange(),
+            const OTIO_NS::AnyDictionary& metadata = OTIO_NS::AnyDictionary());
 
         virtual ~Clip();
 
-        using MediaReferences = std::map<std::string, std::shared_ptr<MediaReference> >;
+        using MediaReferences = std::map<std::string, std::shared_ptr<IMediaReference> >;
 
         const MediaReferences& getMediaReferences() const;
-        std::shared_ptr<MediaReference> getMediaReference() const;
+        std::shared_ptr<IMediaReference> getMediaReference() const;
         void setMediaReferences(const MediaReferences&);
 
         static const std::string defaultMediaKey;
