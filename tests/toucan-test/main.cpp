@@ -31,17 +31,17 @@ int main(int argc, char** argv)
     std::vector<std::filesystem::path> searchPath;
     searchPath.push_back(parentPath);
 #if defined(_WINDOWS)
-    searchPath.push_back(parentPath / ".." / "..");
+    searchPath.push_back(parentPath / ".." / ".." / "..");
 #else // _WINDOWS
-    searchPath.push_back(parentPath / "..");
+    searchPath.push_back(parentPath / ".." / "..");
 #endif // _WINDOWS
     auto host = std::make_shared<ImageEffectHost>(searchPath);
     
-    //compTest(path);
-    //propertySetTest();
-    //readTest(path);
-    //imageGraphTest(path, host);
-    //utilTest(path);
+    compTest(path);
+    propertySetTest();
+    readTest(path);
+    imageGraphTest(path, host);
+    utilTest(path);
 
 #if defined(toucan_EDIT)
     stackTest();
