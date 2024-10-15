@@ -186,7 +186,7 @@ namespace toucan
             options.imageFilters.magnify = dtk::ImageFilter::Nearest;
             event.render->drawImage(
                 _image,
-                dtk::Box2F(0, 0, imageSize.w, imageSize.h),
+                dtk::Box2I(0, 0, imageSize.w, imageSize.h),
                 dtk::Color4F(1.F, 1.F, 1.F),
                 options);
             event.render->setTransform(m);

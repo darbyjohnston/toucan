@@ -103,7 +103,7 @@ namespace toucan
         event.render->drawText(
             _draw.glyphs,
             _size.fontMetrics,
-            dtk::V2F(g3.min.x, g3.min.y + g3.h() / 2 - _size.fontMetrics.lineHeight / 2),
+            dtk::V2I(g3.min.x, g3.min.y + g3.h() / 2 - _size.fontMetrics.lineHeight / 2),
             event.style->getColorRole(dtk::ColorRole::Text));
     }
 }

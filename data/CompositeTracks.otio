@@ -44,7 +44,7 @@
                                 "value": 0
                             }
                         },
-                        "name": "Blue"
+                        "name": "Blue Clip"
                     },
                     {
                         "OTIO_SCHEMA": "Clip.1",
@@ -82,11 +82,11 @@
                                 "value": 0
                             }
                         },
-                        "name": "Green"
+                        "name": "Green Clip"
                     }
                 ],
                 "kind": "Video", 
-                "name": "Video"
+                "name": "Video Track"
             },
             {
                 "OTIO_SCHEMA": "Track.1", 
@@ -130,11 +130,11 @@
                                 "value": 0
                             }
                         },
-                        "name": "Counter"
+                        "name": "Counter Clip"
                     }
                 ],
                 "kind": "Video", 
-                "name": "Video"
+                "name": "Video Track"
             }
         ], 
         "name": "Stack"

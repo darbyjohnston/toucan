@@ -28,7 +28,7 @@ namespace toucan
             parent);
 
         _track = track;
-        _text = !track->name().empty() ? track->name() : track->kind();
+        _text = !track->name().empty() ? track->name() : (track->kind() + " Track");
         _color = OTIO_NS::Track::Kind::video == track->kind() ?
             dtk::Color4F(.2F, .2F, .3F) :
             dtk::Color4F(.2F, .3F, .2F);

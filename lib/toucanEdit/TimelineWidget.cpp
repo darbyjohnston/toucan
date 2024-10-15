@@ -265,7 +265,7 @@ namespace toucan
 
         int pos = timeToPos(_currentTime);
         event.render->drawRect(
-            dtk::Box2F(pos, g.min.y + _size.scrollPos.y, _size.border * 2, g.h()),
+            dtk::Box2I(pos, g.min.y + _size.scrollPos.y, _size.border * 2, g.h()),
             event.style->getColorRole(dtk::ColorRole::Red));
 
         std::string s = _timeUnitsModel->getLabel(_currentTime);
