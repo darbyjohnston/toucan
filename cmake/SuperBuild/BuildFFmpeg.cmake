@@ -96,6 +96,7 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=aac
         --enable-decoder=ac3
         --enable-decoder=av1
+        --enable-decoder=dca
         --enable-decoder=dnxhd
         --enable-decoder=eac3
         --enable-decoder=flac
@@ -147,6 +148,7 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=v308
         --enable-decoder=v408
         --enable-decoder=v410
+        --enable-decoder=vc1
         --enable-decoder=vp9
         --enable-decoder=yuv4
         --disable-encoders
