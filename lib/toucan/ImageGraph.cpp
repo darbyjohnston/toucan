@@ -35,6 +35,8 @@ namespace toucan
         _globalStartTime = globalStartTime.has_value() ? globalStartTime.value() :
             OTIO_NS::RationalTime(0.0, timeline->duration().rate());
 
+        _loadCache.setMax(10);
+
         // Get the image size from the first clip.
         for (auto clip : _timeline->find_clips())
         {
@@ -280,17 +282,12 @@ namespace toucan
             // Get the media reference.
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                auto i = _loadCache.find(externalRef);
-                if (i != _loadCache.end())
-                {
-                    out = i->second;
-                }
-                else
+                if (!_loadCache.get(externalRef, out))
                 {
                     const std::filesystem::path path = _getMediaPath(externalRef->target_url());
                     auto read = std::make_shared<ReadNode>(path);
                     out = read;
-                    _loadCache[externalRef] = read;
+                    _loadCache.add(externalRef, read);
                 }
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))

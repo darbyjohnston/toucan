@@ -7,6 +7,8 @@
 #include <toucan/ImageNode.h>
 #include <toucan/MessageLog.h>
 
+#include <dtk/core/LRUCache.h>
+
 #include <opentimelineio/clip.h>
 #include <opentimelineio/timeline.h>
 #include <opentimelineio/track.h>
@@ -66,6 +68,6 @@ namespace toucan
         OTIO_NS::RationalTime _globalStartTime;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
-        std::map<OTIO_NS::MediaReference*, std::shared_ptr<IImageNode> > _loadCache;
+        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<IImageNode> > _loadCache;
     };
 }

@@ -76,6 +76,9 @@ namespace toucan
                     _scrollWidget->setWidget(nullptr);
                     _currentTimeObserver.reset();
                 }
+
+                _setSizeUpdate();
+                _setDrawUpdate();
             });
     }
 
@@ -110,17 +113,13 @@ namespace toucan
     void TimelineWidget::frameView()
     {
         _scrollWidget->setScrollPos(dtk::V2I());
-        const double scale = _getTimelineScale();
-        if (scale != _scale)
+        _scale = _getTimelineScale();
+        if (_timelineItem)
         {
-            _scale = scale;
-            if (_timelineItem)
-            {
-                _timelineItem->setScale(_scale);
-            }
-            _setSizeUpdate();
-            _setDrawUpdate();
+            _timelineItem->setScale(_scale);
         }
+        _setSizeUpdate();
+        _setDrawUpdate();
     }
 
     bool TimelineWidget::hasFrameView() const

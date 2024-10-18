@@ -43,6 +43,7 @@ namespace toucan
         _timeline = timeline;
         _timeUnitsModel = app->getTimeUnitsModel();
         _selectionModel = document->getSelectionModel();
+        _thumbnails.setMax(100);
         _thumbnailGenerator = document->getThumbnailGenerator();
 
         StackItem::create(context, app, _timeline->tracks(), shared_from_this());
@@ -150,12 +151,21 @@ namespace toucan
         const dtk::TickEvent& event)
     {
         IItem::tickEvent(parentsVisible, parentsEnabled, event);
-        if (_thumbnailFuture.valid() &&
-            _thumbnailFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+        auto i = _thumbnailRequests.begin();
+        while (i != _thumbnailRequests.end())
         {
-            const auto thumbnail = _thumbnailFuture.get();
-            _thumbnails[thumbnail.time] = thumbnail.image;
-            _setDrawUpdate();
+            if (i->future.valid() &&
+                i->future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
+            {
+                const auto image = i->future.get();
+                _thumbnails.add(i->time, image);
+                _setDrawUpdate();
+                i = _thumbnailRequests.erase(i);
+            }
+            else
+            {
+                ++i;
+            }
         }
     }
 
@@ -174,7 +184,13 @@ namespace toucan
             _size.thumbnailSize.w = _size.thumbnailSize.h * _thumbnailGenerator->getAspect();
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
-            _thumbnailFuture = std::future<Thumbnail>();
+            std::vector<uint64_t> ids;
+            for (const auto& request : _thumbnailRequests)
+            {
+                ids.push_back(request.id);
+            }
+            _thumbnailRequests.clear();
+            _thumbnailGenerator->cancelThumbnails(ids);
             _thumbnails.clear();
         }
         int childSizeHint = 0;
@@ -193,6 +209,7 @@ namespace toucan
     void TimelineItem::drawEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
+
         const dtk::Box2I& g = getGeometry();
         const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2;
         for (int x = g.min.x; x < g.max.x; x += _size.thumbnailSize.w)
@@ -201,22 +218,51 @@ namespace toucan
             if (dtk::intersects(g2, drawRect))
             {
                 const OTIO_NS::RationalTime t = posToTime(x);
-                const auto i = _thumbnails.find(t);
-                if (i != _thumbnails.end())
+                std::shared_ptr<dtk::Image> image;
+                if (_thumbnails.get(t, image))
                 {
-                    if (i->second)
+                    if (image)
                     {
                         event.render->drawImage(
-                            i->second,
-                            dtk::Box2I(x, y, i->second->getWidth(), i->second->getHeight()));
+                            image,
+                            dtk::Box2I(x, y, image->getWidth(), image->getHeight()));
                     }
                 }
-                else if (!_thumbnailFuture.valid())
+                else
                 {
-                    _thumbnailFuture = _thumbnailGenerator->getThumbnail(t, _size.thumbnailSize.h);
+                    const auto j = std::find_if(
+                        _thumbnailRequests.begin(),
+                        _thumbnailRequests.end(),
+                        [this, t](const ThumbnailRequest& request)
+                        {
+                            return t == request.time && _size.thumbnailSize.h == request.height;
+                        });
+                    if (j == _thumbnailRequests.end())
+                    {
+                        _thumbnailRequests.push_back(
+                            _thumbnailGenerator->getThumbnail(t, _size.thumbnailSize.h));
+                    }
                 }
             }
         }
+
+        std::vector<uint64_t> cancel;
+        auto i = _thumbnailRequests.begin();
+        while (i != _thumbnailRequests.end())
+        {
+            const int x = timeToPos(i->time);
+            const dtk::Box2I g2(x, y, _size.thumbnailSize.w, _size.thumbnailSize.h);
+            if (!dtk::intersects(g2, drawRect))
+            {
+                cancel.push_back(i->id);
+                i = _thumbnailRequests.erase(i);
+            }
+            else
+            {
+                ++i;
+            }
+        }
+        _thumbnailGenerator->cancelThumbnails(cancel);
     }
 
     void TimelineItem::drawOverlayEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)

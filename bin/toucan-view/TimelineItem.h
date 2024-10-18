@@ -9,6 +9,8 @@
 #include "ThumbnailGenerator.h"
 #include "TimeUnitsModel.h"
 
+#include <dtk/core/LRUCache.h>
+
 namespace toucan
 {
     class Document;
@@ -77,8 +79,8 @@ namespace toucan
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<SelectionModel> _selectionModel;
         std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
-        std::future<Thumbnail> _thumbnailFuture;
-        std::map<OTIO_NS::RationalTime, std::shared_ptr<dtk::Image> > _thumbnails;
+        dtk::LRUCache<OTIO_NS::RationalTime, std::shared_ptr<dtk::Image> > _thumbnails;
+        std::list<ThumbnailRequest> _thumbnailRequests;
 
         struct SizeData
         {

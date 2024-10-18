@@ -20,34 +20,133 @@ namespace toucan
         _timeline(timeline),
         _host(host)
     {
-        _graph = std::make_shared<ImageGraph>(_path, _timeline);
-        const IMATH_NAMESPACE::V2i& imageSize = _graph->getImageSize();
-        _aspect = imageSize.y > 0 ?
-            (imageSize.x / static_cast<float>(imageSize.y)) :
-            0.F;
+        _thread.running = true;
+        _thread.thread = std::thread(
+            [this]
+            {
+                _graph = std::make_shared<ImageGraph>(_path, _timeline);
+                const IMATH_NAMESPACE::V2i& imageSize = _graph->getImageSize();
+                _aspect = imageSize.y > 0 ?
+                    (imageSize.x / static_cast<float>(imageSize.y)) :
+                    0.F;
+
+                while (_thread.running)
+                {
+                    _run();
+                }
+                {
+                    std::unique_lock<std::mutex> lock(_mutex.mutex);
+                    _mutex.stopped = true;
+                }
+                _cancel();
+            });
     }
 
     ThumbnailGenerator::~ThumbnailGenerator()
-    {}
+    {
+        _thread.running = false;
+        if (_thread.thread.joinable())
+        {
+            _thread.thread.join();
+        }
+    }
 
     float ThumbnailGenerator::getAspect() const
     {
         return _aspect;
     }
 
-    std::future<Thumbnail> ThumbnailGenerator::getThumbnail(
+    ThumbnailRequest ThumbnailGenerator::getThumbnail(
         const OTIO_NS::RationalTime& time,
         int height)
     {
-        auto graph = _graph->exec(_host, time);
-        return std::async(
-            std::launch::async,
-            [this, graph, time, height]
+        _requestId++;
+        auto request = std::make_shared<Request>();
+        request->id = _requestId;
+        request->height = height;
+        request->time = time;
+        ThumbnailRequest out;
+        out.id = _requestId;
+        out.height = height;
+        out.time = time;
+        out.future = request->promise.get_future();
+        bool valid = false;
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            if (!_mutex.stopped)
             {
-                const auto sourceBuf = graph->exec(time);
+                valid = true;
+                _mutex.requests.push_back(request);
+            }
+        }
+        if (valid)
+        {
+            _thread.cv.notify_one();
+        }
+        else
+        {
+            request->promise.set_value(nullptr);
+        }
+        return out;
+    }
+
+    void ThumbnailGenerator::cancelThumbnails(const std::vector<uint64_t>& ids)
+    {
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            auto i = _mutex.requests.begin();
+            while (i != _mutex.requests.end())
+            {
+                const auto j = std::find(ids.begin(), ids.end(), (*i)->id);
+                if (j != ids.end())
+                {
+                    i = _mutex.requests.erase(i);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+        }
+    }
+
+    void ThumbnailGenerator::_run()
+    {
+        std::shared_ptr<Request> request;
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            if (_thread.cv.wait_for(
+                lock,
+                std::chrono::milliseconds(5),
+                [this]
+                {
+                    return !_mutex.requests.empty();
+                }))
+            {
+                request = _mutex.requests.front();
+                _mutex.requests.pop_front();
+            }
+        }
+        if (request)
+        {
+            std::shared_ptr<dtk::Image> thumbnail;
+            auto i = _thread.cache.find(std::make_pair(request->time, request->height));
+            if (i != _thread.cache.end())
+            {
+                thumbnail = i->second;
+            }
+            else
+            {
+                auto graph = _graph->exec(_host, request->time);
+                OTIO_NS::RationalTime t = request->time;
+                if (_timeline->global_start_time().has_value())
+                {
+                    t -= _timeline->global_start_time().value();
+                }
+                const auto sourceBuf = graph->exec(t);
                 const auto& sourceSpec = sourceBuf.spec();
 
-                const dtk::Size2I thumbnailSize(height * _aspect, height);
+                const dtk::Size2I thumbnailSize(request->height * _aspect, request->height);
                 dtk::ImageInfo info;
                 info.size = thumbnailSize;
                 switch (sourceSpec.nchannels)
@@ -91,7 +190,6 @@ namespace toucan
                 }
                 info.layout.mirror.y = true;
 
-                std::shared_ptr<dtk::Image> thumbnail;
                 if (info.isValid())
                 {
                     thumbnail = dtk::Image::create(info);
@@ -109,7 +207,24 @@ namespace toucan
                         resizedBuf.localpixels(),
                         thumbnail->getByteCount());
                 }
-                return Thumbnail{ time, thumbnail };
-            });
+
+                _thread.cache[std::make_pair(request->time, request->height)] = thumbnail;
+            }
+
+            request->promise.set_value(thumbnail);
+        }
+    }
+
+    void ThumbnailGenerator::_cancel()
+    {
+        std::list<std::shared_ptr<Request> > requests;
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            requests = std::move(_mutex.requests);
+        }
+        for (auto& request : requests)
+        {
+            request->promise.set_value(nullptr);
+        }
     }
 }
