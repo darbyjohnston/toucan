@@ -25,18 +25,20 @@ namespace toucan
         _resize = resize;
     }
 
-    OIIO::ImageBuf CompNode::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf CompNode::exec()
     {
         OIIO::ImageBuf buf;
-        OTIO_NS::RationalTime offsetTime = time;
+        OTIO_NS::RationalTime offsetTime = _time;
         if (!_timeOffset.is_invalid_time())
         {
             offsetTime -= _timeOffset;
         }
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
         {
-            auto fg = _inputs[0]->exec(offsetTime);
-            auto bg = _inputs[1]->exec(offsetTime);
+            _inputs[0]->setTime(offsetTime);
+            auto fg = _inputs[0]->exec();
+            _inputs[1]->setTime(offsetTime);
+            auto bg = _inputs[1]->exec();
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);
@@ -56,7 +58,8 @@ namespace toucan
         }
         else if (1 == _inputs.size() && _inputs[0])
         {
-            auto fg = _inputs[0]->exec(offsetTime);
+            _inputs[0]->setTime(offsetTime);
+            auto fg = _inputs[0]->exec();
             if (_premult)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);

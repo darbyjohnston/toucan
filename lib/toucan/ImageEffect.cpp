@@ -75,11 +75,11 @@ namespace toucan
             nullptr);
     }
 
-    OIIO::ImageBuf ImageEffectNode::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf ImageEffectNode::exec()
     {
         OIIO::ImageBuf out;
 
-        OTIO_NS::RationalTime offsetTime = time;
+        OTIO_NS::RationalTime offsetTime = _time;
         if (!_timeOffset.is_invalid_time())
         {
             offsetTime -= _timeOffset;
@@ -105,7 +105,8 @@ namespace toucan
             !_inputs.empty() &&
             _inputs[0])
         {
-            inputs.push_back(_inputs[0]->exec(offsetTime));
+            _inputs[0]->setTime(offsetTime);
+            inputs.push_back(_inputs[0]->exec());
             auto spec = inputs[0].spec();
             if (size.x > 0 && size.y > 0)
             {
@@ -122,8 +123,10 @@ namespace toucan
             _inputs[0] &&
             _inputs[1])
         {
-            inputs.push_back(_inputs[0]->exec(offsetTime));
-            inputs.push_back(_inputs[1]->exec(offsetTime));
+            _inputs[0]->setTime(offsetTime);
+            inputs.push_back(_inputs[0]->exec());
+            _inputs[1]->setTime(offsetTime);
+            inputs.push_back(_inputs[1]->exec());
             auto spec = inputs[0].spec();
             if (size.x > 0 && size.y > 0)
             {

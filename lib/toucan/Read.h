@@ -23,7 +23,7 @@ namespace toucan
         
         std::string getLabel() const override;
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec() override;
 
     private:
         std::filesystem::path _path;
@@ -51,7 +51,7 @@ namespace toucan
 
         std::string getLabel() const override;
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec() override;
 
     private:
         std::filesystem::path _base;

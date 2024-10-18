@@ -45,13 +45,17 @@ namespace toucan
         //! \todo How should time transforms be handled?
         void setTimeOffset(const OTIO_NS::RationalTime&);
 
-        //! Execute the image operation for the given time.
-        virtual OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) = 0;
+        //! Get the time.
+        const OTIO_NS::RationalTime& getTime() const;
 
-        //! Generate a Grapviz graph for the given time.
-        std::vector<std::string> graph(
-            const OTIO_NS::RationalTime&,
-            const std::string& name);
+        //! Set the time.
+        void setTime(const OTIO_NS::RationalTime&);
+
+        //! Execute the image operation.
+        virtual OIIO::ImageBuf exec() = 0;
+
+        //! Generate a Grapviz graph
+        std::vector<std::string> graph(const std::string& name);
 
     protected:
         void _graph(
@@ -62,6 +66,7 @@ namespace toucan
 
         std::string _name;
         OTIO_NS::RationalTime _timeOffset;
+        OTIO_NS::RationalTime _time;
         std::vector<std::shared_ptr<IImageNode> > _inputs;
     };
 }

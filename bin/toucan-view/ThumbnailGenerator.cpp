@@ -138,12 +138,7 @@ namespace toucan
             else
             {
                 auto graph = _graph->exec(_host, request->time);
-                OTIO_NS::RationalTime t = request->time;
-                if (_timeline->global_start_time().has_value())
-                {
-                    t -= _timeline->global_start_time().value();
-                }
-                const auto sourceBuf = graph->exec(t);
+                const auto sourceBuf = graph->exec();
                 const auto& sourceSpec = sourceBuf.spec();
 
                 const dtk::Size2I thumbnailSize(request->height * _aspect, request->height);

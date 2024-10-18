@@ -16,18 +16,19 @@ namespace toucan
     LinearTimeWarpNode::~LinearTimeWarpNode()
     {}
 
-    OIIO::ImageBuf LinearTimeWarpNode::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf LinearTimeWarpNode::exec()
     {
         OIIO::ImageBuf buf;
         if (!_inputs.empty())
         {
-            OTIO_NS::RationalTime offsetTime = time;
+            OTIO_NS::RationalTime offsetTime = _time;
             if (!_timeOffset.is_invalid_time())
             {
                 offsetTime -= _timeOffset;
             }
             const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * _timeScalar, offsetTime.rate()).floor();
-            buf = _inputs[0]->exec(scaledTime);
+            _inputs[0]->setTime(scaledTime);
+            buf = _inputs[0]->exec();
         }
         return buf;
     }

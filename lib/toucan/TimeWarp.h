@@ -18,7 +18,7 @@ namespace toucan
 
         virtual ~LinearTimeWarpNode();
         
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec() override;
 
     private:
         float _timeScalar = 1.F;

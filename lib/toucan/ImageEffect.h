@@ -35,11 +35,11 @@ namespace toucan
             ImageEffectPlugin&,
             const std::string& name,
             const OTIO_NS::AnyDictionary& metaData,
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~ImageEffectNode();
 
-        OIIO::ImageBuf exec(const OTIO_NS::RationalTime&) override;
+        OIIO::ImageBuf exec() override;
 
     private:
         ImageEffectPlugin& _plugin;

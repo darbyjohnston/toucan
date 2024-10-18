@@ -17,7 +17,7 @@ namespace toucan
         auto comp = std::make_shared<CompNode>(
             std::vector<std::shared_ptr<IImageNode> >{ fg, bg });
         comp->setPremult(true);
-        auto buf = comp->exec(OTIO_NS::RationalTime());
+        auto buf = comp->exec();
         buf.write("compTest.png");
     }
 }

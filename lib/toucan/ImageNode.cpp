@@ -46,16 +46,24 @@ namespace toucan
         _timeOffset = timeOffset;
     }
 
-    std::vector<std::string> IImageNode::graph(
-        const OTIO_NS::RationalTime& time,
-        const std::string& name)
+    const OTIO_NS::RationalTime& IImageNode::getTime() const
+    {
+        return _time;
+    }
+
+    void IImageNode::setTime(const OTIO_NS::RationalTime& time)
+    {
+        _time = time;
+    }
+
+    std::vector<std::string> IImageNode::graph(const std::string& name)
     {
         std::vector<std::string> out;
         std::stringstream ss;
         ss << "digraph " << name << " {";
         out.push_back(ss.str());
         out.push_back("    node [shape=box, fontsize=12, margin=0.05, width=0, height=0];");
-        _graph(time, shared_from_this(), out);
+        _graph(_time, shared_from_this(), out);
         out.push_back("}");
         return out;
     }

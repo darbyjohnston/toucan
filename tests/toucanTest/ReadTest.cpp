@@ -14,7 +14,7 @@ namespace toucan
     {
         std::cout << "readTest" << std::endl;
         auto read = std::make_shared<ReadNode>(path / "Letter_A.png");
-        auto buf = read->exec(OTIO_NS::RationalTime());
+        auto buf = read->exec();
         const auto& spec = buf.spec();
         assert(spec.width > 0);
     }

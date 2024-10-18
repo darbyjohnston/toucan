@@ -141,6 +141,9 @@ namespace toucan
             node = _effects(host, effects, node);
         }
 
+        // Set the time.
+        node->setTime(time - _globalStartTime);
+
         return node;
     }
 

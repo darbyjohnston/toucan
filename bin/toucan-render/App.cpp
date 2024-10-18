@@ -249,7 +249,7 @@ namespace toucan
             if (auto node = graph->exec(host, time))
             {
                 // Execute the graph.
-                const auto buf = node->exec(time - startTime);
+                const auto buf = node->exec();
 
                 // Save the image.
                 if (!_options.filmstrip)
@@ -295,7 +295,7 @@ namespace toucan
                         outputStartFrame + time.to_frames(),
                         outputNumberPadding,
                         ".dot");
-                    const std::vector<std::string> lines = node->graph(time, inputPath.stem().string());
+                    const std::vector<std::string> lines = node->graph(inputPath.stem().string());
                     if (FILE* f = fopen(path.string().c_str(), "w"))
                     {
                         for (const auto& line : lines)

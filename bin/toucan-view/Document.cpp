@@ -131,9 +131,9 @@ namespace toucan
         std::shared_ptr<dtk::Image> image;
         if (_currentNode->get())
         {
-            //! \todo Can we remove this time arg?
             const OTIO_NS::TimeRange& timeRange = _playbackModel->getTimeRange();
-            _imageBuf = _currentNode->get()->exec(_currentTime - timeRange.start_time());
+            _currentNode->get()->setTime(_currentTime - timeRange.start_time());
+            _imageBuf = _currentNode->get()->exec();
 
             const auto& spec = _imageBuf.spec();
             dtk::ImageType imageType = dtk::ImageType::None;

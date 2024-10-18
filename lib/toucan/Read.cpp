@@ -51,13 +51,13 @@ namespace toucan
         return ss.str();
     }
 
-    OIIO::ImageBuf ReadNode::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf ReadNode::exec()
     {
         OIIO::ImageBuf out;
 
         if (_ffRead)
         {
-            OTIO_NS::RationalTime offsetTime = time;
+            OTIO_NS::RationalTime offsetTime = _time;
             if (!_timeOffset.is_invalid_time())
             {
                 offsetTime -= _timeOffset;
@@ -144,9 +144,9 @@ namespace toucan
         return ss.str();
     }
 
-    OIIO::ImageBuf SequenceReadNode::exec(const OTIO_NS::RationalTime& time)
+    OIIO::ImageBuf SequenceReadNode::exec()
     {
-        OTIO_NS::RationalTime offsetTime = time;
+        OTIO_NS::RationalTime offsetTime = _time;
         if (!_timeOffset.is_invalid_time())
         {
             offsetTime -= _timeOffset;
