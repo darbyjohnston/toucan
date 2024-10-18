@@ -19,7 +19,6 @@ namespace toucan
     void TimelineWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<IWidget>& parent)
     {
         IWidget::_init(context, "toucan::TimelineWidget", parent);
@@ -27,36 +26,56 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(true, 0, static_cast<int>(dtk::KeyModifier::Control));
 
-        _document = document;
-        _timeRange = document->getPlaybackModel()->getTimeRange();
         _frameView = dtk::ObservableValue<bool>::create(true);
 
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
         _scrollWidget->setBorder(false);
 
-        _timelineItem = TimelineItem::create(
-            context,
-            app,
-            document);
-        _scrollWidget->setWidget(_timelineItem);
-
-        _timelineItem->setCurrentTimeCallback(
-            [this](const OTIO_NS::RationalTime& value)
+        auto appWeak = std::weak_ptr<App>(app);
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this, appWeak](const std::shared_ptr<Document>& document)
             {
-                _document->getPlaybackModel()->setCurrentTime(value);
-            });
-
-        _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
-            document->getPlaybackModel()->observeCurrentTime(),
-            [this](const OTIO_NS::RationalTime& value)
-            {
-                _currentTime = value;
-                if (_timelineItem)
+                _document = document;
+                if (document)
                 {
-                    _timelineItem->setCurrentTime(value);
+                    _timeRange = document->getPlaybackModel()->getTimeRange();
+                    _sizeInit = true;
+
+                    _timelineItem = TimelineItem::create(
+                        _getContext().lock(),
+                        appWeak.lock(),
+                        document);
+                    _timelineItem->setCurrentTimeCallback(
+                        [this](const OTIO_NS::RationalTime& value)
+                        {
+                            if (_document)
+                            {
+                                _document->getPlaybackModel()->setCurrentTime(value);
+                            }
+                        });
+                    _scrollWidget->setWidget(_timelineItem);
+
+                    _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
+                        document->getPlaybackModel()->observeCurrentTime(),
+                        [this](const OTIO_NS::RationalTime& value)
+                        {
+                            _currentTime = value;
+                            if (_timelineItem)
+                            {
+                                _timelineItem->setCurrentTime(value);
+                            }
+                            _scrollUpdate();
+                        });
                 }
-                _scrollUpdate();
+                else
+                {
+                    _timeRange = OTIO_NS::TimeRange();
+                    _timelineItem.reset();
+                    _scrollWidget->setWidget(nullptr);
+                    _currentTimeObserver.reset();
+                }
             });
     }
 
@@ -66,11 +85,10 @@ namespace toucan
     std::shared_ptr<TimelineWidget> TimelineWidget::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::shared_ptr<TimelineWidget>(new TimelineWidget);
-        out->_init(context, app, document, parent);
+        out->_init(context, app, parent);
         return out;
     }
 

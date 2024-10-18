@@ -23,7 +23,6 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -32,7 +31,6 @@ namespace toucan
         static std::shared_ptr<GraphWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -55,6 +53,7 @@ namespace toucan
 
         void _graphUpdate();
 
+        std::shared_ptr<Document> _document;
         std::shared_ptr<IImageNode> _rootNode;
         int _depth = 0;
         std::shared_ptr<IImageNode> _currentNode;
@@ -74,6 +73,7 @@ namespace toucan
         };
         SizeData _size;
 
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<IImageNode> > > _rootNodeObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<IImageNode> > > _currentNodeObserver;
     };
@@ -84,7 +84,6 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -93,7 +92,6 @@ namespace toucan
         static std::shared_ptr<GraphTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;

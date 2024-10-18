@@ -6,18 +6,12 @@
 
 #include "WindowModel.h"
 
-#include <dtk/ui/Divider.h>
 #include <dtk/ui/RowLayout.h>
-#include <dtk/ui/Splitter.h>
-#include <dtk/ui/TabWidget.h>
 
 namespace toucan
 {
     class App;
-    class BottomBar;
     class Document;
-    class IToolWidget;
-    class TimelineWidget;
     class Viewport;
 
     class DocumentTab : public dtk::IWidget
@@ -42,16 +36,7 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::shared_ptr<dtk::Splitter> _vSplitter;
-        std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<Viewport> _viewport;
-        std::shared_ptr<dtk::TabWidget> _toolWidget;
-        std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
-        std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
-        std::shared_ptr<BottomBar> _bottomBar;
-        std::shared_ptr<TimelineWidget> _timelineWidget;
-
-        std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
     };
 }
 

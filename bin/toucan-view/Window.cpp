@@ -5,8 +5,13 @@
 #include "Window.h"
 
 #include "App.h"
+#include "BottomBar.h"
 #include "DocumentTab.h"
+#include "ExportTool.h"
+#include "GraphTool.h"
+#include "InspectorTool.h"
 #include "MenuBar.h"
+#include "TimelineWidget.h"
 #include "ToolBar.h"
 
 #include <dtk/ui/MessageDialog.h>
@@ -42,9 +47,31 @@ namespace toucan
             _layout);
         _toolBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
-        _tabWidget = dtk::TabWidget::create(context, _layout);
+
+        _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, _layout);
+        _vSplitter->setSplit({ .7F, .3F });
+        _vSplitter->setStretch(dtk::Stretch::Expanding);
+        _hSplitter = dtk::Splitter::create(context, dtk::Orientation::Horizontal, _vSplitter);
+        _hSplitter->setSplit({ .75F, .25F });
+
+        _tabWidget = dtk::TabWidget::create(context, _hSplitter);
         _tabWidget->setTabsClosable(true);
         _tabWidget->setVStretch(dtk::Stretch::Expanding);
+
+        _toolWidget = dtk::TabWidget::create(context, _hSplitter);
+        _toolWidgets.push_back(InspectorTool::create(context, app));
+        _toolWidgets.push_back(GraphTool::create(context, app));
+        _toolWidgets.push_back(ExportTool::create(context, app));
+        for (const auto& toolWidget : _toolWidgets)
+        {
+            _toolWidget->addTab(toolWidget->getText(), toolWidget);
+        }
+
+        _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
+        _bottomLayout->setSpacingRole(dtk::SizeRole::None);
+        _bottomBar = BottomBar::create(context, app, _bottomLayout);
+        _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
+        _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
         std::weak_ptr<App> appWeak(app);
         _tabWidget->setCallback(
@@ -119,6 +146,13 @@ namespace toucan
                 auto i = value.find(WindowControl::ToolBar);
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
+                i = value.find(WindowControl::TimelineWidget);
+                _timelineWidget->setVisible(i->second);
+                auto j = value.find(WindowControl::BottomBar);
+                _bottomBar->setVisible(j->second);
+                _bottomLayout->setVisible(i->second || j->second);
+                i = value.find(WindowControl::Tools);
+                _toolWidget->setVisible(i->second);
             });
 
         _tooltipsObserver = dtk::ValueObserver<bool>::create(

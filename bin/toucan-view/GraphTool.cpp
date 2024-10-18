@@ -4,6 +4,7 @@
 
 #include "GraphTool.h"
 
+#include "App.h"
 #include "Document.h"
 
 #include <dtk/ui/Spacer.h>
@@ -13,7 +14,6 @@ namespace toucan
     void GraphWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::GraphWidget", parent);
@@ -25,36 +25,54 @@ namespace toucan
         _buttonGroup = dtk::ButtonGroup::create(context, dtk::ButtonGroupType::Radio);
 
         _buttonGroup->setCheckedCallback(
-            [this, document](int index, bool value)
+            [this](int index, bool value)
             {
-                if (index >= 0 && index < _buttons.size())
+                if (_document && index >= 0 && index < _buttons.size())
                 {
                     auto i = _buttonToNode.find(_buttons[index]);
                     if (i != _buttonToNode.end())
                     {
-                        document->setCurrentNode(i->second);
+                        _document->setCurrentNode(i->second);
                     }
                 }
             });
 
-        _rootNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
-            document->observeRootNode(),
-            [this](const std::shared_ptr<IImageNode>& node)
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this](const std::shared_ptr<Document>& document)
             {
-                _rootNode = node;
-                _depth = _getDepth(_rootNode);
-                _graphUpdate();
-            });
-
-        _currentNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
-            document->observeRootNode(),
-            [this](const std::shared_ptr<IImageNode>& node)
-            {
-                _currentNode = node;
-                auto i = _nodeToButton.find(node);
-                if (i != _nodeToButton.end())
+                _document = document;
+                if (document)
                 {
-                    i->second->setChecked(true);
+                    _rootNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
+                        document->observeRootNode(),
+                        [this](const std::shared_ptr<IImageNode>& node)
+                        {
+                            _rootNode = node;
+                            _depth = _getDepth(_rootNode);
+                            _graphUpdate();
+                        });
+
+                    _currentNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
+                        document->observeCurrentNode(),
+                        [this](const std::shared_ptr<IImageNode>& node)
+                        {
+                            _currentNode = node;
+                            auto i = _nodeToButton.find(node);
+                            if (i != _nodeToButton.end())
+                            {
+                                i->second->setChecked(true);
+                            }
+                        });
+                }
+                else
+                {
+                    _rootNode.reset();
+                    _depth = 0;
+                    _currentNode.reset();
+                    _rootNodeObserver.reset();
+                    _currentNodeObserver.reset();
+                    _graphUpdate();
                 }
             });
     }
@@ -65,11 +83,10 @@ namespace toucan
     std::shared_ptr<GraphWidget> GraphWidget::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<GraphWidget>(new GraphWidget);
-        out->_init(context, app, document, parent);
+        out->_init(context, app, parent);
         return out;
     }
 
@@ -201,7 +218,6 @@ namespace toucan
     void GraphTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IToolWidget::_init(context, app, "toucan::GraphTool", "Graph", parent);
@@ -209,7 +225,7 @@ namespace toucan
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setBorder(false);
 
-        _widget = GraphWidget::create(context, app, document);
+        _widget = GraphWidget::create(context, app);
         _scrollWidget->setWidget(_widget);
     }
 
@@ -219,11 +235,10 @@ namespace toucan
     std::shared_ptr<GraphTool> GraphTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<GraphTool>(new GraphTool);
-        out->_init(context, app, document, parent);
+        out->_init(context, app, parent);
         return out;
     }
 

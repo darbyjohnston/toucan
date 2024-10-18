@@ -64,7 +64,6 @@ namespace toucan
     void InspectorTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IToolWidget::_init(context, app, "toucan::InspectorTool", "Inspector", parent);
@@ -114,20 +113,37 @@ namespace toucan
                 }
             });
 
-        _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
-            document->getSelectionModel()->observeSelection(),
-            [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this](const std::shared_ptr<Document>& document)
             {
-                for (const auto& widget : _widgets)
+                if (document)
                 {
-                    widget->setParent(nullptr);
+                    _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
+                        document->getSelectionModel()->observeSelection(),
+                        [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+                        {
+                            for (const auto& widget : _widgets)
+                            {
+                                widget->setParent(nullptr);
+                            }
+                            _widgets.clear();
+                            auto context = _getContext().lock();
+                            for (const auto& item : selection)
+                            {
+                                auto widget = InspectorWidget::create(context, item, _scrollLayout);
+                                _widgets.push_back(widget);
+                            }
+                        });
                 }
-                _widgets.clear();
-                auto context = _getContext().lock();
-                for (const auto& item : selection)
+                else
                 {
-                    auto widget = InspectorWidget::create(context, item, _scrollLayout);
-                    _widgets.push_back(widget);
+                    for (const auto& widget : _widgets)
+                    {
+                        widget->setParent(nullptr);
+                    }
+                    _widgets.clear();
+                    _selectionObserver.reset();
                 }
             });
     }
@@ -138,11 +154,10 @@ namespace toucan
     std::shared_ptr<InspectorTool> InspectorTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<InspectorTool>(new InspectorTool);
-        out->_init(context, app, document, parent);
+        out->_init(context, app, parent);
         return out;
     }
 

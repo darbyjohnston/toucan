@@ -8,6 +8,7 @@
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/RowLayout.h>
+#include <dtk/ui/Splitter.h>
 #include <dtk/ui/TabWidget.h>
 #include <dtk/ui/Window.h>
 #include <dtk/core/ObservableList.h>
@@ -15,9 +16,12 @@
 namespace toucan
 {
     class App;
+    class BottomBar;
     class Document;
     class DocumentTab;
+    class IToolWidget;
     class MenuBar;
+    class TimelineWidget;
     class ToolBar;
 
     class Window : public dtk::Window
@@ -54,8 +58,15 @@ namespace toucan
         std::shared_ptr<MenuBar> _menuBar;
         std::shared_ptr<ToolBar> _toolBar;
         std::shared_ptr<dtk::Divider> _toolBarDivider;
+        std::shared_ptr<dtk::Splitter> _vSplitter;
+        std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<dtk::TabWidget> _tabWidget;
         std::map<std::shared_ptr<Document>, std::shared_ptr<DocumentTab> > _documentTabs;
+        std::shared_ptr<dtk::TabWidget> _toolWidget;
+        std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
+        std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
+        std::shared_ptr<BottomBar> _bottomBar;
+        std::shared_ptr<TimelineWidget> _timelineWidget;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;

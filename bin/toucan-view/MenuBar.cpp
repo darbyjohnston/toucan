@@ -154,6 +154,16 @@ namespace toucan
 
         _menus["File"]->addDivider();
 
+        _actions["File/Export"] = std::make_shared<dtk::Action>(
+            "Export",
+            dtk::Key::T,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this] {
+            });
+        _menus["File"]->addItem(_actions["File/Export"]);
+
+        _menus["File"]->addDivider();
+
         _actions["File/Exit"] = std::make_shared<dtk::Action>(
             "Exit",
             dtk::Key::Q,

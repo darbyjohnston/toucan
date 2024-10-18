@@ -168,13 +168,16 @@ namespace toucan
     void Viewport::drawEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)
     {
         IWidget::drawEvent(drawRect, event);
+        const dtk::Box2I& g = getGeometry();
+        event.render->drawRect(
+            g,
+            dtk::Color4F(0.F, 0.F, 0.F));
         if (_image)
         {
             if (_frame->get())
             {
                 _frameUpdate();
             }
-            const dtk::Box2I& g = getGeometry();
             const dtk::Size2I& imageSize = _image->getSize();
             dtk::M44F vm;
             vm = vm * dtk::translate(dtk::V3F(g.min.x, g.min.y, 0.F));

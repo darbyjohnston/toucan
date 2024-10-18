@@ -5,10 +5,6 @@
 #include "DocumentTab.h"
 
 #include "App.h"
-#include "BottomBar.h"
-#include "GraphTool.h"
-#include "InspectorTool.h"
-#include "TimelineWidget.h"
 #include "Viewport.h"
 
 namespace toucan
@@ -20,43 +16,8 @@ namespace toucan
         const std::shared_ptr<IWidget>& parent)
     {
         dtk::IWidget::_init(context, "toucan::DocumentTab", parent);
-
-        _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, shared_from_this());
-        _vSplitter->setSplit({ .7F, .3F });
-        _vSplitter->setStretch(dtk::Stretch::Expanding);
-        _hSplitter = dtk::Splitter::create(context, dtk::Orientation::Horizontal, _vSplitter);
-        _hSplitter->setSplit({ .75F, .25F });
-
-        _viewport = Viewport::create(context, document, _hSplitter);
+        _viewport = Viewport::create(context, document, shared_from_this());
         _viewport->setStretch(dtk::Stretch::Expanding);
-
-        _toolWidget = dtk::TabWidget::create(context, _hSplitter);
-        _toolWidgets.push_back(InspectorTool::create(context, app, document));
-        _toolWidgets.push_back(GraphTool::create(context, app, document));
-        for (const auto& toolWidget : _toolWidgets)
-        {
-            _toolWidget->addTab(toolWidget->getText(), toolWidget);
-        }
-
-        _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
-        _bottomLayout->setSpacingRole(dtk::SizeRole::None);
-        _bottomBar = BottomBar::create(context, app, _bottomLayout);
-        _timelineWidget = TimelineWidget::create(context, app, document, _bottomLayout);
-        _timelineWidget->setVStretch(dtk::Stretch::Expanding);
-
-        std::weak_ptr<App> appWeak(app);
-        _controlsObserver = dtk::MapObserver<WindowControl, bool>::create(
-            app->getWindowModel()->observeControls(),
-            [this](const std::map<WindowControl, bool>& value)
-            {
-                auto i = value.find(WindowControl::TimelineWidget);
-                _timelineWidget->setVisible(i->second);
-                auto j = value.find(WindowControl::BottomBar);
-                _bottomBar->setVisible(j->second);
-                _bottomLayout->setVisible(i->second || j->second);
-                i = value.find(WindowControl::Tools);
-                _toolWidget->setVisible(i->second);
-            });
     }
 
     DocumentTab::~DocumentTab()
@@ -76,12 +37,12 @@ namespace toucan
     void DocumentTab::setGeometry(const dtk::Box2I& value)
     {
         dtk::IWidget::setGeometry(value);
-        _vSplitter->setGeometry(value);
+        _viewport->setGeometry(value);
     }
 
     void DocumentTab::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         dtk::IWidget::sizeHintEvent(event);
-        _setSizeHint(_vSplitter->getSizeHint());
+        _setSizeHint(_viewport->getSizeHint());
     }
 }

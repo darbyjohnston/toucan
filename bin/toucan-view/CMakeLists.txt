@@ -5,6 +5,8 @@ set(HEADERS
     DocumentTab.h
     Document.h
     DocumentsModel.h
+    Export.h
+    ExportTool.h
     GapItem.h
     GraphTool.h
     IItem.h
@@ -33,6 +35,8 @@ set(SOURCE
     DocumentTab.cpp
     Document.cpp
     DocumentsModel.cpp
+    Export.cpp
+    ExportTool.cpp
     GapItem.cpp
     GraphTool.cpp
     IItem.cpp
