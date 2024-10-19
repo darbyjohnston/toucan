@@ -70,13 +70,17 @@ namespace toucan
     {
         IItem::setGeometry(value);
         const dtk::Box2I& g = getGeometry();
-        dtk::V2I pos = g.min;
-        pos.y += _size.fontMetrics.lineHeight + _size.margin * 2 + _size.border * 2;
+        const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2 + _size.border * 2;
         for (const auto& child : getChildren())
         {
-            const dtk::Size2I& sizeHint = child->getSizeHint();
-            child->setGeometry(dtk::Box2I(pos.x, pos.y, sizeHint.w, sizeHint.h));
-            pos.x += sizeHint.w;
+            if (auto item = std::dynamic_pointer_cast<IItem>(child))
+            {
+                const OTIO_NS::TimeRange& timeRange = item->getTimeRange();
+                const int x0 = timeToPos(timeRange.start_time());
+                const int x1 = timeToPos(timeRange.end_time_exclusive());
+                const dtk::Size2I& sizeHint = child->getSizeHint();
+                child->setGeometry(dtk::Box2I(x0, y, x1 - x0 + 1, sizeHint.h));
+            }
         }
     }
 

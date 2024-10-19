@@ -35,6 +35,9 @@ namespace toucan
         bool isSelected() const;
         void setSelected(bool);
 
+        OTIO_NS::RationalTime posToTime(double) const;
+        int timeToPos(const OTIO_NS::RationalTime&) const;
+
     protected:
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
         OTIO_NS::TimeRange _timeRange;

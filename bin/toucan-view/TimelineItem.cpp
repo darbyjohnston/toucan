@@ -96,35 +96,6 @@ namespace toucan
         _currentTimeCallback = value;
     }
 
-    OTIO_NS::RationalTime TimelineItem::posToTime(double value) const
-    {
-        OTIO_NS::RationalTime out;
-        const dtk::Box2I& g = getGeometry();
-        if (g.w() > 0)
-        {
-            const double normalized = (value - g.min.x) /
-                static_cast<double>(_timeRange.duration().rescaled_to(1.0).value() * _scale);
-            out = OTIO_NS::RationalTime(
-                _timeRange.start_time() +
-                OTIO_NS::RationalTime(
-                    _timeRange.duration().value() * normalized,
-                    _timeRange.duration().rate())).
-                round();
-            out = dtk::clamp(
-                out,
-                _timeRange.start_time(),
-                _timeRange.end_time_inclusive());
-        }
-        return out;
-    }
-
-    int TimelineItem::timeToPos(const OTIO_NS::RationalTime& value) const
-    {
-        const dtk::Box2I& g = getGeometry();
-        const OTIO_NS::RationalTime t = value - _timeRange.start_time();
-        return g.min.x + t.rescaled_to(1.0).value() * _scale;
-    }
-
     void TimelineItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);

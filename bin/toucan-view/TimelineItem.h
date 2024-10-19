@@ -37,9 +37,6 @@ namespace toucan
         void setCurrentTime(const OTIO_NS::RationalTime&);
         void setCurrentTimeCallback(const std::function<void(const OTIO_NS::RationalTime&)>&);
 
-        OTIO_NS::RationalTime posToTime(double) const;
-        int timeToPos(const OTIO_NS::RationalTime&) const;
-
         void setGeometry(const dtk::Box2I&) override;
         void tickEvent(
             bool parentsVisible,
