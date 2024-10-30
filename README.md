@@ -1,6 +1,6 @@
 [![Build Status](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml)
 
-![toucan](images/toucan.svg | width=100)
+<img src="images/toucan.svg" alt="toucan" width="100">
 
 Toucan
 ======
