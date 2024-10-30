@@ -1,5 +1,7 @@
 [![Build Status](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml/badge.svg)](https://github.com/darbyjohnston/toucan/actions/workflows/ci-workflow.yml)
 
+![toucan](images/toucan.svg)
+
 Toucan
 ======
 Toucan is an experimental project for rendering OpenTimelineIO files. The
