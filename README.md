@@ -2,17 +2,27 @@
 
 Toucan
 ======
-
-Toucan is an experimental project for rendering timelines. The project
-currently consists of:
+Toucan is an experimental project for rendering OpenTimelineIO files. The
+project currently consists of:
 * C++ library for rendering timelines
-* OpenFX image effect plugins
+* Collection of OpenFX image effect plugins
 * Command line renderer
 * Interactive viewer
 * Example .otio files
 
-OpenFX Image Effect Plugins
-===========================
+Toucan relies on the following libraries:
+* [OpenTimelineIO](https://github.com/PixarAnimationStudios/OpenTimelineIO)
+* [OpenFX](https://github.com/AcademySoftwareFoundation/openfx)
+* [OpenImageIO](https://github.com/AcademySoftwareFoundation/OpenImageIO)
+* [OpenColorIO](https://github.com/AcademySoftwareFoundation/OpenColorIO)
+* [OpenEXR](https://www.openexr.com/)
+* [FFmpeg](https://ffmpeg.org)
+
+Supported VFX platforms: 2024, 2023, 2022
+
+OpenFX Plugins
+==============
+The OpenFX image effect plugins include:
 * Generators: Checkers, Fill, Gradient, Noise
 * Drawing: Box, Line, Text
 * Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
