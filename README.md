@@ -90,10 +90,8 @@ Multiple effects on clips, tracks, and stacks:
 
 FFmpeg Encoding
 ===============
-Toucan currently only writes image sequences, but these can be converted
-into movie files with FFmpeg. The image sequences can be written to disk
-and then converted with FFmpeg, or they can be piped directly to FFmpeg
-without the overhead of disk I/O.
+Toucan can output rendered images directly to FFmpeg for encoding. The
+images are piped to FFmpeg without incurring the overhead of disk I/O.
 
 Example command line for piping images to FFmpeg:
 ```
