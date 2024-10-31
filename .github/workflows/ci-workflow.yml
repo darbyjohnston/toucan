@@ -31,6 +31,32 @@ jobs:
       run: |
         build-Debug/tests/toucan-test/toucan-test toucan/data
 
+  linux-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: toucan
+        submodules: recursive
+
+    - name: Build
+      run: |
+        bash toucan/SuperBuild.sh Release
+
+    - name: Install
+      run: |
+        cmake --build build-Release --target install
+
+    - name: Package
+      run: |
+        cmake --build build-Release --target package
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: toucan-Linux
+        path: build-Release/toucan-*.tar.gz
+
   macos-12-build:
     runs-on: macos-12
 
@@ -85,6 +111,32 @@ jobs:
       run: |
         build-Debug/tests/toucan-test/toucan-test toucan/data
 
+  macos-14-package:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: toucan
+        submodules: recursive
+
+    - name: Build
+      run: |
+        bash toucan/SuperBuild.sh Release
+
+    - name: Install
+      run: |
+        cmake --build build-Release --target install
+
+    - name: Package
+      run: |
+        cmake --build build-Release --target package
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: toucan-macOS
+        path: build-Release/toucan-*.tar.gz
+
   windows-build:
     runs-on: windows-latest
 
@@ -94,7 +146,7 @@ jobs:
         path: toucan
         submodules: recursive
     - uses: ilammy/setup-nasm@v1
-        
+
     # \bug Any spaces before the ">>" will be considered part of the path.
     - name: Setup
       shell: cmd
@@ -117,3 +169,33 @@ jobs:
       shell: cmd
       run: |
         build-Debug\tests\toucan-test\Debug\toucan-test.exe toucan\data
+
+  windows-build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: toucan
+        submodules: recursive
+    - uses: ilammy/setup-nasm@v1
+
+    - name: Build
+      shell: cmd
+      run: |
+        toucan\SuperBuild.bat Release
+
+    - name: Install
+      shell: cmd
+      run: |
+        cmake --build build-Release --target INSTALL
+
+    - name: Package
+      shell: cmd
+      run: |
+        cmake --build build-Release --target PACKAGE
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: tlRender-Windows
+        path: build-Release\toucan-*.zip

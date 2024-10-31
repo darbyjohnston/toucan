@@ -47,7 +47,6 @@ enable_testing()
 
 find_package(Imath)
 find_package(Freetype)
-find_package(lunasvg)
 find_package(ZLIB)
 find_package(PNG)
 find_package(JPEG)
@@ -59,6 +58,7 @@ find_package(OpenImageIO)
 find_package(OTIO)
 find_package(OpenFX)
 if(toucan_VIEW OR toucan_EDIT)
+    find_package(lunasvg)
     find_package(dtk)
 endif()
 
@@ -88,3 +88,9 @@ configure_package_config_file(
 install(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/toucanConfig.cmake
     DESTINATION lib/cmake/toucan)
+
+if(CMAKE_BUILD_TYPE MATCHES "^Release$")
+    include(Package)
+    include(CPack)
+    include(InstallRequiredSystemLibraries)
+endif()
