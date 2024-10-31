@@ -25,7 +25,7 @@ jobs:
 
     - name: Install
       run: |
-        cmake --build build-Debug --target install
+        cmake --build build-Debug --config Debug --target install
 
     - name: Tests
       run: |
@@ -46,16 +46,24 @@ jobs:
 
     - name: Install
       run: |
-        cmake --build build-Release --target install
+        cmake --build build-Release --config Release --target install
 
     - name: Package
       run: |
-        cmake --build build-Release --target package
+        cmake --build build-Release --config Release --target package
 
-    - uses: actions/upload-artifact@v3
+    - name: Upload artifact
+      id: linux-package-artifact
+      uses: actions/upload-artifact@v4
       with:
         name: toucan-Linux
         path: build-Release/toucan-*.tar.gz
+
+    - name: Upload artifact ID
+      run: echo 'Artifact ID ${{ steps.windows-package-artifact.outputs.artifact-id }}'
+ 
+    - name: Upload artifact URL
+      run: echo 'Artifact URL ${{ steps.windows-package-artifact.outputs.artifact-url }}'
 
   macos-12-build:
     runs-on: macos-12
@@ -78,7 +86,7 @@ jobs:
 
     - name: Install
       run: |
-        cmake --build build-Debug --target install
+        cmake --build build-Debug --config Debug --target install
 
     - name: Tests
       run: |
@@ -105,7 +113,7 @@ jobs:
 
     - name: Install
       run: |
-        cmake --build build-Debug --target install
+        cmake --build build-Debug --config Debug --target install
 
     - name: Tests
       run: |
@@ -126,16 +134,24 @@ jobs:
 
     - name: Install
       run: |
-        cmake --build build-Release --target install
+        cmake --build build-Release --config Release --target install
 
     - name: Package
       run: |
-        cmake --build build-Release --target package
+        cmake --build build-Release --config Release --target package
 
-    - uses: actions/upload-artifact@v3
+    - name: Upload artifact
+      id: macos-package-artifact
+      uses: actions/upload-artifact@v4
       with:
         name: toucan-macOS
         path: build-Release/toucan-*.tar.gz
+
+    - name: Upload artifact ID
+      run: echo 'Artifact ID ${{ steps.windows-package-artifact.outputs.artifact-id }}'
+ 
+    - name: Upload artifact URL
+      run: echo 'Artifact URL ${{ steps.windows-package-artifact.outputs.artifact-url }}'
 
   windows-build:
     runs-on: windows-latest
@@ -163,7 +179,7 @@ jobs:
     - name: Install
       shell: cmd
       run: |
-        cmake --build build-Debug --target INSTALL
+        cmake --build build-Debug --config Debug --target INSTALL
 
     - name: Tests
       shell: cmd
@@ -188,14 +204,22 @@ jobs:
     - name: Install
       shell: cmd
       run: |
-        cmake --build build-Release --target INSTALL
+        cmake --build build-Release --config Release --target INSTALL
 
     - name: Package
       shell: cmd
       run: |
-        cmake --build build-Release --target PACKAGE
+        cmake --build build-Release --config Release --target PACKAGE
 
-    - uses: actions/upload-artifact@v3
+    - name: Upload artifact
+      id: windows-package-artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: tlRender-Windows
+        name: toucan-Windows
         path: build-Release\toucan-*.zip
+
+    - name: Upload artifact ID
+      run: echo 'Artifact ID ${{ steps.windows-package-artifact.outputs.artifact-id }}'
+ 
+    - name: Upload artifact URL
+      run: echo 'Artifact URL ${{ steps.windows-package-artifact.outputs.artifact-url }}'
