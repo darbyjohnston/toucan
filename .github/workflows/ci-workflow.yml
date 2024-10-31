@@ -170,7 +170,7 @@ jobs:
       run: |
         build-Debug\tests\toucan-test\Debug\toucan-test.exe toucan\data
 
-  windows-build:
+  windows-package:
     runs-on: windows-latest
 
     steps:
