@@ -40,6 +40,11 @@ jobs:
         path: toucan
         submodules: recursive
 
+    - name: Setup
+      run: |
+        echo "$PWD/install-Release/bin" >> $GITHUB_PATH
+        echo "LD_LIBRARY_PATH=$PWD/install-Release/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+
     - name: Build
       run: |
         bash toucan/SuperBuild.sh Release
@@ -60,10 +65,10 @@ jobs:
         path: build-Release/toucan-*.tar.gz
 
     - name: Upload artifact ID
-      run: echo 'Artifact ID ${{ steps.windows-package-artifact.outputs.artifact-id }}'
+      run: echo 'Artifact ID ${{ steps.linux-package-artifact.outputs.artifact-id }}'
  
     - name: Upload artifact URL
-      run: echo 'Artifact URL ${{ steps.windows-package-artifact.outputs.artifact-url }}'
+      run: echo 'Artifact URL ${{ steps.linux-package-artifact.outputs.artifact-url }}'
 
   macos-12-build:
     runs-on: macos-12
@@ -148,10 +153,10 @@ jobs:
         path: build-Release/toucan-*.tar.gz
 
     - name: Upload artifact ID
-      run: echo 'Artifact ID ${{ steps.windows-package-artifact.outputs.artifact-id }}'
+      run: echo 'Artifact ID ${{ steps.macos-package-artifact.outputs.artifact-id }}'
  
     - name: Upload artifact URL
-      run: echo 'Artifact URL ${{ steps.windows-package-artifact.outputs.artifact-url }}'
+      run: echo 'Artifact URL ${{ steps.macos-package-artifact.outputs.artifact-url }}'
 
   windows-build:
     runs-on: windows-latest
