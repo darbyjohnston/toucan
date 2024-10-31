@@ -135,6 +135,12 @@ jobs:
         path: toucan
         submodules: recursive
 
+    # \bug DYLD_LIBRARY_PATH is not being set here?
+    - name: Setup
+      run: |
+        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
+        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+
     - name: Build
       run: |
         bash toucan/SuperBuild.sh Release
@@ -202,6 +208,13 @@ jobs:
         path: toucan
         submodules: recursive
     - uses: ilammy/setup-nasm@v1
+
+    # \bug Any spaces before the ">>" will be considered part of the path.
+    - name: Setup
+      shell: cmd
+      run: |
+        echo %CD%\install-Debug\bin>> %GITHUB_PATH%
+        echo %CD%\install-Debug\lib>> %GITHUB_PATH%
 
     - name: Build
       shell: cmd

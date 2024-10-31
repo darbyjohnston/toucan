@@ -9,6 +9,7 @@
 #include "ViewModel.h"
 
 #include <dtk/ui/Action.h>
+#include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
 #include <dtk/core/Format.h>
@@ -104,7 +105,7 @@ namespace toucan
                                     }
                                     catch (const std::exception& e)
                                     {
-                                        context->getSystem<dtk::MessageDialogSystem>()->message("ERROR", e.what(), getWindow());
+                                        context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), getWindow());
                                     }
                                 }
                             });

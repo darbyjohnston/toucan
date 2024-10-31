@@ -4,6 +4,7 @@
 
 #include "App.h"
 
+#include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
 
@@ -65,7 +66,7 @@ namespace toucan
             }
             catch (const std::exception& e)
             {
-                _context->getSystem<dtk::MessageDialogSystem>()->message("ERROR", e.what(), _window);
+                _context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), _window);
             }
         }
 

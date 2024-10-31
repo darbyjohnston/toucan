@@ -14,6 +14,7 @@
 #include "TimelineWidget.h"
 #include "ToolBar.h"
 
+#include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/MessageDialog.h>
 #include <dtk/core/String.h>
 
@@ -219,7 +220,7 @@ namespace toucan
                 }
                 if (!errors.empty())
                 {
-                    context->getSystem<dtk::MessageDialogSystem>()->message(
+                    context->getSystem<dtk::DialogSystem>()->message(
                         "ERROR",
                         dtk::join(errors, '\n'),
                         getWindow());
