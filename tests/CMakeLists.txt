@@ -1,5 +1,2 @@
 add_subdirectory(toucanTest)
-if(toucan_EDIT)
-    add_subdirectory(toucanEditTest)
-endif()
 add_subdirectory(toucan-test)
