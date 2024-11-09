@@ -44,7 +44,7 @@ namespace toucan
                     _sizeInit = true;
 
                     _timelineItem = TimelineItem::create(
-                        _getContext().lock(),
+                        getContext(),
                         appWeak.lock(),
                         document);
                     _timelineItem->setCurrentTimeCallback(

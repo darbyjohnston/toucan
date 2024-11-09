@@ -196,7 +196,7 @@ namespace toucan
         _layouts.clear();
         if (_rootNode)
         {
-            auto context = _getContext().lock();
+            auto context = getContext();
             for (int i = 0; i < _depth; ++i)
             {
                 auto layout = dtk::HorizontalLayout::create(context, _layout);

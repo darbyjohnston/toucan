@@ -105,9 +105,9 @@ namespace toucan
             {
                 if (index >= 0 && index < _documents.size())
                 {
-                    auto document = _documents[index];
-                    auto context = _getContext().lock();
+                    auto context = getContext();
                     auto app = appWeak.lock();
+                    auto document = _documents[index];
                     auto tab = DocumentTab::create(context, app, document);
                     _tabWidget->addTab(
                         dtk::elide(document->getPath().filename().string()),
@@ -202,7 +202,7 @@ namespace toucan
 
     void Window::_drop(const std::vector<std::string>& value)
     {
-        if (auto context = _getContext().lock())
+        if (auto context = getContext())
         {
             if (auto app = _app.lock())
             {
