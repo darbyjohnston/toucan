@@ -4,13 +4,22 @@
 
 Toucan
 ======
-Toucan is an experimental project for rendering OpenTimelineIO files. The
-project currently consists of:
+Toucan is a software renderer for OpenTimelineIO files. Toucan can render an
+OpenTimelineIO file with multiple tracks, clips, transitions, and effects
+into an image sequence or movie file.
+
+The project currently consists of:
 * C++ library for rendering timelines
 * Collection of OpenFX image effect plugins
 * Command line renderer
 * Interactive viewer
 * Example .otio files
+
+Current limitations:
+* Audio is not yet supported
+* Nested timelines are not yet supported
+* Outputting movie files currently relies on the FFmpeg command line program
+(see below: FFmpeg Encoding)
 
 Toucan relies on the following libraries:
 * [OpenTimelineIO](https://github.com/PixarAnimationStudios/OpenTimelineIO)
@@ -38,8 +47,6 @@ Compositing multiple tracks:
 
 ![CompositeTracks](images/CompositeTracks.png)
 
-![Composite Tracks Graph](images/CompositeTracksGraph.svg)
-
 Filter effects; color map, invert, power, saturate, blur, and unsharp mask:
 
 ![Filters](images/Filter.png)
@@ -64,13 +71,9 @@ Dissolve transition:
 
 ![Transition](images/Transition.png)
 
-![Transition Graph](images/TransitionGraph.svg)
-
 Dissolve transition with an invert effect on the clips:
 
 ![Transition 2](images/Transition2.png)
-
-![Transition 2 Graph](images/Transition2Graph.svg)
 
 Wipe transitions:
 
@@ -87,8 +90,6 @@ Color space conversion:
 Multiple effects on clips, tracks, and stacks:
 
 ![Track Effects](images/MultipleEffects.png)
-
-![Multiple Effects Graph](images/MultipleEffectsGraph.svg)
 
 FFmpeg Encoding
 ===============
