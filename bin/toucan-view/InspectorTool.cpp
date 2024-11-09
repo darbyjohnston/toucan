@@ -128,7 +128,7 @@ namespace toucan
                                 widget->setParent(nullptr);
                             }
                             _widgets.clear();
-                            auto context = _getContext().lock();
+                            auto context = getContext();
                             for (const auto& item : selection)
                             {
                                 auto widget = InspectorWidget::create(context, item, _scrollLayout);

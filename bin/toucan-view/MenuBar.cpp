@@ -82,7 +82,7 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (auto context = _getContext().lock())
+                if (auto context = getContext())
                 {
                     if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
                     {
@@ -97,7 +97,7 @@ namespace toucan
                             getWindow(),
                             [this](const std::filesystem::path& path)
                             {
-                                if (auto context = _getContext().lock())
+                                if (auto context = getContext())
                                 {
                                     try
                                     {
