@@ -8,7 +8,6 @@ project(
     LANGUAGES CXX C)
 
 set(toucan_VIEW ON CACHE BOOL "Build viewer application")
-set(toucan_EDIT OFF CACHE BOOL "Build editor application")
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 
@@ -31,9 +30,6 @@ if(APPLE)
     set(CMAKE_IGNORE_PREFIX_PATH /opt/homebrew)
 endif()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-if(toucan_EDIT)
-    add_definitions(-Dtoucan_EDIT)
-endif()
 
 set(TOUCAN_PLUGINS
     toucanColorSpace
@@ -57,7 +53,7 @@ find_package(OpenColorIO)
 find_package(OpenImageIO)
 find_package(OTIO)
 find_package(OpenFX)
-if(toucan_VIEW OR toucan_EDIT)
+if(toucan_VIEW)
     find_package(lunasvg)
     find_package(dtk)
 endif()
