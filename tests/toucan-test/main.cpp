@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (c) 2024 Darby Johnston
-// All rights reserved.
+// Copyright Contributors to the toucan project.
 
 #if defined(toucan_EDIT)
 #include <toucanEditTest/StackTest.h>

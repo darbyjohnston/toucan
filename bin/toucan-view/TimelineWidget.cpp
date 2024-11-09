@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Copyright (c) 2024 Darby Johnston
-// All rights reserved.
+// Copyright Contributors to the toucan project.
 
 #include "TimelineWidget.h"
 
