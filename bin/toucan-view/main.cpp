@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "App.h"
+#include "toucanView/App.h"
 
 DTK_MAIN()
 {

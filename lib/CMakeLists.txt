@@ -1,4 +1,4 @@
 add_subdirectory(toucan)
-if(toucan_EDIT)
-    add_subdirectory(toucanEdit)
+if(toucan_VIEW)
+    add_subdirectory(toucanView)
 endif()
