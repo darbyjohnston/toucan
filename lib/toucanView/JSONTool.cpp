@@ -4,6 +4,8 @@
 #include "JSONTool.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
+#include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Label.h>

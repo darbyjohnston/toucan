@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "Window.h"
+#include "MainWindow.h"
 
 #include "App.h"
 #include "DocumentTab.h"
+#include "DocumentsModel.h"
 #include "ExportTool.h"
 #include "GraphTool.h"
 #include "JSONTool.h"
@@ -19,7 +20,7 @@
 
 namespace toucan
 {
-    void Window::_init(
+    void MainWindow::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::string& name,
@@ -35,18 +36,17 @@ namespace toucan
         _menuBar = MenuBar::create(
             context,
             app,
-            std::dynamic_pointer_cast<Window>(shared_from_this()),
+            std::dynamic_pointer_cast<MainWindow>(shared_from_this()),
             _layout);
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _toolBar = ToolBar::create(
             context,
             app,
-            std::dynamic_pointer_cast<Window>(shared_from_this()),
+            std::dynamic_pointer_cast<MainWindow>(shared_from_this()),
             _menuBar->getActions(),
             _layout);
         _toolBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
-
 
         _vSplitter = dtk::Splitter::create(context, dtk::Orientation::Vertical, _layout);
         _vSplitter->setSplit({ .7F, .3F });
@@ -69,7 +69,11 @@ namespace toucan
 
         _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
         _bottomLayout->setSpacingRole(dtk::SizeRole::None);
+
         _playbackBar = PlaybackBar::create(context, app, _bottomLayout);
+
+        _bottomDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+
         _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
@@ -146,11 +150,14 @@ namespace toucan
                 auto i = value.find(WindowControl::ToolBar);
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
-                i = value.find(WindowControl::TimelineWidget);
-                _timelineWidget->setVisible(i->second);
-                auto j = value.find(WindowControl::PlaybackBar);
-                _playbackBar->setVisible(j->second);
+
+                i = value.find(WindowControl::PlaybackBar);
+                _playbackBar->setVisible(i->second);
+                auto j = value.find(WindowControl::TimelineWidget);
+                _timelineWidget->setVisible(j->second);
                 _bottomLayout->setVisible(i->second || j->second);
+                _bottomDivider->setVisible(i->second && j->second);
+
                 i = value.find(WindowControl::Tools);
                 _toolWidget->setVisible(i->second);
             });
@@ -163,43 +170,43 @@ namespace toucan
             });
     }
 
-    Window::~Window()
+    MainWindow::~MainWindow()
     {}
 
-    std::shared_ptr<Window> Window::create(
+    std::shared_ptr<MainWindow> MainWindow::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::string& name,
         const dtk::Size2I& size)
     {
-        auto out = std::shared_ptr<Window>(new Window);
+        auto out = std::shared_ptr<MainWindow>(new MainWindow);
         out->_init(context, app, name, size);
         return out;
     }
 
-    void Window::setGeometry(const dtk::Box2I& value)
+    void MainWindow::setGeometry(const dtk::Box2I& value)
     {
         dtk::Window::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void Window::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void MainWindow::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         dtk::Window::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());
     }
 
-    void Window::keyPressEvent(dtk::KeyEvent& event)
+    void MainWindow::keyPressEvent(dtk::KeyEvent& event)
     {
         event.accept = _menuBar->shortcut(event.key, event.modifiers);
     }
 
-    void Window::keyReleaseEvent(dtk::KeyEvent& event)
+    void MainWindow::keyReleaseEvent(dtk::KeyEvent& event)
     {
         event.accept = true;
     }
 
-    void Window::_drop(const std::vector<std::string>& value)
+    void MainWindow::_drop(const std::vector<std::string>& value)
     {
         if (auto context = getContext())
         {

@@ -23,7 +23,7 @@ namespace toucan
     class TimelineWidget;
     class ToolBar;
 
-    class Window : public dtk::Window
+    class MainWindow : public dtk::Window
     {
     protected:
         void _init(
@@ -33,9 +33,9 @@ namespace toucan
             const dtk::Size2I&);
 
     public:
-        virtual ~Window();
+        virtual ~MainWindow();
 
-        static std::shared_ptr<Window> create(
+        static std::shared_ptr<MainWindow> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::string& name,
@@ -65,6 +65,7 @@ namespace toucan
         std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<PlaybackBar> _playbackBar;
+        std::shared_ptr<dtk::Divider> _bottomDivider;
         std::shared_ptr<TimelineWidget> _timelineWidget;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;

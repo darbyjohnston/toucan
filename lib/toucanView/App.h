@@ -3,15 +3,17 @@
 
 #pragma once
 
-#include "DocumentsModel.h"
-#include "TimeUnitsModel.h"
-#include "Window.h"
-#include "WindowModel.h"
-
 #include <dtk/ui/App.h>
 
 namespace toucan
 {
+    class DocumentsModel;
+    class ImageEffectHost;
+    class MainWindow;
+    class MessageLog;
+    class TimeUnitsModel;
+    class WindowModel;
+
     class App : public dtk::App
     {
     protected:
@@ -38,7 +40,7 @@ namespace toucan
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<DocumentsModel> _documentsModel;
         std::shared_ptr<WindowModel> _windowModel;
-        std::shared_ptr<Window> _window;
+        std::shared_ptr<MainWindow> _window;
     };
 }
 

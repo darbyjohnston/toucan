@@ -5,14 +5,15 @@
 
 #include "Document.h"
 
-#include <toucan/ImageEffectHost.h>
-
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableList.h>
 #include <dtk/core/ObservableValue.h>
 
 namespace toucan
 {
+    class Document;
+    class ImageEffectHost;
+
     class DocumentsModel : public std::enable_shared_from_this<DocumentsModel>
     {
     public:

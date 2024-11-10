@@ -5,6 +5,7 @@
 
 #include "App.h"
 #include "DocumentsModel.h"
+#include "SelectionModel.h"
 #include "StackItem.h"
 
 #include <dtk/ui/ScrollArea.h>

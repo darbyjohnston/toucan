@@ -4,18 +4,19 @@
 #pragma once
 
 #include "PlaybackModel.h"
-#include "WindowModel.h"
 #include "TimeUnitsModel.h"
+#include "WindowModel.h"
 
 #include <dtk/ui/MenuBar.h>
 #include <dtk/core/ObservableList.h>
+#include <dtk/core/ObservableMap.h>
 
 namespace toucan
 {
     class App;
     class Document;
     class DocumentsModel;
-    class Window;
+    class MainWindow;
 
     class MenuBar : public dtk::MenuBar
     {
@@ -23,7 +24,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Window>&,
+            const std::shared_ptr<MainWindow>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -32,7 +33,7 @@ namespace toucan
         static std::shared_ptr<MenuBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Window>&,
+            const std::shared_ptr<MainWindow>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         const std::map<std::string, std::shared_ptr<dtk::Action> >& getActions() const;
@@ -53,7 +54,7 @@ namespace toucan
         void _windowMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Window>&);
+            const std::shared_ptr<MainWindow>&);
         void _viewMenuInit(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&);

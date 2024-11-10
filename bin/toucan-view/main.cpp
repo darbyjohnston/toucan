@@ -3,6 +3,10 @@
 
 #include "toucanView/App.h"
 
+#include <dtk/core/Context.h>
+
+#include <iostream>
+
 DTK_MAIN()
 {
     try

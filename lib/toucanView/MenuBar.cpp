@@ -4,6 +4,8 @@
 #include "MenuBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
+#include "MainWindow.h"
 #include "SelectionModel.h"
 #include "ViewModel.h"
 
@@ -18,7 +20,7 @@ namespace toucan
     void MenuBar::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Window>& window,
+        const std::shared_ptr<MainWindow>& window,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         dtk::MenuBar::_init(context, parent);
@@ -82,7 +84,7 @@ namespace toucan
     std::shared_ptr<MenuBar> MenuBar::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Window>& window,
+        const std::shared_ptr<MainWindow>& window,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<MenuBar>(new MenuBar);
@@ -180,16 +182,6 @@ namespace toucan
             [this] { _documentsModel->prev(); });
         _actions["File/Prev"]->toolTip = "Switch to the previous file";
         _menus["File"]->addItem(_actions["File/Prev"]);
-
-        _menus["File"]->addDivider();
-
-        _actions["File/Export"] = std::make_shared<dtk::Action>(
-            "Export",
-            dtk::Key::T,
-            static_cast<int>(dtk::KeyModifier::Control),
-            [this] {
-            });
-        _menus["File"]->addItem(_actions["File/Export"]);
 
         _menus["File"]->addDivider();
 
@@ -433,12 +425,12 @@ namespace toucan
     void MenuBar::_windowMenuInit(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Window>& window)
+        const std::shared_ptr<MainWindow>& window)
     {
         _menus["Window"] = dtk::Menu::create(context);
         addMenu("Window", _menus["Window"]);
 
-        std::weak_ptr<Window> windowWeak(window);
+        std::weak_ptr<MainWindow> windowWeak(window);
         _actions["Window/FullScreen"] = std::make_shared<dtk::Action>(
             "Full Screen",
             "WindowFullScreen",

@@ -4,15 +4,16 @@
 #pragma once
 
 #include "IItem.h"
-#include "SelectionModel.h"
 #include "ThumbnailGenerator.h"
 #include "TimeUnitsModel.h"
 
 #include <dtk/core/LRUCache.h>
+#include <dtk/core/ObservableList.h>
 
 namespace toucan
 {
     class Document;
+    class SelectionModel;
 
     class TimelineItem : public IItem
     {

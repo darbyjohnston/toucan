@@ -13,7 +13,7 @@ namespace toucan
 {
     class App;
     class Document;
-    class Window;
+    class MainWindow;
 
     class ToolBar : public dtk::IWidget
     {
@@ -21,7 +21,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Window>&,
+            const std::shared_ptr<MainWindow>&,
             const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -31,7 +31,7 @@ namespace toucan
         static std::shared_ptr<ToolBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Window>&,
+            const std::shared_ptr<MainWindow>&,
             const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 

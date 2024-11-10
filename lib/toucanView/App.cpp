@@ -3,6 +3,11 @@
 
 #include "App.h"
 
+#include "DocumentsModel.h"
+#include "MainWindow.h"
+#include "TimeUnitsModel.h"
+#include "WindowModel.h"
+
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
@@ -50,7 +55,7 @@ namespace toucan
 
         _windowModel = std::make_shared<WindowModel>();
 
-        _window = Window::create(
+        _window = MainWindow::create(
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
             "toucan-view",

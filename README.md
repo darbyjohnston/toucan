@@ -18,7 +18,7 @@ The project currently consists of:
 Current limitations:
 * Audio is not yet supported
 * Nested timelines are not yet supported
-* Outputting movie files currently relies on the FFmpeg command line program
+* Exporting movie files currently relies on the FFmpeg command line program
 (see below: FFmpeg Encoding)
 
 Toucan relies on the following libraries:
@@ -93,7 +93,7 @@ Multiple effects on clips, tracks, and stacks:
 
 FFmpeg Encoding
 ===============
-Toucan can output rendered images directly to FFmpeg for encoding. The
+Toucan can send rendered images directly to FFmpeg for encoding. The
 images are piped to FFmpeg without incurring the overhead of disk I/O.
 
 Example command line for piping images to FFmpeg:

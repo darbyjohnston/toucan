@@ -4,11 +4,13 @@
 #pragma once
 
 #include "IToolWidget.h"
-#include "SelectionModel.h"
 
 #include <dtk/ui/Bellows.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
+#include <dtk/core/ObservableList.h>
+
+#include <opentimelineio/item.h>
 
 namespace toucan
 {
