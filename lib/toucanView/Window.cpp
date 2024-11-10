@@ -4,12 +4,12 @@
 #include "Window.h"
 
 #include "App.h"
-#include "BottomBar.h"
 #include "DocumentTab.h"
 #include "ExportTool.h"
 #include "GraphTool.h"
-#include "InspectorTool.h"
+#include "JSONTool.h"
 #include "MenuBar.h"
+#include "PlaybackBar.h"
 #include "TimelineWidget.h"
 #include "ToolBar.h"
 
@@ -59,7 +59,7 @@ namespace toucan
         _tabWidget->setVStretch(dtk::Stretch::Expanding);
 
         _toolWidget = dtk::TabWidget::create(context, _hSplitter);
-        _toolWidgets.push_back(InspectorTool::create(context, app));
+        _toolWidgets.push_back(JSONTool::create(context, app));
         _toolWidgets.push_back(GraphTool::create(context, app));
         _toolWidgets.push_back(ExportTool::create(context, app));
         for (const auto& toolWidget : _toolWidgets)
@@ -69,7 +69,7 @@ namespace toucan
 
         _bottomLayout = dtk::VerticalLayout::create(context, _vSplitter);
         _bottomLayout->setSpacingRole(dtk::SizeRole::None);
-        _bottomBar = BottomBar::create(context, app, _bottomLayout);
+        _playbackBar = PlaybackBar::create(context, app, _bottomLayout);
         _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
@@ -148,8 +148,8 @@ namespace toucan
                 _toolBarDivider->setVisible(i->second);
                 i = value.find(WindowControl::TimelineWidget);
                 _timelineWidget->setVisible(i->second);
-                auto j = value.find(WindowControl::BottomBar);
-                _bottomBar->setVisible(j->second);
+                auto j = value.find(WindowControl::PlaybackBar);
+                _playbackBar->setVisible(j->second);
                 _bottomLayout->setVisible(i->second || j->second);
                 i = value.find(WindowControl::Tools);
                 _toolWidget->setVisible(i->second);

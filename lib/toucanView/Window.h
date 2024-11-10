@@ -15,11 +15,11 @@
 namespace toucan
 {
     class App;
-    class BottomBar;
     class Document;
     class DocumentTab;
     class IToolWidget;
     class MenuBar;
+    class PlaybackBar;
     class TimelineWidget;
     class ToolBar;
 
@@ -64,7 +64,7 @@ namespace toucan
         std::shared_ptr<dtk::TabWidget> _toolWidget;
         std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
-        std::shared_ptr<BottomBar> _bottomBar;
+        std::shared_ptr<PlaybackBar> _playbackBar;
         std::shared_ptr<TimelineWidget> _timelineWidget;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;

@@ -42,12 +42,15 @@ namespace toucan
         void _widgetUpdate();
 
         size_t _documentsSize = 0;
+        std::shared_ptr<Document> _document;
 
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::map<std::string, std::shared_ptr<dtk::ToolButton> > _buttons;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
     };
 }
 
