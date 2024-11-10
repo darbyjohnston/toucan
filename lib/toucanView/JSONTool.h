@@ -14,7 +14,7 @@ namespace toucan
 {
     class Document;
 
-    class InspectorWidget : public dtk::IWidget
+    class JSONWidget : public dtk::IWidget
     {
     protected:
         void _init(
@@ -23,9 +23,9 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~InspectorWidget();
+        virtual ~JSONWidget();
 
-        static std::shared_ptr<InspectorWidget> create(
+        static std::shared_ptr<JSONWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -40,7 +40,7 @@ namespace toucan
         std::shared_ptr<dtk::Bellows> _bellows;
     };
 
-    class InspectorTool : public IToolWidget
+    class JSONTool : public IToolWidget
     {
     protected:
         void _init(
@@ -49,9 +49,9 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~InspectorTool();
+        virtual ~JSONTool();
 
-        static std::shared_ptr<InspectorTool> create(
+        static std::shared_ptr<JSONTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -65,7 +65,7 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
-        std::vector<std::shared_ptr<InspectorWidget> > _widgets;
+        std::vector<std::shared_ptr<JSONWidget> > _widgets;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;

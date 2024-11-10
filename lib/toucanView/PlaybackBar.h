@@ -13,7 +13,7 @@ namespace toucan
     class App;
     class Document;
 
-    class BottomBar : public dtk::IWidget
+    class PlaybackBar : public dtk::IWidget
     {
     protected:
         void _init(
@@ -22,9 +22,9 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~BottomBar();
+        virtual ~PlaybackBar();
 
-        static std::shared_ptr<BottomBar> create(
+        static std::shared_ptr<PlaybackBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);

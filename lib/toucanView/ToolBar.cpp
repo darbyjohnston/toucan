@@ -4,6 +4,7 @@
 #include "ToolBar.h"
 
 #include "App.h"
+#include "ViewModel.h"
 
 #include <dtk/ui/Divider.h>
 
@@ -21,7 +22,7 @@ namespace toucan
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
-        const std::vector<std::string> actionNames =
+        std::vector<std::string> actionNames =
         {
             "File/Open",
             "File/Close",
@@ -61,6 +62,48 @@ namespace toucan
             });
         _buttons["Window/FullScreen"] = button;
 
+        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
+        
+        actionNames =
+        {
+            "View/ZoomIn",
+            "View/ZoomOut",
+            "View/ZoomReset"
+        };
+        for (const auto& name : actionNames)
+        {
+            i = actions.find(name);
+            button = dtk::ToolButton::create(context, _layout);
+            button->setIcon(i->second->icon);
+            button->setTooltip(i->second->toolTip);
+            button->setClickedCallback(
+                [i]
+                {
+                    if (i->second->callback)
+                    {
+                        i->second->callback();
+                    }
+                });
+            _buttons[name] = button;
+        }
+        
+        i = actions.find("View/Frame");
+        button = dtk::ToolButton::create(context, _layout);
+        button->setIcon(i->second->icon);
+        button->setCheckable(true);
+        button->setTooltip(i->second->toolTip);
+        button->setCheckedCallback(
+            [i](bool value)
+            {
+                if (i->second->checkedCallback)
+                {
+                    i->second->checkedCallback(value);
+                }
+            });
+        _buttons["View/Frame"] = button;
+
+        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
+
         _widgetUpdate();
 
         _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
@@ -68,6 +111,14 @@ namespace toucan
             [this](const std::vector<std::shared_ptr<Document> >& documents)
             {
                 _documentsSize = documents.size();
+                _widgetUpdate();
+            });
+
+        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
+            app->getDocumentsModel()->observeCurrent(),
+            [this](const std::shared_ptr<Document>& document)
+            {
+                _document = document;
                 _widgetUpdate();
             });
 
@@ -110,5 +161,19 @@ namespace toucan
     {
         _buttons["File/Close"]->setEnabled(_documentsSize > 0);
         _buttons["File/CloseAll"]->setEnabled(_documentsSize > 0);
+
+        if (_document)
+        {
+            _frameViewObserver = dtk::ValueObserver<bool>::create(
+                _document->getViewModel()->observeFrame(),
+                [this](bool value)
+                {
+                    _buttons["View/Frame"]->setChecked(value);
+                });
+        }
+        else
+        {
+            _frameViewObserver.reset();
+        }
     }
 }

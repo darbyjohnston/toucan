@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "InspectorTool.h"
+#include "JSONTool.h"
 
 #include "App.h"
 
@@ -12,12 +12,12 @@
 
 namespace toucan
 {
-    void InspectorWidget::_init(
+    void JSONWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IWidget::_init(context, "toucan::InspectorWidget", parent);
+        IWidget::_init(context, "toucan::JSONWidget", parent);
 
         _item = item;
 
@@ -30,42 +30,42 @@ namespace toucan
         _bellows->setOpen(true);
     }
 
-    InspectorWidget::~InspectorWidget()
+    JSONWidget::~JSONWidget()
     {}
 
-    std::shared_ptr<InspectorWidget> InspectorWidget::create(
+    std::shared_ptr<JSONWidget> JSONWidget::create(
         const std::shared_ptr<dtk::Context>& context,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<InspectorWidget>(new InspectorWidget);
+        auto out = std::shared_ptr<JSONWidget>(new JSONWidget);
         out->_init(context, item, parent);
         return out;
     }
 
-    void InspectorWidget::setOpen(bool value)
+    void JSONWidget::setOpen(bool value)
     {
         _bellows->setOpen(value);
     }
 
-    void InspectorWidget::setGeometry(const dtk::Box2I& value)
+    void JSONWidget::setGeometry(const dtk::Box2I& value)
     {
         IWidget::setGeometry(value);
         _bellows->setGeometry(value);
     }
 
-    void InspectorWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void JSONWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IWidget::sizeHintEvent(event);
         _setSizeHint(_bellows->getSizeHint());
     }
 
-    void InspectorTool::_init(
+    void JSONTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IToolWidget::_init(context, app, "toucan::InspectorTool", "Inspector", parent);
+        IToolWidget::_init(context, app, "toucan::JSONTool", "JSON", parent);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -130,7 +130,7 @@ namespace toucan
                             auto context = getContext();
                             for (const auto& item : selection)
                             {
-                                auto widget = InspectorWidget::create(context, item, _scrollLayout);
+                                auto widget = JSONWidget::create(context, item, _scrollLayout);
                                 _widgets.push_back(widget);
                             }
                         });
@@ -147,26 +147,26 @@ namespace toucan
             });
     }
 
-    InspectorTool::~InspectorTool()
+    JSONTool::~JSONTool()
     {}
 
-    std::shared_ptr<InspectorTool> InspectorTool::create(
+    std::shared_ptr<JSONTool> JSONTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<InspectorTool>(new InspectorTool);
+        auto out = std::shared_ptr<JSONTool>(new JSONTool);
         out->_init(context, app, parent);
         return out;
     }
 
-    void InspectorTool::setGeometry(const dtk::Box2I& value)
+    void JSONTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void InspectorTool::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void JSONTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());

@@ -1,6 +1,5 @@
 set(HEADERS
     App.h
-    BottomBar.h
     ClipItem.h
     DocumentTab.h
     Document.h
@@ -11,8 +10,9 @@ set(HEADERS
     GraphTool.h
     IItem.h
     IToolWidget.h
-    InspectorTool.h
+    JSONTool.h
     MenuBar.h
+    PlaybackBar.h
     PlaybackModel.h
     SelectionModel.h
     StackItem.h
@@ -30,7 +30,6 @@ set(HEADERS
 
 set(SOURCE
     App.cpp
-    BottomBar.cpp
     ClipItem.cpp
     DocumentTab.cpp
     Document.cpp
@@ -41,8 +40,9 @@ set(SOURCE
     GraphTool.cpp
     IItem.cpp
     IToolWidget.cpp
-    InspectorTool.cpp
+    JSONTool.cpp
     MenuBar.cpp
+    PlaybackBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
     StackItem.cpp

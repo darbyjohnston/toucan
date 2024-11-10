@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "BottomBar.h"
+#include "PlaybackBar.h"
 
 #include "App.h"
 
 namespace toucan
 {
-    void BottomBar::_init(
+    void PlaybackBar::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        dtk::IWidget::_init(context, "toucan::BottomBar", parent);
+        dtk::IWidget::_init(context, "toucan::PlaybackBar", parent);
 
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setMarginRole(dtk::SizeRole::MarginInside);
@@ -108,47 +108,47 @@ namespace toucan
             });
     }
 
-    BottomBar::~BottomBar()
+        PlaybackBar::~PlaybackBar()
     {}
 
-    std::shared_ptr<BottomBar> BottomBar::create(
+    std::shared_ptr<PlaybackBar> PlaybackBar::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<BottomBar>(new BottomBar);
+        auto out = std::shared_ptr<PlaybackBar>(new PlaybackBar);
         out->_init(context, app, parent);
         return out;
     }
 
-    void BottomBar::setGeometry(const dtk::Box2I& value)
+    void PlaybackBar::setGeometry(const dtk::Box2I& value)
     {
         IWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void BottomBar::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void PlaybackBar::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());
     }
 
-    void BottomBar::_timelineUpdate()
+    void PlaybackBar::_timelineUpdate()
     {}
 
-    void BottomBar::_timeRangeUpdate()
+    void PlaybackBar::_timeRangeUpdate()
     {
         _timeEdit->setTimeRange(_timeRange);
 
         _durationLabel->setTime(_timeRange.duration());
     }
 
-    void BottomBar::_currentTimeUpdate()
+    void PlaybackBar::_currentTimeUpdate()
     {
         _timeEdit->setTime(_currentTime);
     }
 
-    void BottomBar::_playbackUpdate()
+    void PlaybackBar::_playbackUpdate()
     {
         _playbackButtons->setPlayback(_playback);
     }
