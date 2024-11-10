@@ -5,6 +5,8 @@
 
 #include "PlaybackModel.h"
 
+#include <toucan/ImageEffectHost.h>
+
 #include <dtk/core/Math.h>
 
 namespace toucan

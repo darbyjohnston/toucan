@@ -4,6 +4,7 @@
 #include "PlaybackBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
 
 namespace toucan
 {

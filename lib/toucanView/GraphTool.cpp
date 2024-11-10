@@ -4,7 +4,7 @@
 #include "GraphTool.h"
 
 #include "App.h"
-#include "Document.h"
+#include "DocumentsModel.h"
 
 #include <dtk/ui/Spacer.h>
 

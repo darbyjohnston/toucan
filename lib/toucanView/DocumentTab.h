@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "WindowModel.h"
-
 #include <dtk/ui/RowLayout.h>
 
 namespace toucan

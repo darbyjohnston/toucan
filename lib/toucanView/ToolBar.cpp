@@ -4,6 +4,8 @@
 #include "ToolBar.h"
 
 #include "App.h"
+#include "DocumentsModel.h"
+#include "MainWindow.h"
 #include "ViewModel.h"
 
 #include <dtk/ui/Divider.h>
@@ -13,7 +15,7 @@ namespace toucan
     void ToolBar::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Window>& window,
+        const std::shared_ptr<MainWindow>& window,
         const std::map<std::string, std::shared_ptr<dtk::Action> >& actions,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
@@ -136,7 +138,7 @@ namespace toucan
     std::shared_ptr<ToolBar> ToolBar::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Window>& window,
+        const std::shared_ptr<MainWindow>& window,
         const std::map<std::string, std::shared_ptr<dtk::Action> >& actions,
         const std::shared_ptr<dtk::IWidget>& parent)
     {

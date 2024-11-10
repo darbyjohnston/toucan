@@ -11,6 +11,7 @@ set(HEADERS
     IItem.h
     IToolWidget.h
     JSONTool.h
+    MainWindow.h
     MenuBar.h
     PlaybackBar.h
     PlaybackModel.h
@@ -25,7 +26,6 @@ set(HEADERS
     TrackItem.h
     ViewModel.h
     Viewport.h
-    Window.h
     WindowModel.h)
 
 set(SOURCE
@@ -41,6 +41,7 @@ set(SOURCE
     IItem.cpp
     IToolWidget.cpp
     JSONTool.cpp
+    MainWindow.cpp
     MenuBar.cpp
     PlaybackBar.cpp
     PlaybackModel.cpp
@@ -55,7 +56,6 @@ set(SOURCE
     TrackItem.cpp
     ViewModel.cpp
     Viewport.cpp
-    Window.cpp
     WindowModel.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
