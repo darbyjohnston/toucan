@@ -33,16 +33,21 @@ namespace toucan
                 if (document)
                 {
                     const IMATH_NAMESPACE::V2i& imageSize = document->getImageSize();
-                    text = dtk::Format("{0}: {1}x{2}").
+                    const size_t trackCount = document->getTimeline()->find_children<OTIO_NS::Track>().size();
+
+                    text = dtk::Format("{0}: {1}x{2}, {3} tracks").
                         arg(dtk::elide(document->getPath().filename().string())).
                         arg(imageSize.x).
-                        arg(imageSize.y);
+                        arg(imageSize.y).
+                        arg(trackCount);
                     tooltip = dtk::Format(
                         "path: {0}\n"
-                        "resolution: {1}x{2}").
+                        "resolution: {1}x{2}\n"
+                        "tracks: {3}").
                         arg(document->getPath().string()).
                         arg(imageSize.x).
-                        arg(imageSize.y);
+                        arg(imageSize.y).
+                        arg(trackCount);
                 }
                 _label->setText(text);
                 _label->setTooltip(tooltip);
