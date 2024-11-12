@@ -10,6 +10,7 @@ set(HEADERS
     GraphTool.h
     IItem.h
     IToolWidget.h
+    InfoBar.h
     JSONTool.h
     MainWindow.h
     MenuBar.h
@@ -40,6 +41,7 @@ set(SOURCE
     GraphTool.cpp
     IItem.cpp
     IToolWidget.cpp
+    InfoBar.cpp
     JSONTool.cpp
     MainWindow.cpp
     MenuBar.cpp

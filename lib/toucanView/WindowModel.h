@@ -13,6 +13,7 @@ namespace toucan
         ToolBar,
         PlaybackBar,
         TimelineWidget,
+        InfoBar,
         Tools
     };
 

@@ -102,6 +102,11 @@ namespace toucan
         return _thumbnailGenerator;
     }
 
+    const IMATH_NAMESPACE::V2i& Document::getImageSize() const
+    {
+        return _graph->getImageSize();
+    }
+
     std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > Document::observeCurrentImage() const
     {
         return _currentImage;

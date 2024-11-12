@@ -12,6 +12,7 @@ namespace toucan
             { WindowControl::ToolBar, true },
             { WindowControl::PlaybackBar, true },
             { WindowControl::TimelineWidget, true },
+            { WindowControl::InfoBar, true },
             { WindowControl::Tools, true }
         };
         _controls = dtk::ObservableMap<WindowControl, bool>::create(values);
