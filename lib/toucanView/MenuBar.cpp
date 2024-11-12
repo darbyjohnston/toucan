@@ -459,6 +459,7 @@ namespace toucan
             { WindowControl::ToolBar, "ToolBar", "Tool Bar" },
             { WindowControl::PlaybackBar, "PlaybackBar", "Playback Bar" },
             { WindowControl::TimelineWidget, "TimelineWidget", "Timeline Widget" },
+            { WindowControl::InfoBar, "InfoBar", "Information Bar" },
             { WindowControl::Tools, "Tools", "Tools" }
         };
         std::weak_ptr<App> appWeak(app);
@@ -588,6 +589,8 @@ namespace toucan
                 _menus["Window"]->setItemChecked(_actions["Window/PlaybackBar"], i->second);
                 i = value.find(WindowControl::TimelineWidget);
                 _menus["Window"]->setItemChecked(_actions["Window/TimelineWidget"], i->second);
+                i = value.find(WindowControl::InfoBar);
+                _menus["Window"]->setItemChecked(_actions["Window/InfoBar"], i->second);
                 i = value.find(WindowControl::Tools);
                 _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
             });

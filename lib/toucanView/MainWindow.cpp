@@ -8,6 +8,7 @@
 #include "DocumentsModel.h"
 #include "ExportTool.h"
 #include "GraphTool.h"
+#include "InfoBar.h"
 #include "JSONTool.h"
 #include "MenuBar.h"
 #include "PlaybackBar.h"
@@ -72,10 +73,14 @@ namespace toucan
 
         _playbackBar = PlaybackBar::create(context, app, _bottomLayout);
 
-        _bottomDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+        _timelineDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
 
         _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
+
+        _infoDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+
+        _infoBar = InfoBar::create(context, app, _bottomLayout);
 
         std::weak_ptr<App> appWeak(app);
         _tabWidget->setCallback(
@@ -155,8 +160,11 @@ namespace toucan
                 _playbackBar->setVisible(i->second);
                 auto j = value.find(WindowControl::TimelineWidget);
                 _timelineWidget->setVisible(j->second);
-                _bottomLayout->setVisible(i->second || j->second);
-                _bottomDivider->setVisible(i->second && j->second);
+                auto k = value.find(WindowControl::InfoBar);
+                _infoBar->setVisible(k->second);
+                _bottomLayout->setVisible(i->second || j->second || k->second);
+                _timelineDivider->setVisible(i->second && j->second);
+                _infoDivider->setVisible((i->second || j->second) && k->second);
 
                 i = value.find(WindowControl::Tools);
                 _toolWidget->setVisible(i->second);

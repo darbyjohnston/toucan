@@ -18,6 +18,7 @@ namespace toucan
     class Document;
     class DocumentTab;
     class IToolWidget;
+    class InfoBar;
     class MenuBar;
     class PlaybackBar;
     class TimelineWidget;
@@ -65,8 +66,10 @@ namespace toucan
         std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<PlaybackBar> _playbackBar;
-        std::shared_ptr<dtk::Divider> _bottomDivider;
         std::shared_ptr<TimelineWidget> _timelineWidget;
+        std::shared_ptr<dtk::Divider> _timelineDivider;
+        std::shared_ptr<InfoBar> _infoBar;
+        std::shared_ptr<dtk::Divider> _infoDivider;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;

@@ -40,6 +40,8 @@ namespace toucan
         const std::shared_ptr<SelectionModel>& getSelectionModel() const;
         const std::shared_ptr<ThumbnailGenerator>& getThumbnailGenerator() const;
 
+        const IMATH_NAMESPACE::V2i& getImageSize() const;
+
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > observeCurrentImage() const;
 
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > observeRootNode() const;
