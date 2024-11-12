@@ -44,8 +44,9 @@ namespace toucan
             }
             const auto& fgSpec = fg.spec();
             const auto& bgSpec = bg.spec();
-            if (fgSpec.width != bgSpec.width ||
-                fgSpec.height != bgSpec.height)
+            if (bgSpec.width > 0 &&
+                bgSpec.height > 0 &&
+                (fgSpec.width != bgSpec.width || fgSpec.height != bgSpec.height))
             {
                 fg = OIIO::ImageBufAlgo::resize(
                     fg,

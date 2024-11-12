@@ -19,6 +19,8 @@ namespace toucan
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~ReadNode();
+
+        const OTIO_NS::TimeRange& getTimeRange() const;
         
         std::string getLabel() const override;
 

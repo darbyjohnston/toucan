@@ -163,6 +163,10 @@ namespace toucan
     {
         _buttons["File/Close"]->setEnabled(_documentsSize > 0);
         _buttons["File/CloseAll"]->setEnabled(_documentsSize > 0);
+        _buttons["View/ZoomIn"]->setEnabled(_documentsSize > 0);
+        _buttons["View/ZoomOut"]->setEnabled(_documentsSize > 0);
+        _buttons["View/ZoomReset"]->setEnabled(_documentsSize > 0);
+        _buttons["View/Frame"]->setEnabled(_documentsSize > 0);
 
         if (_document)
         {

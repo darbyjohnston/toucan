@@ -18,6 +18,8 @@
 
 namespace toucan
 {
+    class ReadNode;
+
     //! Image graph options.
     struct ImageGraphOptions
     {
@@ -67,6 +69,6 @@ namespace toucan
         OTIO_NS::RationalTime _globalStartTime;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
-        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<IImageNode> > _loadCache;
+        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
     };
 }

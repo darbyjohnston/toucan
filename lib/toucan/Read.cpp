@@ -43,6 +43,11 @@ namespace toucan
         }
     }
 
+    const OTIO_NS::TimeRange& ReadNode::getTimeRange() const
+    {
+        return _timeRange;
+    }
+
     std::string ReadNode::getLabel() const
     {
         std::stringstream ss;

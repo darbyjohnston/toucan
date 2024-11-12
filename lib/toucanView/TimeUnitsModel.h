@@ -27,6 +27,7 @@ namespace toucan
         std::shared_ptr<dtk::IObservableValue<TimeUnits> > observeTimeUnits() const;
         void setTimeUnits(TimeUnits);
 
+        OTIO_NS::RationalTime getTime(const std::string&, double rate) const;
         std::string getLabel(const OTIO_NS::RationalTime&) const;
 
     private:

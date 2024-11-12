@@ -104,7 +104,7 @@ namespace toucan
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                if (track->kind() == OTIO_NS::Track::Kind::video)
+                if (track->kind() == OTIO_NS::Track::Kind::video && !track->find_clips().empty())
                 {
                     // Process this track.
                     auto trackNode = _track(host, time - _globalStartTime, track);
@@ -279,17 +279,32 @@ namespace toucan
     {
         std::shared_ptr<IImageNode> out;
 
+        OTIO_NS::RationalTime timeOffset =
+            trimmedRangeInParent.start_time() -
+            item->trimmed_range().start_time();
+
         if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
         {
             // Get the media reference.
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                if (!_loadCache.get(externalRef, out))
+                std::shared_ptr<ReadNode> read;
+                if (!_loadCache.get(externalRef, read))
                 {
                     const std::filesystem::path path = _getMediaPath(externalRef->target_url());
-                    auto read = std::make_shared<ReadNode>(path);
-                    out = read;
+                    read = std::make_shared<ReadNode>(path);
                     _loadCache.add(externalRef, read);
+                }
+                out = read;
+
+                //! \bug Workaround for when the available range does not match
+                //! the range in the media.
+                const OTIO_NS::TimeRange& timeRange = read->getTimeRange();
+                const auto availableOpt = externalRef->available_range();
+                if (availableOpt.has_value() &&
+                    !availableOpt.value().start_time().strictly_equal(timeRange.start_time()))
+                {
+                    timeOffset += availableOpt.value().start_time() - timeRange.start_time();
                 }
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
@@ -325,9 +340,6 @@ namespace toucan
         }
         if (out)
         {
-            const OTIO_NS::RationalTime timeOffset =
-                trimmedRangeInParent.start_time() -
-                item->trimmed_range().start_time();
             out->setTimeOffset(timeOffset);
         }
 
