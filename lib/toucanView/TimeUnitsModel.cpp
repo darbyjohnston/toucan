@@ -30,12 +30,33 @@ namespace toucan
         _timeUnits->setIfChanged(value);
     }
 
+    OTIO_NS::RationalTime TimeUnitsModel::getTime(const std::string& text, double rate) const
+    {
+        OTIO_NS::RationalTime out;
+        switch (_timeUnits->get())
+        {
+        case TimeUnits::Timecode:
+            out = OTIO_NS::RationalTime::from_timecode(text, rate);
+            break;
+        case TimeUnits::Frames:
+            out = OTIO_NS::RationalTime::from_frames(std::atof(text.c_str()), rate);
+            break;
+        case TimeUnits::Seconds:
+            out = OTIO_NS::RationalTime::from_seconds(std::atof(text.c_str()), rate);
+            break;
+        default: break;
+        }
+        return out;
+    }
+
     std::string TimeUnitsModel::getLabel(const OTIO_NS::RationalTime& time) const
     {
         std::string out;
         switch (_timeUnits->get())
         {
-        case TimeUnits::Timecode: out = time.to_timecode(); break;
+        case TimeUnits::Timecode:
+            out = time.to_timecode();
+            break;
         case TimeUnits::Frames:
         {
             std::stringstream ss;

@@ -188,8 +188,7 @@ namespace toucan
             {
                 if (_callback)
                 {
-                    const auto time = OTIO_NS::RationalTime::from_timecode(text, _time.rate());
-                    _callback(time);
+                    _callback(_timeUnitsModel->getTime(text, _time.rate()));
                 }
             });
 
