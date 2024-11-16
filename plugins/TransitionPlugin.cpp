@@ -198,14 +198,27 @@ OfxStatus DissolvePlugin::_render(
 {
     const float v = value;
     const float iv = 1.0 - value;
+
+    OIIO::ImageBuf sourceFromFillBuf(sourceFromBuf.spec());
+    OIIO::ImageBufAlgo::fill(
+        sourceFromFillBuf,
+        { iv, iv, iv, iv },
+        sourceFromBuf.roi());
+
+    OIIO::ImageBuf sourceToFillBuf(sourceToBuf.spec());
+    OIIO::ImageBufAlgo::fill(
+        sourceToFillBuf,
+        { v, v, v, v },
+        sourceToBuf.roi());
+
     OIIO::ImageBufAlgo::add(
         outputBuf,
         OIIO::ImageBufAlgo::mul(
             sourceFromBuf,
-            OIIO::ImageBufAlgo::fill({ iv, iv, iv, iv }, sourceFromBuf.roi())),
+            sourceFromFillBuf, sourceFromBuf.roi()),
         OIIO::ImageBufAlgo::mul(
             sourceToBuf,
-            OIIO::ImageBufAlgo::fill({ v, v, v, v }, sourceToBuf.roi())));
+            sourceToFillBuf, sourceToBuf.roi()));
 
     return kOfxStatOK;
 }
