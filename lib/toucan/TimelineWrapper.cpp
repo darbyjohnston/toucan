@@ -252,10 +252,10 @@ namespace toucan
 
     TimelineWrapper::~TimelineWrapper()
     {
-        if (!_tmpPath.empty())
-        {
-            std::filesystem::remove_all(_tmpPath);
-        }
+        //if (!_tmpPath.empty())
+        //{
+        //    std::filesystem::remove_all(_tmpPath);
+        //}
     }
 
     const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& TimelineWrapper::getTimeline() const
@@ -276,14 +276,14 @@ namespace toucan
             std::filesystem::path path = splitURLProtocol(url).second;
             if (!path.is_absolute())
             {
-                if (!_tmpPath.empty())
-                {
-                    path = _tmpPath / path;
-                }
-                else
-                {
+                //if (!_tmpPath.empty())
+                //{
+                //    path = _tmpPath / path;
+                //}
+                //else
+                //{
                     path = _path.parent_path() / path;
-                }
+                //}
             }
             out = path.string();
         }

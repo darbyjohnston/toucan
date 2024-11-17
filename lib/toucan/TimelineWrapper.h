@@ -32,7 +32,7 @@ namespace toucan
 
     private:
         std::filesystem::path _path;
-        std::filesystem::path _tmpPath;
+        //std::filesystem::path _tmpPath;
         std::unique_ptr<MemoryMap> _memoryMap;
         MemoryReferences _memoryReferences;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
