@@ -217,7 +217,7 @@ OfxStatus ColorConvertPlugin::_render(
     _paramSuite->paramGetValue(_contextValueParam[handle], &contextValue);
     _paramSuite->paramGetValue(_colorConfigParam[handle], &colorConfigValue);
 
-    const std::filesystem::path colorConfigPath(colorConfigValue);
+    const std::string colorConfigPath(colorConfigValue);
     std::shared_ptr<OIIO::ColorConfig> colorConfig;
     auto i = _colorConfigs.find(colorConfigPath);
     if (i != _colorConfigs.end())
@@ -226,7 +226,7 @@ OfxStatus ColorConvertPlugin::_render(
     }
     else
     {
-        colorConfig = std::make_shared<OIIO::ColorConfig>(colorConfigPath.string());
+        colorConfig = std::make_shared<OIIO::ColorConfig>(colorConfigPath);
         _colorConfigs[colorConfigPath] = colorConfig;
         //for (int i = 0; i < colorConfig->getNumColorSpaces(); ++i)
         //{

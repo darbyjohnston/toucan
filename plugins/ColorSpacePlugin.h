@@ -8,8 +8,6 @@
 #include <OpenImageIO/color.h>
 #include <OpenImageIO/imagebuf.h>
 
-#include <filesystem>
-
 class ColorSpacePlugin : public Plugin
 {
 public:
@@ -70,7 +68,7 @@ private:
     std::map<OfxImageEffectHandle, OfxParamHandle> _contextKeyParam;
     std::map<OfxImageEffectHandle, OfxParamHandle> _contextValueParam;
     std::map<OfxImageEffectHandle, OfxParamHandle> _colorConfigParam;
-    std::map<std::filesystem::path, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
+    std::map<std::string, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
 };
 
 class PremultPlugin : public ColorSpacePlugin
