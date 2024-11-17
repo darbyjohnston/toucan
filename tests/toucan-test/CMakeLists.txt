@@ -1,7 +1,4 @@
 set(LIBS toucanTest)
-if(toucan_EDIT)
-    list(APPEND LIBS toucanEditTest)
-endif()
 
 add_executable(toucan-test main.cpp)
 target_link_libraries(toucan-test ${LIBS})

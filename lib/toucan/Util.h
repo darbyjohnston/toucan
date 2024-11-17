@@ -48,6 +48,9 @@ namespace toucan
     //! Return the zero padding for the given number.
     size_t getNumberPadding(const std::string&);
 
+    //! Convert a floating point rate to a rational.
+    std::pair<int, int> toRational(double);
+
     //! Make a unique temp directory.
     std::filesystem::path makeUniqueTemp();
 
