@@ -94,8 +94,8 @@ Multiple effects on clips, tracks, and stacks:
 FFmpeg Encoding
 ===============
 Toucan can send rendered images to the FFmpeg command line program for encoding.
-The images can be sent as either the y4m format or RGB images. The images
-are piped directly to FFmpeg without the overhead of disk I/O.
+The images can be sent as either the y4m format or raw video. The images are
+piped directly to FFmpeg without the overhead of disk I/O.
 
 Example command line using the y4m format:
 ```
@@ -109,7 +109,7 @@ toucan-render Transition.otio - -y4m 444 | ffmpeg -y -i pipe: output.mov
 * `-i pipe:`: Read from standard input instead of a file.
 * `output.mov`: The output movie file.
 
-Example command line using RGB images:
+Example command line using raw video:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
