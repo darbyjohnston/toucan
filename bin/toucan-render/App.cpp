@@ -5,12 +5,15 @@
 
 #include "Util.h"
 
-#include <toucan/ImageEffectHost.h>
-#include <toucan/ImageGraph.h>
-#include <toucan/TimelineWrapper.h>
 #include <toucan/Util.h>
 
 #include <OpenImageIO/imagebufalgo.h>
+
+extern "C"
+{
+#include <libavutil/imgutils.h>
+
+} // extern "C"
 
 #include <stdio.h>
 
@@ -28,6 +31,14 @@ namespace toucan
             { "rgbf32", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::FLOAT) },
             { "rgbaf32", OIIO::ImageSpec(0, 0, 4, OIIO::TypeDesc::BASETYPE::FLOAT) }
         };
+
+        const std::map<std::string, OIIO::ImageSpec> y4mSpecs =
+        {
+            { "422", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT8) },
+            { "444", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT8) },
+            { "444alpha", OIIO::ImageSpec(0, 0, 4, OIIO::TypeDesc::BASETYPE::UINT8) },
+            { "444p16", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT16) }
+        };
     }
     
     App::App(std::vector<std::string>& argv)
@@ -42,13 +53,18 @@ namespace toucan
         auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
             _args.output,
             "output",
-            "Output image file. Use a dash ('-') to write raw frames to stdout.");
+            "Output image file. Use a dash ('-') to write raw frames or y4m to stdout.");
         _args.list.push_back(outArg);
 
         std::vector<std::string> rawList;
         for (const auto& spec : rawSpecs)
         {
             rawList.push_back(spec.first);
+        }
+        std::vector<std::string> y4mList;
+        for (const auto& spec : y4mSpecs)
+        {
+            y4mList.push_back(spec.first);
         }
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.printStart,
@@ -69,9 +85,15 @@ namespace toucan
         _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
             _options.raw,
             std::vector<std::string>{ "-raw" },
-            "Raw pixel format to output.",
+            "Raw pixel format to send to stdout.",
             _options.raw,
             join(rawList, ", ")));
+        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+            _options.y4m,
+            std::vector<std::string>{ "-y4m" },
+            "y4m format to send to stdout.",
+            _options.y4m,
+            join(y4mList, ", ")));
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.filmstrip,
             std::vector<std::string>{ "-filmstrip" },
@@ -130,7 +152,20 @@ namespace toucan
     }
         
     App::~App()
-    {}
+    {
+        if (_swsContext)
+        {
+            sws_freeContext(_swsContext);
+        }
+        if (_avFrame2)
+        {
+            av_frame_free(&_avFrame2);
+        }
+        if (_avFrame)
+        {
+            av_frame_free(&_avFrame);
+        }
+    }
     
     int App::run()
     {
@@ -148,10 +183,10 @@ namespace toucan
         const size_t outputNumberPadding = getNumberPadding(outputSplit.second);
 
         // Open the timeline.
-        auto timelineWrapper = std::make_shared<TimelineWrapper>(inputPath);
+        _timelineWrapper = std::make_shared<TimelineWrapper>(inputPath);
 
         // Get time values.
-        const OTIO_NS::TimeRange& timeRange = timelineWrapper->getTimeRange();
+        const OTIO_NS::TimeRange& timeRange = _timelineWrapper->getTimeRange();
         const OTIO_NS::RationalTime timeInc(1.0, timeRange.duration().rate());
         const int frames = timeRange.duration().value();
         
@@ -163,11 +198,11 @@ namespace toucan
         }
         ImageGraphOptions imageGraphOptions;
         imageGraphOptions.log = log;
-        const auto graph = std::make_shared<ImageGraph>(
+        _graph = std::make_shared<ImageGraph>(
             inputPath.parent_path(),
-            timelineWrapper,
+            _timelineWrapper,
             imageGraphOptions);
-        const IMATH_NAMESPACE::V2d imageSize = graph->getImageSize();
+        const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
 
         // Print information.
         if (_options.printStart)
@@ -201,7 +236,7 @@ namespace toucan
 #endif // _WINDOWS
         ImageEffectHostOptions imageHostOptions;
         imageHostOptions.log = log;
-        auto host = std::make_shared<ImageEffectHost>(
+        _host = std::make_shared<ImageEffectHost>(
             searchPath,
             imageHostOptions);
 
@@ -224,6 +259,10 @@ namespace toucan
         }
 
         // Render the timeline frames.
+        if (!_options.y4m.empty())
+        {
+            _writeY4mHeader();
+        }
         int filmstripX = 0;
         for (OTIO_NS::RationalTime time = timeRange.start_time();
             time <= timeRange.end_time_inclusive();
@@ -235,7 +274,7 @@ namespace toucan
                     timeRange.duration().value() << std::endl;
             }
 
-            if (auto node = graph->exec(host, time))
+            if (auto node = _graph->exec(_host, time))
             {
                 // Execute the graph.
                 const auto buf = node->exec();
@@ -253,9 +292,13 @@ namespace toucan
                             outputPath.extension().string());
                         buf.write(fileName);
                     }
-                    else
+                    else if (!_options.raw.empty())
                     {
-                        _writeRaw(buf);
+                        _writeRawFrame(buf);
+                    }
+                    else if (!_options.y4m.empty())
+                    {
+                        _writeY4mFrame(buf);
                     }
                 }
                 else
@@ -302,16 +345,20 @@ namespace toucan
             {
                 filmstripBuf.write(outputPath.string());
             }
-            else
+            else if (!_options.raw.empty())
             {
-                _writeRaw(filmstripBuf);
+                _writeRawFrame(filmstripBuf);
+            }
+            else if (!_options.y4m.empty())
+            {
+                _writeY4mFrame(filmstripBuf);
             }
         }
     
         return 0;
     }
 
-    void App::_writeRaw(const OIIO::ImageBuf& buf)
+    void App::_writeRawFrame(const OIIO::ImageBuf& buf)
     {
         const OIIO::ImageBuf* p = &buf;
         auto spec = buf.spec();
@@ -319,7 +366,7 @@ namespace toucan
         const auto i = rawSpecs.find(_options.raw);
         if (i == rawSpecs.end())
         {
-            throw std::runtime_error("Cannot find given raw pixel format");
+            throw std::runtime_error("Cannot find the given raw format");
         }
         auto rawSpec = i->second;
         rawSpec.width = spec.width;
@@ -345,7 +392,192 @@ namespace toucan
             1,
             stdout);
     }
-    
+
+    void App::_writeY4mHeader()
+    {
+        std::string s = "YUV4MPEG2 ";
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        {
+            std::stringstream ss;
+            ss << "W" << _graph->getImageSize().x;
+            s = ss.str();
+        }
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        {
+            std::stringstream ss;
+            ss << " H" << _graph->getImageSize().y;
+            s = ss.str();
+        }
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        {
+            const OTIO_NS::TimeRange timeRange = _timelineWrapper->getTimeRange();
+            const auto r = toRational(timeRange.duration().rate());
+            std::stringstream ss;
+            ss << " F" << r.first << ":" << r.second;
+            s = ss.str();
+        }
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        {
+            std::stringstream ss;
+            ss << " C" << _options.y4m;
+            s = ss.str();
+        }
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        fwrite("\n", 1, 1, stdout);
+    }
+
+    void App::_writeY4mFrame(const OIIO::ImageBuf& buf)
+    {
+        std::string s = "FRAME\n";
+        fwrite(s.c_str(), s.size(), 1, stdout);
+
+        const OIIO::ImageBuf* p = &buf;
+        auto spec = buf.spec();
+
+        const auto i = y4mSpecs.find(_options.y4m);
+        if (i == y4mSpecs.end())
+        {
+            throw std::runtime_error("Cannot find the given y4m format");
+        }
+        auto y4mSpec = i->second;
+        y4mSpec.width = spec.width;
+        y4mSpec.height = spec.height;
+        OIIO::ImageBuf tmp;
+        if (spec.format != y4mSpec.format ||
+            spec.nchannels != y4mSpec.nchannels)
+        {
+            spec = y4mSpec;
+            tmp = OIIO::ImageBuf(spec);
+            OIIO::ImageBufAlgo::paste(
+                tmp,
+                0,
+                0,
+                0,
+                0,
+                buf);
+            p = &tmp;
+        }
+
+        if (!_swsContext)
+        {
+            if ("422" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGB24;
+                _avOutputPixelFormat = AV_PIX_FMT_YUV422P;
+            }
+            else if ("444" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGB24;
+                _avOutputPixelFormat = AV_PIX_FMT_YUV444P;
+            }
+            else if ("444alpha" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGBA;
+                _avOutputPixelFormat = AV_PIX_FMT_YUVA444P;
+            }
+            else if ("444p16" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGB48;
+                _avOutputPixelFormat = AV_PIX_FMT_YUV444P16;
+            }
+
+            _avFrame = av_frame_alloc();
+            _avFrame->width = spec.width;
+            _avFrame->height = spec.height;
+            _avFrame->format = _avInputPixelFormat;
+            av_frame_get_buffer(_avFrame, 1);
+
+            _avFrame2 = av_frame_alloc();
+            _avFrame2->width = y4mSpec.width;
+            _avFrame2->height = y4mSpec.height;
+            _avFrame2->format = _avOutputPixelFormat;
+            av_frame_get_buffer(_avFrame2, 1);
+
+            _swsContext = sws_getContext(
+                spec.width,
+                spec.height,
+                _avInputPixelFormat,
+                y4mSpec.width,
+                y4mSpec.height,
+                _avOutputPixelFormat,
+                SWS_FAST_BILINEAR,
+                nullptr,
+                nullptr,
+                nullptr);
+        }
+
+        memcpy(
+            _avFrame->data[0],
+            p->localpixels(),
+            av_image_get_buffer_size(_avInputPixelFormat, spec.width, spec.height, 1));
+        sws_scale_frame(_swsContext, _avFrame2, _avFrame);
+
+        if ("422" == _options.y4m)
+        {
+            fwrite(
+                _avFrame2->data[0],
+                _avFrame2->linesize[0] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[1],
+                _avFrame2->linesize[1] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[2],
+                _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+        }
+        else if ("444" == _options.y4m || "444p16" == _options.y4m)
+        {
+            fwrite(
+                _avFrame2->data[0],
+                _avFrame2->linesize[0] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[1],
+                _avFrame2->linesize[1] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[2],
+                _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+        }
+        else if ("444alpha" == _options.y4m)
+        {
+            fwrite(
+                _avFrame2->data[0],
+                _avFrame2->linesize[0] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[1],
+                _avFrame2->linesize[1] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[2],
+                _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[3],
+                _avFrame2->linesize[3] * y4mSpec.height,
+                1,
+                stdout);
+        }
+    }
+
     void App::_printHelp()
     {
         std::cout << "Usage:" << std::endl;
