@@ -35,7 +35,9 @@ namespace toucan
         const std::map<std::string, OIIO::ImageSpec> y4mSpecs =
         {
             { "422", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT8) },
-            { "444", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT8) }
+            { "444", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT8) },
+            { "444alpha", OIIO::ImageSpec(0, 0, 4, OIIO::TypeDesc::BASETYPE::UINT8) },
+            { "444p16", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT16) }
         };
     }
     
@@ -405,7 +407,7 @@ namespace toucan
 
         {
             std::stringstream ss;
-            ss << " H" << _graph->getImageSize().x;
+            ss << " H" << _graph->getImageSize().y;
             s = ss.str();
         }
         fwrite(s.c_str(), s.size(), 1, stdout);
@@ -425,12 +427,13 @@ namespace toucan
             s = ss.str();
         }
         fwrite(s.c_str(), s.size(), 1, stdout);
+
+        fwrite("\n", 1, 1, stdout);
     }
 
     void App::_writeY4mFrame(const OIIO::ImageBuf& buf)
     {
         std::string s = "FRAME\n";
-
         fwrite(s.c_str(), s.size(), 1, stdout);
 
         const OIIO::ImageBuf* p = &buf;
@@ -445,7 +448,8 @@ namespace toucan
         y4mSpec.width = spec.width;
         y4mSpec.height = spec.height;
         OIIO::ImageBuf tmp;
-        if (spec.format != y4mSpec.format)
+        if (spec.format != y4mSpec.format ||
+            spec.nchannels != y4mSpec.nchannels)
         {
             spec = y4mSpec;
             tmp = OIIO::ImageBuf(spec);
@@ -471,8 +475,28 @@ namespace toucan
                 _avInputPixelFormat = AV_PIX_FMT_RGB24;
                 _avOutputPixelFormat = AV_PIX_FMT_YUV444P;
             }
+            else if ("444alpha" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGBA;
+                _avOutputPixelFormat = AV_PIX_FMT_YUVA444P;
+            }
+            else if ("444p16" == _options.y4m)
+            {
+                _avInputPixelFormat = AV_PIX_FMT_RGB48;
+                _avOutputPixelFormat = AV_PIX_FMT_YUV444P16;
+            }
+
             _avFrame = av_frame_alloc();
+            _avFrame->width = spec.width;
+            _avFrame->height = spec.height;
+            _avFrame->format = _avInputPixelFormat;
+            av_frame_get_buffer(_avFrame, 1);
+
             _avFrame2 = av_frame_alloc();
+            _avFrame2->width = y4mSpec.width;
+            _avFrame2->height = y4mSpec.height;
+            _avFrame2->format = _avOutputPixelFormat;
+            av_frame_get_buffer(_avFrame2, 1);
 
             _swsContext = sws_getContext(
                 spec.width,
@@ -482,40 +506,18 @@ namespace toucan
                 y4mSpec.height,
                 _avOutputPixelFormat,
                 SWS_FAST_BILINEAR,
-                0,
-                0,
-                0);
+                nullptr,
+                nullptr,
+                nullptr);
         }
 
-        av_image_fill_arrays(
-            _avFrame2->data,
-            _avFrame2->linesize,
-            reinterpret_cast<const uint8_t*>(p->localpixels()),
-            _avOutputPixelFormat,
-            y4mSpec.width,
-            y4mSpec.height,
-            1);
+        memcpy(
+            _avFrame->data[0],
+            p->localpixels(),
+            av_image_get_buffer_size(_avInputPixelFormat, spec.width, spec.height, 1));
         sws_scale_frame(_swsContext, _avFrame2, _avFrame);
 
         if ("422" == _options.y4m)
-        {
-            fwrite(
-                _avFrame2->data[0],
-                _avFrame2->linesize[0] * y4mSpec.height,
-                1,
-                stdout);
-            fwrite(
-                _avFrame2->data[1],
-                _avFrame2->linesize[1] * y4mSpec.height / 2,
-                1,
-                stdout);
-            fwrite(
-                _avFrame2->data[2],
-                _avFrame2->linesize[2] * y4mSpec.height / 2,
-                1,
-                stdout);
-        }
-        else if ("444" == _options.y4m)
         {
             fwrite(
                 _avFrame2->data[0],
@@ -530,6 +532,47 @@ namespace toucan
             fwrite(
                 _avFrame2->data[2],
                 _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+        }
+        else if ("444" == _options.y4m || "444p16" == _options.y4m)
+        {
+            fwrite(
+                _avFrame2->data[0],
+                _avFrame2->linesize[0] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[1],
+                _avFrame2->linesize[1] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[2],
+                _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+        }
+        else if ("444alpha" == _options.y4m)
+        {
+            fwrite(
+                _avFrame2->data[0],
+                _avFrame2->linesize[0] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[1],
+                _avFrame2->linesize[1] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[2],
+                _avFrame2->linesize[2] * y4mSpec.height,
+                1,
+                stdout);
+            fwrite(
+                _avFrame2->data[3],
+                _avFrame2->linesize[3] * y4mSpec.height,
                 1,
                 stdout);
         }
