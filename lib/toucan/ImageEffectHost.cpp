@@ -115,9 +115,13 @@ namespace toucan
             }
             findPlugins(path, pluginPaths);
         }
+        if (pluginPaths.empty() && _options.log)
+        {
+            _options.log->log(logPrefix, "  No plugins found");
+        }
 
         // Load the plugins.
-        if (_options.log)
+        if (!pluginPaths.empty() && _options.log)
         {
             _options.log->log(logPrefix, "Loading plugins...");
         }
@@ -171,7 +175,7 @@ namespace toucan
         }
 
         // Initialize the plugins.
-        if (_options.log)
+        if (!_plugins.empty() && _options.log)
         {
             _options.log->log(logPrefix, "Initializing plugins...");
         }

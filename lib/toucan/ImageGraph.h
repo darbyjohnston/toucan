@@ -4,10 +4,9 @@
 #pragma once
 
 #include <toucan/ImageNode.h>
+#include <toucan/LRUCache.h>
 #include <toucan/MessageLog.h>
 #include <toucan/TimelineWrapper.h>
-
-#include <dtk/core/LRUCache.h>
 
 #include <opentimelineio/mediaReference.h>
 #include <opentimelineio/track.h>
@@ -67,6 +66,6 @@ namespace toucan
         OTIO_NS::TimeRange _timeRange;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
-        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
+        LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
     };
 }

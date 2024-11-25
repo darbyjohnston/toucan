@@ -103,7 +103,7 @@ toucan-render Transition.otio - -y4m 444 | ffmpeg -y -i pipe: output.mov
 ```
 * `Transition.otio`: The input timeline file.
 * `-`: Write to standard out instead of a file.
-* '-y4m 444': Set the pixel format of the output images. Possible values: 422,
+* `-y4m 444`: Set the pixel format of the output images. Possible values: 422,
 444, 444alpha, 444p16
 * `-y`: Overwrite the output file if it already exists.
 * `-i pipe:`: Read from standard input instead of a file.
