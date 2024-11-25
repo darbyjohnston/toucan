@@ -349,18 +349,21 @@ namespace toucan
     void App::_printHelp()
     {
         std::cout << "Usage:" << std::endl;
+        std::cout << std::endl;
         std::cout << "    toucan-render (input) (output) [options...]" << std::endl;
+        std::cout << std::endl;
         std::cout << "    toucan-render (input) (-print_start|-print_duration|-print_rate|-print_size)" << std::endl;
         std::cout << std::endl;
         std::cout << "Arguments:" << std::endl;
+        std::cout << std::endl;
         for (const auto& arg : _args.list)
         {
-            std::cout << "    " << arg->getName() << std::endl;
-            std::cout << "    " << arg->getHelp() << std::endl;
+            std::cout << "    " << arg->getName() << " - " << arg->getHelp() << std::endl;
             std::cout << std::endl;
         }
         std::cout << std::endl;
         std::cout << "Options:" << std::endl;
+        std::cout << std::endl;
         for (const auto& option : _options.list)
         {
             for (const auto& line : option->getHelp())
