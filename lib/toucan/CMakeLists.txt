@@ -5,6 +5,8 @@ set(HEADERS
     ImageEffectHost.h
     ImageGraph.h
     ImageNode.h
+    LRUCache.h
+    LRUCacheInline.h
     MemoryMap.h
     MessageLog.h
     Plugin.h
