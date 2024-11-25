@@ -93,24 +93,33 @@ Multiple effects on clips, tracks, and stacks:
 
 FFmpeg Encoding
 ===============
-Toucan can send rendered images directly to FFmpeg for encoding. The
-images are piped to FFmpeg without incurring the overhead of disk I/O.
+Toucan can send rendered images to the FFmpeg command line program for encoding.
+The images can be sent as either the y4m format or raw video. The images are
+piped directly to FFmpeg without the overhead of disk I/O.
 
-Example command line for piping images to FFmpeg:
+Example command line using the y4m format:
+```
+toucan-render Transition.otio - -y4m 444 | ffmpeg -y -i pipe: output.mov
+```
+* `Transition.otio`: The input timeline file.
+* `-`: Write to standard out instead of a file.
+* '-y4m 444': Set the pixel format of the output images. Possible values: 422,
+444, 444alpha, 444p16
+* `-y`: Overwrite the output file if it already exists.
+* `-i pipe:`: Read from standard input instead of a file.
+* `output.mov`: The output movie file.
+
+Example command line using raw video:
 ```
 toucan-render Transition.otio - -raw rgba | ffmpeg -y -f rawvideo -pix_fmt rgba -s 1280x720 -r 24 -i pipe: output.mov
 ```
 * `Transition.otio`: The input timeline file.
 * `-`: Write to standard out instead of a file.
-* `-raw rgba`: Set the pixel format of the output frames. This should
-match the `-pix_fmt` option given to FFmpeg. One exception is that toucan
-options do not specify the endian, the endian of the current machine is used.
-So for example the toucan option `-raw rgbaf16` might match the FFmpeg option
-`-pix_fmt rgbaf16le` on the current machine. Check the `toucan-render` command
-line help for the list of available formats.
+* `-raw rgba`: Set the pixel format of the output images. Possible values:
+rgb24, rgb48, rgba, rgba64, rgbaf16, rgbaf32, rgbf32
 * `-y`: Overwrite the output file if it already exists.
 * `-f rawvideo`: Set the input to raw video frames.
-* `-pix_fmt rgba`: Set the input pixel format as described above.
+* `-pix_fmt rgba`: Set the pixel format same as above.
 * `-s 1280x720`: Set the size of the input frames. The image size
 can be found by running `toucan-render` with the `-print_size` option.
 * `-r 24`: Set the frame rate. The frame rate can be found by running

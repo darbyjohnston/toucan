@@ -164,4 +164,27 @@ namespace toucan
         }
         return out;
     }
+
+    std::pair<int, int> toRational(double value)
+    {
+        const std::array<std::pair<int, int>, 6> common =
+        {
+            std::make_pair(24, 1),
+            std::make_pair(30, 1),
+            std::make_pair(60, 1),
+            std::make_pair(24000, 1001),
+            std::make_pair(30000, 1001),
+            std::make_pair(60000, 1001)
+        };
+        const double tolerance = 0.01;
+        for (const auto& i : common)
+        {
+            const double diff = fabs(value - i.first / static_cast<double>(i.second));
+            if (diff < tolerance)
+            {
+                return i;
+            }
+        }
+        return std::make_pair(static_cast<int>(value), 1);
+    }
 }
