@@ -6,8 +6,10 @@
 #include "IToolWidget.h"
 
 #include <dtk/ui/Bellows.h>
+#include <dtk/ui/Label.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
+#include <dtk/ui/SearchBox.h>
 #include <dtk/core/ObservableList.h>
 
 #include <opentimelineio/item.h>
@@ -33,12 +35,18 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setOpen(bool);
+        void setFilter(const std::string&);
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
+        void _textUpdate();
+
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
+        std::vector<std::string> _text;
+        std::string _filter;
+        std::shared_ptr<dtk::Label> _label;
         std::shared_ptr<dtk::Bellows> _bellows;
     };
 
@@ -65,9 +73,11 @@ namespace toucan
         std::shared_ptr<Document> _document;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
+        std::shared_ptr<dtk::SearchBox> _searchBox;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
+        std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;

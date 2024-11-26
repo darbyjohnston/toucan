@@ -20,6 +20,15 @@ namespace OTIO_NS
 
 namespace toucan
 {
+    //! Selection type.
+    enum class SelectionType
+    {
+        All,
+        Tracks,
+        Clips
+    };
+
+    //! Selection model.
     class SelectionModel : public std::enable_shared_from_this<SelectionModel>
     {
     public:
@@ -27,12 +36,24 @@ namespace toucan
 
         virtual ~SelectionModel();
 
+        //! Get the selection.
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& getSelection() const;
+
+        //! Observe the selection.
         std::shared_ptr<dtk::IObservableList<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > observeSelection() const;
+
+        //! Set the seldction.
         void setSelection(const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
 
-        void selectAll(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+        //! Select all of the given type.
+        void selectAll(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            SelectionType = SelectionType::All);
+
+        //! Clear the selection.
         void clearSelection();
+
+        //! Invert the selection.
         void invertSelection(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
     private:

@@ -40,6 +40,12 @@ namespace toucan
         //! Get the timeline image size.
         const IMATH_NAMESPACE::V2i& getImageSize() const;
 
+        //! Get the timeline image channels.
+        int getImageChannels() const;
+
+        //! Get the timeline image data type.
+        const std::string& getImageDataType() const;
+
         //! Get an image graph for the given time.
         std::shared_ptr<IImageNode> exec(
             const std::shared_ptr<ImageEffectHost>&,
@@ -67,6 +73,8 @@ namespace toucan
         OTIO_NS::TimeRange _timeRange;
         ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
+        int _imageChannels = 0;
+        std::string _imageDataType;
         dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
     };
 }

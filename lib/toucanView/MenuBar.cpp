@@ -219,6 +219,32 @@ namespace toucan
             });
         _menus["Select"]->addItem(_actions["Select/All"]);
 
+        _actions["Select/AllTracks"] = std::make_shared<dtk::Action>(
+            "All Tracks",
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getSelectionModel()->selectAll(
+                        _document->getTimeline(),
+                        SelectionType::Tracks);
+                }
+            });
+        _menus["Select"]->addItem(_actions["Select/AllTracks"]);
+
+        _actions["Select/AllClips"] = std::make_shared<dtk::Action>(
+            "All Clips",
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getSelectionModel()->selectAll(
+                        _document->getTimeline(),
+                        SelectionType::Clips);
+                }
+            });
+        _menus["Select"]->addItem(_actions["Select/AllClips"]);
+
         _actions["Select/None"] = std::make_shared<dtk::Action>(
             "None",
             dtk::Key::A,
@@ -254,7 +280,7 @@ namespace toucan
         _menus["Time"] = dtk::Menu::create(context);
         addMenu("Time", _menus["Time"]);
 
-        _actions["Time/Start"] = std::make_shared<dtk::Action>(
+        _actions["Time/FrameStart"] = std::make_shared<dtk::Action>(
             "Start Frame",
             "FrameStart",
             dtk::Key::Up,
@@ -263,12 +289,14 @@ namespace toucan
             {
                 if (_document)
                 {
-                    _document->getPlaybackModel()->frameAction(FrameAction::Start);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::FrameStart,
+                        _document->getTimeline());
                 }
             });
-        _menus["Time"]->addItem(_actions["Time/Start"]);
+        _menus["Time"]->addItem(_actions["Time/FrameStart"]);
 
-        _actions["Time/Prev"] = std::make_shared<dtk::Action>(
+        _actions["Time/FramePrev"] = std::make_shared<dtk::Action>(
             "Previous Frame",
             "FramePrev",
             dtk::Key::Left,
@@ -277,12 +305,14 @@ namespace toucan
             {
                 if (_document)
                 {
-                    _document->getPlaybackModel()->frameAction(FrameAction::Prev);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::FramePrev,
+                        _document->getTimeline());
                 }
             });
-        _menus["Time"]->addItem(_actions["Time/Prev"]);
+        _menus["Time"]->addItem(_actions["Time/FramePrev"]);
 
-        _actions["Time/Next"] = std::make_shared<dtk::Action>(
+        _actions["Time/FrameNext"] = std::make_shared<dtk::Action>(
             "Next Frame",
             "FrameNext",
             dtk::Key::Right,
@@ -291,12 +321,14 @@ namespace toucan
             {
                 if (_document)
                 {
-                    _document->getPlaybackModel()->frameAction(FrameAction::Next);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::FrameNext,
+                        _document->getTimeline());
                 }
             });
-        _menus["Time"]->addItem(_actions["Time/Next"]);
+        _menus["Time"]->addItem(_actions["Time/FrameNext"]);
 
-        _actions["Time/End"] = std::make_shared<dtk::Action>(
+        _actions["Time/FrameEnd"] = std::make_shared<dtk::Action>(
             "End Frame",
             "FrameEnd",
             dtk::Key::Down,
@@ -305,56 +337,44 @@ namespace toucan
             {
                 if (_document)
                 {
-                    _document->getPlaybackModel()->frameAction(FrameAction::End);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::FrameEnd,
+                        _document->getTimeline());
                 }
             });
-        _menus["Time"]->addItem(_actions["Time/End"]);
+        _menus["Time"]->addItem(_actions["Time/FrameEnd"]);
 
         _menus["Time"]->addDivider();
 
-        _menus["TimeUnits"] = _menus["Time"]->addSubMenu("Time Units");
-
-        _actions["TimeUnits/Timecode"] = std::make_shared<dtk::Action>(
-            "Timecode",
-            [this](bool value)
+        _actions["Time/ClipNext"] = std::make_shared<dtk::Action>(
+            "Next Clip",
+            dtk::Key::Right,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
             {
-                if (auto app = _app.lock())
+                if (_document)
                 {
-                    app->getTimeUnitsModel()->setTimeUnits(TimeUnits::Timecode);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::ClipNext,
+                        _document->getTimeline());
                 }
             });
-        _menus["TimeUnits"]->addItem(_actions["TimeUnits/Timecode"]);
+        _menus["Time"]->addItem(_actions["Time/ClipNext"]);
 
-        _actions["TimeUnits/Frames"] = std::make_shared<dtk::Action>(
-            "Frames",
-            [this](bool value)
+        _actions["Time/ClipPrev"] = std::make_shared<dtk::Action>(
+            "Previous Clip",
+            dtk::Key::Left,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
             {
-                if (auto app = _app.lock())
+                if (_document)
                 {
-                    app->getTimeUnitsModel()->setTimeUnits(TimeUnits::Frames);
+                    _document->getPlaybackModel()->timeAction(
+                        TimeAction::ClipPrev,
+                        _document->getTimeline());
                 }
             });
-        _menus["TimeUnits"]->addItem(_actions["TimeUnits/Frames"]);
-
-        _actions["TimeUnits/Seconds"] = std::make_shared<dtk::Action>(
-            "Seconds",
-            [this](bool value)
-            {
-                if (auto app = _app.lock())
-                {
-                    app->getTimeUnitsModel()->setTimeUnits(TimeUnits::Seconds);
-                }
-            });
-        _menus["TimeUnits"]->addItem(_actions["TimeUnits/Seconds"]);
-
-        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
-            app->getTimeUnitsModel()->observeTimeUnits(),
-            [this](TimeUnits value)
-            {
-                _menus["TimeUnits"]->setItemChecked(_actions["TimeUnits/Timecode"], TimeUnits::Timecode == value);
-                _menus["TimeUnits"]->setItemChecked(_actions["TimeUnits/Frames"], TimeUnits::Frames == value);
-                _menus["TimeUnits"]->setItemChecked(_actions["TimeUnits/Seconds"], TimeUnits::Seconds == value);
-            });
+        _menus["Time"]->addItem(_actions["Time/ClipPrev"]);
     }
 
     void MenuBar::_playbackMenuInit(
@@ -685,31 +705,39 @@ namespace toucan
 
     void MenuBar::_fileMenuUpdate()
     {
-        _menus["File"]->setItemEnabled(_actions["File/Close"], _document.get());
-        _menus["File"]->setItemEnabled(_actions["File/CloseAll"], _document.get());
-        _menus["File"]->setSubMenuEnabled(_menus["Files"], _document.get());
+        const bool document = _document.get();
+        _menus["File"]->setItemEnabled(_actions["File/Close"], document);
+        _menus["File"]->setItemEnabled(_actions["File/CloseAll"], document);
+        _menus["File"]->setSubMenuEnabled(_menus["Files"], document);
         _menus["File"]->setItemEnabled(_actions["File/Next"], _filesActions.size() > 1);
         _menus["File"]->setItemEnabled(_actions["File/Prev"], _filesActions.size() > 1);
     }
 
     void MenuBar::_selectMenuUpdate()
     {
-        _menus["Select"]->setItemEnabled(_actions["Select/All"], _document.get());
-        _menus["Select"]->setItemEnabled(_actions["Select/None"], _document.get());
-        _menus["Select"]->setItemEnabled(_actions["Select/Invert"], _document.get());
+        const bool document = _document.get();
+        _menus["Select"]->setItemEnabled(_actions["Select/All"], document);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllTracks"], document);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllClips"], document);
+        _menus["Select"]->setItemEnabled(_actions["Select/None"], document);
+        _menus["Select"]->setItemEnabled(_actions["Select/Invert"], document);
     }
 
     void MenuBar::_timeMenuUpdate()
     {
-        _menus["Time"]->setItemEnabled(_actions["Time/Start"], _document.get());
-        _menus["Time"]->setItemEnabled(_actions["Time/Prev"], _document.get());
-        _menus["Time"]->setItemEnabled(_actions["Time/Next"], _document.get());
-        _menus["Time"]->setItemEnabled(_actions["Time/End"], _document.get());
+        const bool document = _document.get();
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameStart"], document);
+        _menus["Time"]->setItemEnabled(_actions["Time/FramePrev"], document);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameNext"], document);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameEnd"], document);
+        _menus["Time"]->setItemEnabled(_actions["Time/ClipPrev"], document);
+        _menus["Time"]->setItemEnabled(_actions["Time/ClipNext"], document);
     }
 
     void MenuBar::_playbackMenuUpdate()
     {
-        if (_document)
+        const bool document = _document.get();
+        if (document)
         {
             _playbackObserver = dtk::ValueObserver<Playback>::create(
                 _document->getPlaybackModel()->observePlayback(),
@@ -725,10 +753,10 @@ namespace toucan
             _playbackObserver.reset();
         }
 
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Stop"], _document.get());
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Forward"], _document.get());
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Reverse"], _document.get());
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Toggle"], _document.get());
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Stop"], document);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Forward"], document);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Reverse"], document);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Toggle"], document);
     }
 
     void MenuBar::_windowMenuUpdate()
@@ -737,7 +765,8 @@ namespace toucan
 
     void MenuBar::_viewMenuUpdate()
     {
-        if (_document)
+        const bool document = _document.get();
+        if (document)
         {
             _frameViewObserver = dtk::ValueObserver<bool>::create(
                 _document->getViewModel()->observeFrame(),
@@ -751,9 +780,9 @@ namespace toucan
             _frameViewObserver.reset();
         }
 
-        _menus["View"]->setItemEnabled(_actions["View/ZoomIn"], _document.get());
-        _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], _document.get());
-        _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], _document.get());
-        _menus["View"]->setItemEnabled(_actions["View/Frame"], _document.get());
+        _menus["View"]->setItemEnabled(_actions["View/ZoomIn"], document);
+        _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], document);
+        _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], document);
+        _menus["View"]->setItemEnabled(_actions["View/Frame"], document);
     }
 }

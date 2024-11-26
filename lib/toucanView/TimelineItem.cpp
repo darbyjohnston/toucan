@@ -289,7 +289,6 @@ namespace toucan
                 static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers ||
                 static_cast<int>(dtk::KeyModifier::Control) == event.modifiers))
         {
-            event.accept = true;
             auto selection = _select(shared_from_this(), event.pos);
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
             if (selection)
@@ -298,6 +297,8 @@ namespace toucan
             }
             if (selection && item)
             {
+                event.accept = true;
+                takeKeyFocus();
                 _mouse.mode = MouseMode::Select;
                 auto selectionPrev = _selectionModel->getSelection();
                 std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > selectionNew;
@@ -321,8 +322,10 @@ namespace toucan
                 }
                 _selectionModel->setSelection(selectionNew);
             }
-            else
+            else if (0 == event.modifiers)
             {
+                event.accept = true;
+                takeKeyFocus();
                 _mouse.mode = MouseMode::CurrentTime;
                 _currentTime = posToTime(_getMousePos().x);
                 if (_currentTimeCallback)

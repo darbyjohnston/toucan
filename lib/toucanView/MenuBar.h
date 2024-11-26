@@ -4,7 +4,6 @@
 #pragma once
 
 #include "PlaybackModel.h"
-#include "TimeUnitsModel.h"
 #include "WindowModel.h"
 
 #include <dtk/ui/MenuBar.h>
@@ -82,7 +81,6 @@ namespace toucan
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
         std::shared_ptr<dtk::ValueObserver<float> > _displayScaleObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
-        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
     };
 }

@@ -3,6 +3,8 @@
 
 #include "Util.h"
 
+#include <opentimelineio/clip.h>
+
 #include <OpenFX/ofxImageEffect.h>
 
 #include <algorithm>

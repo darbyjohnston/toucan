@@ -11,6 +11,7 @@ set(HEADERS
     PropertySet.h
     Read.h
     TimeWarp.h
+    TimelineAlgo.h
     TimelineWrapper.h
     Util.h)
 set(HEADERS_PRIVATE
@@ -28,6 +29,7 @@ set(SOURCE
     PropertySet.cpp
     Read.cpp
     TimeWarp.cpp
+    TimelineAlgo.cpp
     TimelineWrapper.cpp
     Util.cpp)
 if(WIN32)

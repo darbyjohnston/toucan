@@ -3,6 +3,10 @@
 
 #include "PlaybackModel.h"
 
+#include <toucan/TimelineAlgo.h>
+
+#include <opentimelineio/clip.h>
+
 namespace toucan
 {
     PlaybackModel::PlaybackModel(const std::shared_ptr<dtk::Context>& context)
@@ -67,24 +71,138 @@ namespace toucan
         }
     }
 
-    void PlaybackModel::frameAction(FrameAction value)
+    void PlaybackModel::timeAction(
+        TimeAction value,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
     {
         const OTIO_NS::TimeRange& timeRange = _timeRange->get();
-        const OTIO_NS::RationalTime& time = _currentTime->get();
+        const OTIO_NS::RationalTime& currentTime = _currentTime->get();
         switch (value)
         {
-        case FrameAction::Start:
+        case TimeAction::FrameStart:
             setCurrentTime(timeRange.start_time());
             break;
-        case FrameAction::Prev:
-            setCurrentTime(time - OTIO_NS::RationalTime(1.0, time.rate()));
+        case TimeAction::FramePrev:
+            setCurrentTime(currentTime - OTIO_NS::RationalTime(1.0, currentTime.rate()));
             break;
-        case FrameAction::Next:
-            setCurrentTime(time + OTIO_NS::RationalTime(1.0, time.rate()));
+        case TimeAction::FrameNext:
+            setCurrentTime(currentTime + OTIO_NS::RationalTime(1.0, currentTime.rate()));
             break;
-        case FrameAction::End:
+        case TimeAction::FrameEnd:
             setCurrentTime(timeRange.end_time_inclusive());
             break;
+        case TimeAction::ClipNext:
+        {
+            std::optional<OTIO_NS::RationalTime> min;
+            std::optional<OTIO_NS::RationalTime> diff;
+            std::optional<OTIO_NS::RationalTime> t;
+            const auto clips = getVideoClips(timeline);
+            auto i = clips.begin();
+            if (i != clips.end())
+            {
+                const auto clipRangeOpt = (*i)->trimmed_range_in_parent();
+                if (clipRangeOpt.has_value())
+                {
+                    const OTIO_NS::RationalTime start =
+                        clipRangeOpt.value().start_time() +
+                        timeRange.start_time();
+                    min = start;
+                    if (start > currentTime)
+                    {
+                        diff = currentTime - start;
+                        diff = OTIO_NS::RationalTime(std::abs(diff.value().value()), diff.value().rate());
+                        t = start;
+                    }
+                }
+                ++i;
+            }
+            for (; i != clips.end(); ++i)
+            {
+                const auto clipRangeOpt = (*i)->trimmed_range_in_parent();
+                if (clipRangeOpt.has_value())
+                {
+                    const OTIO_NS::RationalTime start =
+                        clipRangeOpt.value().start_time() +
+                        timeRange.start_time();
+                    min = min.has_value() ? std::min(min.value(), start) : start;
+                    if (start > currentTime)
+                    {
+                        OTIO_NS::RationalTime clipDiff = currentTime - start;
+                        clipDiff = OTIO_NS::RationalTime(std::abs(clipDiff.value()), clipDiff.rate());
+                        if (!diff.has_value() || clipDiff < diff)
+                        {
+                            diff = clipDiff;
+                            t = start;
+                        }
+                    }
+                }
+            }
+            if (t.has_value())
+            {
+                setCurrentTime(t.value());
+            }
+            else if (min.has_value())
+            {
+                setCurrentTime(min.value());
+            }
+            break;
+        }
+        case TimeAction::ClipPrev:
+        {
+            std::optional<OTIO_NS::RationalTime> max;
+            std::optional<OTIO_NS::RationalTime> diff;
+            std::optional<OTIO_NS::RationalTime> t;
+            const auto clips = getVideoClips(timeline);
+            auto i = clips.begin();
+            if (i != clips.end())
+            {
+                const auto clipRangeOpt = (*i)->trimmed_range_in_parent();
+                if (clipRangeOpt.has_value())
+                {
+                    const OTIO_NS::RationalTime start =
+                        clipRangeOpt.value().start_time() +
+                        timeRange.start_time();
+                    max = start;
+                    if (start < currentTime)
+                    {
+                        diff = currentTime - start;
+                        diff = OTIO_NS::RationalTime(std::abs(diff.value().value()), diff.value().rate());
+                        t = start;
+                    }
+                }
+                ++i;
+            }
+            for (; i != clips.end(); ++i)
+            {
+                const auto clipRangeOpt = (*i)->trimmed_range_in_parent();
+                if (clipRangeOpt.has_value())
+                {
+                    const OTIO_NS::RationalTime start =
+                        clipRangeOpt.value().start_time() +
+                        timeRange.start_time();
+                    max = max.has_value() ? std::max(max.value(), start) : start;
+                    if (start < currentTime)
+                    {
+                        OTIO_NS::RationalTime clipDiff = currentTime - start;
+                        clipDiff = OTIO_NS::RationalTime(std::abs(clipDiff.value()), clipDiff.rate());
+                        if (!diff.has_value() || clipDiff < diff)
+                        {
+                            diff = clipDiff;
+                            t = start;
+                        }
+                    }
+                }
+            }
+            if (t.has_value())
+            {
+                setCurrentTime(t.value());
+            }
+            else if (max.has_value())
+            {
+                setCurrentTime(max.value());
+            }
+            break;
+        }
         default: break;
         }
     }

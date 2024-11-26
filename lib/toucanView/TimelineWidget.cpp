@@ -23,7 +23,10 @@ namespace toucan
         IWidget::_init(context, "toucan::TimelineWidget", parent);
 
         _setMouseHoverEnabled(true);
-        _setMousePressEnabled(true, 0, static_cast<int>(dtk::KeyModifier::Control));
+        _setMousePressEnabled(
+            true,
+            0,
+            static_cast<int>(dtk::KeyModifier::Control));
 
         _frameView = dtk::ObservableValue<bool>::create(true);
 

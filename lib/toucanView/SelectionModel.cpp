@@ -3,6 +3,8 @@
 
 #include "SelectionModel.h"
 
+#include <opentimelineio/clip.h>
+
 #include <set>
 
 namespace OTIO_NS
@@ -51,14 +53,33 @@ namespace toucan
         _selection->setIfChanged(tmp);
     }
 
-    void SelectionModel::selectAll(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline)
+    void SelectionModel::selectAll(
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        SelectionType type)
     {
         std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > items;
-        //! \bug The stack is not returned by find_children<Item>?
-        items.push_back(timeline->tracks());
-        for (auto& item : timeline->find_children<OTIO_NS::Item>())
+        switch (type)
         {
-            items.push_back(item);
+        case SelectionType::All:
+            //! \bug The stack is not returned by find_children<Item>?
+            items.push_back(timeline->tracks());
+            for (auto& item : timeline->find_children<OTIO_NS::Item>())
+            {
+                items.push_back(item);
+            }
+            break;
+        case SelectionType::Tracks:
+            for (auto& track : timeline->find_children<OTIO_NS::Track>())
+            {
+                items.push_back(OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(track));
+            }
+            break;
+        case SelectionType::Clips:
+            for (auto& clip : timeline->find_children<OTIO_NS::Clip>())
+            {
+                items.push_back(OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(clip));
+            }
+            break;
         }
         _selection->setIfChanged(items);
     }

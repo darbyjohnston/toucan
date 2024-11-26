@@ -35,18 +35,22 @@ namespace toucan
                     const IMATH_NAMESPACE::V2i& imageSize = document->getImageSize();
                     const size_t trackCount = document->getTimeline()->find_children<OTIO_NS::Track>().size();
 
-                    text = dtk::Format("{0}: {1}x{2}, {3} tracks").
+                    text = dtk::Format("{0}: {1}x{2}, {3} channels, {4} data, {5} tracks").
                         arg(dtk::elide(document->getPath().filename().string())).
                         arg(imageSize.x).
                         arg(imageSize.y).
+                        arg(document->getImageChannels()).
+                        arg(document->getImageDataType()).
                         arg(trackCount);
                     tooltip = dtk::Format(
-                        "path: {0}\n"
-                        "resolution: {1}x{2}\n"
-                        "tracks: {3}").
+                        "Path: {0}\n"
+                        "Render: {1}x{2}, {3} channels, {4} data\n"
+                        "Tracks: {5}").
                         arg(document->getPath().string()).
                         arg(imageSize.x).
                         arg(imageSize.y).
+                        arg(document->getImageChannels()).
+                        arg(document->getImageDataType()).
                         arg(trackCount);
                 }
                 _label->setText(text);
