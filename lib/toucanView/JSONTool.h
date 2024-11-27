@@ -77,6 +77,7 @@ namespace toucan
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
+        std::shared_ptr<dtk::Label> _nothingSelectedLabel;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
