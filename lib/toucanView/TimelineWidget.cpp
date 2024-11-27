@@ -54,7 +54,7 @@ namespace toucan
                         {
                             if (_document)
                             {
-                                _document->getPlaybackModel()->setCurrentTime(value);
+                                _document->getPlaybackModel()->setCurrentTime(value, CurrentTime::Free);
                             }
                         });
                     _scrollWidget->setWidget(_timelineItem);
@@ -69,6 +69,17 @@ namespace toucan
                                 _timelineItem->setCurrentTime(value);
                             }
                             _scrollUpdate();
+                        });
+
+                    _inOutRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
+                        document->getPlaybackModel()->observeInOutRange(),
+                        [this](const OTIO_NS::TimeRange& value)
+                        {
+                            _inOutRange = value;
+                            if (_timelineItem)
+                            {
+                                _timelineItem->setInOutRange(_inOutRange);
+                            }
                         });
                 }
                 else

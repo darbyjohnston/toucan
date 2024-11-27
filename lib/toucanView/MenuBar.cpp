@@ -9,6 +9,8 @@
 #include "SelectionModel.h"
 #include "ViewModel.h"
 
+#include <toucan/TimelineAlgo.h>
+
 #include <dtk/ui/Action.h>
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
@@ -375,6 +377,101 @@ namespace toucan
                 }
             });
         _menus["Time"]->addItem(_actions["Time/ClipPrev"]);
+
+        _menus["Time"]->addDivider();
+
+        _actions["Time/InPointSet"] = std::make_shared<dtk::Action>(
+            "Set In Point",
+            dtk::Key::I,
+            0,
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getPlaybackModel()->setInPoint(
+                        _document->getPlaybackModel()->getCurrentTime());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/InPointSet"]);
+
+        _actions["Time/InPointReset"] = std::make_shared<dtk::Action>(
+            "Reset In Point",
+            dtk::Key::I,
+            static_cast<int>(dtk::KeyModifier::Shift),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getPlaybackModel()->resetInPoint();
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/InPointReset"]);
+
+        _actions["Time/OutPointSet"] = std::make_shared<dtk::Action>(
+            "Set Out Point",
+            dtk::Key::O,
+            0,
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getPlaybackModel()->setOutPoint(
+                        _document->getPlaybackModel()->getCurrentTime());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/OutPointSet"]);
+
+        _actions["Time/OutPointReset"] = std::make_shared<dtk::Action>(
+            "Reset Out Point",
+            dtk::Key::O,
+            static_cast<int>(dtk::KeyModifier::Shift),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getPlaybackModel()->resetOutPoint();
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/OutPointReset"]);
+
+        _actions["Time/InOutPointReset"] = std::make_shared<dtk::Action>(
+            "Reset In/Out Points",
+            dtk::Key::P,
+            static_cast<int>(dtk::KeyModifier::Shift),
+            [this]
+            {
+                if (_document)
+                {
+                    _document->getPlaybackModel()->resetInOutPoints();
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/InOutPointReset"]);
+
+        _actions["Time/InOutPointSelection"] = std::make_shared<dtk::Action>(
+            "Set In/Out Points To Selection",
+            dtk::Key::P,
+            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_document)
+                {
+                    const auto selection = _document->getSelectionModel()->getSelection();
+                    const OTIO_NS::TimeRange& timeRange = _document->getTimelineWrapper()->getTimeRange();
+                    const auto timeRangeOpt = getTimeRange(
+                        selection,
+                        timeRange.start_time(),
+                        timeRange.duration().rate());
+                    if (timeRangeOpt.has_value())
+                    {
+                        _document->getPlaybackModel()->setInOutRange(timeRangeOpt.value());
+                    }
+                    else
+                    {
+                        _document->getPlaybackModel()->resetInOutPoints();
+                    }
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/InOutPointSelection"]);
     }
 
     void MenuBar::_playbackMenuInit(

@@ -10,6 +10,14 @@
 
 namespace toucan
 {
+    //! Current time behavior.
+    enum CurrentTime
+    {
+        Free,
+        Clamp,
+        Loop
+    };
+
     //! Time actions.
     enum TimeAction
     {
@@ -53,12 +61,38 @@ namespace toucan
         std::shared_ptr<dtk::IObservableValue<OTIO_NS::RationalTime> > observeCurrentTime() const;
 
         //! Set the current time.
-        void setCurrentTime(const OTIO_NS::RationalTime&);
+        void setCurrentTime(
+            const OTIO_NS::RationalTime&,
+            CurrentTime = CurrentTime::Clamp);
 
         //! Time actions.
         void timeAction(
             TimeAction,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+
+        //! Get the in/out range.
+        const OTIO_NS::TimeRange& getInOutRange() const;
+
+        //! Observe the in/out range.
+        std::shared_ptr<dtk::IObservableValue<OTIO_NS::TimeRange> > observeInOutRange() const;
+
+        //! Set the in/out range.
+        void setInOutRange(const OTIO_NS::TimeRange&);
+
+        //! Set the in point.
+        void setInPoint(const OTIO_NS::RationalTime&);
+
+        //! Reset the in point.
+        void resetInPoint();
+
+        //! Set the out point.
+        void setOutPoint(const OTIO_NS::RationalTime&);
+
+        //! Reset the in point.
+        void resetOutPoint();
+
+        //! Reset the in/out points.
+        void resetInOutPoints();
 
         //! Get the playback.
         Playback getPlayback() const;
@@ -77,6 +111,7 @@ namespace toucan
 
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _timeRange;
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::RationalTime> > _currentTime;
+        std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _inOutRange;
         std::shared_ptr<dtk::ObservableValue<Playback> > _playback;
         Playback _playbackPrev = Playback::Forward;
         std::shared_ptr<dtk::Timer> _timer;
