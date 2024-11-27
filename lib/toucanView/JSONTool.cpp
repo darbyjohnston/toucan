@@ -111,6 +111,9 @@ namespace toucan
         _scrollLayout->setSpacingRole(dtk::SizeRole::None);
         _scrollWidget->setWidget(_scrollLayout);
 
+        _nothingSelectedLabel = dtk::Label::create(context, "Nothing selected", _scrollLayout);
+        _nothingSelectedLabel->setMarginRole(dtk::SizeRole::MarginSmall);
+
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _bottomLayout = dtk::HorizontalLayout::create(context, _layout);
@@ -181,6 +184,7 @@ namespace toucan
                                 widget->setFilter(_searchBox->getText());
                                 _widgets.push_back(widget);
                             }
+                            _nothingSelectedLabel->setVisible(selection.empty());
                         });
                 }
                 else

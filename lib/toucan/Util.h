@@ -36,7 +36,7 @@ namespace toucan
 
     //! Get an image sequence file name.
     std::string getSequenceFrame(
-        const std::string& base,
+        const std::filesystem::path&,
         const std::string& namePrefix,
         int frame,
         int padding,
