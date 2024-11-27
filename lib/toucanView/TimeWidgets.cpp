@@ -47,7 +47,7 @@ namespace toucan
             {
                 if (_callback)
                 {
-                    _callback(static_cast<FrameAction>(index));
+                    _callback(static_cast<TimeAction>(index));
                 }
             });
     }
@@ -64,7 +64,7 @@ namespace toucan
         return out;
     }
 
-    void FrameButtons::setCallback(const std::function<void(FrameAction)>& value)
+    void FrameButtons::setCallback(const std::function<void(TimeAction)>& value)
     {
         _callback = value;
     }

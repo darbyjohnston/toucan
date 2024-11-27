@@ -30,13 +30,13 @@ namespace toucan
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        void setCallback(const std::function<void(FrameAction)>&);
+        void setCallback(const std::function<void(TimeAction)>&);
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::function<void(FrameAction)> _callback;
+        std::function<void(TimeAction)> _callback;
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::ButtonGroup> _buttonGroup;
     };

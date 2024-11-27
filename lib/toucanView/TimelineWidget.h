@@ -64,6 +64,7 @@ namespace toucan
         std::shared_ptr<Document> _document;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime;
+        OTIO_NS::TimeRange _inOutRange;
         double _scale = 100.0;
         bool _sizeInit = true;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
@@ -86,5 +87,6 @@ namespace toucan
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _inOutRangeObserver;
     };
 }

@@ -37,6 +37,8 @@ namespace toucan
         void setCurrentTime(const OTIO_NS::RationalTime&);
         void setCurrentTimeCallback(const std::function<void(const OTIO_NS::RationalTime&)>&);
 
+        void setInOutRange(const OTIO_NS::TimeRange&);
+
         void setGeometry(const dtk::Box2I&) override;
         void tickEvent(
             bool parentsVisible,
@@ -71,8 +73,10 @@ namespace toucan
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
 
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
+        OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime = OTIO_NS::RationalTime(-1.0, -1.0);
         std::function<void(const OTIO_NS::RationalTime&)> _currentTimeCallback;
+        OTIO_NS::TimeRange _inOutRange;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<SelectionModel> _selectionModel;
         std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;

@@ -8,9 +8,9 @@
 #include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
-#include <dtk/ui/Label.h>
 #include <dtk/ui/Spacer.h>
 #include <dtk/ui/ToolButton.h>
+#include <dtk/core/String.h>
 
 namespace toucan
 {
@@ -23,13 +23,16 @@ namespace toucan
 
         _item = item;
 
-        std::string text = item->to_json_string();
-        auto label = dtk::Label::create(context, text);
-        label->setMarginRole(dtk::SizeRole::MarginSmall);
+        _text = dtk::split(item->to_json_string(), { '\n' });
+
+        _label = dtk::Label::create(context);
+        _label->setMarginRole(dtk::SizeRole::MarginSmall);
 
         _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
-        _bellows->setWidget(label);
+        _bellows->setWidget(_label);
         _bellows->setOpen(true);
+
+        _textUpdate();
     }
 
     JSONWidget::~JSONWidget()
@@ -50,6 +53,14 @@ namespace toucan
         _bellows->setOpen(value);
     }
 
+    void JSONWidget::setFilter(const std::string& value)
+    {
+        if (value == _filter)
+            return;
+        _filter = value;
+        _textUpdate();
+    }
+
     void JSONWidget::setGeometry(const dtk::Box2I& value)
     {
         IWidget::setGeometry(value);
@@ -62,6 +73,26 @@ namespace toucan
         _setSizeHint(_bellows->getSizeHint());
     }
 
+    void JSONWidget::_textUpdate()
+    {
+        if (!_filter.empty())
+        {
+            std::vector<std::string> text;
+            for (const auto& line : _text)
+            {
+                if (dtk::contains(line, _filter, dtk::CaseCompare::Insensitive))
+                {
+                    text.push_back(line);
+                }
+            }
+            _label->setText(dtk::join(text, '\n'));
+        }
+        else
+        {
+            _label->setText(dtk::join(_text, '\n'));
+        }
+    }
+
     void JSONTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
@@ -72,11 +103,26 @@ namespace toucan
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
 
-        auto hLayout = dtk::HorizontalLayout::create(context, _layout);
+        _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, _layout);
+        _scrollWidget->setBorder(false);
+        _scrollWidget->setVStretch(dtk::Stretch::Expanding);
+
+        _scrollLayout = dtk::VerticalLayout::create(context);
+        _scrollLayout->setSpacingRole(dtk::SizeRole::None);
+        _scrollWidget->setWidget(_scrollLayout);
+
+        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+
+        _bottomLayout = dtk::HorizontalLayout::create(context, _layout);
+        _bottomLayout->setMarginRole(dtk::SizeRole::MarginInside);
+        _bottomLayout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+
+        _searchBox = dtk::SearchBox::create(context, _bottomLayout);
+        _searchBox->setHStretch(dtk::Stretch::Expanding);
+        _searchBox->setTooltip("Filter the JSON text");
+
+        auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto spacer = dtk::Spacer::create(context, dtk::Orientation::Horizontal, hLayout);
-        spacer->setSpacingRole(dtk::SizeRole::None);
-        spacer->setStretch(dtk::Stretch::Expanding);
         auto openButton = dtk::ToolButton::create(context, hLayout);
         openButton->setMarginRole(dtk::SizeRole::MarginSmall);
         openButton->setIcon("BellowsOpen");
@@ -85,16 +131,6 @@ namespace toucan
         closeButton->setMarginRole(dtk::SizeRole::MarginSmall);
         closeButton->setIcon("BellowsClosed");
         closeButton->setTooltip("Close all");
-
-        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
-
-        _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, _layout);
-        _scrollWidget->setBorder(false);
-        _scrollWidget->setVStretch(dtk::Stretch::Expanding);
-
-        _scrollLayout = dtk::VerticalLayout::create(context);
-        _scrollLayout->setSpacingRole(dtk::SizeRole::None);
-        _scrollWidget->setWidget(_scrollLayout);
 
         openButton->setClickedCallback(
             [this]
@@ -111,6 +147,15 @@ namespace toucan
                 for (const auto& widget : _widgets)
                 {
                     widget->setOpen(false);
+                }
+            });
+
+        _searchBox->setCallback(
+            [this](const std::string& text)
+            {
+                for (const auto& widget : _widgets)
+                {
+                    widget->setFilter(text);
                 }
             });
 
@@ -133,6 +178,7 @@ namespace toucan
                             for (const auto& item : selection)
                             {
                                 auto widget = JSONWidget::create(context, item, _scrollLayout);
+                                widget->setFilter(_searchBox->getText());
                                 _widgets.push_back(widget);
                             }
                         });

@@ -7,6 +7,7 @@
 #include "ImageEffectHost.h"
 #include "Read.h"
 #include "TimeWarp.h"
+#include "TimelineAlgo.h"
 #include "Util.h"
 
 #include <opentimelineio/clip.h>
@@ -21,6 +22,19 @@ namespace toucan
     namespace
     {
         const std::string logPrefix = "toucan::ImageGraph";
+
+        std::string toImageDataType(const OIIO::TypeDesc& value)
+        {
+            std::string out = "Unknown";
+            switch (value.basetype)
+            {
+            case OIIO::TypeDesc::UINT8:  out = "u8";    break;
+            case OIIO::TypeDesc::UINT16: out = "u16";   break;
+            case OIIO::TypeDesc::HALF:   out = "half";  break;
+            case OIIO::TypeDesc::FLOAT:  out = "float"; break;
+            }
+            return out;
+        }
     }
 
     ImageGraph::ImageGraph(
@@ -34,54 +48,55 @@ namespace toucan
     {
         _loadCache.setMax(10);
 
-        // Get the image size from the first video clip.
-        for (auto track : _timelineWrapper->getTimeline()->find_children<OTIO_NS::Track>())
+        // Get the image information from the first video clip.
+        for (auto clip : getVideoClips(_timelineWrapper->getTimeline()))
         {
-            if (OTIO_NS::Track::Kind::video == track->kind())
+            if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                for (auto clip : track->find_clips())
+                auto read = std::make_shared<ReadNode>(
+                    _timelineWrapper->getMediaPath(externalRef->target_url()),
+                    _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                const auto& spec = read->getSpec();
+                if (spec.width > 0)
                 {
-                    if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
-                    {
-                        auto read = std::make_shared<ReadNode>(
-                            _timelineWrapper->getMediaPath(externalRef->target_url()),
-                            _timelineWrapper->getMemoryReference(externalRef->target_url()));
-                        const auto& spec = read->getSpec();
-                        if (spec.width > 0)
-                        {
-                            _imageSize.x = spec.width;
-                            _imageSize.y = spec.height;
-                            break;
-                        }
-                    }
-                    else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
-                    {
-                        auto read = std::make_shared<SequenceReadNode>(
-                            _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
-                            sequenceRef->name_prefix(),
-                            sequenceRef->name_suffix(),
-                            sequenceRef->start_frame(),
-                            sequenceRef->frame_step(),
-                            sequenceRef->rate(),
-                            sequenceRef->frame_zero_padding(),
-                            _timelineWrapper->getMemoryReferences());
-                        const auto& spec = read->getSpec();
-                        if (spec.width > 0)
-                        {
-                            _imageSize.x = spec.width;
-                            _imageSize.y = spec.height;
-                            break;
-                        }
-                    }
-                    else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
-                    {
-                        auto parameters = generatorRef->parameters();
-                        auto i = parameters.find("size");
-                        if (i != parameters.end() && i->second.has_value())
-                        {
-                            anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), _imageSize);
-                        }
-                    }
+                    _imageSize.x = spec.width;
+                    _imageSize.y = spec.height;
+                    _imageChannels = spec.nchannels;
+                    _imageDataType = toImageDataType(spec.format);
+                    break;
+                }
+            }
+            else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
+            {
+                auto read = std::make_shared<SequenceReadNode>(
+                    _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
+                    sequenceRef->name_prefix(),
+                    sequenceRef->name_suffix(),
+                    sequenceRef->start_frame(),
+                    sequenceRef->frame_step(),
+                    sequenceRef->rate(),
+                    sequenceRef->frame_zero_padding(),
+                    _timelineWrapper->getMemoryReferences());
+                const auto& spec = read->getSpec();
+                if (spec.width > 0)
+                {
+                    _imageSize.x = spec.width;
+                    _imageSize.y = spec.height;
+                    _imageChannels = spec.nchannels;
+                    _imageDataType = toImageDataType(spec.format);
+                    break;
+                }
+            }
+            else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
+            {
+                auto parameters = generatorRef->parameters();
+                auto i = parameters.find("size");
+                if (i != parameters.end() && i->second.has_value())
+                {
+                    anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), _imageSize);
+                    //! \bug Hard coded:
+                    _imageChannels = 4;
+                    _imageDataType = toImageDataType(OIIO::TypeDesc::UINT8);
                 }
             }
         }
@@ -93,6 +108,16 @@ namespace toucan
     const IMATH_NAMESPACE::V2i& ImageGraph::getImageSize() const
     {
         return _imageSize;
+    }
+
+    int ImageGraph::getImageChannels() const
+    {
+        return _imageChannels;
+    }
+
+    const std::string& ImageGraph::getImageDataType() const
+    {
+        return _imageDataType;
     }
 
     std::shared_ptr<IImageNode> ImageGraph::exec(

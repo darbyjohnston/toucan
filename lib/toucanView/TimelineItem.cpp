@@ -33,6 +33,7 @@ namespace toucan
             0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control));
 
         _timeline = document->getTimeline();
+        _timeRange = document->getTimelineWrapper()->getTimeRange();
         _timeUnitsModel = app->getTimeUnitsModel();
         _selectionModel = document->getSelectionModel();
         _thumbnails.setMax(100);
@@ -86,6 +87,14 @@ namespace toucan
     void TimelineItem::setCurrentTimeCallback(const std::function<void(const OTIO_NS::RationalTime&)>& value)
     {
         _currentTimeCallback = value;
+    }
+
+    void TimelineItem::setInOutRange(const OTIO_NS::TimeRange& value)
+    {
+        if (value == _inOutRange)
+            return;
+        _inOutRange = value;
+        _setDrawUpdate();
     }
 
     void TimelineItem::setGeometry(const dtk::Box2I& value)
@@ -240,6 +249,21 @@ namespace toucan
             _size.fontMetrics.lineHeight + _size.margin * 2);
         event.render->drawRect(g2, event.style->getColorRole(dtk::ColorRole::Base));
 
+        if (_inOutRange != _timeRange)
+        {
+            const int x0 = timeToPos(_inOutRange.start_time());
+            const int x1 = timeToPos(_inOutRange.end_time_exclusive());
+            dtk::Color4F color = event.style->getColorRole(dtk::ColorRole::Yellow);
+            color.a = .5F;
+            event.render->drawRect(
+                dtk::Box2I(
+                    x0,
+                    g.min.y + _size.scrollPos.y,
+                    x1 - x0,
+                    _size.fontMetrics.lineHeight + _size.margin * 2),
+                color);
+        }
+
         _drawTimeTicks(drawRect, event);
         _drawTimeLabels(drawRect, event);
 
@@ -289,7 +313,6 @@ namespace toucan
                 static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers ||
                 static_cast<int>(dtk::KeyModifier::Control) == event.modifiers))
         {
-            event.accept = true;
             auto selection = _select(shared_from_this(), event.pos);
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
             if (selection)
@@ -298,6 +321,8 @@ namespace toucan
             }
             if (selection && item)
             {
+                event.accept = true;
+                takeKeyFocus();
                 _mouse.mode = MouseMode::Select;
                 auto selectionPrev = _selectionModel->getSelection();
                 std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > selectionNew;
@@ -321,8 +346,10 @@ namespace toucan
                 }
                 _selectionModel->setSelection(selectionNew);
             }
-            else
+            else if (0 == event.modifiers)
             {
+                event.accept = true;
+                takeKeyFocus();
                 _mouse.mode = MouseMode::CurrentTime;
                 _currentTime = posToTime(_getMousePos().x);
                 if (_currentTimeCallback)

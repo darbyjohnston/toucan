@@ -103,6 +103,16 @@ namespace toucan
         return _graph->getImageSize();
     }
 
+    int Document::getImageChannels() const
+    {
+        return _graph->getImageChannels();
+    }
+
+    const std::string& Document::getImageDataType() const
+    {
+        return _graph->getImageDataType();
+    }
+
     std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > Document::observeCurrentImage() const
     {
         return _currentImage;

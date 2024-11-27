@@ -3,8 +3,10 @@
 
 #pragma once
 
+#include "TimeUnitsModel.h"
 #include "TimeWidgets.h"
 
+#include <dtk/ui/ComboBox.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ToolButton.h>
 
@@ -48,11 +50,13 @@ namespace toucan
         std::shared_ptr<PlaybackButtons> _playbackButtons;
         std::shared_ptr<TimeEdit> _timeEdit;
         std::shared_ptr<TimeLabel> _durationLabel;
+        std::shared_ptr<dtk::ComboBox> _timeUnitsComboBox;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }
 
