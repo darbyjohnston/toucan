@@ -76,8 +76,8 @@ jobs:
     - name: Upload artifact URL
       run: echo 'Artifact URL ${{ steps.linux-package-artifact.outputs.artifact-url }}'
 
-  macos-12-build:
-    runs-on: macos-12
+  macos-13-build:
+    runs-on: macos-13
 
     steps:
     - uses: actions/checkout@v4
@@ -103,8 +103,8 @@ jobs:
       run: |
         build-Debug/tests/toucan-test/toucan-test toucan/data
 
-  macos-14-build:
-    runs-on: macos-14
+  macos-build:
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -130,8 +130,8 @@ jobs:
       run: |
         build-Debug/tests/toucan-test/toucan-test toucan/data
 
-  macos-14-package:
-    runs-on: macos-14
+  macos-package:
+    runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v4
