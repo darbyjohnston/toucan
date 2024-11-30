@@ -14,7 +14,7 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
 
     class GraphWidget : public dtk::IWidget
     {
@@ -52,7 +52,7 @@ namespace toucan
 
         void _graphUpdate();
 
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<File> _file;
         std::shared_ptr<IImageNode> _rootNode;
         int _depth = 0;
         std::shared_ptr<IImageNode> _currentNode;
@@ -72,7 +72,7 @@ namespace toucan
         };
         SizeData _size;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<IImageNode> > > _rootNodeObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<IImageNode> > > _currentNodeObserver;
     };

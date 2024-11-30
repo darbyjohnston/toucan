@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Document.h"
+#include "File.h"
 
 #include <dtk/ui/RecentFilesModel.h>
 #include <dtk/ui/Settings.h>
@@ -13,54 +13,54 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
     class ImageEffectHost;
 
-    //! Documents model.
-    class DocumentsModel : public std::enable_shared_from_this<DocumentsModel>
+    //! Files model.
+    class FilesModel : public std::enable_shared_from_this<FilesModel>
     {
     public:
-        DocumentsModel(
+        FilesModel(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<dtk::Settings>&,
             const std::shared_ptr<ImageEffectHost>&);
 
-        virtual ~DocumentsModel();
+        virtual ~FilesModel();
 
-        //! Open a document.
+        //! Open a file.
         void open(const std::filesystem::path&);
 
-        //! Close the current document.
+        //! Close the current file.
         void close();
 
-        //! Close a document.
+        //! Close a file.
         void close(int);
 
-        //! Close all documents.
+        //! Close all files.
         void closeAll();
 
-        //! Observe the documents.
-        std::shared_ptr<dtk::IObservableList<std::shared_ptr<Document> > > observeDocuments() const;
+        //! Observe the files.
+        std::shared_ptr<dtk::IObservableList<std::shared_ptr<File> > > observeFiles() const;
 
-        //! Observe when a document is added.
+        //! Observe when a file is added.
         std::shared_ptr<dtk::IObservableValue<int> > observeAdd() const;
 
-        //! Observe when a document is removed.
+        //! Observe when a file is removed.
         std::shared_ptr<dtk::IObservableValue<int> > observeRemove() const;
 
-        //! Observe the current document.
-        std::shared_ptr<dtk::IObservableValue<std::shared_ptr<Document> > > observeCurrent() const;
+        //! Observe the current file.
+        std::shared_ptr<dtk::IObservableValue<std::shared_ptr<File> > > observeCurrent() const;
 
-        //! Observe the current document index.
+        //! Observe the current file index.
         std::shared_ptr<dtk::IObservableValue<int> > observeCurrentIndex() const;
 
-        //! Set the current document index.
+        //! Set the current file index.
         void setCurrentIndex(int);
 
-        //! Go to the next document.
+        //! Go to the next file.
         void next();
 
-        //! Go to the previous document.
+        //! Go to the previous file.
         void prev();
 
         //! Get the recent files model.
@@ -69,10 +69,10 @@ namespace toucan
     private:
         std::weak_ptr<dtk::Context> _context;
         std::shared_ptr<ImageEffectHost> _host;
-        std::shared_ptr<dtk::ObservableList<std::shared_ptr<Document> > > _documents;
+        std::shared_ptr<dtk::ObservableList<std::shared_ptr<File> > > _files;
         std::shared_ptr<dtk::ObservableValue<int> > _add;
         std::shared_ptr<dtk::ObservableValue<int> > _remove;
-        std::shared_ptr<dtk::ObservableValue<std::shared_ptr<Document> > > _current;
+        std::shared_ptr<dtk::ObservableValue<std::shared_ptr<File> > > _current;
         std::shared_ptr<dtk::ObservableValue<int> > _currentIndex;
         std::shared_ptr<dtk::RecentFilesModel> _recentFilesModel;
     };

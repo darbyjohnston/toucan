@@ -13,7 +13,7 @@
 namespace toucan
 {
     class App;
-    class Document;
+    class File;
 
     class PlaybackBar : public dtk::IWidget
     {
@@ -40,7 +40,7 @@ namespace toucan
         void _currentTimeUpdate();
         void _playbackUpdate();
 
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<File> _file;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime;
         Playback _playback = Playback::Stop;
@@ -52,7 +52,7 @@ namespace toucan
         std::shared_ptr<TimeLabel> _durationLabel;
         std::shared_ptr<dtk::ComboBox> _timeUnitsComboBox;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;

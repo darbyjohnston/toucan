@@ -4,7 +4,7 @@
 #include "GraphTool.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 
 #include <dtk/ui/Spacer.h>
 
@@ -26,25 +26,25 @@ namespace toucan
         _buttonGroup->setCheckedCallback(
             [this](int index, bool value)
             {
-                if (_document && index >= 0 && index < _buttons.size())
+                if (_file && index >= 0 && index < _buttons.size())
                 {
                     auto i = _buttonToNode.find(_buttons[index]);
                     if (i != _buttonToNode.end())
                     {
-                        _document->setCurrentNode(i->second);
+                        _file->setCurrentNode(i->second);
                     }
                 }
             });
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                _document = document;
-                if (document)
+                _file = file;
+                if (file)
                 {
                     _rootNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
-                        document->observeRootNode(),
+                        file->observeRootNode(),
                         [this](const std::shared_ptr<IImageNode>& node)
                         {
                             _rootNode = node;
@@ -53,7 +53,7 @@ namespace toucan
                         });
 
                     _currentNodeObserver = dtk::ValueObserver<std::shared_ptr<IImageNode> >::create(
-                        document->observeCurrentNode(),
+                        file->observeCurrentNode(),
                         [this](const std::shared_ptr<IImageNode>& node)
                         {
                             _currentNode = node;

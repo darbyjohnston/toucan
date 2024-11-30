@@ -8,25 +8,27 @@
 namespace toucan
 {
     class App;
-    class Document;
+    class File;
     class Viewport;
 
-    class DocumentTab : public dtk::IWidget
+    //! File tab.
+    class FileTab : public dtk::IWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~DocumentTab();
+        virtual ~FileTab();
 
-        static std::shared_ptr<DocumentTab> create(
+        //! Create a new file tab.
+        static std::shared_ptr<FileTab> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;

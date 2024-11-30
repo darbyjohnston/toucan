@@ -15,8 +15,8 @@
 namespace toucan
 {
     class App;
-    class Document;
-    class DocumentTab;
+    class File;
+    class FileTab;
     class IToolWidget;
     class InfoBar;
     class MenuBar;
@@ -52,7 +52,7 @@ namespace toucan
 
     private:
         std::weak_ptr<App> _app;
-        std::vector<std::shared_ptr<Document> > _documents;
+        std::vector<std::shared_ptr<File> > _files;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<MenuBar> _menuBar;
@@ -61,7 +61,7 @@ namespace toucan
         std::shared_ptr<dtk::Splitter> _vSplitter;
         std::shared_ptr<dtk::Splitter> _hSplitter;
         std::shared_ptr<dtk::TabWidget> _tabWidget;
-        std::map<std::shared_ptr<Document>, std::shared_ptr<DocumentTab> > _documentTabs;
+        std::map<std::shared_ptr<File>, std::shared_ptr<FileTab> > _fileTabs;
         std::shared_ptr<dtk::TabWidget> _toolWidget;
         std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
@@ -71,10 +71,10 @@ namespace toucan
         std::shared_ptr<InfoBar> _infoBar;
         std::shared_ptr<dtk::Divider> _infoDivider;
 
-        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _removeObserver;
-        std::shared_ptr<dtk::ValueObserver<int> > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _fileObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
     };

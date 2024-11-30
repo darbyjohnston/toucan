@@ -20,15 +20,15 @@ namespace toucan
     class ThumbnailGenerator;
     class ViewModel;
 
-    class Document : std::enable_shared_from_this<Document>
+    class File : std::enable_shared_from_this<File>
     {
     public:
-        Document(
+        File(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<ImageEffectHost>&,
             const std::filesystem::path&);
 
-        ~Document();
+        ~File();
 
         const std::filesystem::path& getPath() const;
 

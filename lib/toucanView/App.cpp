@@ -3,7 +3,7 @@
 
 #include "App.h"
 
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "MainWindow.h"
 #include "TimeUnitsModel.h"
 #include "WindowModel.h"
@@ -59,7 +59,7 @@ namespace toucan
         auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>();
         fileBrowserSystem->setNativeFileDialog(false);
 
-        _documentsModel = std::make_shared<DocumentsModel>(context, _settings, _host);
+        _filesModel = std::make_shared<FilesModel>(context, _settings, _host);
 
         _windowModel = std::make_shared<WindowModel>();
 
@@ -74,7 +74,7 @@ namespace toucan
         {
             try
             {
-                _documentsModel->open(_path);
+                _filesModel->open(_path);
             }
             catch (const std::exception& e)
             {
@@ -107,9 +107,9 @@ namespace toucan
         return _host;
     }
 
-    const std::shared_ptr<DocumentsModel>& App::getDocumentsModel() const
+    const std::shared_ptr<FilesModel>& App::getFilesModel() const
     {
-        return _documentsModel;
+        return _filesModel;
     }
 
     const std::shared_ptr<WindowModel>& App::getWindowModel() const

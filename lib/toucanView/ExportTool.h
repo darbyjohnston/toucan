@@ -20,7 +20,7 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
 
     class ExportWidget : public dtk::IWidget
     {
@@ -45,7 +45,7 @@ namespace toucan
         void _export();
 
         std::shared_ptr<ImageEffectHost> _host;
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<File> _file;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _time;
         std::shared_ptr<ImageGraph> _graph;
@@ -59,7 +59,7 @@ namespace toucan
         std::shared_ptr<dtk::ProgressDialog> _dialog;
         std::shared_ptr<dtk::Timer> _timer;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
     };
 
     class ExportTool : public IToolWidget

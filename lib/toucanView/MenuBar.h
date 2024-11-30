@@ -15,8 +15,8 @@
 namespace toucan
 {
     class App;
-    class Document;
-    class DocumentsModel;
+    class File;
+    class FilesModel;
     class MainWindow;
 
     class MenuBar : public dtk::MenuBar
@@ -68,17 +68,17 @@ namespace toucan
         void _viewMenuUpdate();
 
         std::weak_ptr<App> _app;
-        std::shared_ptr<DocumentsModel> _documentsModel;
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<FilesModel> _filesModel;
+        std::shared_ptr<File> _file;
 
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
         std::vector<std::shared_ptr<dtk::Action> > _filesActions;
         std::vector<std::shared_ptr<dtk::Action> > _recentFilesActions;
 
-        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
-        std::shared_ptr<dtk::ValueObserver<int> > _documentIndexObserver;
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _fileIndexObserver;
         std::shared_ptr<dtk::ListObserver<std::filesystem::path> > _recentFilesObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;

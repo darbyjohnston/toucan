@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "Document.h"
+#include "File.h"
 
 #include "PlaybackModel.h"
 #include "SelectionModel.h"
@@ -14,7 +14,7 @@
 
 namespace toucan
 {
-    Document::Document(
+    File::File(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<ImageEffectHost>& host,
         const std::filesystem::path& path) :
@@ -60,75 +60,75 @@ namespace toucan
             });
     }
 
-    Document::~Document()
+    File::~File()
     {}
 
-    const std::filesystem::path& Document::getPath() const
+    const std::filesystem::path& File::getPath() const
     {
         return _path;
     }
 
-    const std::shared_ptr<TimelineWrapper>& Document::getTimelineWrapper() const
+    const std::shared_ptr<TimelineWrapper>& File::getTimelineWrapper() const
     {
         return _timelineWrapper;
     }
 
-    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& Document::getTimeline() const
+    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& File::getTimeline() const
     {
         return _timelineWrapper->getTimeline();
     }
 
-    const std::shared_ptr<PlaybackModel>& Document::getPlaybackModel() const
+    const std::shared_ptr<PlaybackModel>& File::getPlaybackModel() const
     {
         return _playbackModel;
     }
 
-    const std::shared_ptr<ViewModel>& Document::getViewModel() const
+    const std::shared_ptr<ViewModel>& File::getViewModel() const
     {
         return _viewModel;
     }
 
-    const std::shared_ptr<SelectionModel>& Document::getSelectionModel() const
+    const std::shared_ptr<SelectionModel>& File::getSelectionModel() const
     {
         return _selectionModel;
     }
 
-    const std::shared_ptr<ThumbnailGenerator>& Document::getThumbnailGenerator() const
+    const std::shared_ptr<ThumbnailGenerator>& File::getThumbnailGenerator() const
     {
         return _thumbnailGenerator;
     }
 
-    const IMATH_NAMESPACE::V2i& Document::getImageSize() const
+    const IMATH_NAMESPACE::V2i& File::getImageSize() const
     {
         return _graph->getImageSize();
     }
 
-    int Document::getImageChannels() const
+    int File::getImageChannels() const
     {
         return _graph->getImageChannels();
     }
 
-    const std::string& Document::getImageDataType() const
+    const std::string& File::getImageDataType() const
     {
         return _graph->getImageDataType();
     }
 
-    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > Document::observeCurrentImage() const
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > File::observeCurrentImage() const
     {
         return _currentImage;
     }
 
-    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > Document::observeRootNode() const
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > File::observeRootNode() const
     {
         return _rootNode;
     }
 
-    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > Document::observeCurrentNode() const
+    std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > File::observeCurrentNode() const
     {
         return _currentNode;
     }
     
-    void Document::setCurrentNode(const std::shared_ptr<IImageNode>& value)
+    void File::setCurrentNode(const std::shared_ptr<IImageNode>& value)
     {
         if (_currentNode->setIfChanged(value))
         {
@@ -136,7 +136,7 @@ namespace toucan
         }
     }
 
-    void Document::_render()
+    void File::_render()
     {
         std::shared_ptr<dtk::Image> image;
         if (_currentNode->get())

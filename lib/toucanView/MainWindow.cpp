@@ -4,9 +4,9 @@
 #include "MainWindow.h"
 
 #include "App.h"
-#include "DocumentTab.h"
-#include "DocumentsModel.h"
 #include "ExportTool.h"
+#include "FileTab.h"
+#include "FilesModel.h"
 #include "GraphTool.h"
 #include "InfoBar.h"
 #include "JSONTool.h"
@@ -88,7 +88,7 @@ namespace toucan
             {
                 if (auto app = appWeak.lock())
                 {
-                    app->getDocumentsModel()->setCurrentIndex(index);
+                    app->getFilesModel()->setCurrentIndex(index);
                 }
             });
         _tabWidget->setTabCloseCallback(
@@ -96,53 +96,53 @@ namespace toucan
             {
                 if (auto app = appWeak.lock())
                 {
-                    app->getDocumentsModel()->close(index);
+                    app->getFilesModel()->close(index);
                 }
             });
 
-        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeDocuments(),
-            [this](const std::vector<std::shared_ptr<Document> >& documents)
+        _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeFiles(),
+            [this](const std::vector<std::shared_ptr<File> >& files)
             {
-                _documents = documents;
+                _files = files;
             });
 
         _addObserver = dtk::ValueObserver<int>::create(
-            app->getDocumentsModel()->observeAdd(),
+            app->getFilesModel()->observeAdd(),
             [this, appWeak](int index)
             {
-                if (index >= 0 && index < _documents.size())
+                if (index >= 0 && index < _files.size())
                 {
                     auto context = getContext();
                     auto app = appWeak.lock();
-                    auto document = _documents[index];
-                    auto tab = DocumentTab::create(context, app, document);
+                    auto file = _files[index];
+                    auto tab = FileTab::create(context, app, file);
                     _tabWidget->addTab(
-                        dtk::elide(document->getPath().filename().string()),
+                        dtk::elide(file->getPath().filename().string()),
                         tab,
-                        document->getPath().string());
-                    _documentTabs[document] = tab;
+                        file->getPath().string());
+                    _fileTabs[file] = tab;
                 }
             });
 
         _removeObserver = dtk::ValueObserver<int>::create(
-            app->getDocumentsModel()->observeRemove(),
+            app->getFilesModel()->observeRemove(),
             [this, appWeak](int index)
             {
-                if (index >= 0 && index < _documents.size())
+                if (index >= 0 && index < _files.size())
                 {
-                    auto document = _documents[index];
-                    const auto i = _documentTabs.find(document);
-                    if (i != _documentTabs.end())
+                    auto file = _files[index];
+                    const auto i = _fileTabs.find(file);
+                    if (i != _fileTabs.end())
                     {
                         _tabWidget->removeTab(i->second);
-                        _documentTabs.erase(i);
+                        _fileTabs.erase(i);
                     }
                 }
             });
 
-        _documentObserver = dtk::ValueObserver<int>::create(
-            app->getDocumentsModel()->observeCurrentIndex(),
+        _fileObserver = dtk::ValueObserver<int>::create(
+            app->getFilesModel()->observeCurrentIndex(),
             [this](int index)
             {
                 _tabWidget->setCurrentTab(index);
@@ -225,7 +225,7 @@ namespace toucan
                 {
                     try
                     {
-                        app->getDocumentsModel()->open(i);
+                        app->getFilesModel()->open(i);
                     }
                     catch (const std::exception& e)
                     {
