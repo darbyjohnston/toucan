@@ -10,6 +10,8 @@
 #include <dtk/core/ObservableList.h>
 #include <dtk/core/ObservableMap.h>
 
+#include <filesystem>
+
 namespace toucan
 {
     class App;
@@ -72,10 +74,12 @@ namespace toucan
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
         std::vector<std::shared_ptr<dtk::Action> > _filesActions;
+        std::vector<std::shared_ptr<dtk::Action> > _recentFilesActions;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _documentIndexObserver;
+        std::shared_ptr<dtk::ListObserver<std::filesystem::path> > _recentFilesObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;

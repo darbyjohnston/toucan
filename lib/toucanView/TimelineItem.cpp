@@ -272,7 +272,7 @@ namespace toucan
             dtk::Box2I(pos, g.min.y + _size.scrollPos.y, _size.border * 2, g.h()),
             event.style->getColorRole(dtk::ColorRole::Red));
 
-        std::string s = _timeUnitsModel->getLabel(_currentTime);
+        std::string s = _timeUnitsModel->toString(_currentTime);
         dtk::Size2I size = event.fontSystem->getSize(s, _size.fontInfo);
         dtk::Box2I g3(
             pos + _size.border * 2 + _size.margin,
@@ -374,7 +374,7 @@ namespace toucan
     dtk::Size2I TimelineItem::_getLabelMaxSize(
         const std::shared_ptr<dtk::FontSystem>& fontSystem) const
     {
-        const std::string labelMax = _timeUnitsModel->getLabel(_timeRange.duration());
+        const std::string labelMax = _timeUnitsModel->toString(_timeRange.duration());
         const dtk::Size2I labelMaxSize = fontSystem->getSize(labelMax, _size.fontInfo);
         return labelMaxSize;
     }
@@ -537,7 +537,7 @@ namespace toucan
                         _size.fontMetrics.lineHeight);
                     if (time != _currentTime && intersects(box, drawRect))
                     {
-                        const std::string label = _timeUnitsModel->getLabel(time);
+                        const std::string label = _timeUnitsModel->toString(time);
                         event.render->drawText(
                             event.fontSystem->getGlyphs(label, _size.fontInfo),
                             _size.fontMetrics,

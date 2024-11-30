@@ -15,6 +15,7 @@
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
+#include <dtk/ui/RecentFilesModel.h>
 #include <dtk/core/Format.h>
 
 namespace toucan
@@ -50,6 +51,7 @@ namespace toucan
                         [this, i]
                         {
                             _documentsModel->setCurrentIndex(i);
+                            _menus["File"]->close();
                         });
                     _menus["Files"]->addItem(item);
                     _filesActions.push_back(item);
@@ -76,6 +78,27 @@ namespace toucan
                 for (int i = 0; i < _filesActions.size(); ++i)
                 {
                     _menus["Files"]->setItemChecked(_filesActions[i], i == index);
+                }
+            });
+
+        _recentFilesObserver = dtk::ListObserver<std::filesystem::path>::create(
+            _documentsModel->getRecentFilesModel()->observeRecent(),
+            [this](const std::vector<std::filesystem::path>& files)
+            {
+                _menus["RecentFiles"]->clear();
+                _recentFilesActions.clear();
+                for (auto i = files.rbegin(); i != files.rend(); ++i)
+                {
+                    auto file = *i;
+                    auto item = std::make_shared<dtk::Action>(
+                        file.string(),
+                        [this, file]
+                        {
+                            _documentsModel->open(file);
+                            _menus["File"]->close();
+                        });
+                    _menus["RecentFiles"]->addItem(item);
+                    _recentFilesActions.push_back(item);
                 }
             });
     }
@@ -140,7 +163,8 @@ namespace toucan
                                         context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), getWindow());
                                     }
                                 }
-                            });
+                            },
+                            _documentsModel->getRecentFilesModel());
                     }
                 }
             });
@@ -164,6 +188,10 @@ namespace toucan
             [this] { _documentsModel->closeAll(); });
         _actions["File/CloseAll"]->toolTip = "Close all files";
         _menus["File"]->addItem(_actions["File/CloseAll"]);
+
+        _menus["File"]->addDivider();
+
+        _menus["RecentFiles"] = _menus["File"]->addSubMenu("RecentFiles");
 
         _menus["File"]->addDivider();
 

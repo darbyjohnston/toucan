@@ -116,7 +116,7 @@ namespace toucan
             !_avFormatContext ? fileName.c_str() : nullptr,
             nullptr,
             nullptr);
-        if (r < 0)
+        if (r < 0 || !_avFormatContext)
         {
             throw std::runtime_error("Cannot open file");
         }

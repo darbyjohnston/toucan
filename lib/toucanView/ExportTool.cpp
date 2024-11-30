@@ -60,7 +60,10 @@ namespace toucan
 
         auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
-        auto exportSequenceButton = dtk::PushButton::create(context, "Export Sequence", _layout);
+        auto exportSequenceButton = dtk::PushButton::create(
+            context,
+            "Export Sequence",
+            _layout);
         exportSequenceButton->setClickedCallback(
             [this]
             {
@@ -68,7 +71,10 @@ namespace toucan
                 _export();
             });
 
-        auto exportCurrentButton = dtk::PushButton::create(context, "Export Current Frame", _layout);
+        auto exportCurrentButton = dtk::PushButton::create(
+            context,
+            "Export Current Frame",
+            _layout);
         exportCurrentButton->setClickedCallback(
             [this]
             {

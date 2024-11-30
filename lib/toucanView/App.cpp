@@ -11,8 +11,11 @@
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
+#include <dtk/ui/RecentFilesModel.h>
 
 #include <dtk/core/CmdLine.h>
+
+#include <nlohmann/json.hpp>
 
 namespace toucan
 {
@@ -20,6 +23,10 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         std::vector<std::string>& argv)
     {
+        _messageLog = std::make_shared<MessageLog>();
+
+        _settings = dtk::Settings::create(dtk::getSettingsPath("toucan", "toucan-view.settings"));
+
         dtk::App::_init(
             context,
             argv,
@@ -31,13 +38,11 @@ namespace toucan
                     "input",
                     "Input timeline.",
                     true)
-            });
-
-        context->getSystem<dtk::FileBrowserSystem>()->setNativeFileDialog(false);
-
-        _messageLog = std::make_shared<MessageLog>();
+            },
+            {},
+            _settings);
         
-        _timeUnitsModel = std::make_shared<TimeUnitsModel>();
+        _timeUnitsModel = std::make_shared<TimeUnitsModel>(_settings);
 
         std::vector<std::filesystem::path> searchPath;
         const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
@@ -51,7 +56,10 @@ namespace toucan
         //hostOptions.log = _messageLog;
         _host = std::make_shared<ImageEffectHost>(searchPath, hostOptions);
 
-        _documentsModel = std::make_shared<DocumentsModel>(context, _host);
+        auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>();
+        fileBrowserSystem->setNativeFileDialog(false);
+
+        _documentsModel = std::make_shared<DocumentsModel>(context, _settings, _host);
 
         _windowModel = std::make_shared<WindowModel>();
 

@@ -3,8 +3,6 @@
 
 #include "DocumentsModel.h"
 
-#include "PlaybackModel.h"
-
 #include <toucan/ImageEffectHost.h>
 
 #include <dtk/core/Math.h>
@@ -13,6 +11,7 @@ namespace toucan
 {
     DocumentsModel::DocumentsModel(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<dtk::Settings>& settings,
         const std::shared_ptr<ImageEffectHost>& host) :
         _context(context),
         _host(host)
@@ -22,6 +21,7 @@ namespace toucan
         _remove = dtk::ObservableValue<int>::create(-1);
         _current = dtk::ObservableValue< std::shared_ptr<Document> >::create(nullptr);
         _currentIndex = dtk::ObservableValue<int>::create(-1);
+        _recentFilesModel = dtk::RecentFilesModel::create(context, settings);
     }
 
     DocumentsModel::~DocumentsModel()
@@ -39,6 +39,7 @@ namespace toucan
             _add->setAlways(index);
             _current->setIfChanged(documents[index]);
             _currentIndex->setIfChanged(index);
+            _recentFilesModel->addRecent(path);
         }
     }
 
@@ -136,5 +137,10 @@ namespace toucan
             }
             setCurrentIndex(index);
         }
+    }
+
+    const std::shared_ptr<dtk::RecentFilesModel>& DocumentsModel::getRecentFilesModel() const
+    {
+        return _recentFilesModel;
     }
 }
