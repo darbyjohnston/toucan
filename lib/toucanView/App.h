@@ -7,7 +7,7 @@
 
 namespace toucan
 {
-    class DocumentsModel;
+    class FilesModel;
     class ImageEffectHost;
     class MainWindow;
     class MessageLog;
@@ -30,15 +30,16 @@ namespace toucan
 
         const std::shared_ptr<TimeUnitsModel>& getTimeUnitsModel() const;
         const std::shared_ptr<ImageEffectHost>& getHost() const;
-        const std::shared_ptr<DocumentsModel>& getDocumentsModel() const;
+        const std::shared_ptr<FilesModel>& getFilesModel() const;
         const std::shared_ptr<WindowModel>& getWindowModel() const;
 
     private:
         std::shared_ptr<MessageLog> _messageLog;
+        std::shared_ptr<dtk::Settings> _settings;
         std::string _path;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;
-        std::shared_ptr<DocumentsModel> _documentsModel;
+        std::shared_ptr<FilesModel> _filesModel;
         std::shared_ptr<WindowModel> _windowModel;
         std::shared_ptr<MainWindow> _window;
     };

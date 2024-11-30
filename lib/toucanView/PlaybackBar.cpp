@@ -4,7 +4,7 @@
 #include "PlaybackBar.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 
 namespace toucan
 {
@@ -37,29 +37,29 @@ namespace toucan
         _frameButtons->setCallback(
             [this](TimeAction value)
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         value,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
 
         _playbackButtons->setCallback(
             [this](Playback value)
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setPlayback(value);
+                    _file->getPlaybackModel()->setPlayback(value);
                 }
             });
 
         _timeEdit->setCallback(
             [this](const OTIO_NS::RationalTime& value)
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setCurrentTime(value);
+                    _file->getPlaybackModel()->setCurrentTime(value);
                 }
             });
 
@@ -73,15 +73,15 @@ namespace toucan
                 }
             });
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                _document = document;
-                if (document)
+                _file = file;
+                if (file)
                 {
                     _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
-                        document->getPlaybackModel()->observeTimeRange(),
+                        file->getPlaybackModel()->observeTimeRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {
                             _timeRange = value;
@@ -89,7 +89,7 @@ namespace toucan
                         });
 
                     _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
-                        document->getPlaybackModel()->observeCurrentTime(),
+                        file->getPlaybackModel()->observeCurrentTime(),
                         [this](const OTIO_NS::RationalTime& value)
                         {
                             _currentTime = value;
@@ -97,7 +97,7 @@ namespace toucan
                         });
 
                     _playbackObserver = dtk::ValueObserver<Playback>::create(
-                        document->getPlaybackModel()->observePlayback(),
+                        file->getPlaybackModel()->observePlayback(),
                         [this](Playback value)
                         {
                             _playback = value;
@@ -119,10 +119,10 @@ namespace toucan
                     _playbackObserver.reset();
                 }
 
-                _frameButtons->setEnabled(document.get());
-                _playbackButtons->setEnabled(document.get());
-                _timeEdit->setEnabled(document.get());
-                _durationLabel->setEnabled(document.get());
+                _frameButtons->setEnabled(file.get());
+                _playbackButtons->setEnabled(file.get());
+                _timeEdit->setEnabled(file.get());
+                _durationLabel->setEnabled(file.get());
             });
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(

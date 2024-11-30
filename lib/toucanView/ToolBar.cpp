@@ -4,7 +4,7 @@
 #include "ToolBar.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "MainWindow.h"
 #include "ViewModel.h"
 
@@ -108,19 +108,19 @@ namespace toucan
 
         _widgetUpdate();
 
-        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeDocuments(),
-            [this](const std::vector<std::shared_ptr<Document> >& documents)
+        _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeFiles(),
+            [this](const std::vector<std::shared_ptr<File> >& files)
             {
-                _documentsSize = documents.size();
+                _filesSize = files.size();
                 _widgetUpdate();
             });
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                _document = document;
+                _file = file;
                 _widgetUpdate();
             });
 
@@ -161,17 +161,17 @@ namespace toucan
 
     void ToolBar::_widgetUpdate()
     {
-        _buttons["File/Close"]->setEnabled(_documentsSize > 0);
-        _buttons["File/CloseAll"]->setEnabled(_documentsSize > 0);
-        _buttons["View/ZoomIn"]->setEnabled(_documentsSize > 0);
-        _buttons["View/ZoomOut"]->setEnabled(_documentsSize > 0);
-        _buttons["View/ZoomReset"]->setEnabled(_documentsSize > 0);
-        _buttons["View/Frame"]->setEnabled(_documentsSize > 0);
+        _buttons["File/Close"]->setEnabled(_filesSize > 0);
+        _buttons["File/CloseAll"]->setEnabled(_filesSize > 0);
+        _buttons["View/ZoomIn"]->setEnabled(_filesSize > 0);
+        _buttons["View/ZoomOut"]->setEnabled(_filesSize > 0);
+        _buttons["View/ZoomReset"]->setEnabled(_filesSize > 0);
+        _buttons["View/Frame"]->setEnabled(_filesSize > 0);
 
-        if (_document)
+        if (_file)
         {
             _frameViewObserver = dtk::ValueObserver<bool>::create(
-                _document->getViewModel()->observeFrame(),
+                _file->getViewModel()->observeFrame(),
                 [this](bool value)
                 {
                     _buttons["View/Frame"]->setChecked(value);

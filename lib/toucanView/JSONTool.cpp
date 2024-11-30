@@ -4,7 +4,7 @@
 #include "JSONTool.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
@@ -162,14 +162,14 @@ namespace toucan
                 }
             });
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                if (document)
+                if (file)
                 {
                     _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
-                        document->getSelectionModel()->observeSelection(),
+                        file->getSelectionModel()->observeSelection(),
                         [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
                         {
                             for (const auto& widget : _widgets)

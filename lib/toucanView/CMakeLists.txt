@@ -1,10 +1,10 @@
 set(HEADERS
     App.h
     ClipItem.h
-    DocumentTab.h
-    Document.h
-    DocumentsModel.h
     ExportTool.h
+    FileTab.h
+    File.h
+    FilesModel.h
     GapItem.h
     GraphTool.h
     IItem.h
@@ -31,10 +31,10 @@ set(HEADERS
 set(SOURCE
     App.cpp
     ClipItem.cpp
-    DocumentTab.cpp
-    Document.cpp
-    DocumentsModel.cpp
     ExportTool.cpp
+    FileTab.cpp
+    File.cpp
+    FilesModel.cpp
     GapItem.cpp
     GraphTool.cpp
     IItem.cpp

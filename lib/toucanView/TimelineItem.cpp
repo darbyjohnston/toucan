@@ -4,7 +4,7 @@
 #include "TimelineItem.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "SelectionModel.h"
 #include "StackItem.h"
 
@@ -15,14 +15,14 @@ namespace toucan
     void TimelineItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
+        const std::shared_ptr<File>& file,
         const std::shared_ptr<IWidget>& parent)
     {
         IItem::_init(
             context,
             app,
             nullptr,
-            document->getTimelineWrapper()->getTimeRange(),
+            file->getTimelineWrapper()->getTimeRange(),
             "toucan::TimelineItem",
             parent);
 
@@ -32,12 +32,12 @@ namespace toucan
             0,
             0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control));
 
-        _timeline = document->getTimeline();
-        _timeRange = document->getTimelineWrapper()->getTimeRange();
+        _timeline = file->getTimeline();
+        _timeRange = file->getTimelineWrapper()->getTimeRange();
         _timeUnitsModel = app->getTimeUnitsModel();
-        _selectionModel = document->getSelectionModel();
+        _selectionModel = file->getSelectionModel();
         _thumbnails.setMax(100);
-        _thumbnailGenerator = document->getThumbnailGenerator();
+        _thumbnailGenerator = file->getThumbnailGenerator();
 
         StackItem::create(context, app, _timeline->tracks(), shared_from_this());
 
@@ -63,11 +63,11 @@ namespace toucan
     std::shared_ptr<TimelineItem> TimelineItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const std::shared_ptr<Document>& document,
+        const std::shared_ptr<File>& file,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<TimelineItem>();
-        out->_init(context, app, document, parent);
+        out->_init(context, app, file, parent);
         return out;
     }
 
@@ -272,7 +272,7 @@ namespace toucan
             dtk::Box2I(pos, g.min.y + _size.scrollPos.y, _size.border * 2, g.h()),
             event.style->getColorRole(dtk::ColorRole::Red));
 
-        std::string s = _timeUnitsModel->getLabel(_currentTime);
+        std::string s = _timeUnitsModel->toString(_currentTime);
         dtk::Size2I size = event.fontSystem->getSize(s, _size.fontInfo);
         dtk::Box2I g3(
             pos + _size.border * 2 + _size.margin,
@@ -374,7 +374,7 @@ namespace toucan
     dtk::Size2I TimelineItem::_getLabelMaxSize(
         const std::shared_ptr<dtk::FontSystem>& fontSystem) const
     {
-        const std::string labelMax = _timeUnitsModel->getLabel(_timeRange.duration());
+        const std::string labelMax = _timeUnitsModel->toString(_timeRange.duration());
         const dtk::Size2I labelMaxSize = fontSystem->getSize(labelMax, _size.fontInfo);
         return labelMaxSize;
     }
@@ -537,7 +537,7 @@ namespace toucan
                         _size.fontMetrics.lineHeight);
                     if (time != _currentTime && intersects(box, drawRect))
                     {
-                        const std::string label = _timeUnitsModel->getLabel(time);
+                        const std::string label = _timeUnitsModel->toString(time);
                         event.render->drawText(
                             event.fontSystem->getGlyphs(label, _size.fontInfo),
                             _size.fontMetrics,

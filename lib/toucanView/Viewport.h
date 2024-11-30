@@ -9,7 +9,7 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
     class ViewModel;
 
     class Viewport : public dtk::IWidget
@@ -17,7 +17,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -25,7 +25,7 @@ namespace toucan
 
         static std::shared_ptr<Viewport> create(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         const dtk::V2I& getPos() const;

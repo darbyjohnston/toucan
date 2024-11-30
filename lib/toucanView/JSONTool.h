@@ -16,7 +16,7 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
 
     class JSONWidget : public dtk::IWidget
     {
@@ -70,7 +70,7 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<File> _file;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::SearchBox> _searchBox;
@@ -80,7 +80,7 @@ namespace toucan
         std::shared_ptr<dtk::Label> _nothingSelectedLabel;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
     };
 }

@@ -4,7 +4,7 @@
 #include "MenuBar.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "MainWindow.h"
 #include "SelectionModel.h"
 #include "ViewModel.h"
@@ -15,6 +15,7 @@
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
+#include <dtk/ui/RecentFilesModel.h>
 #include <dtk/core/Format.h>
 
 namespace toucan
@@ -28,7 +29,7 @@ namespace toucan
         dtk::MenuBar::_init(context, parent);
 
         _app = app;
-        _documentsModel = app->getDocumentsModel();
+        _filesModel = app->getFilesModel();
 
         _fileMenuInit(context, app);
         _selectMenuInit(context, app);
@@ -37,30 +38,31 @@ namespace toucan
         _windowMenuInit(context, app, window);
         _viewMenuInit(context, app);
 
-        _documentsObserver = dtk::ListObserver<std::shared_ptr<Document> >::create(
-            _documentsModel->observeDocuments(),
-            [this](const std::vector<std::shared_ptr<Document> >& documents)
+        _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
+            _filesModel->observeFiles(),
+            [this](const std::vector<std::shared_ptr<File> >& files)
             {
                 _menus["Files"]->clear();
                 _filesActions.clear();
-                for (int i = 0; i < documents.size(); ++i)
+                for (int i = 0; i < files.size(); ++i)
                 {
                     auto item = std::make_shared<dtk::Action>(
-                        documents[i]->getPath().filename().string(),
+                        files[i]->getPath().filename().string(),
                         [this, i]
                         {
-                            _documentsModel->setCurrentIndex(i);
+                            _filesModel->setCurrentIndex(i);
+                            _menus["File"]->close();
                         });
                     _menus["Files"]->addItem(item);
                     _filesActions.push_back(item);
                 }
             });
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            _documentsModel->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            _filesModel->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                _document = document;
+                _file = file;
                 _fileMenuUpdate();
                 _selectMenuUpdate();
                 _timeMenuUpdate();
@@ -69,13 +71,34 @@ namespace toucan
                 _viewMenuUpdate();
             });
 
-        _documentIndexObserver = dtk::ValueObserver<int>::create(
-            _documentsModel->observeCurrentIndex(),
+        _fileIndexObserver = dtk::ValueObserver<int>::create(
+            _filesModel->observeCurrentIndex(),
             [this](int index)
             {
                 for (int i = 0; i < _filesActions.size(); ++i)
                 {
                     _menus["Files"]->setItemChecked(_filesActions[i], i == index);
+                }
+            });
+
+        _recentFilesObserver = dtk::ListObserver<std::filesystem::path>::create(
+            _filesModel->getRecentFilesModel()->observeRecent(),
+            [this](const std::vector<std::filesystem::path>& files)
+            {
+                _menus["RecentFiles"]->clear();
+                _recentFilesActions.clear();
+                for (auto i = files.rbegin(); i != files.rend(); ++i)
+                {
+                    auto file = *i;
+                    auto item = std::make_shared<dtk::Action>(
+                        file.string(),
+                        [this, file]
+                        {
+                            _filesModel->open(file);
+                            _menus["File"]->close();
+                        });
+                    _menus["RecentFiles"]->addItem(item);
+                    _recentFilesActions.push_back(item);
                 }
             });
     }
@@ -118,9 +141,9 @@ namespace toucan
                 {
                     if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
                     {
-                        if (_document)
+                        if (_file)
                         {
-                            fileBrowserSystem->setPath(_document->getPath().parent_path());
+                            fileBrowserSystem->setPath(_file->getPath().parent_path());
                         }
                         dtk::FileBrowserOptions options;
                         options.extensions.push_back(".otio");
@@ -133,14 +156,15 @@ namespace toucan
                                 {
                                     try
                                     {
-                                        _documentsModel->open(path);
+                                        _filesModel->open(path);
                                     }
                                     catch (const std::exception& e)
                                     {
                                         context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), getWindow());
                                     }
                                 }
-                            });
+                            },
+                            _filesModel->getRecentFilesModel());
                     }
                 }
             });
@@ -152,7 +176,7 @@ namespace toucan
             "FileClose",
             dtk::Key::E,
             static_cast<int>(dtk::KeyModifier::Control),
-            [this] { _documentsModel->close(); });
+            [this] { _filesModel->close(); });
         _actions["File/Close"]->toolTip = "Close the current file";
         _menus["File"]->addItem(_actions["File/Close"]);
 
@@ -161,9 +185,13 @@ namespace toucan
             "FileCloseAll",
             dtk::Key::E,
             static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
-            [this] { _documentsModel->closeAll(); });
+            [this] { _filesModel->closeAll(); });
         _actions["File/CloseAll"]->toolTip = "Close all files";
         _menus["File"]->addItem(_actions["File/CloseAll"]);
+
+        _menus["File"]->addDivider();
+
+        _menus["RecentFiles"] = _menus["File"]->addSubMenu("RecentFiles");
 
         _menus["File"]->addDivider();
 
@@ -173,7 +201,7 @@ namespace toucan
             "Next",
             dtk::Key::PageUp,
             0,
-            [this] { _documentsModel->next(); });
+            [this] { _filesModel->next(); });
         _actions["File/Next"]->toolTip = "Switch to the next file";
         _menus["File"]->addItem(_actions["File/Next"]);
 
@@ -181,7 +209,7 @@ namespace toucan
             "Previous",
             dtk::Key::PageDown,
             0,
-            [this] { _documentsModel->prev(); });
+            [this] { _filesModel->prev(); });
         _actions["File/Prev"]->toolTip = "Switch to the previous file";
         _menus["File"]->addItem(_actions["File/Prev"]);
 
@@ -214,9 +242,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getSelectionModel()->selectAll(_document->getTimeline());
+                    _file->getSelectionModel()->selectAll(_file->getTimeline());
                 }
             });
         _menus["Select"]->addItem(_actions["Select/All"]);
@@ -225,10 +253,10 @@ namespace toucan
             "All Tracks",
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getSelectionModel()->selectAll(
-                        _document->getTimeline(),
+                    _file->getSelectionModel()->selectAll(
+                        _file->getTimeline(),
                         SelectionType::Tracks);
                 }
             });
@@ -238,10 +266,10 @@ namespace toucan
             "All Clips",
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getSelectionModel()->selectAll(
-                        _document->getTimeline(),
+                    _file->getSelectionModel()->selectAll(
+                        _file->getTimeline(),
                         SelectionType::Clips);
                 }
             });
@@ -254,9 +282,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getSelectionModel()->clearSelection();
+                    _file->getSelectionModel()->clearSelection();
                 }
             });
         _menus["Select"]->addItem(_actions["Select/None"]);
@@ -267,9 +295,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getSelectionModel()->invertSelection(_document->getTimeline());
+                    _file->getSelectionModel()->invertSelection(_file->getTimeline());
                 }
             });
         _menus["Select"]->addItem(_actions["Select/Invert"]);
@@ -289,11 +317,11 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::FrameStart,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/FrameStart"]);
@@ -305,11 +333,11 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::FramePrev,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/FramePrev"]);
@@ -321,11 +349,11 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::FrameNext,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/FrameNext"]);
@@ -337,11 +365,11 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::FrameEnd,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/FrameEnd"]);
@@ -354,11 +382,11 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::ClipNext,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/ClipNext"]);
@@ -369,11 +397,11 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->timeAction(
+                    _file->getPlaybackModel()->timeAction(
                         TimeAction::ClipPrev,
-                        _document->getTimeline());
+                        _file->getTimeline());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/ClipPrev"]);
@@ -386,10 +414,10 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setInPoint(
-                        _document->getPlaybackModel()->getCurrentTime());
+                    _file->getPlaybackModel()->setInPoint(
+                        _file->getPlaybackModel()->getCurrentTime());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/InPointSet"]);
@@ -400,9 +428,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Shift),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->resetInPoint();
+                    _file->getPlaybackModel()->resetInPoint();
                 }
             });
         _menus["Time"]->addItem(_actions["Time/InPointReset"]);
@@ -413,10 +441,10 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setOutPoint(
-                        _document->getPlaybackModel()->getCurrentTime());
+                    _file->getPlaybackModel()->setOutPoint(
+                        _file->getPlaybackModel()->getCurrentTime());
                 }
             });
         _menus["Time"]->addItem(_actions["Time/OutPointSet"]);
@@ -427,9 +455,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Shift),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->resetOutPoint();
+                    _file->getPlaybackModel()->resetOutPoint();
                 }
             });
         _menus["Time"]->addItem(_actions["Time/OutPointReset"]);
@@ -440,9 +468,9 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Shift),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->resetInOutPoints();
+                    _file->getPlaybackModel()->resetInOutPoints();
                 }
             });
         _menus["Time"]->addItem(_actions["Time/InOutPointReset"]);
@@ -453,21 +481,21 @@ namespace toucan
             static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    const auto selection = _document->getSelectionModel()->getSelection();
-                    const OTIO_NS::TimeRange& timeRange = _document->getTimelineWrapper()->getTimeRange();
+                    const auto selection = _file->getSelectionModel()->getSelection();
+                    const OTIO_NS::TimeRange& timeRange = _file->getTimelineWrapper()->getTimeRange();
                     const auto timeRangeOpt = getTimeRange(
                         selection,
                         timeRange.start_time(),
                         timeRange.duration().rate());
                     if (timeRangeOpt.has_value())
                     {
-                        _document->getPlaybackModel()->setInOutRange(timeRangeOpt.value());
+                        _file->getPlaybackModel()->setInOutRange(timeRangeOpt.value());
                     }
                     else
                     {
-                        _document->getPlaybackModel()->resetInOutPoints();
+                        _file->getPlaybackModel()->resetInOutPoints();
                     }
                 }
             });
@@ -488,9 +516,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setPlayback(Playback::Stop);
+                    _file->getPlaybackModel()->setPlayback(Playback::Stop);
                 }
             });
         _menus["Playback"]->addItem(_actions["Playback/Stop"]);
@@ -502,9 +530,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setPlayback(Playback::Forward);
+                    _file->getPlaybackModel()->setPlayback(Playback::Forward);
                 }
             });
         _menus["Playback"]->addItem(_actions["Playback/Forward"]);
@@ -516,9 +544,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->setPlayback(Playback::Reverse);
+                    _file->getPlaybackModel()->setPlayback(Playback::Reverse);
                 }
             });
         _menus["Playback"]->addItem(_actions["Playback/Reverse"]);
@@ -531,9 +559,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getPlaybackModel()->togglePlayback();
+                    _file->getPlaybackModel()->togglePlayback();
                 }
             });
         _menus["Playback"]->addItem(_actions["Playback/Toggle"]);
@@ -744,9 +772,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getViewModel()->zoomIn();
+                    _file->getViewModel()->zoomIn();
                 }
             });
         _actions["View/ZoomIn"]->toolTip = "View zoom in";
@@ -759,9 +787,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getViewModel()->zoomOut();
+                    _file->getViewModel()->zoomOut();
                 }
             });
         _actions["View/ZoomOut"]->toolTip = "View zoom out";
@@ -774,9 +802,9 @@ namespace toucan
             0,
             [this]
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getViewModel()->zoomReset();
+                    _file->getViewModel()->zoomReset();
                 }
             });
         _actions["View/ZoomReset"]->toolTip = "Reset the view zoom";
@@ -791,9 +819,9 @@ namespace toucan
             0,
             [this](bool value)
             {
-                if (_document)
+                if (_file)
                 {
-                    _document->getViewModel()->setFrame(value);
+                    _file->getViewModel()->setFrame(value);
                 }
             });
         _actions["View/Frame"]->toolTip = "Frame the view";
@@ -802,42 +830,42 @@ namespace toucan
 
     void MenuBar::_fileMenuUpdate()
     {
-        const bool document = _document.get();
-        _menus["File"]->setItemEnabled(_actions["File/Close"], document);
-        _menus["File"]->setItemEnabled(_actions["File/CloseAll"], document);
-        _menus["File"]->setSubMenuEnabled(_menus["Files"], document);
+        const bool file = _file.get();
+        _menus["File"]->setItemEnabled(_actions["File/Close"], file);
+        _menus["File"]->setItemEnabled(_actions["File/CloseAll"], file);
+        _menus["File"]->setSubMenuEnabled(_menus["Files"], file);
         _menus["File"]->setItemEnabled(_actions["File/Next"], _filesActions.size() > 1);
         _menus["File"]->setItemEnabled(_actions["File/Prev"], _filesActions.size() > 1);
     }
 
     void MenuBar::_selectMenuUpdate()
     {
-        const bool document = _document.get();
-        _menus["Select"]->setItemEnabled(_actions["Select/All"], document);
-        _menus["Select"]->setItemEnabled(_actions["Select/AllTracks"], document);
-        _menus["Select"]->setItemEnabled(_actions["Select/AllClips"], document);
-        _menus["Select"]->setItemEnabled(_actions["Select/None"], document);
-        _menus["Select"]->setItemEnabled(_actions["Select/Invert"], document);
+        const bool file = _file.get();
+        _menus["Select"]->setItemEnabled(_actions["Select/All"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllTracks"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllClips"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/None"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/Invert"], file);
     }
 
     void MenuBar::_timeMenuUpdate()
     {
-        const bool document = _document.get();
-        _menus["Time"]->setItemEnabled(_actions["Time/FrameStart"], document);
-        _menus["Time"]->setItemEnabled(_actions["Time/FramePrev"], document);
-        _menus["Time"]->setItemEnabled(_actions["Time/FrameNext"], document);
-        _menus["Time"]->setItemEnabled(_actions["Time/FrameEnd"], document);
-        _menus["Time"]->setItemEnabled(_actions["Time/ClipPrev"], document);
-        _menus["Time"]->setItemEnabled(_actions["Time/ClipNext"], document);
+        const bool file = _file.get();
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameStart"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FramePrev"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameNext"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameEnd"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/ClipPrev"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/ClipNext"], file);
     }
 
     void MenuBar::_playbackMenuUpdate()
     {
-        const bool document = _document.get();
-        if (document)
+        const bool file = _file.get();
+        if (file)
         {
             _playbackObserver = dtk::ValueObserver<Playback>::create(
-                _document->getPlaybackModel()->observePlayback(),
+                _file->getPlaybackModel()->observePlayback(),
                 [this](Playback value)
                 {
                     _menus["Playback"]->setItemChecked(_actions["Playback/Stop"], Playback::Stop == value);
@@ -850,10 +878,10 @@ namespace toucan
             _playbackObserver.reset();
         }
 
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Stop"], document);
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Forward"], document);
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Reverse"], document);
-        _menus["Playback"]->setItemEnabled(_actions["Playback/Toggle"], document);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Stop"], file);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Forward"], file);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Reverse"], file);
+        _menus["Playback"]->setItemEnabled(_actions["Playback/Toggle"], file);
     }
 
     void MenuBar::_windowMenuUpdate()
@@ -862,11 +890,11 @@ namespace toucan
 
     void MenuBar::_viewMenuUpdate()
     {
-        const bool document = _document.get();
-        if (document)
+        const bool file = _file.get();
+        if (file)
         {
             _frameViewObserver = dtk::ValueObserver<bool>::create(
-                _document->getViewModel()->observeFrame(),
+                _file->getViewModel()->observeFrame(),
                 [this](bool value)
                 {
                     _menus["View"]->setItemChecked(_actions["View/Frame"], value);
@@ -877,9 +905,9 @@ namespace toucan
             _frameViewObserver.reset();
         }
 
-        _menus["View"]->setItemEnabled(_actions["View/ZoomIn"], document);
-        _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], document);
-        _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], document);
-        _menus["View"]->setItemEnabled(_actions["View/Frame"], document);
+        _menus["View"]->setItemEnabled(_actions["View/ZoomIn"], file);
+        _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], file);
+        _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], file);
+        _menus["View"]->setItemEnabled(_actions["View/Frame"], file);
     }
 }

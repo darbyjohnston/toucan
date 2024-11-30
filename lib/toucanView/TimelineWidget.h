@@ -13,7 +13,7 @@
 namespace toucan
 {
     class App;
-    class Document;
+    class File;
     class TimelineItem;
 
     class TimelineWidget : public dtk::IWidget
@@ -61,7 +61,7 @@ namespace toucan
 
         void _scrollUpdate();
 
-        std::shared_ptr<Document> _document;
+        std::shared_ptr<File> _file;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime;
         OTIO_NS::TimeRange _inOutRange;
@@ -85,7 +85,7 @@ namespace toucan
         };
         MouseData _mouse;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
         std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _inOutRangeObserver;
     };

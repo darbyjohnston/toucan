@@ -12,7 +12,7 @@
 namespace toucan
 {
     class App;
-    class Document;
+    class File;
 
     class InfoBar : public dtk::IWidget
     {
@@ -37,7 +37,7 @@ namespace toucan
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::Label> _label;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
     };
 }
 

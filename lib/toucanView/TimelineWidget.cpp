@@ -4,7 +4,7 @@
 #include "TimelineWidget.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "PlaybackModel.h"
 #include "TimelineItem.h"
 
@@ -35,32 +35,32 @@ namespace toucan
         _scrollWidget->setBorder(false);
 
         auto appWeak = std::weak_ptr<App>(app);
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this, appWeak](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this, appWeak](const std::shared_ptr<File>& file)
             {
-                _document = document;
-                if (document)
+                _file = file;
+                if (file)
                 {
-                    _timeRange = document->getPlaybackModel()->getTimeRange();
+                    _timeRange = file->getPlaybackModel()->getTimeRange();
                     _sizeInit = true;
 
                     _timelineItem = TimelineItem::create(
                         getContext(),
                         appWeak.lock(),
-                        document);
+                        file);
                     _timelineItem->setCurrentTimeCallback(
                         [this](const OTIO_NS::RationalTime& value)
                         {
-                            if (_document)
+                            if (_file)
                             {
-                                _document->getPlaybackModel()->setCurrentTime(value, CurrentTime::Free);
+                                _file->getPlaybackModel()->setCurrentTime(value, CurrentTime::Free);
                             }
                         });
                     _scrollWidget->setWidget(_timelineItem);
 
                     _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
-                        document->getPlaybackModel()->observeCurrentTime(),
+                        file->getPlaybackModel()->observeCurrentTime(),
                         [this](const OTIO_NS::RationalTime& value)
                         {
                             _currentTime = value;
@@ -72,7 +72,7 @@ namespace toucan
                         });
 
                     _inOutRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
-                        document->getPlaybackModel()->observeInOutRange(),
+                        file->getPlaybackModel()->observeInOutRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {
                             _inOutRange = value;

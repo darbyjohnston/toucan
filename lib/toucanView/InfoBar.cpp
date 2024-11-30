@@ -4,7 +4,7 @@
 #include "InfoBar.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 
 #include <dtk/core/Format.h>
 #include <dtk/core/String.h>
@@ -24,33 +24,33 @@ namespace toucan
         _label = dtk::Label::create(context, _layout);
         _label->setMarginRole(dtk::SizeRole::MarginInside);
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
                 std::string text;
                 std::string tooltip;
-                if (document)
+                if (file)
                 {
-                    const IMATH_NAMESPACE::V2i& imageSize = document->getImageSize();
-                    const size_t trackCount = document->getTimeline()->find_children<OTIO_NS::Track>().size();
+                    const IMATH_NAMESPACE::V2i& imageSize = file->getImageSize();
+                    const size_t trackCount = file->getTimeline()->find_children<OTIO_NS::Track>().size();
 
-                    text = dtk::Format("{0}: {1}x{2}, {3} channels, {4} data, {5} tracks").
-                        arg(dtk::elide(document->getPath().filename().string())).
+                    text = dtk::Format("{0}: {1}x{2}, {3} image channels, {4} pixel data, {5} tracks").
+                        arg(dtk::elide(file->getPath().filename().string())).
                         arg(imageSize.x).
                         arg(imageSize.y).
-                        arg(document->getImageChannels()).
-                        arg(document->getImageDataType()).
+                        arg(file->getImageChannels()).
+                        arg(file->getImageDataType()).
                         arg(trackCount);
                     tooltip = dtk::Format(
                         "Path: {0}\n"
-                        "Render: {1}x{2}, {3} channels, {4} data\n"
+                        "Render: {1}x{2}, {3} image channels, {4} pixel data\n"
                         "Tracks: {5}").
-                        arg(document->getPath().string()).
+                        arg(file->getPath().string()).
                         arg(imageSize.x).
                         arg(imageSize.y).
-                        arg(document->getImageChannels()).
-                        arg(document->getImageDataType()).
+                        arg(file->getImageChannels()).
+                        arg(file->getImageDataType()).
                         arg(trackCount);
                 }
                 _label->setText(text);

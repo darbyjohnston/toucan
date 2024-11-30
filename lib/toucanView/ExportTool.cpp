@@ -4,7 +4,7 @@
 #include "ExportTool.h"
 
 #include "App.h"
-#include "DocumentsModel.h"
+#include "FilesModel.h"
 #include "PlaybackModel.h"
 
 #include <toucan/Util.h>
@@ -60,37 +60,43 @@ namespace toucan
 
         auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
-        auto exportSequenceButton = dtk::PushButton::create(context, "Export Sequence", _layout);
+        auto exportSequenceButton = dtk::PushButton::create(
+            context,
+            "Export Sequence",
+            _layout);
         exportSequenceButton->setClickedCallback(
             [this]
             {
-                _timeRange = _document->getPlaybackModel()->getInOutRange();
+                _timeRange = _file->getPlaybackModel()->getInOutRange();
                 _export();
             });
 
-        auto exportCurrentButton = dtk::PushButton::create(context, "Export Current Frame", _layout);
+        auto exportCurrentButton = dtk::PushButton::create(
+            context,
+            "Export Current Frame",
+            _layout);
         exportCurrentButton->setClickedCallback(
             [this]
             {
                 _timeRange = OTIO_NS::TimeRange(
-                    _document->getPlaybackModel()->getCurrentTime(),
-                    OTIO_NS::RationalTime(1.0, _document->getPlaybackModel()->getTimeRange().duration().rate()));
+                    _file->getPlaybackModel()->getCurrentTime(),
+                    OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
                 _export();
             });
 
         _timer = dtk::Timer::create(context);
         _timer->setRepeating(true);
 
-        _documentObserver = dtk::ValueObserver<std::shared_ptr<Document> >::create(
-            app->getDocumentsModel()->observeCurrent(),
-            [this](const std::shared_ptr<Document>& document)
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
             {
-                _document = document;
-                if (_document)
+                _file = file;
+                if (_file)
                 {
                     _graph = std::make_shared<ImageGraph>(
-                        _document->getPath(),
-                        _document->getTimelineWrapper());
+                        _file->getPath(),
+                        _file->getTimelineWrapper());
                 }
                 else
                 {
@@ -98,7 +104,7 @@ namespace toucan
                     _time = OTIO_NS::RationalTime();
                     _graph.reset();
                 }
-                setEnabled(_document.get());
+                setEnabled(_file.get());
             });
     }
 

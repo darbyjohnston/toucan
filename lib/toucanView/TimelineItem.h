@@ -12,7 +12,7 @@
 
 namespace toucan
 {
-    class Document;
+    class File;
     class SelectionModel;
 
     class TimelineItem : public IItem
@@ -21,7 +21,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -30,7 +30,7 @@ namespace toucan
         static std::shared_ptr<TimelineItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const std::shared_ptr<Document>&,
+            const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         const OTIO_NS::RationalTime& getCurrentTime() const;

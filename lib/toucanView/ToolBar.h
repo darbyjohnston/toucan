@@ -12,7 +12,7 @@
 namespace toucan
 {
     class App;
-    class Document;
+    class File;
     class MainWindow;
 
     class ToolBar : public dtk::IWidget
@@ -41,14 +41,14 @@ namespace toucan
     private:
         void _widgetUpdate();
 
-        size_t _documentsSize = 0;
-        std::shared_ptr<Document> _document;
+        size_t _filesSize = 0;
+        std::shared_ptr<File> _file;
 
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::map<std::string, std::shared_ptr<dtk::ToolButton> > _buttons;
 
-        std::shared_ptr<dtk::ListObserver<std::shared_ptr<Document> > > _documentsObserver;
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<Document> > > _documentObserver;
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
     };

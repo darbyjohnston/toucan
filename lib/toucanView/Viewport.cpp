@@ -4,14 +4,14 @@
 #include "Viewport.h"
 
 #include "App.h"
-#include "Document.h"
+#include "File.h"
 #include "ViewModel.h"
 
 namespace toucan
 {
     void Viewport::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<Document>& document,
+        const std::shared_ptr<File>& file,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::Viewport", parent);
@@ -19,13 +19,13 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(true);
 
-        _viewModel = document->getViewModel();
+        _viewModel = file->getViewModel();
         _pos = dtk::ObservableValue<dtk::V2I>::create();
         _zoom = dtk::ObservableValue<float>::create(1.F);
         _frame = dtk::ObservableValue<bool>::create(true);
 
         _imageObserver = dtk::ValueObserver<std::shared_ptr<dtk::Image> >::create(
-            document->observeCurrentImage(),
+            file->observeCurrentImage(),
             [this](const std::shared_ptr<dtk::Image>& value)
             {
                 _image = value;
@@ -75,11 +75,11 @@ namespace toucan
 
     std::shared_ptr<Viewport> Viewport::create(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<Document>& document,
+        const std::shared_ptr<File>& file,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<Viewport>(new Viewport);
-        out->_init(context, document, parent);
+        out->_init(context, file, parent);
         return out;
     }
 

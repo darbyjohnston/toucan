@@ -188,7 +188,7 @@ namespace toucan
             {
                 if (_callback)
                 {
-                    _callback(_timeUnitsModel->getTime(text, _time.rate()));
+                    _callback(_timeUnitsModel->fromString(text, _time.rate()));
                 }
             });
 
@@ -302,7 +302,7 @@ namespace toucan
 
     void TimeEdit::_timeUpdate()
     {
-        _lineEdit->setText(_timeUnitsModel->getLabel(_time));
+        _lineEdit->setText(_timeUnitsModel->toString(_time));
     }
 
     void TimeEdit::_timeInc(int value)
@@ -385,6 +385,6 @@ namespace toucan
 
     void TimeLabel::_timeUpdate()
     {
-        _label->setText(_timeUnitsModel->getLabel(_time));
+        _label->setText(_timeUnitsModel->toString(_time));
     }
 }
