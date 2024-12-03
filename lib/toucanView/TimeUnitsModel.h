@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <dtk/ui/Settings.h>
+#include <dtk/core/Context.h>
 #include <dtk/core/ObservableValue.h>
 
 #include <opentimelineio/version.h>
@@ -28,7 +28,7 @@ namespace toucan
     class TimeUnitsModel : public std::enable_shared_from_this<TimeUnitsModel>
     {
     public:
-        TimeUnitsModel(const std::shared_ptr<dtk::Settings>&);
+        TimeUnitsModel(const std::shared_ptr<dtk::Context>&);
 
         virtual ~TimeUnitsModel();
 
@@ -48,7 +48,7 @@ namespace toucan
         OTIO_NS::RationalTime fromString(const std::string&, double rate) const;
 
     private:
-        std::shared_ptr<dtk::Settings> _settings;
+        std::weak_ptr<dtk::Context> _context;
         std::shared_ptr<dtk::ObservableValue<TimeUnits> > _timeUnits;
     };
 }

@@ -25,6 +25,7 @@ namespace toucan
         _host = app->getHost();
         _formats =
         {
+            ".exr",
             ".tiff",
             ".png"
         };

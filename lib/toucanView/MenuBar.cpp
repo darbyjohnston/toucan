@@ -145,8 +145,11 @@ namespace toucan
                         {
                             fileBrowserSystem->setPath(_file->getPath().parent_path());
                         }
-                        dtk::FileBrowserOptions options;
+                        dtk::FileBrowserOptions options = fileBrowserSystem->getOptions();
+                        options.extensions.clear();
                         options.extensions.push_back(".otio");
+                        options.extensions.push_back(".otiod");
+                        options.extensions.push_back(".otioz");
                         fileBrowserSystem->setOptions(options);
                         fileBrowserSystem->open(
                             getWindow(),

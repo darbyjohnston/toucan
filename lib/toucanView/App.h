@@ -35,7 +35,6 @@ namespace toucan
 
     private:
         std::shared_ptr<MessageLog> _messageLog;
-        std::shared_ptr<dtk::Settings> _settings;
         std::string _path;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;
