@@ -18,6 +18,7 @@ namespace toucan
 {
     class File;
 
+    //! JSON widget.
     class JSONWidget : public dtk::IWidget
     {
     protected:
@@ -29,12 +30,16 @@ namespace toucan
     public:
         virtual ~JSONWidget();
 
+        //! Create a new widget.
         static std::shared_ptr<JSONWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set whether the widget is open.
         void setOpen(bool);
+
+        //! Set the filter.
         void setFilter(const std::string&);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -50,6 +55,7 @@ namespace toucan
         std::shared_ptr<dtk::Bellows> _bellows;
     };
 
+    //! JSON tool.
     class JSONTool : public IToolWidget
     {
     protected:
@@ -61,6 +67,7 @@ namespace toucan
     public:
         virtual ~JSONTool();
 
+        //! Create a new tool.
         static std::shared_ptr<JSONTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

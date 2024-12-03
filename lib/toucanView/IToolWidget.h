@@ -9,6 +9,7 @@ namespace toucan
 {
     class App;
 
+    //! Base class for tools.
     class IToolWidget : public dtk::IWidget
     {
     protected:
@@ -22,6 +23,7 @@ namespace toucan
     public:
         virtual ~IToolWidget() = 0;
 
+        //! Get the tool text.
         const std::string& getText() const;
 
     protected:

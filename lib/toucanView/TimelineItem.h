@@ -15,6 +15,7 @@ namespace toucan
     class File;
     class SelectionModel;
 
+    //! Timeline item.
     class TimelineItem : public IItem
     {
     protected:
@@ -27,16 +28,23 @@ namespace toucan
     public:
         virtual ~TimelineItem();
 
+        //! Create a new item.
         static std::shared_ptr<TimelineItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Get the current time.
         const OTIO_NS::RationalTime& getCurrentTime() const;
+
+        //! Set the current time.
         void setCurrentTime(const OTIO_NS::RationalTime&);
+
+        //! Set the current time callback.
         void setCurrentTimeCallback(const std::function<void(const OTIO_NS::RationalTime&)>&);
 
+        //! Set the in/out range.
         void setInOutRange(const OTIO_NS::TimeRange&);
 
         void setGeometry(const dtk::Box2I&) override;

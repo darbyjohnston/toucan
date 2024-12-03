@@ -22,6 +22,7 @@ namespace toucan
 {
     class File;
 
+    //! Export widget.
     class ExportWidget : public dtk::IWidget
     {
     protected:
@@ -33,6 +34,7 @@ namespace toucan
     public:
         virtual ~ExportWidget();
 
+        //! Create a new widget.
         static std::shared_ptr<ExportWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
@@ -62,6 +64,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
     };
 
+    //! Export tool.
     class ExportTool : public IToolWidget
     {
     protected:
@@ -73,6 +76,7 @@ namespace toucan
     public:
         virtual ~ExportTool();
 
+        //! Create a new tool.
         static std::shared_ptr<ExportTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

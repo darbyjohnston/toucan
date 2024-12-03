@@ -16,6 +16,7 @@ namespace toucan
 {
     class File;
 
+    //! Image graph widget.
     class GraphWidget : public dtk::IWidget
     {
     protected:
@@ -27,6 +28,7 @@ namespace toucan
     public:
         virtual ~GraphWidget();
 
+        //! Create a new widget.
         static std::shared_ptr<GraphWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
@@ -77,6 +79,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<IImageNode> > > _currentNodeObserver;
     };
 
+    //! Image graph tool.
     class GraphTool : public IToolWidget
     {
     protected:
@@ -88,6 +91,7 @@ namespace toucan
     public:
         virtual ~GraphTool();
 
+        //! Create a new tool.
         static std::shared_ptr<GraphTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

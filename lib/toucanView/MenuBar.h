@@ -19,6 +19,7 @@ namespace toucan
     class FilesModel;
     class MainWindow;
 
+    //! Menu bar.
     class MenuBar : public dtk::MenuBar
     {
     protected:
@@ -31,12 +32,14 @@ namespace toucan
     public:
         virtual ~MenuBar();
 
+        //! Create a new menu bar.
         static std::shared_ptr<MenuBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<MainWindow>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Get the actions.
         const std::map<std::string, std::shared_ptr<dtk::Action> >& getActions() const;
 
     private:

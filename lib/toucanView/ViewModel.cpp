@@ -12,7 +12,7 @@ namespace toucan
         _zoomIn = dtk::ObservableValue<bool>::create(false);
         _zoomOut = dtk::ObservableValue<bool>::create(false);
         _zoomReset = dtk::ObservableValue<bool>::create(false);
-        _frame = dtk::ObservableValue<bool>::create(true);
+        _frameView = dtk::ObservableValue<bool>::create(true);
     }
 
     ViewModel::~ViewModel()
@@ -48,18 +48,18 @@ namespace toucan
         return _zoomReset;
     }
 
-    bool ViewModel::getFrame() const
+    bool ViewModel::getFrameView() const
     {
-        return _frame->get();
+        return _frameView->get();
     }
 
-    std::shared_ptr<dtk::IObservableValue<bool> > ViewModel::observeFrame() const
+    std::shared_ptr<dtk::IObservableValue<bool> > ViewModel::observeFrameView() const
     {
-        return _frame;
+        return _frameView;
     }
 
-    void ViewModel::setFrame(bool value)
+    void ViewModel::setFrameView(bool value)
     {
-        _frame->setIfChanged(value);
+        _frameView->setIfChanged(value);
     }
 }

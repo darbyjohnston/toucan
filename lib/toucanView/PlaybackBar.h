@@ -27,7 +27,7 @@ namespace toucan
     public:
         virtual ~PlaybackBar();
 
-        //! Create a new widget.
+        //! Create a new tool bar.
         static std::shared_ptr<PlaybackBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

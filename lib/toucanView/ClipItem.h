@@ -9,6 +9,7 @@
 
 namespace toucan
 {
+    //! Timeline clip item.
     class ClipItem : public IItem
     {
     protected:
@@ -22,6 +23,7 @@ namespace toucan
     public:
         virtual ~ClipItem();
 
+        //! Create a new item.
         static std::shared_ptr<ClipItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

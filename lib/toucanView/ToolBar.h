@@ -15,6 +15,7 @@ namespace toucan
     class File;
     class MainWindow;
 
+    //! Tool bar.
     class ToolBar : public dtk::IWidget
     {
     protected:
@@ -28,6 +29,7 @@ namespace toucan
     public:
         virtual ~ToolBar();
 
+        //! Create a new tool bar.
         static std::shared_ptr<ToolBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

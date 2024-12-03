@@ -16,6 +16,7 @@ namespace toucan
     class File;
     class TimelineItem;
 
+    //! Timeline widget.
     class TimelineWidget : public dtk::IWidget
     {
     protected:
@@ -27,17 +28,28 @@ namespace toucan
     public:
         virtual ~TimelineWidget();
 
+        //! Create a new widget.
         static std::shared_ptr<TimelineWidget> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set the view zoom.
         void setViewZoom(double);
+
+        //! Set the view zoom.
         void setViewZoom(double, const dtk::V2I& focus);
 
+        //! Get whether frame view is enabled.
         bool hasFrameView() const;
+
+        //! Frame the view.
         void frameView();
+
+        //! Observe whether frame view is enabled.
         std::shared_ptr<dtk::IObservableValue<bool> > observeFrameView() const;
+
+        //! Set whether frame view is enabled.
         void setFrameView(bool);
 
         void setGeometry(const dtk::Box2I&) override;

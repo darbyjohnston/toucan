@@ -633,7 +633,7 @@ namespace toucan
             {
                 if (_file)
                 {
-                    _file->getViewModel()->setFrame(value);
+                    _file->getViewModel()->setFrameView(value);
                 }
             });
         _actions["View/Frame"]->toolTip = "Frame the view";
@@ -893,7 +893,7 @@ namespace toucan
         if (file)
         {
             _frameViewObserver = dtk::ValueObserver<bool>::create(
-                _file->getViewModel()->observeFrame(),
+                _file->getViewModel()->observeFrameView(),
                 [this](bool value)
                 {
                     _menus["View"]->setItemChecked(_actions["View/Frame"], value);

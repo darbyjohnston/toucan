@@ -9,6 +9,7 @@
 
 namespace toucan
 {
+    //! View model.
     class ViewModel : public std::enable_shared_from_this<ViewModel>
     {
     public:
@@ -16,21 +17,37 @@ namespace toucan
 
         virtual ~ViewModel();
 
+        //! Zoom in.
         void zoomIn();
+
+        //! Zoom out.
         void zoomOut();
+
+        //! Reset the zoom.
         void zoomReset();
+
+        //! Observe the zoom in.
         std::shared_ptr<dtk::IObservableValue<bool> > observeZoomIn() const;
+
+        //! Observe the zoom out.
         std::shared_ptr<dtk::IObservableValue<bool> > observeZoomOut() const;
+
+        //! Observe the zoom reset.
         std::shared_ptr<dtk::IObservableValue<bool> > observeZoomReset() const;
 
-        bool getFrame() const;
-        std::shared_ptr<dtk::IObservableValue<bool> > observeFrame() const;
-        void setFrame(bool);
+        //! Get whether frame view is enabled.
+        bool getFrameView() const;
+
+        //! Observe whether frame view is enabled.
+        std::shared_ptr<dtk::IObservableValue<bool> > observeFrameView() const;
+
+        //! Set whether frame view is enabled.
+        void setFrameView(bool);
 
     private:
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomIn;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomOut;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomReset;
-        std::shared_ptr<dtk::ObservableValue<bool> > _frame;
+        std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
     };
 }

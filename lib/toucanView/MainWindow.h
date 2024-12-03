@@ -24,6 +24,7 @@ namespace toucan
     class TimelineWidget;
     class ToolBar;
 
+    //! Main window.
     class MainWindow : public dtk::Window
     {
     protected:
@@ -36,6 +37,7 @@ namespace toucan
     public:
         virtual ~MainWindow();
 
+        //! Create a new window.
         static std::shared_ptr<MainWindow> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
