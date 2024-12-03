@@ -103,7 +103,7 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
-            _size.lineWidth = event.style->getSizeRole(dtk::SizeRole::BorderFocus, event.displayScale);
+            _size.lineWidth = 2 * event.displayScale;
         }
         _setSizeHint(_layout->getSizeHint());
     }

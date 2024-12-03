@@ -22,8 +22,10 @@ namespace toucan
         dtk::IWidget::_init(context, "toucan::ToolBar", parent);
 
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
-        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+        _layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
 
+        auto hLayout = dtk::HorizontalLayout::create(context, _layout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
         std::vector<std::string> actionNames =
         {
             "File/Open",
@@ -33,7 +35,7 @@ namespace toucan
         for (const auto& name : actionNames)
         {
             auto i = actions.find(name);
-            auto button = dtk::ToolButton::create(context, _layout);
+            auto button = dtk::ToolButton::create(context, hLayout);
             button->setIcon(i->second->icon);
             button->setTooltip(i->second->toolTip);
             button->setClickedCallback(
@@ -49,8 +51,10 @@ namespace toucan
 
         dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
 
+        hLayout = dtk::HorizontalLayout::create(context, _layout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
         auto i = actions.find("Window/FullScreen");
-        auto button = dtk::ToolButton::create(context, _layout);
+        auto button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
         button->setTooltip(i->second->toolTip);
@@ -66,6 +70,8 @@ namespace toucan
 
         dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
         
+        hLayout = dtk::HorizontalLayout::create(context, _layout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
         actionNames =
         {
             "View/ZoomIn",
@@ -75,7 +81,7 @@ namespace toucan
         for (const auto& name : actionNames)
         {
             i = actions.find(name);
-            button = dtk::ToolButton::create(context, _layout);
+            button = dtk::ToolButton::create(context, hLayout);
             button->setIcon(i->second->icon);
             button->setTooltip(i->second->toolTip);
             button->setClickedCallback(
@@ -90,7 +96,7 @@ namespace toucan
         }
         
         i = actions.find("View/Frame");
-        button = dtk::ToolButton::create(context, _layout);
+        button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
         button->setTooltip(i->second->toolTip);
@@ -103,8 +109,6 @@ namespace toucan
                 }
             });
         _buttons["View/Frame"] = button;
-
-        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
 
         _widgetUpdate();
 

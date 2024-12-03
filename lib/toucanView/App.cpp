@@ -12,6 +12,7 @@
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
 #include <dtk/ui/RecentFilesModel.h>
+#include <dtk/ui/Settings.h>
 
 #include <dtk/core/CmdLine.h>
 
@@ -24,8 +25,6 @@ namespace toucan
         std::vector<std::string>& argv)
     {
         _messageLog = std::make_shared<MessageLog>();
-
-        _settings = dtk::Settings::create(dtk::getSettingsPath("toucan", "toucan-view.settings"));
 
         dtk::App::_init(
             context,
@@ -40,9 +39,9 @@ namespace toucan
                     true)
             },
             {},
-            _settings);
+            dtk::getSettingsPath("toucan", "toucan-view.settings").string());
         
-        _timeUnitsModel = std::make_shared<TimeUnitsModel>(_settings);
+        _timeUnitsModel = std::make_shared<TimeUnitsModel>(context);
 
         std::vector<std::filesystem::path> searchPath;
         const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
@@ -59,7 +58,7 @@ namespace toucan
         auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>();
         fileBrowserSystem->setNativeFileDialog(false);
 
-        _filesModel = std::make_shared<FilesModel>(context, _settings, _host);
+        _filesModel = std::make_shared<FilesModel>(context, _host);
 
         _windowModel = std::make_shared<WindowModel>();
 

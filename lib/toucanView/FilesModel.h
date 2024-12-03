@@ -6,7 +6,6 @@
 #include "File.h"
 
 #include <dtk/ui/RecentFilesModel.h>
-#include <dtk/ui/Settings.h>
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableList.h>
 #include <dtk/core/ObservableValue.h>
@@ -22,7 +21,6 @@ namespace toucan
     public:
         FilesModel(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<dtk::Settings>&,
             const std::shared_ptr<ImageEffectHost>&);
 
         virtual ~FilesModel();

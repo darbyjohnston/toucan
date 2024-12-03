@@ -11,7 +11,6 @@ namespace toucan
 {
     FilesModel::FilesModel(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<dtk::Settings>& settings,
         const std::shared_ptr<ImageEffectHost>& host) :
         _context(context),
         _host(host)
@@ -21,7 +20,7 @@ namespace toucan
         _remove = dtk::ObservableValue<int>::create(-1);
         _current = dtk::ObservableValue< std::shared_ptr<File> >::create(nullptr);
         _currentIndex = dtk::ObservableValue<int>::create(-1);
-        _recentFilesModel = dtk::RecentFilesModel::create(context, settings);
+        _recentFilesModel = dtk::RecentFilesModel::create(context);
     }
 
     FilesModel::~FilesModel()

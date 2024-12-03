@@ -3,6 +3,8 @@
 
 #include "TimeUnitsModel.h"
 
+#include <dtk/ui/Settings.h>
+
 #include <nlohmann/json.hpp>
 
 #include <array>
@@ -33,16 +35,21 @@ namespace toucan
             TimeUnits::Timecode;
     }
 
-    TimeUnitsModel::TimeUnitsModel(const std::shared_ptr<dtk::Settings>& settings)
+    TimeUnitsModel::TimeUnitsModel(const std::shared_ptr<dtk::Context>& context)
     {
-        _settings = settings;
+        _context = context;
         TimeUnits value = TimeUnits::Timecode;
         try
         {
-            const auto json = std::any_cast<nlohmann::json>(_settings->get("TimeUnits"));
+            auto settings = context->getSystem<dtk::Settings>();
+            const auto json = std::any_cast<nlohmann::json>(settings->get("TimeUnits"));
             if (json.is_object())
             {
-                value = toucan::fromString(json["Units"]);
+                auto i = json.find("Units");
+                if (i != json.end())
+                {
+                    value = toucan::fromString(i->get<std::string>());
+                }
             }
         }
         catch (const std::exception&)
@@ -55,7 +62,9 @@ namespace toucan
     {
         nlohmann::json json;
         json["Units"] = toucan::toString(_timeUnits->get());
-        _settings->set("TimeUnits", json);
+        auto context = _context.lock();
+        auto settings = context->getSystem<dtk::Settings>();
+        settings->set("TimeUnits", json);
     }
 
     TimeUnits TimeUnitsModel::getTimeUnits() const

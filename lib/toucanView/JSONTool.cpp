@@ -127,11 +127,9 @@ namespace toucan
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
         auto openButton = dtk::ToolButton::create(context, hLayout);
-        openButton->setMarginRole(dtk::SizeRole::MarginSmall);
         openButton->setIcon("BellowsOpen");
         openButton->setTooltip("Open all");
         auto closeButton = dtk::ToolButton::create(context, hLayout);
-        closeButton->setMarginRole(dtk::SizeRole::MarginSmall);
         closeButton->setIcon("BellowsClosed");
         closeButton->setTooltip("Close all");
 
