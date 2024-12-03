@@ -15,6 +15,7 @@ namespace toucan
     class App;
     class File;
 
+    //! Playback tool bar.
     class PlaybackBar : public dtk::IWidget
     {
     protected:
@@ -26,6 +27,7 @@ namespace toucan
     public:
         virtual ~PlaybackBar();
 
+        //! Create a new widget.
         static std::shared_ptr<PlaybackBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

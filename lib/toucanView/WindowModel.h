@@ -3,40 +3,61 @@
 
 #pragma once
 
+#include <dtk/core/Context.h>
 #include <dtk/core/ObservableMap.h>
 #include <dtk/core/ObservableValue.h>
 
 namespace toucan
 {
-    enum class WindowControl
+    //! Window components.
+    enum class WindowComponent
     {
         ToolBar,
         PlaybackBar,
         TimelineWidget,
         InfoBar,
-        Tools
-    };
+        Tools,
 
+        Count,
+        First = ToolBar
+    };
+    DTK_ENUM(WindowComponent);
+
+    //! Window model.
     class WindowModel : public std::enable_shared_from_this<WindowModel>
     {
     public:
-        WindowModel();
+        WindowModel(const std::shared_ptr<dtk::Context>&);
 
         virtual ~WindowModel();
 
-        const std::map<WindowControl, bool> getControls() const;
-        std::shared_ptr<dtk::IObservableMap<WindowControl, bool> > observeControls() const;
-        void setControls(const std::map<WindowControl, bool>&);
+        //! Get the window components.
+        const std::map<WindowComponent, bool> getComponents() const;
 
-        bool getControl(WindowControl) const;
-        void setControl(WindowControl, bool);
+        //! Observe the window components.
+        std::shared_ptr<dtk::IObservableMap<WindowComponent, bool> > observeComponents() const;
 
+        //! Set the window components.
+        void setComponents(const std::map<WindowComponent, bool>&);
+
+        //! Get a window component.
+        bool getComponent(WindowComponent) const;
+
+        //! Set a window component.
+        void setComponent(WindowComponent, bool);
+
+        //! Get whether tooltips are enabled.
         bool getTooltips() const;
+
+        //! Observe whether tooltips are enabled.
         std::shared_ptr<dtk::IObservableValue<bool> > observeTooltips() const;
+
+        //! Set whether tooltips are enabled.
         void setTooltips(bool);
 
     private:
-        std::shared_ptr<dtk::ObservableMap<WindowControl, bool> > _controls;
+        std::weak_ptr<dtk::Context> _context;
+        std::shared_ptr<dtk::ObservableMap<WindowComponent, bool> > _components;
         std::shared_ptr<dtk::ObservableValue<bool> > _tooltips;
     };
 }

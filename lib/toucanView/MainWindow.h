@@ -75,7 +75,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _removeObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _fileObserver;
-        std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
+        std::shared_ptr<dtk::MapObserver<WindowComponent, bool> > _componentsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
     };
 }

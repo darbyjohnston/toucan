@@ -26,6 +26,7 @@ namespace toucan
         _text = dtk::split(item->to_json_string(), { '\n' });
 
         _label = dtk::Label::create(context);
+        _label->setFontRole(dtk::FontRole::Mono);
         _label->setMarginRole(dtk::SizeRole::MarginSmall);
 
         _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());

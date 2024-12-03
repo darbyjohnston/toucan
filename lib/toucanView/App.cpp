@@ -60,7 +60,7 @@ namespace toucan
 
         _filesModel = std::make_shared<FilesModel>(context, _host);
 
-        _windowModel = std::make_shared<WindowModel>();
+        _windowModel = std::make_shared<WindowModel>(context);
 
         _window = MainWindow::create(
             context,

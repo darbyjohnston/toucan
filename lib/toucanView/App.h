@@ -14,6 +14,7 @@ namespace toucan
     class TimeUnitsModel;
     class WindowModel;
 
+    //! Application.
     class App : public dtk::App
     {
     protected:
@@ -24,13 +25,21 @@ namespace toucan
     public:
         virtual ~App();
 
+        //! Create a new application.
         static std::shared_ptr<App> create(
             const std::shared_ptr<dtk::Context>&,
             std::vector<std::string>&);
 
+        //! Get the time units model.
         const std::shared_ptr<TimeUnitsModel>& getTimeUnitsModel() const;
+
+        //! Get the image effect host.
         const std::shared_ptr<ImageEffectHost>& getHost() const;
+
+        //! Get the files model.
         const std::shared_ptr<FilesModel>& getFilesModel() const;
+
+        //! Get the window model.
         const std::shared_ptr<WindowModel>& getWindowModel() const;
 
     private:

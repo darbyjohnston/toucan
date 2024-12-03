@@ -50,25 +50,6 @@ namespace toucan
         }
 
         dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
-
-        hLayout = dtk::HorizontalLayout::create(context, _layout);
-        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto i = actions.find("Window/FullScreen");
-        auto button = dtk::ToolButton::create(context, hLayout);
-        button->setIcon(i->second->icon);
-        button->setCheckable(true);
-        button->setTooltip(i->second->toolTip);
-        button->setCheckedCallback(
-            [i](bool value)
-            {
-                if (i->second->checkedCallback)
-                {
-                    i->second->checkedCallback(value);
-                }
-            });
-        _buttons["Window/FullScreen"] = button;
-
-        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
         
         hLayout = dtk::HorizontalLayout::create(context, _layout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
@@ -80,8 +61,8 @@ namespace toucan
         };
         for (const auto& name : actionNames)
         {
-            i = actions.find(name);
-            button = dtk::ToolButton::create(context, hLayout);
+            auto i = actions.find(name);
+            auto button = dtk::ToolButton::create(context, hLayout);
             button->setIcon(i->second->icon);
             button->setTooltip(i->second->toolTip);
             button->setClickedCallback(
@@ -95,8 +76,8 @@ namespace toucan
             _buttons[name] = button;
         }
         
-        i = actions.find("View/Frame");
-        button = dtk::ToolButton::create(context, hLayout);
+        auto i = actions.find("View/Frame");
+        auto button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
         button->setTooltip(i->second->toolTip);
@@ -109,6 +90,25 @@ namespace toucan
                 }
             });
         _buttons["View/Frame"] = button;
+
+        dtk::Divider::create(context, dtk::Orientation::Horizontal, _layout);
+
+        hLayout = dtk::HorizontalLayout::create(context, _layout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
+        i = actions.find("Window/FullScreen");
+        button = dtk::ToolButton::create(context, hLayout);
+        button->setIcon(i->second->icon);
+        button->setCheckable(true);
+        button->setTooltip(i->second->toolTip);
+        button->setCheckedCallback(
+            [i](bool value)
+            {
+                if (i->second->checkedCallback)
+                {
+                    i->second->checkedCallback(value);
+                }
+            });
+        _buttons["Window/FullScreen"] = button;
 
         _widgetUpdate();
 

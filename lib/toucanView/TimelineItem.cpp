@@ -154,7 +154,7 @@ namespace toucan
             _size.handle = event.style->getSizeRole(dtk::SizeRole::Handle, event.displayScale);
             _size.thumbnailSize.h = 2 * event.style->getSizeRole(dtk::SizeRole::SwatchLarge, event.displayScale);
             _size.thumbnailSize.w = _size.thumbnailSize.h * _thumbnailGenerator->getAspect();
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
+            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Mono, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             std::vector<uint64_t> ids;
             for (const auto& request : _thumbnailRequests)

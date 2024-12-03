@@ -4,6 +4,8 @@
 #include "TimeUnitsModel.h"
 
 #include <dtk/ui/Settings.h>
+#include <dtk/core/Error.h>
+#include <dtk/core/String.h>
 
 #include <nlohmann/json.hpp>
 
@@ -12,44 +14,26 @@
 
 namespace toucan
 {
-    namespace
-    {
-        const std::array<std::string, 3> timeUnits =
-        {
-            "Timecode",
-            "Frames",
-            "Seconds"
-        };
-    }
-
-    std::string toString(TimeUnits value)
-    {
-        return timeUnits[static_cast<size_t>(value)];
-    }
-
-    TimeUnits fromString(const std::string& value)
-    {
-        const auto i = std::find(timeUnits.begin(), timeUnits.end(), value);
-        return i != timeUnits.end() ?
-            static_cast<TimeUnits>(i - timeUnits.begin()) :
-            TimeUnits::Timecode;
-    }
+    DTK_ENUM_IMPL(
+        TimeUnits,
+        "Timecode",
+        "Frames",
+        "Seconds");
 
     TimeUnitsModel::TimeUnitsModel(const std::shared_ptr<dtk::Context>& context)
     {
         _context = context;
+
         TimeUnits value = TimeUnits::Timecode;
         try
         {
             auto settings = context->getSystem<dtk::Settings>();
             const auto json = std::any_cast<nlohmann::json>(settings->get("TimeUnits"));
-            if (json.is_object())
+            auto i = json.find("Units");
+            if (i != json.end() && i->is_string())
             {
-                auto i = json.find("Units");
-                if (i != json.end())
-                {
-                    value = toucan::fromString(i->get<std::string>());
-                }
+                std::stringstream ss(i->get<std::string>());
+                ss >> value;
             }
         }
         catch (const std::exception&)
@@ -61,7 +45,9 @@ namespace toucan
     TimeUnitsModel::~TimeUnitsModel()
     {
         nlohmann::json json;
-        json["Units"] = toucan::toString(_timeUnits->get());
+        std::stringstream ss;
+        ss << _timeUnits->get();
+        json["Units"] = ss.str();
         auto context = _context.lock();
         auto settings = context->getSystem<dtk::Settings>();
         settings->set("TimeUnits", json);

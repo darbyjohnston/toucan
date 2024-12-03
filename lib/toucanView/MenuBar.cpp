@@ -35,8 +35,8 @@ namespace toucan
         _selectMenuInit(context, app);
         _timeMenuInit(context, app);
         _playbackMenuInit(context, app);
-        _windowMenuInit(context, app, window);
         _viewMenuInit(context, app);
+        _windowMenuInit(context, app, window);
 
         _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
             _filesModel->observeFiles(),
@@ -67,8 +67,8 @@ namespace toucan
                 _selectMenuUpdate();
                 _timeMenuUpdate();
                 _playbackMenuUpdate();
-                _windowMenuUpdate();
                 _viewMenuUpdate();
+                _windowMenuUpdate();
             });
 
         _fileIndexObserver = dtk::ValueObserver<int>::create(
@@ -570,6 +570,76 @@ namespace toucan
         _menus["Playback"]->addItem(_actions["Playback/Toggle"]);
     }
 
+    void MenuBar::_viewMenuInit(
+        const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<App>& app)
+    {
+        _menus["View"] = dtk::Menu::create(context);
+        addMenu("View", _menus["View"]);
+
+        _actions["View/ZoomIn"] = std::make_shared<dtk::Action>(
+            "Zoom In",
+            "ViewZoomIn",
+            dtk::Key::Equal,
+            0,
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getViewModel()->zoomIn();
+                }
+            });
+        _actions["View/ZoomIn"]->toolTip = "View zoom in";
+        _menus["View"]->addItem(_actions["View/ZoomIn"]);
+
+        _actions["View/ZoomOut"] = std::make_shared<dtk::Action>(
+            "Zoom Out",
+            "ViewZoomOut",
+            dtk::Key::Minus,
+            0,
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getViewModel()->zoomOut();
+                }
+            });
+        _actions["View/ZoomOut"]->toolTip = "View zoom out";
+        _menus["View"]->addItem(_actions["View/ZoomOut"]);
+
+        _actions["View/ZoomReset"] = std::make_shared<dtk::Action>(
+            "Zoom Reset",
+            "ViewZoomReset",
+            dtk::Key::_0,
+            0,
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getViewModel()->zoomReset();
+                }
+            });
+        _actions["View/ZoomReset"]->toolTip = "Reset the view zoom";
+        _menus["View"]->addItem(_actions["View/ZoomReset"]);
+
+        _menus["View"]->addDivider();
+
+        _actions["View/Frame"] = std::make_shared<dtk::Action>(
+            "Frame View",
+            "ViewFrame",
+            dtk::Key::Backspace,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    _file->getViewModel()->setFrame(value);
+                }
+            });
+        _actions["View/Frame"]->toolTip = "Frame the view";
+        _menus["View"]->addItem(_actions["View/Frame"]);
+    }
+
     void MenuBar::_windowMenuInit(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
@@ -596,31 +666,31 @@ namespace toucan
 
         _menus["Window"]->addDivider();
 
-        struct Control
+        struct Component
         {
-            WindowControl control;
+            WindowComponent component;
             std::string action;
             std::string text;
         };
-        const std::vector<Control> controls =
+        const std::vector<Component> components =
         {
-            { WindowControl::ToolBar, "ToolBar", "Tool Bar" },
-            { WindowControl::PlaybackBar, "PlaybackBar", "Playback Bar" },
-            { WindowControl::TimelineWidget, "TimelineWidget", "Timeline Widget" },
-            { WindowControl::InfoBar, "InfoBar", "Information Bar" },
-            { WindowControl::Tools, "Tools", "Tools" }
+            { WindowComponent::ToolBar, "ToolBar", "Tool Bar" },
+            { WindowComponent::PlaybackBar, "PlaybackBar", "Playback Bar" },
+            { WindowComponent::TimelineWidget, "TimelineWidget", "Timeline Widget" },
+            { WindowComponent::InfoBar, "InfoBar", "Information Bar" },
+            { WindowComponent::Tools, "Tools", "Tools" }
         };
         std::weak_ptr<App> appWeak(app);
-        for (const auto& control : controls)
+        for (const auto& component : components)
         {
-            const std::string actionName = dtk::Format("Window/{0}").arg(control.action);
+            const std::string actionName = dtk::Format("Window/{0}").arg(component.action);
             _actions[actionName] = std::make_shared<dtk::Action>(
-                control.text,
-                [appWeak, control](bool value)
+                component.text,
+                [appWeak, component](bool value)
                 {
                     if (auto app = appWeak.lock())
                     {
-                        app->getWindowModel()->setControl(control.control, value);
+                        app->getWindowModel()->setComponent(component.component, value);
                     }
                 });
             _menus["Window"]->addItem(_actions[actionName]);
@@ -727,19 +797,19 @@ namespace toucan
                 _menus["Window"]->setItemChecked(_actions["Window/FullScreen"], value);
             });
 
-        _controlsObserver = dtk::MapObserver<WindowControl, bool>::create(
-            app->getWindowModel()->observeControls(),
-            [this](const std::map<WindowControl, bool>& value)
+        _componentsObserver = dtk::MapObserver<WindowComponent, bool>::create(
+            app->getWindowModel()->observeComponents(),
+            [this](const std::map<WindowComponent, bool>& value)
             {
-                auto i = value.find(WindowControl::ToolBar);
+                auto i = value.find(WindowComponent::ToolBar);
                 _menus["Window"]->setItemChecked(_actions["Window/ToolBar"], i->second);
-                i = value.find(WindowControl::PlaybackBar);
+                i = value.find(WindowComponent::PlaybackBar);
                 _menus["Window"]->setItemChecked(_actions["Window/PlaybackBar"], i->second);
-                i = value.find(WindowControl::TimelineWidget);
+                i = value.find(WindowComponent::TimelineWidget);
                 _menus["Window"]->setItemChecked(_actions["Window/TimelineWidget"], i->second);
-                i = value.find(WindowControl::InfoBar);
+                i = value.find(WindowComponent::InfoBar);
                 _menus["Window"]->setItemChecked(_actions["Window/InfoBar"], i->second);
-                i = value.find(WindowControl::Tools);
+                i = value.find(WindowComponent::Tools);
                 _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
             });
 
@@ -759,76 +829,6 @@ namespace toucan
             {
                 _menus["Window"]->setItemChecked(_actions["Window/Tooltips"], value);
             });
-    }
-
-    void MenuBar::_viewMenuInit(
-        const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app)
-    {
-        _menus["View"] = dtk::Menu::create(context);
-        addMenu("View", _menus["View"]);
-
-        _actions["View/ZoomIn"] = std::make_shared<dtk::Action>(
-            "Zoom In",
-            "ViewZoomIn",
-            dtk::Key::Equal,
-            0,
-            [this]
-            {
-                if (_file)
-                {
-                    _file->getViewModel()->zoomIn();
-                }
-            });
-        _actions["View/ZoomIn"]->toolTip = "View zoom in";
-        _menus["View"]->addItem(_actions["View/ZoomIn"]);
-
-        _actions["View/ZoomOut"] = std::make_shared<dtk::Action>(
-            "Zoom Out",
-            "ViewZoomOut",
-            dtk::Key::Minus,
-            0,
-            [this]
-            {
-                if (_file)
-                {
-                    _file->getViewModel()->zoomOut();
-                }
-            });
-        _actions["View/ZoomOut"]->toolTip = "View zoom out";
-        _menus["View"]->addItem(_actions["View/ZoomOut"]);
-
-        _actions["View/ZoomReset"] = std::make_shared<dtk::Action>(
-            "Zoom Reset",
-            "ViewZoomReset",
-            dtk::Key::_0,
-            0,
-            [this]
-            {
-                if (_file)
-                {
-                    _file->getViewModel()->zoomReset();
-                }
-            });
-        _actions["View/ZoomReset"]->toolTip = "Reset the view zoom";
-        _menus["View"]->addItem(_actions["View/ZoomReset"]);
-
-        _menus["View"]->addDivider();
-
-        _actions["View/Frame"] = std::make_shared<dtk::Action>(
-            "Frame View",
-            "ViewFrame",
-            dtk::Key::Backspace,
-            0,
-            [this](bool value)
-            {
-                if (_file)
-                {
-                    _file->getViewModel()->setFrame(value);
-                }
-            });
-        _actions["View/Frame"]->toolTip = "Frame the view";
-        _menus["View"]->addItem(_actions["View/Frame"]);
     }
 
     void MenuBar::_fileMenuUpdate()
@@ -887,10 +887,6 @@ namespace toucan
         _menus["Playback"]->setItemEnabled(_actions["Playback/Toggle"], file);
     }
 
-    void MenuBar::_windowMenuUpdate()
-    {
-    }
-
     void MenuBar::_viewMenuUpdate()
     {
         const bool file = _file.get();
@@ -912,5 +908,9 @@ namespace toucan
         _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], file);
         _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], file);
         _menus["View"]->setItemEnabled(_actions["View/Frame"], file);
+    }
+
+    void MenuBar::_windowMenuUpdate()
+    {
     }
 }
