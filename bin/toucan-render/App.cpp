@@ -5,6 +5,7 @@
 
 #include "Util.h"
 
+#include <toucan/FFmpegWrite.h>
 #include <toucan/Util.h>
 
 #include <OpenImageIO/imagebufalgo.h>
@@ -258,6 +259,16 @@ namespace toucan
                 OIIO::ROI(0, filmstripSize.x, 0, filmstripSize.y, 0, 1, 0, 4));
         }
 
+        // Open the movie file.
+        std::shared_ptr<ffmpeg::Write> ffWrite;
+        if (ffmpeg::isExtension(outputPath.extension().string()))
+        {
+            ffWrite = std::make_shared<ffmpeg::Write>(
+                outputPath,
+                OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
+                timeRange.duration().rate());
+        }
+
         // Render the timeline frames.
         if (!_options.y4m.empty())
         {
@@ -284,13 +295,20 @@ namespace toucan
                 {
                     if (!_args.outputRaw)
                     {
-                        const std::string fileName = getSequenceFrame(
-                            outputPath.parent_path().string(),
-                            outputSplit.first,
-                            outputStartFrame + time.to_frames(),
-                            outputNumberPadding,
-                            outputPath.extension().string());
-                        buf.write(fileName);
+                        if (ffWrite)
+                        {
+                            ffWrite->writeImage(buf, time);
+                        }
+                        else
+                        {
+                            const std::string fileName = getSequenceFrame(
+                                outputPath.parent_path().string(),
+                                outputSplit.first,
+                                outputStartFrame + time.to_frames(),
+                                outputNumberPadding,
+                                outputPath.extension().string());
+                            buf.write(fileName);
+                        }
                     }
                     else if (!_options.raw.empty())
                     {

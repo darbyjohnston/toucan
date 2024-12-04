@@ -23,48 +23,88 @@ namespace toucan
         IWidget::_init(context, "toucan::ExportWidget", parent);
 
         _host = app->getHost();
-        _formats =
+        _imageExtensions =
         {
             ".exr",
             ".tiff",
             ".png"
         };
+        _movieCodecs =
+        {
+            "mjpeg"
+        };
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
-        _layout->setMarginRole(dtk::SizeRole::MarginSmall);
-        _layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+        _layout->setSpacingRole(dtk::SizeRole::None);
 
-        auto vLayout = dtk::VerticalLayout::create(context, _layout);
-        vLayout->setSpacingRole(dtk::SizeRole::SpacingSmall);
-        auto label = dtk::Label::create(context, "Output directory:", vLayout);
-        _outputPathEdit = dtk::FileEdit::create(context, vLayout);
+        _outputLayout = dtk::VerticalLayout::create(context, _layout);
+        _outputLayout->setMarginRole(dtk::SizeRole::Margin);
+        auto label = dtk::Label::create(context, "Output directory:", _outputLayout);
+        _outputPathEdit = dtk::FileEdit::create(context, _outputLayout);
 
-        auto gridLayout = dtk::GridLayout::create(context, _layout);
-        gridLayout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+        auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+
+        _tabWidget = dtk::TabWidget::create(context, _layout);
+
+        _imageLayout = dtk::VerticalLayout::create(context);
+        _imageLayout->setMarginRole(dtk::SizeRole::Margin);
+        _tabWidget->addTab("Images", _imageLayout);
+
+        auto gridLayout = dtk::GridLayout::create(context, _imageLayout);
 
         label = dtk::Label::create(context, "Base name:", gridLayout);
         gridLayout->setGridPos(label, 0, 0);
-        _baseNameEdit = dtk::LineEdit::create(context, gridLayout);
-        _baseNameEdit->setText("render.");
-        gridLayout->setGridPos(_baseNameEdit, 0, 1);
+        _imageBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
+        _imageBaseNameEdit->setText("render.");
+        gridLayout->setGridPos(_imageBaseNameEdit, 0, 1);
 
         label = dtk::Label::create(context, "Number padding:", gridLayout);
         gridLayout->setGridPos(label, 1, 0);
-        _paddingEdit = dtk::IntEdit::create(context, gridLayout);
-        _paddingEdit->setRange(dtk::RangeI(0, 9));
-        gridLayout->setGridPos(_paddingEdit, 1, 1);
+        _imagePaddingEdit = dtk::IntEdit::create(context, gridLayout);
+        _imagePaddingEdit->setRange(dtk::RangeI(0, 9));
+        gridLayout->setGridPos(_imagePaddingEdit, 1, 1);
 
-        label = dtk::Label::create(context, "File format:", gridLayout);
+        label = dtk::Label::create(context, "Extension:", gridLayout);
         gridLayout->setGridPos(label, 2, 0);
-        _formatComboBox = dtk::ComboBox::create(context, _formats, gridLayout);
-        gridLayout->setGridPos(_formatComboBox, 2, 1);
+        _imageExtensionComboBox = dtk::ComboBox::create(context, _imageExtensions, gridLayout);
+        gridLayout->setGridPos(_imageExtensionComboBox, 2, 1);
 
-        auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _imageLayout);
 
         auto exportSequenceButton = dtk::PushButton::create(
             context,
             "Export Sequence",
-            _layout);
+            _imageLayout);
+
+        auto exportCurrentButton = dtk::PushButton::create(
+            context,
+            "Export Current Frame",
+            _imageLayout);
+
+        _movieLayout = dtk::VerticalLayout::create(context);
+        _movieLayout->setMarginRole(dtk::SizeRole::Margin);
+        _tabWidget->addTab("Movie", _movieLayout);
+
+        gridLayout = dtk::GridLayout::create(context, _movieLayout);
+
+        label = dtk::Label::create(context, "Base name:", gridLayout);
+        gridLayout->setGridPos(label, 0, 0);
+        _movieBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
+        _movieBaseNameEdit->setText("render");
+        gridLayout->setGridPos(_movieBaseNameEdit, 0, 1);
+
+        label = dtk::Label::create(context, "Codec:", gridLayout);
+        gridLayout->setGridPos(label, 1, 0);
+        _movieCodecComboBox = dtk::ComboBox::create(context, _movieCodecs, gridLayout);
+        gridLayout->setGridPos(_movieCodecComboBox, 1, 1);
+
+        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _movieLayout);
+
+        auto exportMovieButton = dtk::PushButton::create(
+            context,
+            "Export Movie",
+            _movieLayout);
+
         exportSequenceButton->setClickedCallback(
             [this]
             {
@@ -72,16 +112,28 @@ namespace toucan
                 _export();
             });
 
-        auto exportCurrentButton = dtk::PushButton::create(
-            context,
-            "Export Current Frame",
-            _layout);
         exportCurrentButton->setClickedCallback(
             [this]
             {
                 _timeRange = OTIO_NS::TimeRange(
                     _file->getPlaybackModel()->getCurrentTime(),
                     OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
+                _export();
+            });
+
+        exportMovieButton->setClickedCallback(
+            [this]
+            {
+                _timeRange = _file->getPlaybackModel()->getInOutRange();
+                const std::string extension = ".mov";
+                const std::filesystem::path path =
+                    _outputPathEdit->getPath() /
+                    (_movieBaseNameEdit->getText() + extension);
+                const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
+                _ffWrite = std::make_shared<ffmpeg::Write>(
+                    path,
+                    OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
+                    _timeRange.duration().rate());
                 _export();
             });
 
@@ -105,7 +157,9 @@ namespace toucan
                     _time = OTIO_NS::RationalTime();
                     _graph.reset();
                 }
-                setEnabled(_file.get());
+                _outputLayout->setEnabled(_file.get());
+                _imageLayout->setEnabled(_file.get());
+                _movieLayout->setEnabled(_file.get());
             });
     }
 
@@ -147,6 +201,7 @@ namespace toucan
             [this]
             {
                 _timer->stop();
+                _ffWrite.reset();
                 _dialog.reset();
             });
         _dialog->show();
@@ -158,13 +213,20 @@ namespace toucan
                 if (auto node = _graph->exec(_host, _time))
                 {
                     const auto buf = node->exec();
-                    const std::string fileName = getSequenceFrame(
-                        _outputPathEdit->getPath().string(),
-                        _baseNameEdit->getText(),
-                        _time.to_frames(),
-                        _paddingEdit->getValue(),
-                        _formats[_formatComboBox->getCurrentIndex()]);
-                    buf.write(fileName);
+                    if (_ffWrite)
+                    {
+                        _ffWrite->writeImage(buf, _time);
+                    }
+                    else
+                    {
+                        const std::string fileName = getSequenceFrame(
+                            _outputPathEdit->getPath().string(),
+                            _imageBaseNameEdit->getText(),
+                            _time.to_frames(),
+                            _imagePaddingEdit->getValue(),
+                            _imageExtensions[_imageExtensionComboBox->getCurrentIndex()]);
+                        buf.write(fileName);
+                    }
                 }
 
                 const OTIO_NS::RationalTime end = _timeRange.end_time_inclusive();

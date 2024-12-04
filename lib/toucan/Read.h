@@ -35,7 +35,7 @@ namespace toucan
 
     private:
         std::filesystem::path _path;
-        std::unique_ptr<FFmpegRead> _ffRead;
+        std::unique_ptr<ffmpeg::Read> _ffRead;
         std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
         std::unique_ptr<OIIO::ImageInput> _input;
         OIIO::ImageSpec _spec;

@@ -5,6 +5,7 @@
 
 #include "IToolWidget.h"
 
+#include <toucan/FFmpegWrite.h>
 #include <toucan/ImageGraph.h>
 
 #include <dtk/ui/ComboBox.h>
@@ -16,6 +17,7 @@
 #include <dtk/ui/ProgressDialog.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
+#include <dtk/ui/TabWidget.h>
 #include <dtk/core/Timer.h>
 
 namespace toucan
@@ -51,14 +53,23 @@ namespace toucan
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _time;
         std::shared_ptr<ImageGraph> _graph;
-        std::vector<std::string> _formats;
+        std::vector<std::string> _imageExtensions;
+        std::vector<std::string> _movieCodecs;
+        std::shared_ptr<ffmpeg::Write> _ffWrite;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
+        std::shared_ptr<dtk::VerticalLayout> _outputLayout;
         std::shared_ptr<dtk::FileEdit> _outputPathEdit;
-        std::shared_ptr<dtk::LineEdit> _baseNameEdit;
-        std::shared_ptr<dtk::IntEdit> _paddingEdit;
-        std::shared_ptr<dtk::ComboBox> _formatComboBox;
+        std::shared_ptr<dtk::TabWidget> _tabWidget;
+        std::shared_ptr<dtk::VerticalLayout> _imageLayout;
+        std::shared_ptr<dtk::LineEdit> _imageBaseNameEdit;
+        std::shared_ptr<dtk::IntEdit> _imagePaddingEdit;
+        std::shared_ptr<dtk::ComboBox> _imageExtensionComboBox;
+        std::shared_ptr<dtk::VerticalLayout> _movieLayout;
+        std::shared_ptr<dtk::LineEdit> _movieBaseNameEdit;
+        std::shared_ptr<dtk::ComboBox> _movieCodecComboBox;
         std::shared_ptr<dtk::ProgressDialog> _dialog;
+
         std::shared_ptr<dtk::Timer> _timer;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
