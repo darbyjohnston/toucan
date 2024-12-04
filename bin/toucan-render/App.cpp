@@ -3,8 +3,6 @@
 
 #include "App.h"
 
-#include "Util.h"
-
 #include <toucan/FFmpegWrite.h>
 #include <toucan/Util.h>
 
@@ -95,14 +93,6 @@ namespace toucan
             "y4m format to send to stdout.",
             _options.y4m,
             join(y4mList, ", ")));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
-            _options.filmstrip,
-            std::vector<std::string>{ "-filmstrip" },
-            "Render the frames to a single output image as thumbnails in a row."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
-            _options.graph,
-            std::vector<std::string>{ "-graph" },
-            "Write a Graphviz graph for each frame."));
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.verbose,
             std::vector<std::string>{ "-v" },
@@ -241,24 +231,6 @@ namespace toucan
             searchPath,
             imageHostOptions);
 
-        // Initialize the filmstrip.
-        OIIO::ImageBuf filmstripBuf;
-        const int thumbnailWidth = 360;
-        const int thumbnailSpacing = 0;
-        IMATH_NAMESPACE::V2d thumbnailSize;
-        if (_options.filmstrip && imageSize.x > 0 && imageSize.y > 0)
-        {
-            thumbnailSize = IMATH_NAMESPACE::V2d(
-                thumbnailWidth,
-                thumbnailWidth / static_cast<float>(imageSize.x / static_cast<float>(imageSize.y)));
-            const IMATH_NAMESPACE::V2d filmstripSize(
-                thumbnailSize.x * frames + thumbnailSpacing * (frames - 1),
-                thumbnailSize.y);
-            filmstripBuf = OIIO::ImageBufAlgo::fill(
-                { 0.F, 0.F, 0.F, 0.F },
-                OIIO::ROI(0, filmstripSize.x, 0, filmstripSize.y, 0, 1, 0, 4));
-        }
-
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
         if (ffmpeg::isExtension(outputPath.extension().string()))
@@ -274,7 +246,6 @@ namespace toucan
         {
             _writeY4mHeader();
         }
-        int filmstripX = 0;
         for (OTIO_NS::RationalTime time = timeRange.start_time();
             time <= timeRange.end_time_inclusive();
             time += timeInc)
@@ -291,85 +262,31 @@ namespace toucan
                 const auto buf = node->exec();
 
                 // Save the image.
-                if (!_options.filmstrip)
+                if (!_args.outputRaw)
                 {
-                    if (!_args.outputRaw)
+                    if (ffWrite)
                     {
-                        if (ffWrite)
-                        {
-                            ffWrite->writeImage(buf, time);
-                        }
-                        else
-                        {
-                            const std::string fileName = getSequenceFrame(
-                                outputPath.parent_path().string(),
-                                outputSplit.first,
-                                outputStartFrame + time.to_frames(),
-                                outputNumberPadding,
-                                outputPath.extension().string());
-                            buf.write(fileName);
-                        }
+                        ffWrite->writeImage(buf, time);
                     }
-                    else if (!_options.raw.empty())
+                    else
                     {
-                        _writeRawFrame(buf);
-                    }
-                    else if (!_options.y4m.empty())
-                    {
-                        _writeY4mFrame(buf);
+                        const std::string fileName = getSequenceFrame(
+                            outputPath.parent_path().string(),
+                            outputSplit.first,
+                            outputStartFrame + time.to_frames(),
+                            outputNumberPadding,
+                            outputPath.extension().string());
+                        buf.write(fileName);
                     }
                 }
-                else
+                else if (!_options.raw.empty())
                 {
-                    const auto thumbnailBuf = OIIO::ImageBufAlgo::resize(
-                        buf,
-                        "",
-                        0.0,
-                        OIIO::ROI(0, thumbnailSize.x, 0, thumbnailSize.y, 0, 1, 0, 4));
-                    OIIO::ImageBufAlgo::paste(
-                        filmstripBuf,
-                        filmstripX,
-                        0,
-                        0,
-                        0,
-                        thumbnailBuf);
-                    filmstripX += thumbnailSize.x + thumbnailSpacing;
+                    _writeRawFrame(buf);
                 }
-
-                // Write the graph.
-                if (_options.graph)
+                else if (!_options.y4m.empty())
                 {
-                    const std::string fileName = getSequenceFrame(
-                        outputPath.parent_path().string(),
-                        outputSplit.first,
-                        outputStartFrame + time.to_frames(),
-                        outputNumberPadding,
-                        ".dot");
-                    const std::vector<std::string> lines = node->graph(inputPath.stem().string());
-                    if (FILE* f = fopen(fileName.c_str(), "w"))
-                    {
-                        for (const auto& line : lines)
-                        {
-                            fprintf(f, "%s\n", line.c_str());
-                        }
-                        fclose(f);
-                    }
+                    _writeY4mFrame(buf);
                 }
-            }
-        }
-        if (_options.filmstrip)
-        {
-            if (!_args.outputRaw)
-            {
-                filmstripBuf.write(outputPath.string());
-            }
-            else if (!_options.raw.empty())
-            {
-                _writeRawFrame(filmstripBuf);
-            }
-            else if (!_options.y4m.empty())
-            {
-                _writeY4mFrame(filmstripBuf);
             }
         }
     

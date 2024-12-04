@@ -1,12 +1,7 @@
 set(HEADERS
-    App.h
-    CmdLine.h
-    CmdLineInline.h
-    Util.h)
+    App.h)
 set(SOURCE
     App.cpp
-    CmdLine.cpp
-    Util.cpp
     main.cpp)
 
 add_executable(toucan-render ${HEADERS} ${SOURCE})
@@ -22,6 +17,6 @@ foreach(OTIO CompositeTracks Draw Filter Gap Generator LinearTimeWarp Transition
     add_test(
         toucan-render-${OTIO}
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/toucan-render${CMAKE_EXECUTABLE_SUFFIX}
-        ${PROJECT_SOURCE_DIR}/data/${OTIO}.otio ${OTIO}.png -filmstrip)
+        ${PROJECT_SOURCE_DIR}/data/${OTIO}.otio ${OTIO}.png)
 endforeach()
 

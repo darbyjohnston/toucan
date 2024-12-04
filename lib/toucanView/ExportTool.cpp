@@ -25,9 +25,9 @@ namespace toucan
         _host = app->getHost();
         _imageExtensions =
         {
-            ".exr",
             ".tiff",
-            ".png"
+            ".png",
+            ".exr"
         };
         _movieCodecs =
         {

@@ -34,6 +34,12 @@ namespace toucan
     //! Split the URL protocol.
     std::pair<std::string, std::string> splitURLProtocol(const std::string&);
 
+    //! Join a list of strings.
+    std::string join(const std::vector<std::string>&, char delimeter);
+
+    //! Join a list of strings.
+    std::string join(const std::vector<std::string>&, const std::string& delimeter);
+
     //! Get an image sequence file name.
     std::string getSequenceFrame(
         const std::filesystem::path&,

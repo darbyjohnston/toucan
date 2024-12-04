@@ -1,4 +1,6 @@
 set(HEADERS
+    CmdLine.h
+    CmdLineInline.h
     Comp.h
     FFmpeg.h
     FFmpegRead.h
@@ -21,6 +23,7 @@ set(HEADERS
 set(HEADERS_PRIVATE
     ImageEffect_p.h)
 set(SOURCE
+    CmdLine.cpp
     Comp.cpp
     FFmpeg.cpp
     FFmpegRead.cpp
