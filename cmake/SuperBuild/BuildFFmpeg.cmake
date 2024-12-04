@@ -154,6 +154,7 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-encoders
         --enable-encoder=aac
         --enable-encoder=ac3
+        --enable-encoder=av1
         --enable-encoder=dnxhd
         --enable-encoder=eac3
         --enable-encoder=mjpeg
@@ -244,6 +245,7 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-muxers
         --enable-muxer=ac3
         --enable-muxer=aiff
+        --enable-muxer=av1
         --enable-muxer=dnxhd
         --enable-muxer=dts
         --enable-muxer=eac3
@@ -303,7 +305,8 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-protocol=https
         --enable-protocol=md5
         --enable-protocol=pipe
-        --enable-protocol=tls)
+        --enable-protocol=tls
+        --disable-filters)
 endif()
 if(NOT WIN32)
     list(APPEND FFmpeg_CONFIGURE_ARGS

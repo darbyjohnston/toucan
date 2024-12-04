@@ -238,7 +238,7 @@ namespace toucan
             ffWrite = std::make_shared<ffmpeg::Write>(
                 outputPath,
                 OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
-                timeRange.duration().rate());
+                timeRange);
         }
 
         // Render the timeline frames.

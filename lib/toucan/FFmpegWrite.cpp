@@ -21,10 +21,10 @@ namespace toucan
         Write::Write(
             const std::filesystem::path& path,
             const OIIO::ImageSpec& spec,
-            double rate) :
+            const OTIO_NS::TimeRange& timeRange) :
             _path(path),
             _spec(spec),
-            _rate(rate)
+            _timeRange(timeRange)
         {
             av_log_set_level(AV_LOG_QUIET);
             //av_log_set_level(AV_LOG_VERBOSE);
@@ -64,7 +64,7 @@ namespace toucan
             _avCodecContext->height = spec.height;
             _avCodecContext->sample_aspect_ratio = AVRational({ 1, 1 });
             _avCodecContext->pix_fmt = avCodec->pix_fmts[0];
-            const auto rational = toRational(rate);
+            const auto rational = toRational(timeRange.duration().rate());
             _avCodecContext->time_base = { rational.second, rational.first };
             _avCodecContext->framerate = { rational.first, rational.second };
             _avCodecContext->profile = avProfile;
@@ -243,7 +243,7 @@ namespace toucan
                 r = sws_init_context(_swsContext, nullptr, nullptr);
                 if (r < 0)
                 {
-                    throw std::runtime_error("Cannot initialize sws context");
+                    throw std::runtime_error(getErrorLabel(r));
                 }
             }
 
@@ -267,7 +267,7 @@ namespace toucan
 
             const auto timeRational = toRational(time.rate());
             _avFrame->pts = av_rescale_q(
-                time.value(),
+                (time - _timeRange.start_time()).value(),
                 { timeRational.second, timeRational.first },
                 _avVideoStream->time_base);
             _encodeVideo(_avFrame);
@@ -278,7 +278,7 @@ namespace toucan
             int r = avcodec_send_frame(_avCodecContext, frame);
             if (r < 0)
             {
-                throw std::runtime_error("Cannot write frame");
+                throw std::runtime_error(getErrorLabel(r));
             }
 
             while (r >= 0)
@@ -290,12 +290,12 @@ namespace toucan
                 }
                 else if (r < 0)
                 {
-                    throw std::runtime_error("Cannot write frame");
+                    throw std::runtime_error(getErrorLabel(r));
                 }
                 r = av_interleaved_write_frame(_avFormatContext, _avPacket);
                 if (r < 0)
                 {
-                    throw std::runtime_error("Cannot write frame");
+                    throw std::runtime_error(getErrorLabel(r));
                 }
                 av_packet_unref(_avPacket);
             }

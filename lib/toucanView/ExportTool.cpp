@@ -133,7 +133,7 @@ namespace toucan
                 _ffWrite = std::make_shared<ffmpeg::Write>(
                     path,
                     OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
-                    _timeRange.duration().rate());
+                    _timeRange);
                 _export();
             });
 

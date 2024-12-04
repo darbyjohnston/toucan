@@ -29,7 +29,7 @@ namespace toucan
             Write(
                 const std::filesystem::path&,
                 const OIIO::ImageSpec&,
-                double rate);
+                const OTIO_NS::TimeRange&);
 
             virtual ~Write();
 
@@ -40,7 +40,7 @@ namespace toucan
 
             std::filesystem::path _path;
             OIIO::ImageSpec _spec;
-            double _rate = 0.0;
+            OTIO_NS::TimeRange _timeRange;
             AVFormatContext* _avFormatContext = nullptr;
             AVCodecContext* _avCodecContext = nullptr;
             AVStream* _avVideoStream = nullptr;
