@@ -5,7 +5,7 @@ set(libjpeg-turbo_GIT_TAG "3.0.0")
 
 set(libjpeg-turbo_DEPS ZLIB)
 if(NOT WIN32)
-    set(libjpeg-turbo_DEPS ${libjpeg-turbo_DEPS} NASM)
+    list(APPEND libjpeg-turbo_DEPS NASM)
 endif()
 
 set(libjpeg-turbo_ENABLE_SHARED ON)

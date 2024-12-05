@@ -6,6 +6,9 @@ if(WIN32)
 endif()
 
 set(FFmpeg_DEPS ZLIB)
+if(toucan_svt-av1)
+    list(APPEND FFmpeg_DEPS svt-av1)
+endif()
 if(toucan_NET)
     list(APPEND FFmpeg_DEPS OpenSSL)
 endif()
@@ -42,12 +45,14 @@ if(APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
     list(APPEND FFmpeg_OBJCFLAGS "--extra-objcflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
     list(APPEND FFmpeg_LDFLAGS "--extra-ldflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
+
 if(FFmpeg_DEBUG)
     list(APPEND FFmpeg_CFLAGS "--extra-cflags=-g")
     list(APPEND FFmpeg_CXXFLAGS "--extra-cxxflags=-g")
     list(APPEND FFmpeg_OBJCFLAGS "--extra-objcflags=-g")
     list(APPEND FFmpeg_LDFLAGS "--extra-ldflags=-g")
 endif()
+
 set(FFmpeg_CONFIGURE_ARGS
     --prefix=${CMAKE_INSTALL_PREFIX}
     --disable-doc
@@ -154,9 +159,9 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-encoders
         --enable-encoder=aac
         --enable-encoder=ac3
-        --enable-encoder=av1
         --enable-encoder=dnxhd
         --enable-encoder=eac3
+        --enable-encoder=libsvtav1
         --enable-encoder=mjpeg
         --enable-encoder=mpeg2video
         --enable-encoder=mpeg4
@@ -245,7 +250,6 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-muxers
         --enable-muxer=ac3
         --enable-muxer=aiff
-        --enable-muxer=av1
         --enable-muxer=dnxhd
         --enable-muxer=dts
         --enable-muxer=eac3
@@ -312,6 +316,11 @@ if(NOT WIN32)
     list(APPEND FFmpeg_CONFIGURE_ARGS
         --x86asmexe=${CMAKE_INSTALL_PREFIX}/bin/nasm)
 endif()
+if(toucan_svt-av1)
+    list(APPEND FFmpeg_CONFIGURE_ARGS
+        --enable-libsvtav1
+        --pkg-config-flags=--with-path=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
+endif()
 if(toucan_NET)
     list(APPEND FFmpeg_CONFIGURE_ARGS
         --enable-openssl)
@@ -328,6 +337,7 @@ if(FFmpeg_DEBUG)
         --enable-debug=3
         --assert-level=2)
 endif()
+
 include(ProcessorCount)
 ProcessorCount(FFmpeg_BUILD_JOBS)
 if(WIN32)
@@ -404,7 +414,7 @@ ExternalProject_Add(
     FFmpeg
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/FFmpeg
     DEPENDS ${FFmpeg_DEPS}
-    URL https://ffmpeg.org/releases/ffmpeg-7.0.1.tar.bz2
+    URL https://ffmpeg.org/releases/ffmpeg-7.1.tar.bz2
     CONFIGURE_COMMAND ${FFmpeg_CONFIGURE}
     BUILD_COMMAND ${FFmpeg_BUILD}
     INSTALL_COMMAND ${FFmpeg_INSTALL}
