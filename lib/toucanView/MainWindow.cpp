@@ -91,12 +91,12 @@ namespace toucan
 
         _playbackBar = PlaybackBar::create(context, app, _bottomLayout);
 
-        _timelineDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+        auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
 
         _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
-        _infoDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _infoBar = InfoBar::create(context, app, _layout);
 
@@ -174,19 +174,11 @@ namespace toucan
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
 
-                i = value.find(WindowComponent::PlaybackBar);
-                auto j = value.find(WindowComponent::TimelineWidget);
-                _bottomLayout->setVisible(i->second || j->second);
-                _playbackBar->setVisible(i->second);
-                _timelineWidget->setVisible(j->second);
-                _timelineDivider->setVisible(i->second && j->second);
-
-                auto k = value.find(WindowComponent::InfoBar);
-                _infoBar->setVisible(k->second);
-                _infoDivider->setVisible(k->second);
-
-                i = value.find(WindowComponent::Tools);
+                i = value.find(WindowComponent::ToolsPanel);
                 _toolWidget->setVisible(i->second);
+
+                i = value.find(WindowComponent::PlaybackPanel);
+                _bottomLayout->setVisible(i->second);
             });
 
         _tooltipsObserver = dtk::ValueObserver<bool>::create(

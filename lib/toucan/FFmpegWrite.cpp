@@ -21,17 +21,18 @@ namespace toucan
         Write::Write(
             const std::filesystem::path& path,
             const OIIO::ImageSpec& spec,
-            const OTIO_NS::TimeRange& timeRange) :
+            const OTIO_NS::TimeRange& timeRange,
+            VideoCodec videoCodec) :
             _path(path),
             _spec(spec),
             _timeRange(timeRange)
         {
             av_log_set_level(AV_LOG_QUIET);
             //av_log_set_level(AV_LOG_VERBOSE);
-            //av_log_set_callback(log);AVCodecID avCodecID = AV_CODEC_ID_MPEG4;
+            //av_log_set_callback(log);
 
-            AVCodecID avCodecID = AV_CODEC_ID_MJPEG;
-            int avProfile = AV_PROFILE_UNKNOWN;
+            AVCodecID avCodecID = getVideoCodecId(videoCodec);
+            int avProfile = getVideoCodecProfile(videoCodec);
 
             int r = avformat_alloc_output_context2(&_avFormatContext, NULL, NULL, _path.string().c_str());
             if (r < 0)

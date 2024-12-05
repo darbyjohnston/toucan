@@ -9,8 +9,8 @@
 
 #include <toucan/Util.h>
 
+#include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/GridLayout.h>
-#include <dtk/ui/PushButton.h>
 #include <dtk/ui/Window.h>
 
 namespace toucan
@@ -29,10 +29,8 @@ namespace toucan
             ".png",
             ".exr"
         };
-        _movieCodecs =
-        {
-            "mjpeg"
-        };
+        _movieExtensions = ffmpeg::getVideoExtensions();
+        _movieCodecs = ffmpeg::getVideoCodecStrings();
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -71,14 +69,14 @@ namespace toucan
 
         divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _imageLayout);
 
-        auto exportSequenceButton = dtk::PushButton::create(
+        _exportSequenceButton = dtk::PushButton::create(
             context,
             "Export Sequence",
             _imageLayout);
 
-        auto exportCurrentButton = dtk::PushButton::create(
+        _exportStillButton = dtk::PushButton::create(
             context,
-            "Export Current Frame",
+            "Export Still Frame",
             _imageLayout);
 
         _movieLayout = dtk::VerticalLayout::create(context);
@@ -93,26 +91,31 @@ namespace toucan
         _movieBaseNameEdit->setText("render");
         gridLayout->setGridPos(_movieBaseNameEdit, 0, 1);
 
-        label = dtk::Label::create(context, "Codec:", gridLayout);
+        label = dtk::Label::create(context, "Extension:", gridLayout);
         gridLayout->setGridPos(label, 1, 0);
+        _movieExtensionComboBox = dtk::ComboBox::create(context, _movieExtensions, gridLayout);
+        gridLayout->setGridPos(_movieExtensionComboBox, 1, 1);
+
+        label = dtk::Label::create(context, "Codec:", gridLayout);
+        gridLayout->setGridPos(label, 2, 0);
         _movieCodecComboBox = dtk::ComboBox::create(context, _movieCodecs, gridLayout);
-        gridLayout->setGridPos(_movieCodecComboBox, 1, 1);
+        gridLayout->setGridPos(_movieCodecComboBox, 2, 1);
 
         divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _movieLayout);
 
-        auto exportMovieButton = dtk::PushButton::create(
+        _exportMovieButton = dtk::PushButton::create(
             context,
             "Export Movie",
             _movieLayout);
 
-        exportSequenceButton->setClickedCallback(
+        _exportSequenceButton->setClickedCallback(
             [this]
             {
                 _timeRange = _file->getPlaybackModel()->getInOutRange();
                 _export();
             });
 
-        exportCurrentButton->setClickedCallback(
+        _exportStillButton->setClickedCallback(
             [this]
             {
                 _timeRange = OTIO_NS::TimeRange(
@@ -121,20 +124,30 @@ namespace toucan
                 _export();
             });
 
-        exportMovieButton->setClickedCallback(
+        _exportMovieButton->setClickedCallback(
             [this]
             {
                 _timeRange = _file->getPlaybackModel()->getInOutRange();
-                const std::string extension = ".mov";
-                const std::filesystem::path path =
-                    _outputPathEdit->getPath() /
-                    (_movieBaseNameEdit->getText() + extension);
+                const std::string baseName = _movieBaseNameEdit->getText();
+                const std::string extension = _movieExtensions[_movieExtensionComboBox->getCurrentIndex()];
+                const std::filesystem::path path = _outputPathEdit->getPath() / (baseName + extension);
                 const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
-                _ffWrite = std::make_shared<ffmpeg::Write>(
-                    path,
-                    OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
-                    _timeRange);
-                _export();
+                ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
+                ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
+                try
+                {
+                    _ffWrite = std::make_shared<ffmpeg::Write>(
+                        path,
+                        OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
+                        _timeRange,
+                        videoCodec);
+                    _export();
+                }
+                catch (const std::exception& e)
+                {
+                    auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
+                    dialogSystem->message("ERROR", e.what(), getWindow());
+                }
             });
 
         _timer = dtk::Timer::create(context);
@@ -157,9 +170,9 @@ namespace toucan
                     _time = OTIO_NS::RationalTime();
                     _graph.reset();
                 }
-                _outputLayout->setEnabled(_file.get());
-                _imageLayout->setEnabled(_file.get());
-                _movieLayout->setEnabled(_file.get());
+                _exportSequenceButton->setEnabled(_file.get());
+                _exportStillButton->setEnabled(_file.get());
+                _exportMovieButton->setEnabled(_file.get());
             });
     }
 
@@ -215,7 +228,19 @@ namespace toucan
                     const auto buf = node->exec();
                     if (_ffWrite)
                     {
-                        _ffWrite->writeImage(buf, _time);
+                        try
+                        {
+                            _ffWrite->writeImage(buf, _time);
+                        }
+                        catch (const std::exception& e)
+                        {
+                            if (_dialog)
+                            {
+                                _dialog->close();
+                            }
+                            auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
+                            dialogSystem->message("ERROR", e.what(), getWindow());
+                        }
                     }
                     else
                     {
@@ -229,19 +254,22 @@ namespace toucan
                     }
                 }
 
-                const OTIO_NS::RationalTime end = _timeRange.end_time_inclusive();
-                if (_time < end)
+                if (_dialog)
                 {
-                    _time += OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
-                    const OTIO_NS::RationalTime duration = _timeRange.duration();
-                    const double v = duration.value() > 0.0 ?
-                        (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
-                        0.0;
-                    _dialog->setValue(v);
-                }
-                else
-                {
-                    _dialog->close();
+                    const OTIO_NS::RationalTime end = _timeRange.end_time_inclusive();
+                    if (_time < end)
+                    {
+                        _time += OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
+                        const OTIO_NS::RationalTime duration = _timeRange.duration();
+                        const double v = duration.value() > 0.0 ?
+                            (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
+                            0.0;
+                        _dialog->setValue(v);
+                    }
+                    else
+                    {
+                        _dialog->close();
+                    }
                 }
             });
     }

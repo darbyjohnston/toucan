@@ -65,6 +65,12 @@ namespace toucan
         {
             y4mList.push_back(spec.first);
         }
+        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+            _options.videoCodec,
+            std::vector<std::string>{ "-vcodec" },
+            "Set the video codec.",
+            _options.videoCodec,
+            join(ffmpeg::getVideoCodecStrings(), ", ")));
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.printStart,
             std::vector<std::string>{ "-print_start" },
@@ -233,12 +239,15 @@ namespace toucan
 
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
-        if (ffmpeg::isExtension(outputPath.extension().string()))
+        if (ffmpeg::hasVideoExtension(outputPath.extension().string()))
         {
+            ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
+            ffmpeg::fromString(_options.videoCodec, videoCodec);
             ffWrite = std::make_shared<ffmpeg::Write>(
                 outputPath,
                 OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
-                timeRange);
+                timeRange,
+                videoCodec);
         }
 
         // Render the timeline frames.

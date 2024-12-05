@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "WindowModel.h"
+
 #include <dtk/ui/Action.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ToolButton.h>
@@ -51,8 +53,9 @@ namespace toucan
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<dtk::MapObserver<WindowComponent, bool> > _componentObserver;
     };
 }
 

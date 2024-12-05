@@ -47,6 +47,7 @@ namespace toucan
         
         struct Options
         {
+            std::string videoCodec = "mjpeg";
             bool printStart = false;
             bool printDuration = false;
             bool printRate = false;

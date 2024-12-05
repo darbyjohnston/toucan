@@ -95,6 +95,7 @@ namespace toucan
 
         hLayout = dtk::HorizontalLayout::create(context, _layout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
+
         i = actions.find("Window/FullScreen");
         button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
@@ -109,6 +110,36 @@ namespace toucan
                 }
             });
         _buttons["Window/FullScreen"] = button;
+
+        i = actions.find("Window/ToolsPanel");
+        button = dtk::ToolButton::create(context, hLayout);
+        button->setIcon(i->second->icon);
+        button->setCheckable(true);
+        button->setTooltip(i->second->toolTip);
+        button->setCheckedCallback(
+            [i](bool value)
+            {
+                if (i->second->checkedCallback)
+                {
+                    i->second->checkedCallback(value);
+                }
+            });
+        _buttons["Window/ToolsPanel"] = button;
+
+        i = actions.find("Window/PlaybackPanel");
+        button = dtk::ToolButton::create(context, hLayout);
+        button->setIcon(i->second->icon);
+        button->setCheckable(true);
+        button->setTooltip(i->second->toolTip);
+        button->setCheckedCallback(
+            [i](bool value)
+            {
+                if (i->second->checkedCallback)
+                {
+                    i->second->checkedCallback(value);
+                }
+            });
+        _buttons["Window/PlaybackPanel"] = button;
 
         _widgetUpdate();
 
@@ -133,6 +164,16 @@ namespace toucan
             [this](bool value)
             {
                 _buttons["Window/FullScreen"]->setChecked(value);
+            });
+
+        _componentObserver = dtk::MapObserver<WindowComponent, bool>::create(
+            app->getWindowModel()->observeComponents(),
+            [this](const std::map<WindowComponent, bool> value)
+            {
+                auto i = value.find(WindowComponent::ToolsPanel);
+                _buttons["Window/ToolsPanel"]->setChecked(i != value.end() ? i->second : false);
+                i = value.find(WindowComponent::PlaybackPanel);
+                _buttons["Window/PlaybackPanel"]->setChecked(i != value.end() ? i->second : false);
             });
     }
 

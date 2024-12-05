@@ -33,6 +33,7 @@ namespace toucan
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
         _scrollWidget->setBorder(false);
+        _scrollWidget->setScrollBarsVisible(false);
 
         auto appWeak = std::weak_ptr<App>(app);
         _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(

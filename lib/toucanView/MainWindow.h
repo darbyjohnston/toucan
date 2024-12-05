@@ -69,9 +69,7 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<PlaybackBar> _playbackBar;
         std::shared_ptr<TimelineWidget> _timelineWidget;
-        std::shared_ptr<dtk::Divider> _timelineDivider;
         std::shared_ptr<InfoBar> _infoBar;
-        std::shared_ptr<dtk::Divider> _infoDivider;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;

@@ -15,6 +15,7 @@
 #include <dtk/ui/Label.h>
 #include <dtk/ui/LineEdit.h>
 #include <dtk/ui/ProgressDialog.h>
+#include <dtk/ui/PushButton.h>
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/ui/TabWidget.h>
@@ -54,6 +55,7 @@ namespace toucan
         OTIO_NS::RationalTime _time;
         std::shared_ptr<ImageGraph> _graph;
         std::vector<std::string> _imageExtensions;
+        std::vector<std::string> _movieExtensions;
         std::vector<std::string> _movieCodecs;
         std::shared_ptr<ffmpeg::Write> _ffWrite;
 
@@ -65,9 +67,13 @@ namespace toucan
         std::shared_ptr<dtk::LineEdit> _imageBaseNameEdit;
         std::shared_ptr<dtk::IntEdit> _imagePaddingEdit;
         std::shared_ptr<dtk::ComboBox> _imageExtensionComboBox;
+        std::shared_ptr<dtk::PushButton> _exportSequenceButton;
+        std::shared_ptr<dtk::PushButton> _exportStillButton;
         std::shared_ptr<dtk::VerticalLayout> _movieLayout;
         std::shared_ptr<dtk::LineEdit> _movieBaseNameEdit;
+        std::shared_ptr<dtk::ComboBox> _movieExtensionComboBox;
         std::shared_ptr<dtk::ComboBox> _movieCodecComboBox;
+        std::shared_ptr<dtk::PushButton> _exportMovieButton;
         std::shared_ptr<dtk::ProgressDialog> _dialog;
 
         std::shared_ptr<dtk::Timer> _timer;

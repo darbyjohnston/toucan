@@ -671,14 +671,14 @@ namespace toucan
             WindowComponent component;
             std::string action;
             std::string text;
+            std::string icon;
+            std::string tooltip;
         };
         const std::vector<Component> components =
         {
-            { WindowComponent::ToolBar, "ToolBar", "Tool Bar" },
-            { WindowComponent::PlaybackBar, "PlaybackBar", "Playback Bar" },
-            { WindowComponent::TimelineWidget, "TimelineWidget", "Timeline Widget" },
-            { WindowComponent::InfoBar, "InfoBar", "Information Bar" },
-            { WindowComponent::Tools, "Tools", "Tools" }
+            { WindowComponent::ToolBar, "ToolBar", "Tool Bar", "", "" },
+            { WindowComponent::ToolsPanel, "ToolsPanel", "Tools Panel", "PanelRight", "Toggle the tools panel" },
+            { WindowComponent::PlaybackPanel, "PlaybackPanel", "Playback Panel", "PanelBottom", "Toggle the playback panel" }
         };
         std::weak_ptr<App> appWeak(app);
         for (const auto& component : components)
@@ -686,6 +686,7 @@ namespace toucan
             const std::string actionName = dtk::Format("Window/{0}").arg(component.action);
             _actions[actionName] = std::make_shared<dtk::Action>(
                 component.text,
+                component.icon,
                 [appWeak, component](bool value)
                 {
                     if (auto app = appWeak.lock())
@@ -693,6 +694,7 @@ namespace toucan
                         app->getWindowModel()->setComponent(component.component, value);
                     }
                 });
+            _actions[actionName]->toolTip = component.tooltip;
             _menus["Window"]->addItem(_actions[actionName]);
         }
 
@@ -803,14 +805,10 @@ namespace toucan
             {
                 auto i = value.find(WindowComponent::ToolBar);
                 _menus["Window"]->setItemChecked(_actions["Window/ToolBar"], i->second);
-                i = value.find(WindowComponent::PlaybackBar);
-                _menus["Window"]->setItemChecked(_actions["Window/PlaybackBar"], i->second);
-                i = value.find(WindowComponent::TimelineWidget);
-                _menus["Window"]->setItemChecked(_actions["Window/TimelineWidget"], i->second);
-                i = value.find(WindowComponent::InfoBar);
-                _menus["Window"]->setItemChecked(_actions["Window/InfoBar"], i->second);
-                i = value.find(WindowComponent::Tools);
-                _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
+                i = value.find(WindowComponent::ToolsPanel);
+                _menus["Window"]->setItemChecked(_actions["Window/ToolsPanel"], i->second);
+                i = value.find(WindowComponent::PlaybackPanel);
+                _menus["Window"]->setItemChecked(_actions["Window/PlaybackPanel"], i->second);
             });
 
         _displayScaleObserver = dtk::ValueObserver<float>::create(

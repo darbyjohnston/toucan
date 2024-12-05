@@ -11,7 +11,6 @@
 
 extern "C"
 {
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
@@ -29,7 +28,8 @@ namespace toucan
             Write(
                 const std::filesystem::path&,
                 const OIIO::ImageSpec&,
-                const OTIO_NS::TimeRange&);
+                const OTIO_NS::TimeRange&,
+                VideoCodec);
 
             virtual ~Write();
 
