@@ -57,17 +57,29 @@ namespace toucan
             const std::vector<std::string> videoCodecStrings =
             {
                 "MJPEG",
+                "V210",
+                "V308",
+                "V408",
+                "V410",
                 "AV1"
             };
 
             const std::vector<AVCodecID> videoCodecIds =
             {
                 AV_CODEC_ID_MJPEG,
+                AV_CODEC_ID_V210,
+                AV_CODEC_ID_V308,
+                AV_CODEC_ID_V408,
+                AV_CODEC_ID_V410,
                 AV_CODEC_ID_AV1
             };
 
             const std::vector<int> videoCodecProfiles =
             {
+                AV_PROFILE_UNKNOWN,
+                AV_PROFILE_UNKNOWN,
+                AV_PROFILE_UNKNOWN,
+                AV_PROFILE_UNKNOWN,
                 AV_PROFILE_UNKNOWN,
                 AV_PROFILE_AV1_MAIN
             };

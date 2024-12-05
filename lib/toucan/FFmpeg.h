@@ -30,6 +30,10 @@ namespace toucan
         enum class VideoCodec
         {
             MJPEG,
+            V210,
+            V308,
+            V408,
+            V410,
             AV1,
 
             Count,

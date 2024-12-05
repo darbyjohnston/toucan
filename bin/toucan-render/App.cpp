@@ -52,7 +52,7 @@ namespace toucan
         auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
             _args.output,
             "output",
-            "Output image file. Use a dash ('-') to write raw frames or y4m to stdout.");
+            "Output image or movie file. Use a dash ('-') to write raw frames or y4m to stdout.");
         _args.list.push_back(outArg);
 
         std::vector<std::string> rawList;
