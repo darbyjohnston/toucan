@@ -17,7 +17,10 @@
 
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/MessageDialog.h>
+#include <dtk/ui/Settings.h>
 #include <dtk/core/String.h>
+
+#include <nlohmann/json.hpp>
 
 namespace toucan
 {
@@ -30,6 +33,21 @@ namespace toucan
         dtk::Window::_init(context, name, size);
 
         _app = app;
+
+        float displayScale = 0.F;
+        try
+        {
+            auto settings = context->getSystem<dtk::Settings>();
+            const auto json = std::any_cast<nlohmann::json>(settings->get("MainWindow"));
+            auto i = json.find("DisplayScale");
+            if (i != json.end() && i->is_number())
+            {
+                displayScale = i->get<float>();
+            }
+        }
+        catch (const std::exception&)
+        {}
+        setDisplayScale(displayScale);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -73,14 +91,14 @@ namespace toucan
 
         _playbackBar = PlaybackBar::create(context, app, _bottomLayout);
 
-        _timelineDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+        auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
 
         _timelineWidget = TimelineWidget::create(context, app, _bottomLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
-        _infoDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _bottomLayout);
+        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
-        _infoBar = InfoBar::create(context, app, _bottomLayout);
+        _infoBar = InfoBar::create(context, app, _layout);
 
         std::weak_ptr<App> appWeak(app);
         _tabWidget->setCallback(
@@ -148,26 +166,19 @@ namespace toucan
                 _tabWidget->setCurrentTab(index);
             });
 
-        _controlsObserver = dtk::MapObserver<WindowControl, bool>::create(
-            app->getWindowModel()->observeControls(),
-            [this](const std::map<WindowControl, bool>& value)
+        _componentsObserver = dtk::MapObserver<WindowComponent, bool>::create(
+            app->getWindowModel()->observeComponents(),
+            [this](const std::map<WindowComponent, bool>& value)
             {
-                auto i = value.find(WindowControl::ToolBar);
+                auto i = value.find(WindowComponent::ToolBar);
                 _toolBar->setVisible(i->second);
                 _toolBarDivider->setVisible(i->second);
 
-                i = value.find(WindowControl::PlaybackBar);
-                _playbackBar->setVisible(i->second);
-                auto j = value.find(WindowControl::TimelineWidget);
-                _timelineWidget->setVisible(j->second);
-                auto k = value.find(WindowControl::InfoBar);
-                _infoBar->setVisible(k->second);
-                _bottomLayout->setVisible(i->second || j->second || k->second);
-                _timelineDivider->setVisible(i->second && j->second);
-                _infoDivider->setVisible((i->second || j->second) && k->second);
-
-                i = value.find(WindowControl::Tools);
+                i = value.find(WindowComponent::ToolsPanel);
                 _toolWidget->setVisible(i->second);
+
+                i = value.find(WindowComponent::PlaybackPanel);
+                _bottomLayout->setVisible(i->second);
             });
 
         _tooltipsObserver = dtk::ValueObserver<bool>::create(
@@ -179,7 +190,13 @@ namespace toucan
     }
 
     MainWindow::~MainWindow()
-    {}
+    {
+        nlohmann::json json;
+        json["DisplayScale"] = getDisplayScale();
+        auto context = getContext();
+        auto settings = context->getSystem<dtk::Settings>();
+        settings->set("MainWindow", json);
+    }
 
     std::shared_ptr<MainWindow> MainWindow::create(
         const std::shared_ptr<dtk::Context>& context,

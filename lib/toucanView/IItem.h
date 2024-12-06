@@ -11,6 +11,7 @@ namespace toucan
 {
     class App;
 
+    //! Base class for timeline items.
     class IItem : public dtk::IWidget
     {
     protected:
@@ -25,16 +26,25 @@ namespace toucan
     public:
         virtual ~IItem() = 0;
 
+        //! Get the OTIO item.
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& getItem() const;
 
+        //! Get the time range.
         const OTIO_NS::TimeRange& getTimeRange();
 
+        //! Set the item scale.
         void setScale(double);
         
+        //! Get whether the item is selected.
         bool isSelected() const;
+
+        //! Set whether the item is selected.
         void setSelected(bool);
 
+        //! Convert a position to a time.
         OTIO_NS::RationalTime posToTime(double) const;
+
+        //! Convert a time to a position.
         int timeToPos(const OTIO_NS::RationalTime&) const;
 
     protected:

@@ -15,7 +15,7 @@ namespace toucan
     class File;
     class ImageEffectHost;
 
-    //! Files model.
+    //! Timeline files model.
     class FilesModel : public std::enable_shared_from_this<FilesModel>
     {
     public:

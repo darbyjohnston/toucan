@@ -3,48 +3,98 @@
 
 #include "WindowModel.h"
 
+#include <dtk/ui/Settings.h>
+#include <dtk/core/Error.h>
+#include <dtk/core/String.h>
+
+#include <nlohmann/json.hpp>
+
+#include <sstream>
+
 namespace toucan
 {
-    WindowModel::WindowModel()
+    DTK_ENUM_IMPL(
+        WindowComponent,
+        "ToolBar",
+        "ToolsPanel",
+        "PlaybackPanel");
+
+    WindowModel::WindowModel(const std::shared_ptr<dtk::Context>& context)
     {
-        std::map<WindowControl, bool> values =
+        _context = context;
+
+        std::map<WindowComponent, bool> components =
         {
-            { WindowControl::ToolBar, true },
-            { WindowControl::PlaybackBar, true },
-            { WindowControl::TimelineWidget, true },
-            { WindowControl::InfoBar, true },
-            { WindowControl::Tools, true }
+            { WindowComponent::ToolBar, true },
+            { WindowComponent::ToolsPanel, true },
+            { WindowComponent::PlaybackPanel, true }
         };
-        _controls = dtk::ObservableMap<WindowControl, bool>::create(values);
-        _tooltips = dtk::ObservableValue<bool>::create(true);
+        bool tooltips = true;
+        try
+        {
+            auto settings = context->getSystem<dtk::Settings>();
+            const auto json = std::any_cast<nlohmann::json>(settings->get("WindowModel"));
+            for (auto& i : components)
+            {
+                std::stringstream ss;
+                ss << i.first;
+                auto j = json.find(ss.str());
+                if (j != json.end() && j->is_boolean())
+                {
+                    i.second = j->get<bool>();
+                }
+            }
+            auto i = json.find("Tooltips");
+            if (i != json.end() && i->is_boolean())
+            {
+                tooltips = i->get<bool>();
+            }
+        }
+        catch (const std::exception&)
+        {}
+
+        _components = dtk::ObservableMap<WindowComponent, bool>::create(components);
+        _tooltips = dtk::ObservableValue<bool>::create(tooltips);
     }
 
     WindowModel::~WindowModel()
-    {}
-
-    const std::map<WindowControl, bool> WindowModel::getControls() const
     {
-        return _controls->get();
+        nlohmann::json json;
+        for (const auto i : _components->get())
+        {
+            std::stringstream ss;
+            ss << i.first;
+            json[ss.str()] = i.second;
+        }
+        json["Tooltips"] = _tooltips->get();
+        auto context = _context.lock();
+        auto settings = context->getSystem<dtk::Settings>();
+        settings->set("WindowModel", json);
     }
 
-    std::shared_ptr<dtk::IObservableMap<WindowControl, bool> > WindowModel::observeControls() const
+    const std::map<WindowComponent, bool> WindowModel::getComponents() const
     {
-        return _controls;
+        return _components->get();
     }
 
-    void WindowModel::setControls(const std::map<WindowControl, bool>& value)
+    std::shared_ptr<dtk::IObservableMap<WindowComponent, bool> > WindowModel::observeComponents() const
     {
-        _controls->setIfChanged(value);
+        return _components;
     }
 
-    bool WindowModel::getControl(WindowControl value) const
+    void WindowModel::setComponents(const std::map<WindowComponent, bool>& value)
     {
-        return _controls->getItem(value);
+        _components->setIfChanged(value);
     }
 
-    void WindowModel::setControl(WindowControl control, bool value)
+    bool WindowModel::getComponent(WindowComponent value) const
     {
-        _controls->setItemOnlyIfChanged(control, value);
+        return _components->getItem(value);
+    }
+
+    void WindowModel::setComponent(WindowComponent component, bool value)
+    {
+        _components->setItemOnlyIfChanged(component, value);
     }
 
     bool WindowModel::getTooltips() const

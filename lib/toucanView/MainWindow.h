@@ -24,6 +24,7 @@ namespace toucan
     class TimelineWidget;
     class ToolBar;
 
+    //! Main window.
     class MainWindow : public dtk::Window
     {
     protected:
@@ -36,6 +37,7 @@ namespace toucan
     public:
         virtual ~MainWindow();
 
+        //! Create a new window.
         static std::shared_ptr<MainWindow> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
@@ -67,15 +69,13 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
         std::shared_ptr<PlaybackBar> _playbackBar;
         std::shared_ptr<TimelineWidget> _timelineWidget;
-        std::shared_ptr<dtk::Divider> _timelineDivider;
         std::shared_ptr<InfoBar> _infoBar;
-        std::shared_ptr<dtk::Divider> _infoDivider;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _addObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _removeObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _fileObserver;
-        std::shared_ptr<dtk::MapObserver<WindowControl, bool> > _controlsObserver;
+        std::shared_ptr<dtk::MapObserver<WindowComponent, bool> > _componentsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
     };
 }

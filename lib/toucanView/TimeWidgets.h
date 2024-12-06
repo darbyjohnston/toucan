@@ -16,6 +16,7 @@
 
 namespace toucan
 {
+    //! Frame buttons.
     class FrameButtons : public dtk::IWidget
     {
     protected:
@@ -26,10 +27,12 @@ namespace toucan
     public:
         virtual ~FrameButtons();
 
+        //! Create a new widget.
         static std::shared_ptr<FrameButtons> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set the callback.
         void setCallback(const std::function<void(TimeAction)>&);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -41,6 +44,7 @@ namespace toucan
         std::shared_ptr<dtk::ButtonGroup> _buttonGroup;
     };
 
+    //! Playback buttons.
     class PlaybackButtons : public dtk::IWidget
     {
     protected:
@@ -51,12 +55,15 @@ namespace toucan
     public:
         virtual ~PlaybackButtons();
 
+        //! Create a new widget.
         static std::shared_ptr<PlaybackButtons> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set the playback.
         void setPlayback(Playback);
 
+        //! Set the callback.
         void setCallback(const std::function<void(Playback)>&);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -71,6 +78,7 @@ namespace toucan
         std::shared_ptr<dtk::ButtonGroup> _buttonGroup;
     };
 
+    //! Time edit.
     class TimeEdit : public dtk::IWidget
     {
     protected:
@@ -82,14 +90,19 @@ namespace toucan
     public:
         virtual ~TimeEdit();
 
+        //! Create a new widget.
         static std::shared_ptr<TimeEdit> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set the time.
         void setTime(const OTIO_NS::RationalTime&);
+
+        //! Set the time range.
         void setTimeRange(const OTIO_NS::TimeRange&);
 
+        //! Set the callback.
         void setCallback(const std::function<void(const OTIO_NS::RationalTime&)>&);
 
         void setGeometry(const dtk::Box2I&) override;
@@ -114,6 +127,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 
+    //! Time label.
     class TimeLabel : public dtk::IWidget
     {
     protected:
@@ -125,13 +139,16 @@ namespace toucan
     public:
         virtual ~TimeLabel();
 
+        //! Create a new widget.
         static std::shared_ptr<TimeLabel> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
+        //! Set the time.
         void setTime(const OTIO_NS::RationalTime&);
 
+        //! Set the margin size role.
         void setMarginRole(dtk::SizeRole);
 
         void setGeometry(const dtk::Box2I&) override;

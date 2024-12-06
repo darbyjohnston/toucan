@@ -18,6 +18,7 @@
 
 namespace toucan
 {
+    //! Thumbnail request.
     struct ThumbnailRequest
     {
         uint64_t id = 0;
@@ -26,6 +27,7 @@ namespace toucan
         std::future<std::shared_ptr<dtk::Image> > future;
     };
 
+    //! Thumbnail generator.
     class ThumbnailGenerator : public std::enable_shared_from_this<ThumbnailGenerator>
     {
     public:
@@ -36,12 +38,15 @@ namespace toucan
 
         ~ThumbnailGenerator();
 
+        //! Get the aspect ratio.
         float getAspect() const;
 
+        //! Get a thumbnail.
         ThumbnailRequest getThumbnail(
             const OTIO_NS::RationalTime&,
             int height);
 
+        //! Cancel thumbnail requests.
         void cancelThumbnails(const std::vector<uint64_t>&);
 
     private:

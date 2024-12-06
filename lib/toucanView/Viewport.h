@@ -12,6 +12,7 @@ namespace toucan
     class File;
     class ViewModel;
 
+    //! Viewport widget.
     class Viewport : public dtk::IWidget
     {
     protected:
@@ -23,25 +24,50 @@ namespace toucan
     public:
         virtual ~Viewport();
 
+        //! Create a new widget.
         static std::shared_ptr<Viewport> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
-        const dtk::V2I& getPos() const;
-        float getZoom() const;
-        std::shared_ptr<dtk::IObservableValue<dtk::V2I> > observePos() const;
-        std::shared_ptr<dtk::IObservableValue<float> > observeZoom() const;
-        void setPosZoom(const dtk::V2I&, float);
-        void setZoom(float);
-        void setZoom(float, const dtk::V2I& focus);
-        void zoomIn(double amount = 2.F);
-        void zoomOut(double amount = 2.F);
-        void zoomReset();
+        //! Get the view position.
+        const dtk::V2I& getViewPos() const;
 
-        bool getFrame() const;
-        std::shared_ptr<dtk::IObservableValue<bool> > observeFrame() const;
-        void setFrame(bool);
+        //! Get the view zoom.
+        float getViewZoom() const;
+
+        //! Observe the view position.
+        std::shared_ptr<dtk::IObservableValue<dtk::V2I> > observeViewPos() const;
+
+        //! Observe the view zoom.
+        std::shared_ptr<dtk::IObservableValue<float> > observeViewZoom() const;
+
+        //! Set the view position and zoom.
+        void setViewPosZoom(const dtk::V2I&, float);
+
+        //! Set the view zoom.
+        void setViewZoom(float);
+
+        //! Set the view zoom.
+        void setViewZoom(float, const dtk::V2I& focus);
+
+        //! Zoom in the view.
+        void viewZoomIn(double amount = 2.F);
+
+        //! Zoom out the view.
+        void viewZoomOut(double amount = 2.F);
+
+        //! Reset the view zoom.
+        void viewZoomReset();
+
+        //! Get whether frame view is enabled.
+        bool getFrameView() const;
+
+        //! Observe whether frame view is enabled.
+        std::shared_ptr<dtk::IObservableValue<bool> > observeFrameView() const;
+
+        //! Set whether frame view is enabled.
+        void setFrameView(bool);
 
         void drawEvent(const dtk::Box2I&, const dtk::DrawEvent&) override;
         void mouseMoveEvent(dtk::MouseMoveEvent&) override;
@@ -54,9 +80,9 @@ namespace toucan
 
         std::shared_ptr<ViewModel> _viewModel;
         std::shared_ptr<dtk::Image> _image;
-        std::shared_ptr<dtk::ObservableValue<dtk::V2I> > _pos;
-        std::shared_ptr<dtk::ObservableValue<float> > _zoom;
-        std::shared_ptr<dtk::ObservableValue<bool> > _frame;
+        std::shared_ptr<dtk::ObservableValue<dtk::V2I> > _viewPos;
+        std::shared_ptr<dtk::ObservableValue<float> > _viewZoom;
+        std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
         dtk::V2I _viewMousePress;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;

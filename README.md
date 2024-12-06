@@ -2,24 +2,31 @@
 
 <img src="images/toucan.svg" alt="toucan" width="100">
 
+
 Toucan
 ======
 Toucan is a software renderer for OpenTimelineIO files. Toucan can render an
 OpenTimelineIO file with multiple tracks, clips, transitions, and effects
 into an image sequence or movie file.
 
-The project currently consists of:
+The project consists of:
 * C++ library for rendering timelines
 * Collection of OpenFX image effect plugins
 * Command line renderer
 * Interactive viewer
 * Example .otio files
 
-Current limitations:
-* Audio is not yet supported
-* Nested timelines are not yet supported
-* Exporting movie files currently relies on the FFmpeg command line program
-(see below: FFmpeg Encoding)
+OpenFX Plugins:
+* Generators: Checkers, Fill, Gradient, Noise
+* Drawing: Box, Line, Text
+* Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
+* Transforms: Crop, Flip, Flop, Resize, Rotate
+* Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
+* Color space: Color Convert, Premultiply Alpha, Un-Premultiply Alpha
+
+TODO:
+* Audio support
+* Nested timeline support
 
 Toucan relies on the following libraries:
 * [OpenTimelineIO](https://github.com/PixarAnimationStudios/OpenTimelineIO)
@@ -31,15 +38,6 @@ Toucan relies on the following libraries:
 
 Supported VFX platforms: 2024, 2023, 2022
 
-OpenFX Plugins
-==============
-The OpenFX image effect plugins include:
-* Generators: Checkers, Fill, Gradient, Noise
-* Drawing: Box, Line, Text
-* Filters: Blur, Color Map, Invert, Power, Saturate, Unsharp Mask
-* Transforms: Crop, Flip, Flop, Resize, Rotate
-* Transitions: Dissolve, Horizontal Wipe, Vertical Wipe
-* Color spaces: Color Convert, Premultiply Alpha, Un-Premultiply Alpha
 
 Example Renders
 ===============
@@ -91,11 +89,18 @@ Multiple effects on clips, tracks, and stacks:
 
 ![Track Effects](images/MultipleEffects.png)
 
+
 FFmpeg Encoding
 ===============
-Toucan can send rendered images to the FFmpeg command line program for encoding.
-The images can be sent as either the y4m format or raw video. The images are
-piped directly to FFmpeg without the overhead of disk I/O.
+Toucan can write movies with FFmpeg directly, or send raw images to the FFmpeg
+command line program over a pipe.
+
+Example command line writing a movie directly:
+```
+toucan-render Transition.otio Transition.mov -vcodec MJPEG
+```
+
+Raw images can be sent to FFmpeg as either the y4m format or raw video.
 
 Example command line using the y4m format:
 ```
@@ -126,6 +131,7 @@ can be found by running `toucan-render` with the `-print_size` option.
 `toucan-render` with the `-print_rate` option.
 * `-i pipe:`: Read from standard input instead of a file.
 * `output.mov`: The output movie file.
+
 
 Building
 ========

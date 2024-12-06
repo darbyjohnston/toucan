@@ -15,8 +15,12 @@ namespace toucan
     {
         Timecode,
         Frames,
-        Seconds
+        Seconds,
+
+        Count,
+        First = Timecode
     };
+    DTK_ENUM(TimeUnits);
 
     //! Convert to a string.
     std::string toString(TimeUnits);

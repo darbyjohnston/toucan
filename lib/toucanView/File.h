@@ -20,6 +20,7 @@ namespace toucan
     class ThumbnailGenerator;
     class ViewModel;
 
+    //! Timeline file.
     class File : std::enable_shared_from_this<File>
     {
     public:
@@ -30,24 +31,46 @@ namespace toucan
 
         ~File();
 
+        //! Get the path.
         const std::filesystem::path& getPath() const;
 
+        //! Get the timeline wrapper.
         const std::shared_ptr<TimelineWrapper>& getTimelineWrapper() const;
+
+        //! Get the timeline.
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& getTimeline() const;
 
+        //! Get the playback model.
         const std::shared_ptr<PlaybackModel>& getPlaybackModel() const;
+
+        //! Get the view model.
         const std::shared_ptr<ViewModel>& getViewModel() const;
+
+        //! Get the selection model.
         const std::shared_ptr<SelectionModel>& getSelectionModel() const;
+
+        //! Get the thumbnail generator.
         const std::shared_ptr<ThumbnailGenerator>& getThumbnailGenerator() const;
 
+        //! Get the image size.
         const IMATH_NAMESPACE::V2i& getImageSize() const;
+
+        //! Get the number of image channels.
         int getImageChannels() const;
+
+        //! Get the image data type.
         const std::string& getImageDataType() const;
 
+        //! Observe the current image.
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<dtk::Image> > > observeCurrentImage() const;
 
+        //! Observe the root node.
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > observeRootNode() const;
+
+        //! Observe the current node.
         std::shared_ptr<dtk::IObservableValue<std::shared_ptr<IImageNode> > > observeCurrentNode() const;
+
+        //! Set the current node.
         void setCurrentNode(const std::shared_ptr<IImageNode>&);
 
     private:

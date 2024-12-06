@@ -177,6 +177,7 @@ namespace toucan
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
         _lineEdit = dtk::LineEdit::create(context, _layout);
+        _lineEdit->setFontRole(dtk::FontRole::Mono);
         _lineEdit->setFormat("00:00:00:00");
 
         _incButtons = dtk::IncButtons::create(context, _layout);
@@ -333,6 +334,7 @@ namespace toucan
         _timeUnitsModel = timeUnitsModel;
 
         _label = dtk::Label::create(context, shared_from_this());
+        _label->setFontRole(dtk::FontRole::Mono);
         _label->setMarginRole(dtk::SizeRole::MarginInside);
 
         _timeUpdate();

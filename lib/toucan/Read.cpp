@@ -22,7 +22,7 @@ namespace toucan
         // Open the file ane get information.
         try
         {
-            _ffRead = std::make_unique<FFmpegRead>(path, memoryReference);
+            _ffRead = std::make_unique<ffmpeg::Read>(path, memoryReference);
             _spec = _ffRead->getSpec();
             _timeRange = _ffRead->getTimeRange();
         }

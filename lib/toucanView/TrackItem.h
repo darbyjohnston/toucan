@@ -9,6 +9,7 @@
 
 namespace toucan
 {
+    //! Timeline track item.
     class TrackItem : public IItem
     {
     protected:
@@ -21,6 +22,7 @@ namespace toucan
     public:
         virtual ~TrackItem();
 
+        //! Create a new item.
         static std::shared_ptr<TrackItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

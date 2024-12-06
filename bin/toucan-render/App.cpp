@@ -3,8 +3,7 @@
 
 #include "App.h"
 
-#include "Util.h"
-
+#include <toucan/FFmpegWrite.h>
 #include <toucan/Util.h>
 
 #include <OpenImageIO/imagebufalgo.h>
@@ -53,7 +52,7 @@ namespace toucan
         auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
             _args.output,
             "output",
-            "Output image file. Use a dash ('-') to write raw frames or y4m to stdout.");
+            "Output image or movie file. Use a dash ('-') to write raw frames or y4m to stdout.");
         _args.list.push_back(outArg);
 
         std::vector<std::string> rawList;
@@ -66,6 +65,12 @@ namespace toucan
         {
             y4mList.push_back(spec.first);
         }
+        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+            _options.videoCodec,
+            std::vector<std::string>{ "-vcodec" },
+            "Set the video codec.",
+            _options.videoCodec,
+            join(ffmpeg::getVideoCodecStrings(), ", ")));
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.printStart,
             std::vector<std::string>{ "-print_start" },
@@ -94,14 +99,6 @@ namespace toucan
             "y4m format to send to stdout.",
             _options.y4m,
             join(y4mList, ", ")));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
-            _options.filmstrip,
-            std::vector<std::string>{ "-filmstrip" },
-            "Render the frames to a single output image as thumbnails in a row."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
-            _options.graph,
-            std::vector<std::string>{ "-graph" },
-            "Write a Graphviz graph for each frame."));
         _options.list.push_back(std::make_shared<CmdLineFlagOption>(
             _options.verbose,
             std::vector<std::string>{ "-v" },
@@ -240,22 +237,17 @@ namespace toucan
             searchPath,
             imageHostOptions);
 
-        // Initialize the filmstrip.
-        OIIO::ImageBuf filmstripBuf;
-        const int thumbnailWidth = 360;
-        const int thumbnailSpacing = 0;
-        IMATH_NAMESPACE::V2d thumbnailSize;
-        if (_options.filmstrip && imageSize.x > 0 && imageSize.y > 0)
+        // Open the movie file.
+        std::shared_ptr<ffmpeg::Write> ffWrite;
+        if (ffmpeg::hasVideoExtension(outputPath.extension().string()))
         {
-            thumbnailSize = IMATH_NAMESPACE::V2d(
-                thumbnailWidth,
-                thumbnailWidth / static_cast<float>(imageSize.x / static_cast<float>(imageSize.y)));
-            const IMATH_NAMESPACE::V2d filmstripSize(
-                thumbnailSize.x * frames + thumbnailSpacing * (frames - 1),
-                thumbnailSize.y);
-            filmstripBuf = OIIO::ImageBufAlgo::fill(
-                { 0.F, 0.F, 0.F, 0.F },
-                OIIO::ROI(0, filmstripSize.x, 0, filmstripSize.y, 0, 1, 0, 4));
+            ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
+            ffmpeg::fromString(_options.videoCodec, videoCodec);
+            ffWrite = std::make_shared<ffmpeg::Write>(
+                outputPath,
+                OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
+                timeRange,
+                videoCodec);
         }
 
         // Render the timeline frames.
@@ -263,7 +255,6 @@ namespace toucan
         {
             _writeY4mHeader();
         }
-        int filmstripX = 0;
         for (OTIO_NS::RationalTime time = timeRange.start_time();
             time <= timeRange.end_time_inclusive();
             time += timeInc)
@@ -280,9 +271,13 @@ namespace toucan
                 const auto buf = node->exec();
 
                 // Save the image.
-                if (!_options.filmstrip)
+                if (!_args.outputRaw)
                 {
-                    if (!_args.outputRaw)
+                    if (ffWrite)
+                    {
+                        ffWrite->writeImage(buf, time);
+                    }
+                    else
                     {
                         const std::string fileName = getSequenceFrame(
                             outputPath.parent_path().string(),
@@ -292,66 +287,15 @@ namespace toucan
                             outputPath.extension().string());
                         buf.write(fileName);
                     }
-                    else if (!_options.raw.empty())
-                    {
-                        _writeRawFrame(buf);
-                    }
-                    else if (!_options.y4m.empty())
-                    {
-                        _writeY4mFrame(buf);
-                    }
                 }
-                else
+                else if (!_options.raw.empty())
                 {
-                    const auto thumbnailBuf = OIIO::ImageBufAlgo::resize(
-                        buf,
-                        "",
-                        0.0,
-                        OIIO::ROI(0, thumbnailSize.x, 0, thumbnailSize.y, 0, 1, 0, 4));
-                    OIIO::ImageBufAlgo::paste(
-                        filmstripBuf,
-                        filmstripX,
-                        0,
-                        0,
-                        0,
-                        thumbnailBuf);
-                    filmstripX += thumbnailSize.x + thumbnailSpacing;
+                    _writeRawFrame(buf);
                 }
-
-                // Write the graph.
-                if (_options.graph)
+                else if (!_options.y4m.empty())
                 {
-                    const std::string fileName = getSequenceFrame(
-                        outputPath.parent_path().string(),
-                        outputSplit.first,
-                        outputStartFrame + time.to_frames(),
-                        outputNumberPadding,
-                        ".dot");
-                    const std::vector<std::string> lines = node->graph(inputPath.stem().string());
-                    if (FILE* f = fopen(fileName.c_str(), "w"))
-                    {
-                        for (const auto& line : lines)
-                        {
-                            fprintf(f, "%s\n", line.c_str());
-                        }
-                        fclose(f);
-                    }
+                    _writeY4mFrame(buf);
                 }
-            }
-        }
-        if (_options.filmstrip)
-        {
-            if (!_args.outputRaw)
-            {
-                filmstripBuf.write(outputPath.string());
-            }
-            else if (!_options.raw.empty())
-            {
-                _writeRawFrame(filmstripBuf);
-            }
-            else if (!_options.y4m.empty())
-            {
-                _writeY4mFrame(filmstripBuf);
             }
         }
     

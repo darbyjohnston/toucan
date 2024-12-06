@@ -18,6 +18,7 @@ namespace toucan
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setMarginRole(dtk::SizeRole::MarginInside);
         _layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+        _layout->setVAlign(dtk::VAlign::Center);
 
         _playbackButtons = PlaybackButtons::create(context, _layout);
 
@@ -33,6 +34,7 @@ namespace toucan
             context,
             { "Timecode", "Frames", "Seconds" },
             _layout);
+        _timeUnitsComboBox->setTooltip("Set the time units");
 
         _frameButtons->setCallback(
             [this](TimeAction value)

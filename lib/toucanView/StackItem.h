@@ -9,6 +9,7 @@
 
 namespace toucan
 {
+    //! Timeline stack item.
     class StackItem : public IItem
     {
     protected:
@@ -21,6 +22,7 @@ namespace toucan
     public:
         virtual ~StackItem();
 
+        //! Create a new item.
         static std::shared_ptr<StackItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

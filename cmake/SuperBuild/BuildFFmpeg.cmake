@@ -6,6 +6,9 @@ if(WIN32)
 endif()
 
 set(FFmpeg_DEPS ZLIB)
+if(toucan_svt-av1)
+    list(APPEND FFmpeg_DEPS svt-av1)
+endif()
 if(toucan_NET)
     list(APPEND FFmpeg_DEPS OpenSSL)
 endif()
@@ -42,12 +45,14 @@ if(APPLE AND CMAKE_OSX_DEPLOYMENT_TARGET)
     list(APPEND FFmpeg_OBJCFLAGS "--extra-objcflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
     list(APPEND FFmpeg_LDFLAGS "--extra-ldflags=-mmacosx-version-min=${CMAKE_OSX_DEPLOYMENT_TARGET}")
 endif()
+
 if(FFmpeg_DEBUG)
     list(APPEND FFmpeg_CFLAGS "--extra-cflags=-g")
     list(APPEND FFmpeg_CXXFLAGS "--extra-cxxflags=-g")
     list(APPEND FFmpeg_OBJCFLAGS "--extra-objcflags=-g")
     list(APPEND FFmpeg_LDFLAGS "--extra-ldflags=-g")
 endif()
+
 set(FFmpeg_CONFIGURE_ARGS
     --prefix=${CMAKE_INSTALL_PREFIX}
     --disable-doc
@@ -156,6 +161,7 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-encoder=ac3
         --enable-encoder=dnxhd
         --enable-encoder=eac3
+        --enable-encoder=libsvtav1
         --enable-encoder=mjpeg
         --enable-encoder=mpeg2video
         --enable-encoder=mpeg4
@@ -303,11 +309,17 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-protocol=https
         --enable-protocol=md5
         --enable-protocol=pipe
-        --enable-protocol=tls)
+        --enable-protocol=tls
+        --disable-filters)
 endif()
 if(NOT WIN32)
     list(APPEND FFmpeg_CONFIGURE_ARGS
         --x86asmexe=${CMAKE_INSTALL_PREFIX}/bin/nasm)
+endif()
+if(toucan_svt-av1)
+    list(APPEND FFmpeg_CONFIGURE_ARGS
+        --enable-libsvtav1
+        --pkg-config-flags=--with-path=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 endif()
 if(toucan_NET)
     list(APPEND FFmpeg_CONFIGURE_ARGS
@@ -325,6 +337,7 @@ if(FFmpeg_DEBUG)
         --enable-debug=3
         --assert-level=2)
 endif()
+
 include(ProcessorCount)
 ProcessorCount(FFmpeg_BUILD_JOBS)
 if(WIN32)
@@ -366,34 +379,34 @@ else()
     set(FFmpeg_INSTALL make install)
     if(APPLE)
         list(APPEND FFmpeg_INSTALL
-            COMMAND install_name_tool -id @rpath/libavcodec.61.3.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.dylib
-            COMMAND install_name_tool -id @rpath/libavdevice.61.1.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.61.dylib
-            COMMAND install_name_tool -id @rpath/libavformat.61.1.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavformat.61.dylib
-            COMMAND install_name_tool -id @rpath/libavutil.59.8.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib
-            COMMAND install_name_tool -id @rpath/libswresample.5.1.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.dylib
-            COMMAND install_name_tool -id @rpath/libswscale.8.1.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libswscale.8.dylib
+            COMMAND install_name_tool -id @rpath/libavcodec.61.19.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.dylib
+            COMMAND install_name_tool -id @rpath/libavdevice.61.3.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.61.dylib
+            COMMAND install_name_tool -id @rpath/libavformat.61.7.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavformat.61.dylib
+            COMMAND install_name_tool -id @rpath/libavutil.59.39.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib
+            COMMAND install_name_tool -id @rpath/libswresample.5.3.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.dylib
+            COMMAND install_name_tool -id @rpath/libswscale.8.3.100.dylib ${CMAKE_INSTALL_PREFIX}/lib/libswscale.8.dylib
             COMMAND install_name_tool
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.dylib @rpath/libswresample.5.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib @rpath/libavutil.59.dylib
-                ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.3.100.dylib
+                ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.19.100.dylib
             COMMAND install_name_tool
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libswscale.8.dylib @rpath/libswscale.8.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavformat.61.dylib @rpath/libavformat.61.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.dylib @rpath/libavcodec.61.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.dylib @rpath/libswresample.5.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib @rpath/libavutil.59.dylib
-                ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.61.1.100.dylib
+                ${CMAKE_INSTALL_PREFIX}/lib/libavdevice.61.3.100.dylib
             COMMAND install_name_tool
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavcodec.61.dylib @rpath/libavcodec.61.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.dylib @rpath/libswresample.5.dylib
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib @rpath/libavutil.59.dylib
-                ${CMAKE_INSTALL_PREFIX}/lib/libavformat.61.1.100.dylib
+                ${CMAKE_INSTALL_PREFIX}/lib/libavformat.61.7.100.dylib
             COMMAND install_name_tool
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib @rpath/libavutil.59.dylib
-                ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.1.100.dylib
+                ${CMAKE_INSTALL_PREFIX}/lib/libswresample.5.3.100.dylib
             COMMAND install_name_tool
                 -change ${CMAKE_INSTALL_PREFIX}/lib/libavutil.59.dylib @rpath/libavutil.59.dylib
-                ${CMAKE_INSTALL_PREFIX}/lib/libswscale.8.1.100.dylib)
+                ${CMAKE_INSTALL_PREFIX}/lib/libswscale.8.3.100.dylib)
     endif()
 endif()
 
@@ -401,8 +414,8 @@ ExternalProject_Add(
     FFmpeg
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/FFmpeg
     DEPENDS ${FFmpeg_DEPS}
-    URL https://ffmpeg.org/releases/ffmpeg-7.0.1.tar.bz2
-    CONFIGURE_COMMAND ${FFmpeg_CONFIGURE}
+    URL https://ffmpeg.org/releases/ffmpeg-7.1.tar.bz2
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env PKG_CONFIG_PATH=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig ${FFmpeg_CONFIGURE}
     BUILD_COMMAND ${FFmpeg_BUILD}
     INSTALL_COMMAND ${FFmpeg_INSTALL}
     BUILD_IN_SOURCE 1)

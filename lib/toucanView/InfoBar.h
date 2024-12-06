@@ -14,6 +14,7 @@ namespace toucan
     class App;
     class File;
 
+    //! Information tool bar.
     class InfoBar : public dtk::IWidget
     {
     protected:
@@ -25,6 +26,7 @@ namespace toucan
     public:
         virtual ~InfoBar();
 
+        //! Create a new tool bar.
         static std::shared_ptr<InfoBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

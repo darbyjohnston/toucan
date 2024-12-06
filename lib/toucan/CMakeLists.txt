@@ -1,6 +1,10 @@
 set(HEADERS
+    CmdLine.h
+    CmdLineInline.h
     Comp.h
+    FFmpeg.h
     FFmpegRead.h
+    FFmpegWrite.h
     ImageEffect.h
     ImageEffectHost.h
     ImageGraph.h
@@ -19,8 +23,11 @@ set(HEADERS
 set(HEADERS_PRIVATE
     ImageEffect_p.h)
 set(SOURCE
+    CmdLine.cpp
     Comp.cpp
+    FFmpeg.cpp
     FFmpegRead.cpp
+    FFmpegWrite.cpp
     ImageEffect.cpp
     ImageEffectHost.cpp
     ImageGraph.cpp

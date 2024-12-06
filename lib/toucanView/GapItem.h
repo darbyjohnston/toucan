@@ -9,6 +9,7 @@
 
 namespace toucan
 {
+    //! Timeline gap item.
     class GapItem : public IItem
     {
     protected:
@@ -21,6 +22,7 @@ namespace toucan
     public:
         virtual ~GapItem();
 
+        //! Create a new item.
         static std::shared_ptr<GapItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,

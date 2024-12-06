@@ -59,7 +59,7 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label , event.displayScale);
+            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
             _draw.glyphs.clear();

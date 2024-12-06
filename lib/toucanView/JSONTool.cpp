@@ -26,6 +26,7 @@ namespace toucan
         _text = dtk::split(item->to_json_string(), { '\n' });
 
         _label = dtk::Label::create(context);
+        _label->setFontRole(dtk::FontRole::Mono);
         _label->setMarginRole(dtk::SizeRole::MarginSmall);
 
         _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
@@ -111,9 +112,6 @@ namespace toucan
         _scrollLayout->setSpacingRole(dtk::SizeRole::None);
         _scrollWidget->setWidget(_scrollLayout);
 
-        _nothingSelectedLabel = dtk::Label::create(context, "Nothing selected", _scrollLayout);
-        _nothingSelectedLabel->setMarginRole(dtk::SizeRole::MarginSmall);
-
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _bottomLayout = dtk::HorizontalLayout::create(context, _layout);
@@ -182,7 +180,6 @@ namespace toucan
                                 widget->setFilter(_searchBox->getText());
                                 _widgets.push_back(widget);
                             }
-                            _nothingSelectedLabel->setVisible(selection.empty());
                         });
                 }
                 else

@@ -11,7 +11,7 @@ namespace toucan
     class File;
     class Viewport;
 
-    //! File tab.
+    //! Timeline file tab.
     class FileTab : public dtk::IWidget
     {
     protected:
@@ -24,7 +24,7 @@ namespace toucan
     public:
         virtual ~FileTab();
 
-        //! Create a new file tab.
+        //! Create a new tab.
         static std::shared_ptr<FileTab> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
