@@ -5,8 +5,8 @@
 
 #include "IToolWidget.h"
 
-#include <toucan/FFmpegWrite.h>
-#include <toucan/ImageGraph.h>
+#include <toucanRender/FFmpegWrite.h>
+#include <toucanRender/ImageGraph.h>
 
 #include <dtk/ui/ComboBox.h>
 #include <dtk/ui/Divider.h>

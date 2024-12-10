@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <toucan/CmdLine.h>
-#include <toucan/ImageEffectHost.h>
-#include <toucan/ImageGraph.h>
-#include <toucan/TimelineWrapper.h>
+#include <toucanRender/ImageEffectHost.h>
+#include <toucanRender/ImageGraph.h>
+#include <toucanRender/TimelineWrapper.h>
+#include <toucanUtil/CmdLine.h>
 
 #include <OpenImageIO/imagebuf.h>
 

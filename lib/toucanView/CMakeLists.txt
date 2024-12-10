@@ -59,6 +59,6 @@ set(SOURCE
     WindowModel.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
-target_link_libraries(toucanView PUBLIC toucan dtk::dtkUI)
+target_link_libraries(toucanView PUBLIC toucanRender dtk::dtkUI)
 set_target_properties(toucanView PROPERTIES FOLDER lib)
 add_dependencies(toucanView ${TOUCAN_PLUGINS})

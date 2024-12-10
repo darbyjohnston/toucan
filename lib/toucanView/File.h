@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <toucan/ImageEffectHost.h>
-#include <toucan/ImageGraph.h>
-#include <toucan/TimelineWrapper.h>
+#include <toucanRender/ImageEffectHost.h>
+#include <toucanRender/ImageGraph.h>
+#include <toucanRender/TimelineWrapper.h>
 
 #include <dtk/core/Context.h>
 #include <dtk/core/Image.h>

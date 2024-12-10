@@ -5,7 +5,7 @@ set(SOURCE
     main.cpp)
 
 add_executable(toucan-filmstrip ${HEADERS} ${SOURCE})
-target_link_libraries(toucan-filmstrip toucan)
+target_link_libraries(toucan-filmstrip toucanRender)
 set_target_properties(toucan-filmstrip PROPERTIES FOLDER bin)
 add_dependencies(toucan-filmstrip ${TOUCAN_PLUGINS})
 

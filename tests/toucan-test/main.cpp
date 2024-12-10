@@ -5,13 +5,12 @@
 #include <toucanEditTest/StackTest.h>
 #endif // toucan_EDIT
 
-#include <toucanTest/CompTest.h>
-#include <toucanTest/ImageGraphTest.h>
-#include <toucanTest/PropertySetTest.h>
-#include <toucanTest/ReadTest.h>
-#include <toucanTest/UtilTest.h>
+#include <toucanUtilTest/FileTest.h>
 
-#include <toucan/ImageEffectHost.h>
+#include <toucanRenderTest/CompTest.h>
+#include <toucanRenderTest/ImageGraphTest.h>
+#include <toucanRenderTest/PropertySetTest.h>
+#include <toucanRenderTest/ReadTest.h>
 
 #include <iostream>
 
@@ -35,12 +34,13 @@ int main(int argc, char** argv)
     searchPath.push_back(parentPath / ".." / "..");
 #endif // _WINDOWS
     auto host = std::make_shared<ImageEffectHost>(searchPath);
-    
+
+    fileTest(path);
+
     compTest(path);
     propertySetTest();
     readTest(path);
     imageGraphTest(path, host);
-    utilTest(path);
 
 #if defined(toucan_EDIT)
     stackTest();

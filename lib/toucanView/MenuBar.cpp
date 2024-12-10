@@ -9,7 +9,7 @@
 #include "SelectionModel.h"
 #include "ViewModel.h"
 
-#include <toucan/TimelineAlgo.h>
+#include <toucanRender/TimelineAlgo.h>
 
 #include <dtk/ui/Action.h>
 #include <dtk/ui/FileBrowser.h>

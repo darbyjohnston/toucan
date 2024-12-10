@@ -3,8 +3,6 @@
 
 #include "ThumbnailGenerator.h"
 
-#include <toucan/ImageGraph.h>
-
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan

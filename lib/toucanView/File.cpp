@@ -8,7 +8,7 @@
 #include "ThumbnailGenerator.h"
 #include "ViewModel.h"
 
-#include <toucan/TimelineWrapper.h>
+#include <toucanRender/TimelineWrapper.h>
 
 #include <dtk/core/Math.h>
 

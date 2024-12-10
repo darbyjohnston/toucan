@@ -1,7 +1,5 @@
-set(LIBS toucanTest)
-
 add_executable(toucan-test main.cpp)
-target_link_libraries(toucan-test ${LIBS})
+target_link_libraries(toucan-test toucanRenderTest toucanUtilTest)
 set_target_properties(toucan-test PROPERTIES FOLDER tests)
 add_dependencies(toucan-test ${TOUCAN_PLUGINS})
 

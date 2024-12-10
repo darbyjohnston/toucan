@@ -3,8 +3,10 @@
 
 #include "App.h"
 
-#include <toucan/FFmpegWrite.h>
-#include <toucan/Util.h>
+#include <toucanRender/FFmpegWrite.h>
+#include <toucanUtil/File.h>
+#include <toucanUtil/Math.h>
+#include <toucanUtil/String.h>
 
 #include <OpenImageIO/imagebufalgo.h>
 
