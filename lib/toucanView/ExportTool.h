@@ -47,7 +47,16 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        void _export();
+        enum class ExportType
+        {
+            Sequence,
+            Still,
+            Movie
+        };
+
+        void _export(ExportType);
+        void _exportFrame();
+
         void _widgetUpdate();
 
         std::shared_ptr<ImageEffectHost> _host;
@@ -55,6 +64,7 @@ namespace toucan
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _time;
         std::shared_ptr<ImageGraph> _graph;
+        IMATH_NAMESPACE::V2d _imageSize = IMATH_NAMESPACE::V2d(0, 0);
         std::vector<std::string> _movieCodecs;
         std::shared_ptr<ffmpeg::Write> _ffWrite;
 

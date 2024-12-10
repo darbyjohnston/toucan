@@ -216,43 +216,19 @@ namespace toucan
         _exportSequenceButton->setClickedCallback(
             [this]
             {
-                _timeRange = _file->getPlaybackModel()->getInOutRange();
-                _export();
+                _export(ExportType::Sequence);
             });
 
         _exportStillButton->setClickedCallback(
             [this]
             {
-                _timeRange = OTIO_NS::TimeRange(
-                    _file->getPlaybackModel()->getCurrentTime(),
-                    OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
-                _export();
+                _export(ExportType::Still);
             });
 
         _exportMovieButton->setClickedCallback(
             [this]
             {
-                _timeRange = _file->getPlaybackModel()->getInOutRange();
-                const std::string baseName = _movieBaseNameEdit->getText();
-                const std::string extension = _movieExtensionEdit->getText();
-                const std::filesystem::path path = _outputPathEdit->getPath() / (baseName + extension);
-                const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
-                ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
-                ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
-                try
-                {
-                    _ffWrite = std::make_shared<ffmpeg::Write>(
-                        path,
-                        OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
-                        _timeRange,
-                        videoCodec);
-                    _export();
-                }
-                catch (const std::exception& e)
-                {
-                    auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
-                    dialogSystem->message("ERROR", e.what(), getWindow());
-                }
+                _export(ExportType::Movie);
             });
 
         _timer = dtk::Timer::create(context);
@@ -263,18 +239,6 @@ namespace toucan
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
-                if (_file)
-                {
-                    _graph = std::make_shared<ImageGraph>(
-                        _file->getPath(),
-                        _file->getTimelineWrapper());
-                }
-                else
-                {
-                    _timeRange = OTIO_NS::TimeRange();
-                    _time = OTIO_NS::RationalTime();
-                    _graph.reset();
-                }
                 _exportSequenceButton->setEnabled(_file.get());
                 _exportStillButton->setEnabled(_file.get());
                 _exportMovieButton->setEnabled(_file.get());
@@ -320,9 +284,51 @@ namespace toucan
         _setSizeHint(_layout->getSizeHint());
     }
 
-    void ExportWidget::_export()
+    void ExportWidget::_export(ExportType type)
     {
-        _time = _timeRange.start_time();
+        if (!_file)
+            return;
+
+        _graph = std::make_shared<ImageGraph>(
+            _file->getPath(),
+            _file->getTimelineWrapper());
+        _imageSize = _graph->getImageSize();
+
+        switch (type)
+        {
+        case ExportType::Sequence:
+            _timeRange = _file->getPlaybackModel()->getInOutRange();
+            break;
+        case ExportType::Still:
+            _timeRange = OTIO_NS::TimeRange(
+                _file->getPlaybackModel()->getCurrentTime(),
+                OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
+            break;
+        case ExportType::Movie:
+        {
+            _timeRange = _file->getPlaybackModel()->getInOutRange();
+            const std::string baseName = _movieBaseNameEdit->getText();
+            const std::string extension = _movieExtensionEdit->getText();
+            const std::filesystem::path path = _outputPathEdit->getPath() / (baseName + extension);
+            ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
+            ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
+            try
+            {
+                _ffWrite = std::make_shared<ffmpeg::Write>(
+                    path,
+                    OIIO::ImageSpec(_imageSize.x, _imageSize.y, 3),
+                    _timeRange,
+                    videoCodec);
+            }
+            catch (const std::exception& e)
+            {
+                auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
+                dialogSystem->message("ERROR", e.what(), getWindow());
+            }
+            break;
+        }
+        default: break;
+        }
 
         _dialog = dtk::ProgressDialog::create(
             getContext(),
@@ -333,64 +339,73 @@ namespace toucan
             [this]
             {
                 _timer->stop();
+                _graph.reset();
                 _ffWrite.reset();
                 _dialog.reset();
             });
         _dialog->show();
 
+        _time = _timeRange.start_time();
         _timer->start(
             std::chrono::microseconds(0),
             [this]
             {
-                if (auto node = _graph->exec(_host, _time))
-                {
-                    const auto buf = node->exec();
-                    if (_ffWrite)
-                    {
-                        try
-                        {
-                            _ffWrite->writeImage(buf, _time);
-                        }
-                        catch (const std::exception& e)
-                        {
-                            if (_dialog)
-                            {
-                                _dialog->close();
-                            }
-                            auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
-                            dialogSystem->message("ERROR", e.what(), getWindow());
-                        }
-                    }
-                    else
-                    {
-                        const std::string fileName = getSequenceFrame(
-                            _outputPathEdit->getPath().string(),
-                            _imageBaseNameEdit->getText(),
-                            _time.to_frames(),
-                            _imagePaddingEdit->getValue(),
-                            _imageExtensionEdit->getText());
-                        buf.write(fileName);
-                    }
-                }
+                _exportFrame();
+            });
+    }
 
+    void ExportWidget::_exportFrame()
+    {
+        if (auto node = _graph->exec(_host, _time))
+        {
+            const auto buf = node->exec();
+            try
+            {
+                if (_ffWrite)
+                {
+                    _ffWrite->writeImage(buf, _time);
+                }
+                else
+                {
+                    const std::string fileName = getSequenceFrame(
+                        _outputPathEdit->getPath().string(),
+                        _imageBaseNameEdit->getText(),
+                        _time.to_frames(),
+                        _imagePaddingEdit->getValue(),
+                        _imageExtensionEdit->getText());
+                    buf.write(fileName);
+                }
+            }
+            catch (const std::exception& e)
+            {
                 if (_dialog)
                 {
-                    const OTIO_NS::RationalTime end = _timeRange.end_time_inclusive();
-                    if (_time < end)
-                    {
-                        _time += OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
-                        const OTIO_NS::RationalTime duration = _timeRange.duration();
-                        const double v = duration.value() > 0.0 ?
-                            (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
-                            0.0;
-                        _dialog->setValue(v);
-                    }
-                    else
-                    {
-                        _dialog->close();
-                    }
+                    _dialog->close();
                 }
-            });
+                getContext()->getSystem<dtk::DialogSystem>()->message(
+                    "ERROR",
+                    e.what(),
+                    getWindow());
+            }
+        }
+
+        if (_dialog)
+        {
+            const OTIO_NS::RationalTime end = _timeRange.end_time_inclusive();
+            if (_time < end)
+            {
+                _time += OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
+                const OTIO_NS::RationalTime duration = _timeRange.duration();
+                const double v = duration.value() > 0.0 ?
+                    (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
+                    0.0;
+                _dialog->setValue(v);
+            }
+            else
+            {
+                _dialog->close();
+            }
+        }
     }
 
     void ExportWidget::_widgetUpdate()

@@ -30,8 +30,8 @@ namespace toucan
     {
         if (auto context = _context.lock())
         {
-            auto files = _files->get();
             auto file = std::make_shared<File>(context, _host, path);
+            auto files = _files->get();
             files.push_back(file);
             _files->setIfChanged(files);
             const int index = files.size() - 1;

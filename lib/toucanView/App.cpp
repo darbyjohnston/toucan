@@ -68,20 +68,12 @@ namespace toucan
             "toucan-view",
             dtk::Size2I(1920, 1080));
         addWindow(_window);
+        _window->show();
 
         if (!_path.empty())
         {
-            try
-            {
-                _filesModel->open(_path);
-            }
-            catch (const std::exception& e)
-            {
-                _context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), _window);
-            }
+            open(_path);
         }
-
-        _window->show();
     }
 
     App::~App()
@@ -114,5 +106,20 @@ namespace toucan
     const std::shared_ptr<WindowModel>& App::getWindowModel() const
     {
         return _windowModel;
+    }
+
+    void App::open(const std::filesystem::path& path)
+    {
+        try
+        {
+            _filesModel->open(path);
+        }
+        catch (const std::exception& e)
+        {
+            _context->getSystem<dtk::DialogSystem>()->message(
+                "ERROR",
+                e.what(),
+                _window);
+        }
     }
 }

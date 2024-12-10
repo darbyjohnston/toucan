@@ -53,38 +53,64 @@ namespace toucan
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                auto read = std::make_shared<ReadNode>(
-                    _timelineWrapper->getMediaPath(externalRef->target_url()),
-                    _timelineWrapper->getMemoryReference(externalRef->target_url()));
-                const auto& spec = read->getSpec();
-                if (spec.width > 0)
+                try
                 {
-                    _imageSize.x = spec.width;
-                    _imageSize.y = spec.height;
-                    _imageChannels = spec.nchannels;
-                    _imageDataType = toImageDataType(spec.format);
-                    break;
+                    auto read = std::make_shared<ReadNode>(
+                        _timelineWrapper->getMediaPath(externalRef->target_url()),
+                        _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                    const auto& spec = read->getSpec();
+                    if (spec.width > 0)
+                    {
+                        _imageSize.x = spec.width;
+                        _imageSize.y = spec.height;
+                        _imageChannels = spec.nchannels;
+                        _imageDataType = toImageDataType(spec.format);
+                        break;
+                    }
+                }
+                catch (const std::exception& e)
+                {
+                    if (_options.log)
+                    {
+                        _options.log->log(
+                            "ImageGraph",
+                            e.what(),
+                            MessageLogType::Error);
+                    }
                 }
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
-                auto read = std::make_shared<SequenceReadNode>(
-                    _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
-                    sequenceRef->name_prefix(),
-                    sequenceRef->name_suffix(),
-                    sequenceRef->start_frame(),
-                    sequenceRef->frame_step(),
-                    sequenceRef->rate(),
-                    sequenceRef->frame_zero_padding(),
-                    _timelineWrapper->getMemoryReferences());
-                const auto& spec = read->getSpec();
-                if (spec.width > 0)
+                try
                 {
-                    _imageSize.x = spec.width;
-                    _imageSize.y = spec.height;
-                    _imageChannels = spec.nchannels;
-                    _imageDataType = toImageDataType(spec.format);
-                    break;
+                    auto read = std::make_shared<SequenceReadNode>(
+                        _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
+                        sequenceRef->name_prefix(),
+                        sequenceRef->name_suffix(),
+                        sequenceRef->start_frame(),
+                        sequenceRef->frame_step(),
+                        sequenceRef->rate(),
+                        sequenceRef->frame_zero_padding(),
+                        _timelineWrapper->getMemoryReferences());
+                    const auto& spec = read->getSpec();
+                    if (spec.width > 0)
+                    {
+                        _imageSize.x = spec.width;
+                        _imageSize.y = spec.height;
+                        _imageChannels = spec.nchannels;
+                        _imageDataType = toImageDataType(spec.format);
+                        break;
+                    }
+                }
+                catch (const std::exception& e)
+                {
+                    if (_options.log)
+                    {
+                        _options.log->log(
+                            "ImageGraph",
+                            e.what(),
+                            MessageLogType::Error);
+                    }
                 }
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
@@ -143,7 +169,7 @@ namespace toucan
 
                     // Get the track effects.
                     const auto& effects = track->effects();
-                    if (!effects.empty())
+                    if (trackNode && !effects.empty())
                     {
                         trackNode = _effects(host, effects, trackNode);
                     }
@@ -226,7 +252,7 @@ namespace toucan
         }
 
         // Handle transitions.
-        if (item)
+        if (item && out)
         {
             if (auto prevTransition = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Transition>(prev))
             {
@@ -323,34 +349,65 @@ namespace toucan
                 std::shared_ptr<ReadNode> read;
                 if (!_loadCache.get(externalRef, read))
                 {
-                    read = std::make_shared<ReadNode>(
-                        _timelineWrapper->getMediaPath(externalRef->target_url()),
-                        _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                    try
+                    {
+                        read = std::make_shared<ReadNode>(
+                            _timelineWrapper->getMediaPath(externalRef->target_url()),
+                            _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                    }
+                    catch (const std::exception& e)
+                    {
+                        if (_options.log)
+                        {
+                            _options.log->log(
+                                "ImageGraph",
+                                e.what(),
+                                MessageLogType::Error);
+                        }
+                    }
                     _loadCache.add(externalRef, read);
                 }
-                out = read;
 
                 //! \bug Workaround for when the available range does not match
                 //! the range in the media.
-                const OTIO_NS::TimeRange& timeRange = read->getTimeRange();
-                const auto availableOpt = externalRef->available_range();
-                if (availableOpt.has_value() &&
-                    !availableOpt.value().start_time().strictly_equal(timeRange.start_time()))
+                if (read)
                 {
-                    timeOffset += availableOpt.value().start_time() - timeRange.start_time();
+                    const OTIO_NS::TimeRange& timeRange = read->getTimeRange();
+                    const auto availableOpt = externalRef->available_range();
+                    if (availableOpt.has_value() &&
+                        !availableOpt.value().start_time().strictly_equal(timeRange.start_time()))
+                    {
+                        timeOffset += availableOpt.value().start_time() - timeRange.start_time();
+                    }
                 }
+
+                out = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
-                auto read = std::make_shared<SequenceReadNode>(
-                    _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
-                    sequenceRef->name_prefix(),
-                    sequenceRef->name_suffix(),
-                    sequenceRef->start_frame(),
-                    sequenceRef->frame_step(),
-                    sequenceRef->rate(),
-                    sequenceRef->frame_zero_padding(),
-                    _timelineWrapper->getMemoryReferences());
+                std::shared_ptr<SequenceReadNode> read;
+                try
+                {
+                    read = std::make_shared<SequenceReadNode>(
+                        _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
+                        sequenceRef->name_prefix(),
+                        sequenceRef->name_suffix(),
+                        sequenceRef->start_frame(),
+                        sequenceRef->frame_step(),
+                        sequenceRef->rate(),
+                        sequenceRef->frame_zero_padding(),
+                        _timelineWrapper->getMemoryReferences());
+                }
+                catch (const std::exception& e)
+                {
+                    if (_options.log)
+                    {
+                        _options.log->log(
+                            "ImageGraph",
+                            e.what(),
+                            MessageLogType::Error);
+                    }
+                }
                 out = read;
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
@@ -367,7 +424,7 @@ namespace toucan
 
         // Get the effects.
         const auto& effects = item->effects();
-        if (!effects.empty())
+        if (out && !effects.empty())
         {
             out = _effects(host, effects, out);
         }

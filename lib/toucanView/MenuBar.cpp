@@ -12,9 +12,7 @@
 #include <toucan/TimelineAlgo.h>
 
 #include <dtk/ui/Action.h>
-#include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
-#include <dtk/ui/MessageDialog.h>
 #include <dtk/ui/RecentFilesModel.h>
 #include <dtk/core/Format.h>
 
@@ -94,7 +92,7 @@ namespace toucan
                         file.string(),
                         [this, file]
                         {
-                            _filesModel->open(file);
+                            _app.lock()->open(file);
                             _menus["File"]->close();
                         });
                     _menus["RecentFiles"]->addItem(item);
@@ -155,17 +153,7 @@ namespace toucan
                             getWindow(),
                             [this](const std::filesystem::path& path)
                             {
-                                if (auto context = getContext())
-                                {
-                                    try
-                                    {
-                                        _filesModel->open(path);
-                                    }
-                                    catch (const std::exception& e)
-                                    {
-                                        context->getSystem<dtk::DialogSystem>()->message("ERROR", e.what(), getWindow());
-                                    }
-                                }
+                                _app.lock()->open(path);
                             },
                             _filesModel->getRecentFilesModel());
                     }
