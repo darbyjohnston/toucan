@@ -12,6 +12,7 @@ namespace toucan
         const std::string& message,
         MessageLogType type)
     {
+        std::unique_lock<std::mutex> lock(_mutex);
         switch (type)
         {
         case MessageLogType::Info:

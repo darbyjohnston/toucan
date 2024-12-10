@@ -19,22 +19,23 @@ namespace toucan
         _path(path),
         _memoryReader(getMemoryReader(memoryReference))
     {
-        // Open the file ane get information.
-        try
+        // Open the file and get information.
+        if (ffmpeg::hasVideoExtension(path.extension().string()))
         {
             _ffRead = std::make_unique<ffmpeg::Read>(path, memoryReference);
             _spec = _ffRead->getSpec();
             _timeRange = _ffRead->getTimeRange();
         }
-        catch (const std::exception&)
-        {}
-        if (!_ffRead)
+        else
         {
             _input = OIIO::ImageInput::open(_path.string(), nullptr, _memoryReader.get());
-            if (_input)
+            if (!_input)
             {
-                _spec = _input->spec();
+                std::stringstream ss;
+                ss << "Cannot open file: " << _path.string();
+                throw std::runtime_error(ss.str());
             }
+            _spec = _input->spec();
         }
     }
 

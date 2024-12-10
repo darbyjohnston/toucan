@@ -5,6 +5,8 @@
 
 #include <dtk/ui/App.h>
 
+#include <filesystem>
+
 namespace toucan
 {
     class FilesModel;
@@ -41,6 +43,9 @@ namespace toucan
 
         //! Get the window model.
         const std::shared_ptr<WindowModel>& getWindowModel() const;
+
+        //! Open a file.
+        void open(const std::filesystem::path&);
 
     private:
         std::shared_ptr<MessageLog> _messageLog;

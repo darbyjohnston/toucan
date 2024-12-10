@@ -25,7 +25,7 @@ namespace toucan
 
         std::vector<std::string> getVideoExtensions()
         {
-            return std::vector<std::string>({ ".mov", ".mp4", ".m4v" });
+            return std::vector<std::string>({ ".mov", ".mp4", ".m4v", ".y4m" });
         }
 
         bool hasVideoExtension(const std::string& value)

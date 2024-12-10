@@ -5,6 +5,8 @@
 
 #include "Util.h"
 
+#include <OpenImageIO/imagebufalgo.h>
+
 #include <iostream>
 #include <sstream>
 
@@ -173,7 +175,30 @@ namespace toucan
 
         void Write::writeImage(const OIIO::ImageBuf& buf, const OTIO_NS::RationalTime& time)
         {
-            const auto& spec = buf.spec();
+            auto spec = buf.spec();
+            const OIIO::ImageBuf* bufP = &buf;
+            OIIO::ImageBuf tmp;
+            switch (spec.format.basetype)
+            {
+            case OIIO::TypeDesc::INT8:
+                spec.format.basetype = OIIO::TypeDesc::UINT8;
+                break;
+            case OIIO::TypeDesc::INT16:
+            case OIIO::TypeDesc::UINT32:
+            case OIIO::TypeDesc::INT32:
+            case OIIO::TypeDesc::UINT64:
+            case OIIO::TypeDesc::INT64:
+            case OIIO::TypeDesc::HALF:
+            case OIIO::TypeDesc::FLOAT:
+                spec.format.basetype = OIIO::TypeDesc::UINT16;
+                break;
+            }
+            if (buf.spec().format.basetype != spec.format.basetype)
+            {
+                tmp = OIIO::ImageBufAlgo::copy(buf, spec.format);
+                bufP = &tmp;
+            }
+
             AVPixelFormat avPixelFormatIn = AV_PIX_FMT_NONE;
             switch (spec.nchannels)
             {
@@ -251,7 +276,7 @@ namespace toucan
             av_image_fill_arrays(
                 _avFrame2->data,
                 _avFrame2->linesize,
-                reinterpret_cast<const uint8_t*>(buf.localpixels()),
+                reinterpret_cast<const uint8_t*>(bufP->localpixels()),
                 _avPixelFormatIn,
                 spec.width,
                 spec.height,

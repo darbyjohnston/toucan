@@ -4,6 +4,7 @@
 #pragma once
 
 #include <memory>
+#include <mutex>
 #include <string>
 
 namespace toucan
@@ -24,5 +25,8 @@ namespace toucan
             const std::string& prefix,
             const std::string& message,
             MessageLogType = MessageLogType::Info);
+
+    private:
+        std::mutex _mutex;
     };
 }

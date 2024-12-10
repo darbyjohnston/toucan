@@ -201,7 +201,7 @@
                                 "OTIO_SCHEMA": "Effect.1",
                                 "effect_name": "toucan:Blur",
                                 "metadata": {
-                                    "radius": 50.0
+                                    "radius": 10.0
                                 }
                             }
                         ],
@@ -245,7 +245,7 @@
                                 "effect_name": "toucan:UnsharpMask",
                                 "metadata": {
                                     "kernel": "gaussian",
-                                    "width": 50.0,
+                                    "width": 10.0,
                                     "contrast": 1.0,
                                     "threshold": 0.0
                                 }
