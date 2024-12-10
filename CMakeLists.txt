@@ -45,12 +45,12 @@ else()
 endif()
 
 set(TOUCAN_PLUGINS
-    toucanColorSpace
-    toucanDraw
-    toucanFilter
-    toucanGenerator
-    toucanTransform
-    toucanTransition)
+    toucanColorPlugin
+    toucanDrawPlugin
+    toucanFilterPlugin
+    toucanGeneratorPlugin
+    toucanTransformPlugin
+    toucanTransitionPlugin)
 
 enable_testing()
 

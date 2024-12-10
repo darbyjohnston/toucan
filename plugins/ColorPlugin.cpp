@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "ColorSpacePlugin.h"
+#include "ColorPlugin.h"
 
 #include "Util.h"
 
 #include <OpenImageIO/imagebufalgo.h>
 
-ColorSpacePlugin::ColorSpacePlugin(const std::string& group, const std::string& name) :
+ColorPlugin::ColorPlugin(const std::string& group, const std::string& name) :
     Plugin(group, name)
 {}
 
-ColorSpacePlugin::~ColorSpacePlugin()
+ColorPlugin::~ColorPlugin()
 {}
 
-OfxStatus ColorSpacePlugin::_describeAction(OfxImageEffectHandle handle)
+OfxStatus ColorPlugin::_describeAction(OfxImageEffectHandle handle)
 {
     Plugin::_describeAction(handle);
 
@@ -29,7 +29,7 @@ OfxStatus ColorSpacePlugin::_describeAction(OfxImageEffectHandle handle)
     return kOfxStatOK;
 }
 
-OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
+OfxStatus ColorPlugin::_describeInContextAction(OfxImageEffectHandle handle, OfxPropertySetHandle inArgs)
 {
     Plugin::_describeInContextAction(handle, inArgs);
 
@@ -79,7 +79,7 @@ OfxStatus ColorSpacePlugin::_describeInContextAction(OfxImageEffectHandle handle
     return kOfxStatOK;
 }
 
-OfxStatus ColorSpacePlugin::_renderAction(
+OfxStatus ColorPlugin::_renderAction(
     OfxImageEffectHandle handle ,
     OfxPropertySetHandle inArgs,
     OfxPropertySetHandle outArgs)
@@ -121,7 +121,7 @@ OfxStatus ColorSpacePlugin::_renderAction(
 ColorConvertPlugin* ColorConvertPlugin::_plugin = nullptr;
 
 ColorConvertPlugin::ColorConvertPlugin() :
-    ColorSpacePlugin("toucan", "ColorConvert")
+    ColorPlugin("toucan", "ColorConvert")
 {}
 
 ColorConvertPlugin::~ColorConvertPlugin()
@@ -149,7 +149,7 @@ OfxStatus ColorConvertPlugin::_describeInContextAction(
     OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs)
 {
-    ColorSpacePlugin::_describeInContextAction(handle, inArgs);
+    ColorPlugin::_describeInContextAction(handle, inArgs);
 
     OfxParamSetHandle paramSet;
     _effectSuite->getParamSet(handle, &paramSet);
@@ -183,7 +183,7 @@ OfxStatus ColorConvertPlugin::_describeInContextAction(
 
 OfxStatus ColorConvertPlugin::_createInstance(OfxImageEffectHandle handle)
 {
-    ColorSpacePlugin::_createInstance(handle);
+    ColorPlugin::_createInstance(handle);
 
     OfxParamSetHandle paramSet;
     _effectSuite->getParamSet(handle, &paramSet);
@@ -252,7 +252,7 @@ OfxStatus ColorConvertPlugin::_render(
 PremultPlugin* PremultPlugin::_plugin = nullptr;
 
 PremultPlugin::PremultPlugin() :
-    ColorSpacePlugin("toucan", "Premult")
+    ColorPlugin("toucan", "Premult")
 {}
 
 PremultPlugin::~PremultPlugin()
@@ -290,7 +290,7 @@ OfxStatus PremultPlugin::_render(
 UnpremultPlugin* UnpremultPlugin::_plugin = nullptr;
 
 UnpremultPlugin::UnpremultPlugin() :
-    ColorSpacePlugin("toucan", "Unpremult")
+    ColorPlugin("toucan", "Unpremult")
 {}
 
 UnpremultPlugin::~UnpremultPlugin()

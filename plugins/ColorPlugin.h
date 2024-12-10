@@ -8,12 +8,12 @@
 #include <OpenImageIO/color.h>
 #include <OpenImageIO/imagebuf.h>
 
-class ColorSpacePlugin : public Plugin
+class ColorPlugin : public Plugin
 {
 public:
-    ColorSpacePlugin(const std::string& group, const std::string& name);
+    ColorPlugin(const std::string& group, const std::string& name);
 
-    virtual ~ColorSpacePlugin() = 0;
+    virtual ~ColorPlugin() = 0;
 
 protected:
     virtual OfxStatus _render(
@@ -33,7 +33,7 @@ protected:
         OfxPropertySetHandle outArgs) override;
 };
 
-class ColorConvertPlugin : public ColorSpacePlugin
+class ColorConvertPlugin : public ColorPlugin
 {
 public:
     ColorConvertPlugin();
@@ -71,7 +71,7 @@ private:
     std::map<std::string, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
 };
 
-class PremultPlugin : public ColorSpacePlugin
+class PremultPlugin : public ColorPlugin
 {
 public:
     PremultPlugin();
@@ -98,7 +98,7 @@ private:
     static PremultPlugin* _plugin;
 };
 
-class UnpremultPlugin : public ColorSpacePlugin
+class UnpremultPlugin : public ColorPlugin
 {
 public:
     UnpremultPlugin();
