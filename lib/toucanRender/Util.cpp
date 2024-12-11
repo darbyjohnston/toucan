@@ -1,52 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "File.h"
+#include "Util.h"
 
-//#include <algorithm>
-//#include <cctype>
-//#include <iomanip>
 #include <sstream>
 
 namespace toucan
 {
-    namespace
-    {
-        void _findPlugins(
-            const std::filesystem::path& path,
-            std::vector<std::filesystem::path>& out,
-            int depth,
-            int maxDepth)
-        {
-            try
-            {
-                for (auto const& entry : std::filesystem::directory_iterator(path))
-                {
-                    const auto& entryPath = entry.path();
-                    if (entry.is_regular_file() && entryPath.extension() == ".ofx")
-                    {
-                        out.push_back(entryPath);
-                    }
-                    else if (entry.is_directory() && depth < maxDepth)
-                    {
-                        _findPlugins(entryPath, out, depth + 1, maxDepth);
-                    }
-                }
-            }
-            catch (const std::exception&)
-            {
-                //! \bug How should this be handled?
-            }
-        }
-    }
-
-    void findPlugins(
-        const std::filesystem::path& path,
-        std::vector<std::filesystem::path>& out)
-    {
-        _findPlugins(path, out, 0, 2);
-    }
-
     std::pair<std::string, std::string> splitURLProtocol(const std::string& url)
     {
         std::pair<std::string, std::string> out;
@@ -111,5 +71,45 @@ namespace toucan
             out = value.size();
         }
         return out;
+    }
+
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i& vec)
+    {
+        return OTIO_NS::AnyVector
+        {
+            static_cast<int64_t>(vec.x),
+            static_cast<int64_t>(vec.y)
+        };
+    }
+    
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V4f& vec)
+    {
+        return OTIO_NS::AnyVector
+        {
+            static_cast<double>(vec.x),
+            static_cast<double>(vec.y),
+            static_cast<double>(vec.z),
+            static_cast<double>(vec.w)
+        };
+    }
+    
+    void anyToVec(const OTIO_NS::AnyVector& any, IMATH_NAMESPACE::V2i& out)
+    {
+        if (2 == any.size())
+        {
+            out.x = std::any_cast<int64_t>(any[0]);
+            out.y = std::any_cast<int64_t>(any[1]);
+        }
+    }
+    
+    void anyToVec(const OTIO_NS::AnyVector& any, IMATH_NAMESPACE::V4f& out)
+    {
+        if (4 == any.size())
+        {
+            out.x = std::any_cast<double>(any[0]);
+            out.y = std::any_cast<double>(any[1]);
+            out.z = std::any_cast<double>(any[2]);
+            out.w = std::any_cast<double>(any[3]);
+        }
     }
 }

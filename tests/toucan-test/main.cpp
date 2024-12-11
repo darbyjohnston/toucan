@@ -5,12 +5,13 @@
 #include <toucanEditTest/StackTest.h>
 #endif // toucan_EDIT
 
-#include <toucanUtilTest/FileTest.h>
-
 #include <toucanRenderTest/CompTest.h>
 #include <toucanRenderTest/ImageGraphTest.h>
 #include <toucanRenderTest/PropertySetTest.h>
 #include <toucanRenderTest/ReadTest.h>
+
+#include <dtk/core/Context.h>
+#include <dtk/core/Init.h>
 
 #include <iostream>
 
@@ -25,6 +26,9 @@ int main(int argc, char** argv)
     }
     const std::filesystem::path parentPath = std::filesystem::path(argv[0]).parent_path();
     const std::filesystem::path path(argv[1]);
+
+    auto context = dtk::Context::create();
+    dtk::coreInit(context);
     
     std::vector<std::filesystem::path> searchPath;
     searchPath.push_back(parentPath);
@@ -33,14 +37,12 @@ int main(int argc, char** argv)
 #else // _WINDOWS
     searchPath.push_back(parentPath / ".." / "..");
 #endif // _WINDOWS
-    auto host = std::make_shared<ImageEffectHost>(searchPath);
-
-    fileTest(path);
+    auto host = std::make_shared<ImageEffectHost>(context, searchPath);
 
     compTest(path);
     propertySetTest();
     readTest(path);
-    imageGraphTest(path, host);
+    imageGraphTest(context, path, host);
 
 #if defined(toucan_EDIT)
     stackTest();

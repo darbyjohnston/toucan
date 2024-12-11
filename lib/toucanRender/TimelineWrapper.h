@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <toucanRender/OTIOZ.h>
+#include <toucanRender/MemoryMap.h>
 
 #include <opentimelineio/timeline.h>
 

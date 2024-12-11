@@ -12,6 +12,7 @@
 
 namespace toucan
 {
+    //! Plugin.
     class Plugin : std::enable_shared_from_this<Plugin>
     {
     public:
@@ -19,8 +20,10 @@ namespace toucan
 
         ~Plugin();
 
+        //! Get the number of plugins.
         int getCount();
 
+        //! Get a plugin.
         OfxPlugin* getPlugin(int);
 
     private:
@@ -33,4 +36,7 @@ namespace toucan
         struct Private;
         std::unique_ptr<Private> _p;
     };
+
+    //! Find plugins.
+    void findPlugins(const std::filesystem::path&, std::vector<std::filesystem::path>&);
 }

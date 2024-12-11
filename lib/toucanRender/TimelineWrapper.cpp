@@ -3,8 +3,9 @@
 
 #include "TimelineWrapper.h"
 
-#include <toucanUtil/File.h>
-#include <toucanUtil/String.h>
+#include "Util.h"
+
+#include <dtk/core/String.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/externalReference.h>
@@ -66,7 +67,7 @@ namespace toucan
     TimelineWrapper::TimelineWrapper(const std::filesystem::path& path) :
         _path(path)
     {
-        const std::string extension = toLower(_path.extension().string());
+        const std::string extension = dtk::toLower(_path.extension().string());
         if (".otio" == extension)
         {
             OTIO_NS::ErrorStatus errorStatus;

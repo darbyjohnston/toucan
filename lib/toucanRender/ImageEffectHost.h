@@ -4,7 +4,8 @@
 #pragma once
 
 #include <toucanRender/ImageEffect.h>
-#include <toucanUtil/MessageLog.h>
+
+#include <dtk/core/Context.h>
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -12,19 +13,13 @@
 
 namespace toucan
 {
-    //! Image effect host options.
-    struct ImageEffectHostOptions
-    {
-        std::shared_ptr<MessageLog> log;
-    };
-
     //! Image effect host.
     class ImageEffectHost : public std::enable_shared_from_this<ImageEffectHost>
     {
     public:
         ImageEffectHost(
-            const std::vector<std::filesystem::path>& searchPath,
-            const ImageEffectHostOptions& = ImageEffectHostOptions());
+            const std::shared_ptr<dtk::Context>&,
+            const std::vector<std::filesystem::path>& searchPath);
 
         ~ImageEffectHost();
 
@@ -49,7 +44,7 @@ namespace toucan
         static OfxStatus _clipGetImage(OfxImageClipHandle, OfxTime, const OfxRectD*, OfxPropertySetHandle*);
         static OfxStatus _clipReleaseImage(OfxPropertySetHandle);
 
-        ImageEffectHostOptions _options;
+        std::weak_ptr<dtk::Context> _context;
         PropertySet _propSet;
         OfxHost _host;
         OfxPropertySuiteV1 _propertySuite;

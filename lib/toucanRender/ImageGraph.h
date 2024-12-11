@@ -5,8 +5,9 @@
 
 #include <toucanRender/ImageNode.h>
 #include <toucanRender/TimelineWrapper.h>
-#include <toucanUtil/LRUCache.h>
-#include <toucanUtil/MessageLog.h>
+
+#include <dtk/core/Context.h>
+#include <dtk/core/LRUCache.h>
 
 #include <opentimelineio/mediaReference.h>
 #include <opentimelineio/track.h>
@@ -19,20 +20,14 @@ namespace toucan
 {
     class ReadNode;
 
-    //! Image graph options.
-    struct ImageGraphOptions
-    {
-        std::shared_ptr<MessageLog> log;
-    };
-
     //! Create image graphs from a timeline.
     class ImageGraph : public std::enable_shared_from_this<ImageGraph>
     {
     public:
         ImageGraph(
+            const std::shared_ptr<dtk::Context>&,
             const std::filesystem::path&,
-            const std::shared_ptr<TimelineWrapper>&,
-            const ImageGraphOptions& = ImageGraphOptions());
+            const std::shared_ptr<TimelineWrapper>&);
 
         ~ImageGraph();
 
@@ -67,13 +62,13 @@ namespace toucan
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
             const std::shared_ptr<IImageNode>&);
 
+        std::weak_ptr<dtk::Context> _context;
         std::filesystem::path _path;
         std::shared_ptr<TimelineWrapper> _timelineWrapper;
         OTIO_NS::TimeRange _timeRange;
-        ImageGraphOptions _options;
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
         int _imageChannels = 0;
         std::string _imageDataType;
-        LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
+        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
     };
 }

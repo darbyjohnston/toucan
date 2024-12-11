@@ -12,7 +12,9 @@ set(HEADERS
     InfoBar.h
     JSONTool.h
     MainWindow.h
+    MarkersTool.h
     MenuBar.h
+    MessageLogTool.h
     PlaybackBar.h
     PlaybackModel.h
     SelectionModel.h
@@ -42,7 +44,9 @@ set(SOURCE
     InfoBar.cpp
     JSONTool.cpp
     MainWindow.cpp
+    MarkersTool.cpp
     MenuBar.cpp
+    MessageLogTool.cpp
     PlaybackBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp

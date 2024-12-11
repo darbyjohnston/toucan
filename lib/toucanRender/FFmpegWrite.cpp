@@ -3,9 +3,9 @@
 
 #include "FFmpegWrite.h"
 
-#include <toucanUtil/Math.h>
-
 #include <OpenImageIO/imagebufalgo.h>
+
+#include <dtk/core/Time.h>
 
 #include <iostream>
 #include <sstream>
@@ -67,7 +67,7 @@ namespace toucan
             _avCodecContext->height = spec.height;
             _avCodecContext->sample_aspect_ratio = AVRational({ 1, 1 });
             _avCodecContext->pix_fmt = avCodec->pix_fmts[0];
-            const auto rational = toRational(timeRange.duration().rate());
+            const auto rational = dtk::toRational(timeRange.duration().rate());
             _avCodecContext->time_base = { rational.second, rational.first };
             _avCodecContext->framerate = { rational.first, rational.second };
             _avCodecContext->profile = avProfile;
@@ -291,7 +291,7 @@ namespace toucan
                 _avFrame->data,
                 _avFrame->linesize);
 
-            const auto timeRational = toRational(time.rate());
+            const auto timeRational = dtk::toRational(time.rate());
             _avFrame->pts = av_rescale_q(
                 (time - _timeRange.start_time()).value(),
                 { timeRational.second, timeRational.first },

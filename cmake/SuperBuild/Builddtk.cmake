@@ -1,11 +1,12 @@
 include(ExternalProject)
 
 set(dtk_GIT_REPOSITORY "https://github.com/darbyjohnston/dtk.git")
-set(dtk_GIT_TAG "b5d7a808efae236ee1a4635956cf500fae9528e2")
+set(dtk_GIT_TAG "fa74272afd36fc42af18db52fa7316b9705487c4")
 
 set(dtk_DEPS dtk-deps)
 set(dtk_ARGS
     ${toucan_EXTERNAL_PROJECT_ARGS}
+    -Ddtk_UI_LIB=${toucan_dtk_UI_LIB}
     -Ddtk_PYTHON=OFF
     -Ddtk_TESTS=OFF
     -Ddtk_EXAMPLES=OFF)

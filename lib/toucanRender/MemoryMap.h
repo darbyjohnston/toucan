@@ -3,7 +3,10 @@
 
 #pragma once
 
+#include <OpenImageIO/filesystem.h>
+
 #include <filesystem>
+#include <map>
 #include <memory>
 
 namespace toucan
@@ -42,4 +45,10 @@ namespace toucan
         const void* _data = nullptr;
         size_t _size = 0;
     };
+
+    //! Map URLs to memory references.
+    typedef std::map<std::string, MemoryReference> MemoryReferences;
+
+    //! Get an OIIO memory reader for a memory reference.
+    std::unique_ptr<OIIO::Filesystem::IOMemReader> getMemoryReader(const MemoryReference&);
 }

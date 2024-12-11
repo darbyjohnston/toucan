@@ -290,6 +290,7 @@ namespace toucan
             return;
 
         _graph = std::make_shared<ImageGraph>(
+            getContext(),
             _file->getPath(),
             _file->getTimelineWrapper());
         _imageSize = _graph->getImageSize();

@@ -33,6 +33,7 @@ namespace toucan
         _selectionModel = std::make_shared<SelectionModel>();
 
         _thumbnailGenerator = std::make_shared<ThumbnailGenerator>(
+            context,
             _path.parent_path(),
             _timelineWrapper,
             _host);
@@ -42,11 +43,10 @@ namespace toucan
         _rootNode = dtk::ObservableValue<std::shared_ptr<IImageNode> >::create();
         _currentNode = dtk::ObservableValue<std::shared_ptr<IImageNode> >::create();
 
-        ImageGraphOptions graphOptions;
         _graph = std::make_shared<ImageGraph>(
+            context,
             path.parent_path(),
-            _timelineWrapper,
-            graphOptions);
+            _timelineWrapper);
 
         _currentTimeObserver = dtk::ValueObserver<OTIO_NS::RationalTime>::create(
             _playbackModel->observeCurrentTime(),

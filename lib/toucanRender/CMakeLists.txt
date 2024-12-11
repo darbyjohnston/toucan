@@ -7,13 +7,14 @@ set(HEADERS
     ImageEffectHost.h
     ImageGraph.h
     ImageNode.h
-    OTIOZ.h
+    MemoryMap.h
     Plugin.h
     PropertySet.h
     Read.h
     TimeWarp.h
     TimelineAlgo.h
-    TimelineWrapper.h)
+    TimelineWrapper.h
+    Util.h)
 set(HEADERS_PRIVATE
     ImageEffect_p.h)
 set(SOURCE
@@ -25,23 +26,30 @@ set(SOURCE
     ImageEffectHost.cpp
     ImageGraph.cpp
     ImageNode.cpp
-    OTIOZ.cpp
+    MemoryMap.cpp
     Plugin.cpp
     PropertySet.cpp
     Read.cpp
     TimeWarp.cpp
     TimelineAlgo.cpp
-    TimelineWrapper.cpp)
+    TimelineWrapper.cpp
+    Util.cpp)
 if(WIN32)
     list(APPEND SOURCE
+        MemoryMapWin32.cpp
         PluginWin32.cpp)
 else()
     list(APPEND SOURCE
+        MemoryMapUnix.cpp
         PluginUnix.cpp)
 endif()
 
 add_library(toucanRender ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-target_link_libraries(toucanRender PUBLIC toucanUtil)
+set(LIBS_PUBLIC dtk::dtkCore OTIO::opentimelineio OTIO::opentime OpenImageIO::OpenImageIO MINIZIP::minizip)
+if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+    list(APPEND LIBS_PUBLIC stdc++fs)
+endif()
+target_link_libraries(toucanRender PUBLIC ${LIBS_PUBLIC})
 set_target_properties(toucanRender PROPERTIES FOLDER lib)
 set_target_properties(toucanRender PROPERTIES PUBLIC_HEADER "${HEADERS}")
 

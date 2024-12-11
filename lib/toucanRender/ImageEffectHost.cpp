@@ -5,7 +5,7 @@
 
 #include "ImageEffect_p.h"
 
-#include <toucanUtil/File.h>
+#include <dtk/core/LogSystem.h>
 
 #include <cstdarg>
 #include <cstring>
@@ -20,9 +20,9 @@ namespace toucan
     }
 
     ImageEffectHost::ImageEffectHost(
-        const std::vector<std::filesystem::path>& searchPath,
-        const ImageEffectHostOptions& options) :
-        _options(options)
+        const std::shared_ptr<dtk::Context>& context,
+        const std::vector<std::filesystem::path>& searchPath) :
+        _context(context)
     {
         _propSet.setPointer("host", 0, this);
 
@@ -100,38 +100,34 @@ namespace toucan
     void ImageEffectHost::_pluginInit(const std::vector<std::filesystem::path>& searchPath)
     {
         // Find the plugins.
-        if (_options.log)
-        {
-            _options.log->log(logPrefix, "Searching for plugins...");
-        }
+        auto logSystem = _context.lock()->getSystem<dtk::LogSystem>();
+        logSystem->print(logPrefix, "Searching for plugins...");
         std::vector<std::filesystem::path> pluginPaths;
         for (const auto& path : searchPath)
         {
-            if (_options.log)
             {
                 std::stringstream ss;
                 ss << "  Search path: " << path.string();
-                _options.log->log(logPrefix, ss.str());
+                logSystem->print(logPrefix, ss.str());
             }
             findPlugins(path, pluginPaths);
         }
-        if (pluginPaths.empty() && _options.log)
+        if (pluginPaths.empty())
         {
-            _options.log->log(logPrefix, "  No plugins found");
+            logSystem->print(logPrefix, "  No plugins found");
         }
 
         // Load the plugins.
-        if (!pluginPaths.empty() && _options.log)
+        if (!pluginPaths.empty())
         {
-            _options.log->log(logPrefix, "Loading plugins...");
+            logSystem->print(logPrefix, "Loading plugins...");
         }
         for (const auto& path : pluginPaths)
         {
-            if (_options.log)
             {
                 std::stringstream ss;
                 ss << "  Path: " << path.string();
-                _options.log->log(logPrefix, ss.str());
+                logSystem->print(logPrefix, ss.str());
             }
             try
             {
@@ -175,17 +171,16 @@ namespace toucan
         }
 
         // Initialize the plugins.
-        if (!_plugins.empty() && _options.log)
+        if (!_plugins.empty())
         {
-            _options.log->log(logPrefix, "Initializing plugins...");
+            logSystem->print(logPrefix, "Initializing plugins...");
         }
         for (auto& plugin : _plugins)
         {
-            if (_options.log)
             {
                 std::stringstream ss;
                 ss << "  Plugin: " << plugin.ofxPlugin->pluginIdentifier;
-                _options.log->log(logPrefix, ss.str());
+                logSystem->print(logPrefix, ss.str());
             }
             ImageEffectHandle handle = { &plugin };
             OfxStatus ofxStatus = plugin.ofxPlugin->mainEntry(
@@ -203,11 +198,10 @@ namespace toucan
                 {
                     PropertySet propSet;
                     propSet.setString(kOfxImageEffectPropContext, 0, context);
-                    if (_options.log)
                     {
                         std::stringstream ss;
                         ss << "    Context: " << context;
-                        _options.log->log(logPrefix, ss.str());
+                        logSystem->print(logPrefix, ss.str());
                     }
                     ofxStatus = plugin.ofxPlugin->mainEntry(
                         kOfxImageEffectActionDescribeInContext,
@@ -216,14 +210,11 @@ namespace toucan
                         nullptr);
                 }
             }
-            if (_options.log)
+            for (const auto& param : plugin.paramTypes)
             {
-                for (const auto& param : plugin.paramTypes)
-                {
-                    std::stringstream ss;
-                    ss << "    \"" << param.first << "\": " << param.second;
-                    _options.log->log(logPrefix, ss.str());
-                }
+                std::stringstream ss;
+                ss << "    \"" << param.first << "\": " << param.second;
+                logSystem->print(logPrefix, ss.str());
             }
         }
     }

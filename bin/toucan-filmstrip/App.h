@@ -3,35 +3,39 @@
 
 #pragma once
 
-
 #include <toucanRender/ImageEffectHost.h>
 #include <toucanRender/ImageGraph.h>
 #include <toucanRender/TimelineWrapper.h>
-#include <toucanUtil/CmdLine.h>
+
+#include <dtk/core/IApp.h>
 
 #include <OpenImageIO/imagebuf.h>
 
 namespace toucan
 {
-    class App : public std::enable_shared_from_this<App>
+    class App : public dtk::IApp
     {
+    protected:
+        void _init(
+            const std::shared_ptr<dtk::Context>&,
+            std::vector<std::string>&);
+
+        App();
+
     public:
-        App(std::vector<std::string>&);
-        
         ~App();
+
+        static std::shared_ptr<App> create(
+            const std::shared_ptr<dtk::Context>&,
+            std::vector<std::string>&);
         
-        int run();
+        void run() override;
     
     private:
-        void _printHelp();
-        
-        std::string _exe;
-        
         struct Args
         {
             std::string input;
             std::string output;
-            std::vector<std::shared_ptr<ICmdLineArg> > list;
         };
         Args _args;
         
@@ -39,7 +43,6 @@ namespace toucan
         {
             bool verbose = false;
             bool help = false;
-            std::vector<std::shared_ptr<ICmdLineOption> > list;
         };
         Options _options;
 
@@ -48,4 +51,3 @@ namespace toucan
         std::shared_ptr<ImageEffectHost> _host;
     };
 }
-

@@ -8,6 +8,7 @@
 namespace toucan
 {
     void imageGraphTest(
+        const std::shared_ptr<dtk::Context>&,
         const std::filesystem::path&,
         const std::shared_ptr<ImageEffectHost>&);
 }

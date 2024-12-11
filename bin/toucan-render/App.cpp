@@ -4,9 +4,10 @@
 #include "App.h"
 
 #include <toucanRender/FFmpegWrite.h>
-#include <toucanUtil/File.h>
-#include <toucanUtil/Math.h>
-#include <toucanUtil/String.h>
+#include <toucanRender/Util.h>
+
+#include <dtk/core/CmdLine.h>
+#include <dtk/core/Time.h>
 
 #include <OpenImageIO/imagebufalgo.h>
 
@@ -42,21 +43,22 @@ namespace toucan
         };
     }
     
-    App::App(std::vector<std::string>& argv)
+    void App::_init(
+        const std::shared_ptr<dtk::Context>& context,
+        std::vector<std::string>& argv)
     {
-        _exe = argv.front();
-        argv.erase(argv.begin());
-
-        _args.list.push_back(std::make_shared<CmdLineValueArg<std::string> >(
+        std::vector<std::shared_ptr<dtk::ICmdLineArg> > args;
+        args.push_back(dtk::CmdLineValueArg<std::string>::create(
             _args.input,
             "input",
             "Input .otio file."));
-        auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
+        auto outArg = dtk::CmdLineValueArg<std::string>::create(
             _args.output,
             "output",
             "Output image or movie file. Use a dash ('-') to write raw frames or y4m to stdout.");
-        _args.list.push_back(outArg);
+        args.push_back(outArg);
 
+        std::vector<std::shared_ptr<dtk::ICmdLineOption> > options;
         std::vector<std::string> rawList;
         for (const auto& spec : rawSpecs)
         {
@@ -67,88 +69,62 @@ namespace toucan
         {
             y4mList.push_back(spec.first);
         }
-        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+        options.push_back(dtk::CmdLineValueOption<std::string>::create(
             _options.videoCodec,
             std::vector<std::string>{ "-vcodec" },
             "Set the video codec.",
             _options.videoCodec,
-            join(ffmpeg::getVideoCodecStrings(), ", ")));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+            dtk::join(ffmpeg::getVideoCodecStrings(), ", ")));
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.printStart,
             std::vector<std::string>{ "-print_start" },
             "Print the timeline start time and exit."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.printDuration,
             std::vector<std::string>{ "-print_duration" },
             "Print the timeline duration and exit."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.printRate,
             std::vector<std::string>{ "-print_rate" },
             "Print the timeline frame rate and exit."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.printSize,
             std::vector<std::string>{ "-print_size" },
             "Print the timeline image size."));
-        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+        options.push_back(dtk::CmdLineValueOption<std::string>::create(
             _options.raw,
             std::vector<std::string>{ "-raw" },
             "Raw pixel format to send to stdout.",
             _options.raw,
-            join(rawList, ", ")));
-        _options.list.push_back(std::make_shared<CmdLineValueOption<std::string> >(
+            dtk::join(rawList, ", ")));
+        options.push_back(dtk::CmdLineValueOption<std::string>::create(
             _options.y4m,
             std::vector<std::string>{ "-y4m" },
             "y4m format to send to stdout.",
             _options.y4m,
-            join(y4mList, ", ")));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+            dtk::join(y4mList, ", ")));
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.verbose,
             std::vector<std::string>{ "-v" },
             "Print verbose output."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
-            _options.help,
-            std::vector<std::string>{ "-h" },
-            "Print help."));
 
-        if (!argv.empty())
+        IApp::_init(
+            context,
+            argv,
+            "toucan-render",
+            "Render timeline files",
+            args,
+            options);
+
+        _args.outputRaw = "-" == _args.output;
+        if (_args.outputRaw)
         {
-            for (const auto& option : _options.list)
-            {
-                option->parse(argv);
-            }
-            if (_options.printStart ||
-                _options.printDuration ||
-                _options.printRate ||
-                _options.printSize)
-            {
-                auto i = std::find(_args.list.begin(), _args.list.end(), outArg);
-                if (i != _args.list.end())
-                {
-                    _args.list.erase(i);
-                }
-            }
-            if (!_options.help)
-            {
-                for (const auto& arg : _args.list)
-                {
-                    arg->parse(argv);
-                }
-                _args.outputRaw = "-" == _args.output;
-                if (_args.outputRaw)
-                {
-                    _options.verbose = false;
-                }
-                if (argv.size())
-                {
-                    _options.help = true;
-                }
-            }
-        }
-        else
-        {
-            _options.help = true;
+            _options.verbose = false;
         }
     }
+
+    App::App()
+    {}
         
     App::~App()
     {
@@ -165,16 +141,19 @@ namespace toucan
             av_frame_free(&_avFrame);
         }
     }
-    
-    int App::run()
+
+    std::shared_ptr<App> App::create(
+        const std::shared_ptr<dtk::Context>& context,
+        std::vector<std::string>& argv)
     {
-        if (_options.help)
-        {
-            _printHelp();
-            return 1;
-        }
-        
-        const std::filesystem::path parentPath = std::filesystem::path(_exe).parent_path();
+        auto out = std::shared_ptr<App>(new App);
+        out->_init(context, argv);
+        return out;
+    }
+    
+    void App::run()
+    {
+        const std::filesystem::path parentPath = std::filesystem::path(getExeName()).parent_path();
         const std::filesystem::path inputPath(_args.input);
         const std::filesystem::path outputPath(_args.output);
         const auto outputSplit = splitFileNameNumber(outputPath.stem().string());
@@ -190,39 +169,32 @@ namespace toucan
         const int frames = timeRange.duration().value();
         
         // Create the image graph.
-        std::shared_ptr<MessageLog> log;
-        if (_options.verbose)
-        {
-            log = std::make_shared<MessageLog>();
-        }
-        ImageGraphOptions imageGraphOptions;
-        imageGraphOptions.log = log;
         _graph = std::make_shared<ImageGraph>(
+            _context,
             inputPath.parent_path(),
-            _timelineWrapper,
-            imageGraphOptions);
+            _timelineWrapper);
         const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
 
         // Print information.
         if (_options.printStart)
         {
             std::cout << timeRange.start_time().value() << std::endl;
-            return 0;
+            return;
         }
         else if (_options.printDuration)
         {
             std::cout << timeRange.duration().value() << std::endl;
-            return 0;
+            return;
         }
         else if (_options.printRate)
         {
             std::cout << timeRange.duration().rate() << std::endl;
-            return 0;
+            return;
         }
         else if (_options.printSize)
         {
             std::cout << imageSize.x << "x" << imageSize.y << std::endl;
-            return 0;
+            return;
         }
 
         // Create the image host.
@@ -233,11 +205,7 @@ namespace toucan
 #else // _WINDOWS
         searchPath.push_back(parentPath / ".." / "..");
 #endif // _WINDOWS
-        ImageEffectHostOptions imageHostOptions;
-        imageHostOptions.log = log;
-        _host = std::make_shared<ImageEffectHost>(
-            searchPath,
-            imageHostOptions);
+        _host = std::make_shared<ImageEffectHost>(_context, searchPath);
 
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
@@ -300,8 +268,6 @@ namespace toucan
                 }
             }
         }
-    
-        return 0;
     }
 
     void App::_writeRawFrame(const OIIO::ImageBuf& buf)
@@ -360,7 +326,7 @@ namespace toucan
 
         {
             const OTIO_NS::TimeRange timeRange = _timelineWrapper->getTimeRange();
-            const auto r = toRational(timeRange.duration().rate());
+            const auto r = dtk::toRational(timeRange.duration().rate());
             std::stringstream ss;
             ss << " F" << r.first << ":" << r.second;
             s = ss.str();
@@ -522,34 +488,6 @@ namespace toucan
                 1,
                 stdout);
         }
-    }
-
-    void App::_printHelp()
-    {
-        std::cout << "Usage:" << std::endl;
-        std::cout << std::endl;
-        std::cout << "    toucan-render (input) (output) [options...]" << std::endl;
-        std::cout << std::endl;
-        std::cout << "    toucan-render (input) (-print_start|-print_duration|-print_rate|-print_size)" << std::endl;
-        std::cout << std::endl;
-        std::cout << "Arguments:" << std::endl;
-        std::cout << std::endl;
-        for (const auto& arg : _args.list)
-        {
-            std::cout << "    " << arg->getName() << " - " << arg->getHelp() << std::endl;
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << std::endl;
-        for (const auto& option : _options.list)
-        {
-            for (const auto& line : option->getHelp())
-            {
-                std::cout << "    " << line << std::endl;
-            }
-            std::cout << std::endl;
-        }        
     }
 }
 

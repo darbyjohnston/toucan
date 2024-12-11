@@ -12,6 +12,7 @@
 namespace toucan
 {
     void imageGraphTest(
+        const std::shared_ptr<dtk::Context>& context,
         const std::filesystem::path& path,
         const std::shared_ptr<ImageEffectHost>& host)
     {
@@ -51,7 +52,7 @@ namespace toucan
             const OTIO_NS::RationalTime timeInc(1.0, timeRange.duration().rate());
 
             // Render the timeline frames.
-            const auto graph = std::make_shared<ImageGraph>(path, timelineWrapper);
+            const auto graph = std::make_shared<ImageGraph>(context, path, timelineWrapper);
             for (OTIO_NS::RationalTime time = timeRange.start_time();
                 time <= timeRange.end_time_inclusive();
                 time += timeInc)

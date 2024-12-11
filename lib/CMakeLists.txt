@@ -1,4 +1,3 @@
-add_subdirectory(toucanUtil)
 add_subdirectory(toucanRender)
 if(toucan_VIEW)
     add_subdirectory(toucanView)

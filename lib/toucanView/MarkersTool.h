@@ -80,11 +80,11 @@ namespace toucan
         std::shared_ptr<File> _file;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
+        std::shared_ptr<dtk::SearchBox> _searchBox;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
-        std::shared_ptr<dtk::SearchBox> _searchBox;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;

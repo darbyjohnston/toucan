@@ -8,22 +8,24 @@
 namespace toucan
 {
     ThumbnailGenerator::ThumbnailGenerator(
+        const std::shared_ptr<dtk::Context>& context,
         const std::filesystem::path& path,
         const std::shared_ptr<TimelineWrapper>& timelineWrapper,
-        const std::shared_ptr<ImageEffectHost>& host,
-        const std::shared_ptr<MessageLog>& log) :
+        const std::shared_ptr<ImageEffectHost>& host) :
         _path(path),
         _timelineWrapper(timelineWrapper),
-        _host(host),
-        _log(log)
+        _host(host)
     {
+        _logSystem = context->getSystem<dtk::LogSystem>();
+
+        _graph = std::make_shared<ImageGraph>(context, _path, _timelineWrapper);
+
         _thread.running = true;
         _thread.thread = std::thread(
             [this]
             {
                 try
                 {
-                    _graph = std::make_shared<ImageGraph>(_path, _timelineWrapper);
                     const IMATH_NAMESPACE::V2i& imageSize = _graph->getImageSize();
                     _aspect = imageSize.y > 0 ?
                         (imageSize.x / static_cast<float>(imageSize.y)) :
@@ -31,13 +33,10 @@ namespace toucan
                 }
                 catch (const std::exception& e)
                 {
-                    if (_log)
-                    {
-                        _log->log(
-                            "ThumbnailGenerator",
-                            e.what(),
-                            MessageLogType::Error);
-                    }
+                    _logSystem->print(
+                        "toucan::ThumbnailGenerator",
+                        e.what(),
+                        dtk::LogType::Error);
                 }
 
                 while (_thread.running)
@@ -217,13 +216,10 @@ namespace toucan
                 }
                 catch (const std::exception& e)
                 {
-                    if (_log)
-                    {
-                        _log->log(
-                            "ThumbnailGenerator",
-                            e.what(),
-                            MessageLogType::Error);
-                    }
+                    _logSystem->print(
+                        "toucan::ThumbnailGenerator",
+                        e.what(),
+                        dtk::LogType::Error);
                 }
 
                 _thread.cache[std::make_pair(request->time, request->height)] = thumbnail;

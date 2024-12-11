@@ -3,7 +3,7 @@
 
 #include "ImageEffect_p.h"
 
-#include <toucanUtil/Math.h>
+#include <toucanRender/Util.h>
 
 namespace toucan
 {

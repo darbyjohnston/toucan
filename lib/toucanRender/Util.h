@@ -3,14 +3,15 @@
 
 #pragma once
 
+#include <opentimelineio/anyVector.h>
+
+#include <Imath/ImathVec.h>
+
 #include <filesystem>
 #include <string>
 
 namespace toucan
 {
-    //! Find plugins.
-    void findPlugins(const std::filesystem::path&, std::vector<std::filesystem::path>&);
-
     //! Split the URL protocol.
     std::pair<std::string, std::string> splitURLProtocol(const std::string&);
 
@@ -28,6 +29,11 @@ namespace toucan
     //! Get the zero padding for the given number.
     size_t getNumberPadding(const std::string&);
 
-    //! Make a unique temp directory.
-    std::filesystem::path makeUniqueTemp();
+    //! Conversion to any vector.
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i&);
+    OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V4f&);
+    
+    //! Conversion from any vector.
+    void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V2i&);
+    void anyToVec(const OTIO_NS::AnyVector&, IMATH_NAMESPACE::V4f&);
 }
