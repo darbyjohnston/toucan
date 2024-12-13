@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "JSONTool.h"
+#include "MarkersTool.h"
 
 #include "App.h"
 #include "FilesModel.h"
@@ -14,92 +14,12 @@
 
 namespace toucan
 {
-    void JSONWidget::_init(
-        const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
-        const std::shared_ptr<dtk::IWidget>& parent)
-    {
-        IWidget::_init(context, "toucan::JSONWidget", parent);
-
-        _item = item;
-
-        _text = dtk::split(item->to_json_string(), { '\n' });
-
-        _label = dtk::Label::create(context);
-        _label->setFontRole(dtk::FontRole::Mono);
-        _label->setMarginRole(dtk::SizeRole::MarginSmall);
-
-        _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
-        _bellows->setWidget(_label);
-        _bellows->setOpen(true);
-
-        _textUpdate();
-    }
-
-    JSONWidget::~JSONWidget()
-    {}
-
-    std::shared_ptr<JSONWidget> JSONWidget::create(
-        const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
-        const std::shared_ptr<dtk::IWidget>& parent)
-    {
-        auto out = std::shared_ptr<JSONWidget>(new JSONWidget);
-        out->_init(context, item, parent);
-        return out;
-    }
-
-    void JSONWidget::setOpen(bool value)
-    {
-        _bellows->setOpen(value);
-    }
-
-    void JSONWidget::setFilter(const std::string& value)
-    {
-        if (value == _filter)
-            return;
-        _filter = value;
-        _textUpdate();
-    }
-
-    void JSONWidget::setGeometry(const dtk::Box2I& value)
-    {
-        IWidget::setGeometry(value);
-        _bellows->setGeometry(value);
-    }
-
-    void JSONWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
-    {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_bellows->getSizeHint());
-    }
-
-    void JSONWidget::_textUpdate()
-    {
-        if (!_filter.empty())
-        {
-            std::vector<std::string> text;
-            for (const auto& line : _text)
-            {
-                if (dtk::contains(line, _filter, dtk::CaseCompare::Insensitive))
-                {
-                    text.push_back(line);
-                }
-            }
-            _label->setText(dtk::join(text, '\n'));
-        }
-        else
-        {
-            _label->setText(dtk::join(_text, '\n'));
-        }
-    }
-
-    void JSONTool::_init(
+    void MarkersTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IToolWidget::_init(context, app, "toucan::JSONTool", "JSON", parent);
+        IToolWidget::_init(context, app, "toucan::MarkersTool", "Markers", parent);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -107,10 +27,6 @@ namespace toucan
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, _layout);
         _scrollWidget->setBorder(false);
         _scrollWidget->setVStretch(dtk::Stretch::Expanding);
-
-        _scrollLayout = dtk::VerticalLayout::create(context);
-        _scrollLayout->setSpacingRole(dtk::SizeRole::None);
-        _scrollWidget->setWidget(_scrollLayout);
 
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
@@ -120,42 +36,11 @@ namespace toucan
 
         _searchBox = dtk::SearchBox::create(context, _bottomLayout);
         _searchBox->setHStretch(dtk::Stretch::Expanding);
-        _searchBox->setTooltip("Filter the JSON text");
-
-        auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
-        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto openButton = dtk::ToolButton::create(context, hLayout);
-        openButton->setIcon("BellowsOpen");
-        openButton->setTooltip("Open all");
-        auto closeButton = dtk::ToolButton::create(context, hLayout);
-        closeButton->setIcon("BellowsClosed");
-        closeButton->setTooltip("Close all");
-
-        openButton->setClickedCallback(
-            [this]
-            {
-                for (const auto& widget : _widgets)
-                {
-                    widget->setOpen(true);
-                }
-            });
-
-        closeButton->setClickedCallback(
-            [this]
-            {
-                for (const auto& widget : _widgets)
-                {
-                    widget->setOpen(false);
-                }
-            });
+        _searchBox->setTooltip("Search the markers");
 
         _searchBox->setCallback(
             [this](const std::string& text)
             {
-                for (const auto& widget : _widgets)
-                {
-                    widget->setFilter(text);
-                }
             });
 
         _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
@@ -168,52 +53,35 @@ namespace toucan
                         file->getSelectionModel()->observeSelection(),
                         [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
                         {
-                            for (const auto& widget : _widgets)
-                            {
-                                widget->setParent(nullptr);
-                            }
-                            _widgets.clear();
-                            auto context = getContext();
-                            for (const auto& item : selection)
-                            {
-                                auto widget = JSONWidget::create(context, item, _scrollLayout);
-                                widget->setFilter(_searchBox->getText());
-                                _widgets.push_back(widget);
-                            }
                         });
                 }
                 else
                 {
-                    for (const auto& widget : _widgets)
-                    {
-                        widget->setParent(nullptr);
-                    }
-                    _widgets.clear();
                     _selectionObserver.reset();
                 }
             });
     }
 
-    JSONTool::~JSONTool()
+    MarkersTool::~MarkersTool()
     {}
 
-    std::shared_ptr<JSONTool> JSONTool::create(
+    std::shared_ptr<MarkersTool> MarkersTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<JSONTool>(new JSONTool);
+        auto out = std::shared_ptr<MarkersTool>(new MarkersTool);
         out->_init(context, app, parent);
         return out;
     }
 
-    void JSONTool::setGeometry(const dtk::Box2I& value)
+    void MarkersTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void JSONTool::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void MarkersTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());

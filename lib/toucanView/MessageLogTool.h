@@ -9,42 +9,11 @@
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/ui/SearchBox.h>
+#include <dtk/core/LogSystem.h>
 
 namespace toucan
 {
     class File;
-
-    //! Message log widget.
-    class MessageLogWidget : public dtk::IWidget
-    {
-    protected:
-        void _init(
-            const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<IWidget>& parent);
-
-    public:
-        virtual ~MessageLogWidget();
-
-        //! Create a new widget.
-        static std::shared_ptr<MessageLogWidget> create(
-            const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<IWidget>& parent = nullptr);
-
-        //! Set the text.
-
-        //! Set the filter.
-        void setFilter(const std::string&);
-
-        void setGeometry(const dtk::Box2I&) override;
-        void sizeHintEvent(const dtk::SizeHintEvent&) override;
-
-    private:
-        void _textUpdate();
-
-        std::vector<std::string> _text;
-        std::string _filter;
-        std::shared_ptr<dtk::Label> _label;
-    };
 
     //! Message log tool.
     class MessageLogTool : public IToolWidget
@@ -68,14 +37,18 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
-        std::shared_ptr<File> _file;
+        void _textUpdate();
+
+        std::list<std::string> _text;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
-        std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
-        std::shared_ptr<MessageLogWidget> _widget;
+        std::shared_ptr<dtk::Label> _label;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<dtk::SearchBox> _searchBox;
+
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<dtk::ListObserver<dtk::LogItem> > _logObserver;
     };
 }
 

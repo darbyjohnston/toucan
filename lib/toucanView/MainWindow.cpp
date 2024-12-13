@@ -10,6 +10,8 @@
 #include "GraphTool.h"
 #include "InfoBar.h"
 #include "JSONTool.h"
+#include "MarkersTool.h"
+#include "MessageLogTool.h"
 #include "MenuBar.h"
 #include "PlaybackBar.h"
 #include "TimelineWidget.h"
@@ -80,7 +82,9 @@ namespace toucan
         _toolWidget = dtk::TabWidget::create(context, _hSplitter);
         _toolWidgets.push_back(JSONTool::create(context, app));
         _toolWidgets.push_back(GraphTool::create(context, app));
+        _toolWidgets.push_back(MarkersTool::create(context, app));
         _toolWidgets.push_back(ExportTool::create(context, app));
+        _toolWidgets.push_back(MessageLogTool::create(context, app));
         for (const auto& toolWidget : _toolWidgets)
         {
             _toolWidget->addTab(toolWidget->getText(), toolWidget);

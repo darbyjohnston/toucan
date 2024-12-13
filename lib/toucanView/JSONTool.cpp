@@ -120,7 +120,7 @@ namespace toucan
 
         _searchBox = dtk::SearchBox::create(context, _bottomLayout);
         _searchBox->setHStretch(dtk::Stretch::Expanding);
-        _searchBox->setTooltip("Filter the JSON text");
+        _searchBox->setTooltip("Search the JSON text");
 
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
