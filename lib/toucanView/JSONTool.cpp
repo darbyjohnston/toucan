@@ -115,7 +115,7 @@ namespace toucan
         dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _bottomLayout = dtk::HorizontalLayout::create(context, _layout);
-        _bottomLayout->setMarginRole(dtk::SizeRole::MarginInside);
+        _bottomLayout->setMarginRole(dtk::SizeRole::MarginSmall);
         _bottomLayout->setSpacingRole(dtk::SizeRole::SpacingSmall);
 
         _searchBox = dtk::SearchBox::create(context, _bottomLayout);

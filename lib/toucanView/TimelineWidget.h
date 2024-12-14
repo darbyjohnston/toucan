@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "TimeUnitsModel.h"
+#include <toucanView/TimeUnitsModel.h>
 
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/core/ObservableList.h>

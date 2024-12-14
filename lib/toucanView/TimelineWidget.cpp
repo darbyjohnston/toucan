@@ -26,14 +26,13 @@ namespace toucan
         _setMousePressEnabled(
             true,
             0,
-            static_cast<int>(dtk::KeyModifier::Control));
+            static_cast<int>(dtk::KeyModifier::Alt));
 
         _frameView = dtk::ObservableValue<bool>::create(true);
 
         _scrollWidget = dtk::ScrollWidget::create(context, dtk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
         _scrollWidget->setBorder(false);
-        _scrollWidget->setScrollBarsVisible(false);
 
         auto appWeak = std::weak_ptr<App>(app);
         _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
@@ -201,7 +200,7 @@ namespace toucan
     {
         IWidget::mousePressEvent(event);
         if (0 == event.button &&
-            static_cast<int>(dtk::KeyModifier::Control) == event.modifiers)
+            static_cast<int>(dtk::KeyModifier::Alt) == event.modifiers)
         {
             event.accept = true;
             takeKeyFocus();

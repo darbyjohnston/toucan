@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "PlaybackModel.h"
-#include "TimeUnitsModel.h"
+#include <toucanView/PlaybackModel.h>
+#include <toucanView/TimeUnitsModel.h>
 
 #include <dtk/ui/ButtonGroup.h>
 #include <dtk/ui/IncButtons.h>
@@ -93,7 +93,7 @@ namespace toucan
         //! Create a new widget.
         static std::shared_ptr<TimeEdit> create(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
+            const std::shared_ptr<TimeUnitsModel>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set the time.
@@ -117,7 +117,7 @@ namespace toucan
 
         OTIO_NS::RationalTime _time;
         OTIO_NS::TimeRange _timeRange;
-        std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
+        TimeUnits _timeUnits = TimeUnits::First;
 
         std::shared_ptr<dtk::HorizontalLayout> _layout;
         std::shared_ptr<dtk::LineEdit> _lineEdit;
@@ -142,7 +142,7 @@ namespace toucan
         //! Create a new widget.
         static std::shared_ptr<TimeLabel> create(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<TimeUnitsModel>& timeUnitsModel,
+            const std::shared_ptr<TimeUnitsModel>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set the time.
@@ -158,7 +158,7 @@ namespace toucan
         void _timeUpdate();
 
         OTIO_NS::RationalTime _time;
-        std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
+        TimeUnits _timeUnits = TimeUnits::First;
 
         std::shared_ptr<dtk::Label> _label;
 

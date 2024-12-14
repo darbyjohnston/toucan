@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "IToolWidget.h"
+#include <toucanView/IToolWidget.h>
 
 #include <toucanRender/FFmpegWrite.h>
 #include <toucanRender/ImageGraph.h>

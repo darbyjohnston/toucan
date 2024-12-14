@@ -10,6 +10,7 @@ set(HEADERS
     IItem.h
     IToolWidget.h
     InfoBar.h
+    ItemLabel.h
     JSONTool.h
     MainWindow.h
     MarkersTool.h
@@ -20,6 +21,7 @@ set(HEADERS
     SelectionModel.h
     StackItem.h
     ThumbnailGenerator.h
+    TimeLayout.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
@@ -42,6 +44,7 @@ set(SOURCE
     IItem.cpp
     IToolWidget.cpp
     InfoBar.cpp
+    ItemLabel.cpp
     JSONTool.cpp
     MainWindow.cpp
     MarkersTool.cpp
@@ -52,6 +55,7 @@ set(SOURCE
     SelectionModel.cpp
     StackItem.cpp
     ThumbnailGenerator.cpp
+    TimeLayout.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
     TimelineItem.cpp

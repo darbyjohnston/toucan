@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "TimeUnitsModel.h"
-#include "TimeWidgets.h"
+#include <toucanView/TimeUnitsModel.h>
+#include <toucanView/TimeWidgets.h>
 
 #include <dtk/ui/ComboBox.h>
 #include <dtk/ui/RowLayout.h>

@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "IToolWidget.h"
+#include <toucanView/IToolWidget.h>
 
 #include <dtk/ui/Bellows.h>
 #include <dtk/ui/Label.h>

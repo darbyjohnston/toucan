@@ -4,10 +4,6 @@
 #include "GapItem.h"
 
 #include <dtk/ui/DrawUtil.h>
-#include <dtk/core/Random.h>
-#include <dtk/core/RenderUtil.h>
-
-#include <opentimelineio/gap.h>
 
 namespace toucan
 {
@@ -26,13 +22,19 @@ namespace toucan
             "toucan::ClipItem",
             parent);
 
-        setTooltip(gap->name());
-
         _gap = gap;
         _text = !gap->name().empty() ? gap->name() : "Gap";
         _color = dtk::Color4F(.3F, .3F, .3F);
 
         setTooltip(_text);
+
+        _layout = dtk::VerticalLayout::create(context, shared_from_this());
+        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+
+        _label = ItemLabel::create(context, _layout);
+        _label->setName(_text);
+
+        _textUpdate();
     }
     
     GapItem::~GapItem()
@@ -49,6 +51,12 @@ namespace toucan
         return out;
     }
 
+    void GapItem::setGeometry(const dtk::Box2I& value)
+    {
+        IItem::setGeometry(value);
+        _layout->setGeometry(value);
+    }
+
     void GapItem::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IItem::sizeHintEvent(event);
@@ -57,26 +65,9 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
-            _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
-            _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
-            _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
-            _draw.glyphs.clear();
         }
-        dtk::Size2I sizeHint(
-            _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.textSize.h + _size.margin * 2 + _size.border * 2);
-        _setSizeHint(sizeHint);
-    }
-
-    void GapItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
-    {
-        IItem::clipEvent(clipRect, clipped);
-        if (clipped)
-        {
-            _draw.glyphs.clear();
-        }
+        _setSizeHint(_layout->getSizeHint());
     }
 
     void GapItem::drawEvent(
@@ -85,25 +76,23 @@ namespace toucan
     {
         IItem::drawEvent(drawRect, event);
         const dtk::Box2I& g = getGeometry();
-
         const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
         event.render->drawRect(
             g2,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
+    }
 
-        const dtk::Box2I g3 = dtk::margin(g2, -_size.margin);
-        if (!_text.empty() && _draw.glyphs.empty())
+    void GapItem::_timeUnitsUpdate()
+    {
+        _textUpdate();
+    }
+
+    void GapItem::_textUpdate()
+    {
+        if (_label)
         {
-            _draw.glyphs = event.fontSystem->getGlyphs(_text, _size.fontInfo);
+            std::string text = toString(_timeRange.duration(), _timeUnits);
+            _label->setDuration(text);
         }
-        dtk::ClipRectEnabledState clipRectEnabledState(event.render);
-        dtk::ClipRectState clipRectState(event.render);
-        event.render->setClipRectEnabled(true);
-        event.render->setClipRect(intersect(g3, drawRect));
-        event.render->drawText(
-            _draw.glyphs,
-            _size.fontMetrics,
-            dtk::V2I(g3.min.x, g3.min.y + g3.h() / 2 - _size.fontMetrics.lineHeight / 2),
-            event.style->getColorRole(dtk::ColorRole::Text));
     }
 }

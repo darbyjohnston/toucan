@@ -20,6 +20,53 @@ namespace toucan
         "Frames",
         "Seconds");
 
+    std::string toString(const OTIO_NS::RationalTime& time, TimeUnits units)
+    {
+        std::string out;
+        switch (units)
+        {
+        case TimeUnits::Timecode:
+            out = time.to_timecode();
+            break;
+        case TimeUnits::Frames:
+        {
+            std::stringstream ss;
+            ss << time.to_frames();
+            out = ss.str();
+            break;
+        }
+        case TimeUnits::Seconds:
+        {
+            std::stringstream ss;
+            ss.precision(2);
+            ss << std::fixed << time.to_seconds();
+            out = ss.str();
+            break;
+        }
+        default: break;
+        }
+        return out;
+    }
+
+    OTIO_NS::RationalTime fromString(const std::string& text, TimeUnits units, double rate)
+    {
+        OTIO_NS::RationalTime out;
+        switch (units)
+        {
+        case TimeUnits::Timecode:
+            out = OTIO_NS::RationalTime::from_timecode(text, rate);
+            break;
+        case TimeUnits::Frames:
+            out = OTIO_NS::RationalTime::from_frames(std::atof(text.c_str()), rate);
+            break;
+        case TimeUnits::Seconds:
+            out = OTIO_NS::RationalTime::from_seconds(std::atof(text.c_str()), rate);
+            break;
+        default: break;
+        }
+        return out;
+    }
+
     TimeUnitsModel::TimeUnitsModel(const std::shared_ptr<dtk::Context>& context)
     {
         _context = context;
@@ -66,52 +113,5 @@ namespace toucan
     void TimeUnitsModel::setTimeUnits(TimeUnits value)
     {
         _timeUnits->setIfChanged(value);
-    }
-
-    std::string TimeUnitsModel::toString(const OTIO_NS::RationalTime& time) const
-    {
-        std::string out;
-        switch (_timeUnits->get())
-        {
-        case TimeUnits::Timecode:
-            out = time.to_timecode();
-            break;
-        case TimeUnits::Frames:
-        {
-            std::stringstream ss;
-            ss << time.to_frames();
-            out = ss.str();
-            break;
-        }
-        case TimeUnits::Seconds:
-        {
-            std::stringstream ss;
-            ss.precision(2);
-            ss << std::fixed << time.to_seconds();
-            out = ss.str();
-            break;
-        }
-        default: break;
-        }
-        return out;
-    }
-
-    OTIO_NS::RationalTime TimeUnitsModel::fromString(const std::string& text, double rate) const
-    {
-        OTIO_NS::RationalTime out;
-        switch (_timeUnits->get())
-        {
-        case TimeUnits::Timecode:
-            out = OTIO_NS::RationalTime::from_timecode(text, rate);
-            break;
-        case TimeUnits::Frames:
-            out = OTIO_NS::RationalTime::from_frames(std::atof(text.c_str()), rate);
-            break;
-        case TimeUnits::Seconds:
-            out = OTIO_NS::RationalTime::from_seconds(std::atof(text.c_str()), rate);
-            break;
-        default: break;
-        }
-        return out;
     }
 }

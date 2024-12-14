@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "WindowModel.h"
+#include <toucanView/WindowModel.h>
 
 #include <dtk/ui/Action.h>
 #include <dtk/ui/RowLayout.h>
