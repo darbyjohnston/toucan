@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "MessageLogTool.h"
+#include "LogTool.h"
 
 #include "App.h"
 #include "FilesModel.h"
@@ -19,12 +19,12 @@ namespace toucan
         const size_t textMax = 200;
     }
 
-    void MessageLogTool::_init(
+    void LogTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IToolWidget::_init(context, app, "toucan::MessageLogTool", "Message Log", parent);
+        IToolWidget::_init(context, app, "toucan::LogTool", "Log", parent);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -47,13 +47,13 @@ namespace toucan
 
         _searchBox = dtk::SearchBox::create(context, _bottomLayout);
         _searchBox->setHStretch(dtk::Stretch::Expanding);
-        _searchBox->setTooltip("Search the message log");
+        _searchBox->setTooltip("Search the log");
 
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
         auto clearButton = dtk::ToolButton::create(context, hLayout);
         clearButton->setIcon("Clear");
-        clearButton->setTooltip("Clear the message log");
+        clearButton->setTooltip("Clear the log");
 
         _textUpdate();
 
@@ -85,32 +85,32 @@ namespace toucan
             });
     }
 
-    MessageLogTool::~MessageLogTool()
+    LogTool::~LogTool()
     {}
 
-    std::shared_ptr<MessageLogTool> MessageLogTool::create(
+    std::shared_ptr<LogTool> LogTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<MessageLogTool>(new MessageLogTool);
+        auto out = std::shared_ptr<LogTool>(new LogTool);
         out->_init(context, app, parent);
         return out;
     }
 
-    void MessageLogTool::setGeometry(const dtk::Box2I& value)
+    void LogTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void MessageLogTool::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void LogTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());
     }
 
-    void MessageLogTool::_textUpdate()
+    void LogTool::_textUpdate()
     {
         while (_text.size() > textMax)
         {

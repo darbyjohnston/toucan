@@ -665,8 +665,8 @@ namespace toucan
         const std::vector<Component> components =
         {
             { WindowComponent::ToolBar, "ToolBar", "Tool Bar", "", "" },
-            { WindowComponent::ToolsPanel, "ToolsPanel", "Tools Panel", "PanelRight", "Toggle the tools panel" },
-            { WindowComponent::PlaybackPanel, "PlaybackPanel", "Playback Panel", "PanelBottom", "Toggle the playback panel" }
+            { WindowComponent::Tools, "Tools", "Tools", "PanelRight", "Toggle the tools" },
+            { WindowComponent::Playback, "Playback", "Playback", "PanelBottom", "Toggle the playback controls" }
         };
         std::weak_ptr<App> appWeak(app);
         for (const auto& component : components)
@@ -793,10 +793,10 @@ namespace toucan
             {
                 auto i = value.find(WindowComponent::ToolBar);
                 _menus["Window"]->setItemChecked(_actions["Window/ToolBar"], i->second);
-                i = value.find(WindowComponent::ToolsPanel);
-                _menus["Window"]->setItemChecked(_actions["Window/ToolsPanel"], i->second);
-                i = value.find(WindowComponent::PlaybackPanel);
-                _menus["Window"]->setItemChecked(_actions["Window/PlaybackPanel"], i->second);
+                i = value.find(WindowComponent::Tools);
+                _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
+                i = value.find(WindowComponent::Playback);
+                _menus["Window"]->setItemChecked(_actions["Window/Playback"], i->second);
             });
 
         _displayScaleObserver = dtk::ValueObserver<float>::create(

@@ -111,7 +111,7 @@ namespace toucan
             });
         _buttons["Window/FullScreen"] = button;
 
-        i = actions.find("Window/ToolsPanel");
+        i = actions.find("Window/Tools");
         button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
@@ -124,9 +124,9 @@ namespace toucan
                     i->second->checkedCallback(value);
                 }
             });
-        _buttons["Window/ToolsPanel"] = button;
+        _buttons["Window/Tools"] = button;
 
-        i = actions.find("Window/PlaybackPanel");
+        i = actions.find("Window/Playback");
         button = dtk::ToolButton::create(context, hLayout);
         button->setIcon(i->second->icon);
         button->setCheckable(true);
@@ -139,7 +139,7 @@ namespace toucan
                     i->second->checkedCallback(value);
                 }
             });
-        _buttons["Window/PlaybackPanel"] = button;
+        _buttons["Window/Playback"] = button;
 
         _widgetUpdate();
 
@@ -170,10 +170,10 @@ namespace toucan
             app->getWindowModel()->observeComponents(),
             [this](const std::map<WindowComponent, bool> value)
             {
-                auto i = value.find(WindowComponent::ToolsPanel);
-                _buttons["Window/ToolsPanel"]->setChecked(i != value.end() ? i->second : false);
-                i = value.find(WindowComponent::PlaybackPanel);
-                _buttons["Window/PlaybackPanel"]->setChecked(i != value.end() ? i->second : false);
+                auto i = value.find(WindowComponent::Tools);
+                _buttons["Window/Tools"]->setChecked(i != value.end() ? i->second : false);
+                i = value.find(WindowComponent::Playback);
+                _buttons["Window/Playback"]->setChecked(i != value.end() ? i->second : false);
             });
     }
 

@@ -15,8 +15,8 @@ namespace toucan
 {
     class File;
 
-    //! Message log tool.
-    class MessageLogTool : public IToolWidget
+    //! Log tool.
+    class LogTool : public IToolWidget
     {
     protected:
         void _init(
@@ -25,10 +25,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~MessageLogTool();
+        virtual ~LogTool();
 
         //! Create a new tool.
-        static std::shared_ptr<MessageLogTool> create(
+        static std::shared_ptr<LogTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);

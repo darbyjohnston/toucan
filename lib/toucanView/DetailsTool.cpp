@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "JSONTool.h"
+#include "DetailsTool.h"
 
 #include "App.h"
 #include "FilesModel.h"
@@ -10,50 +10,109 @@
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
 #include <dtk/ui/ToolButton.h>
+#include <dtk/core/Format.h>
 #include <dtk/core/String.h>
 
 namespace toucan
 {
-    void JSONWidget::_init(
+    void DetailsItemWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IWidget::_init(context, "toucan::JSONWidget", parent);
+        IWidget::_init(context, "toucan::DetailsItemWidget", parent);
 
         _item = item;
-        _text = dtk::split(item->to_json_string(), { '\n' });
 
         _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
         _bellows->setOpen(true);
 
-        _label = dtk::Label::create(context);
-        _label->setFontRole(dtk::FontRole::Mono);
-        _label->setMarginRole(dtk::SizeRole::MarginSmall);
-        _bellows->setWidget(_label);
+        _layout = dtk::GridLayout::create(context);
+        _layout->setMarginRole(dtk::SizeRole::MarginSmall);
+        _layout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+        _bellows->setWidget(_layout);
+
+        _text.push_back(std::make_pair("Name:", item->name()));
+
+        _text.push_back(std::make_pair(
+            "Enabled:",
+            dtk::Format("{0}").arg(item->enabled())));
+
+        std::string text;
+        if (item->source_range().has_value())
+        {
+            OTIO_NS::TimeRange timeRange = item->source_range().value();
+            text = dtk::Format("{0} @ {1} / {2} @ {3}").
+                arg(timeRange.start_time().value()).
+                arg(timeRange.start_time().rate()).
+                arg(timeRange.duration().value()).
+                arg(timeRange.duration().rate());
+        }
+        _text.push_back(std::make_pair("Source range:", text));
+
+        OTIO_NS::TimeRange timeRange = item->available_range();
+        text = dtk::Format("{0} @ {1} / {2} @ {3}").
+            arg(timeRange.start_time().value()).
+            arg(timeRange.start_time().rate()).
+            arg(timeRange.duration().value()).
+            arg(timeRange.duration().rate());
+        _text.push_back(std::make_pair("Available range:", text));
+
+        timeRange = item->trimmed_range();
+        text = dtk::Format("{0} @ {1} / {2} @ {3}").
+            arg(timeRange.start_time().value()).
+            arg(timeRange.start_time().rate()).
+            arg(timeRange.duration().value()).
+            arg(timeRange.duration().rate());
+        _text.push_back(std::make_pair("Trimmed range:", text));
+
+        text.clear();
+        //! \todo Calling trimmed_range_in_parent() on a stack causes a crash?
+        auto stack = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Stack>(item);
+        if (!stack && item->trimmed_range_in_parent().has_value())
+        {
+            timeRange = item->trimmed_range_in_parent().value();
+            text = dtk::Format("{0} @ {1} / {2} @ {3}").
+                arg(timeRange.start_time().value()).
+                arg(timeRange.start_time().rate()).
+                arg(timeRange.duration().value()).
+                arg(timeRange.duration().rate());
+        }
+        _text.push_back(std::make_pair("Trimmed range in parent:", text));
+
+        int row = 0;
+        for (const auto& text : _text)
+        {
+            auto label = dtk::Label::create(context, text.first, _layout);
+            _layout->setGridPos(label, row, 0);
+            auto label2 = dtk::Label::create(context, text.second, _layout);
+            _layout->setGridPos(label2, row, 1);
+            _labels.push_back(std::make_pair(label, label2));
+            ++row;
+        }
 
         _textUpdate();
     }
 
-    JSONWidget::~JSONWidget()
+    DetailsItemWidget::~DetailsItemWidget()
     {}
 
-    std::shared_ptr<JSONWidget> JSONWidget::create(
+    std::shared_ptr<DetailsItemWidget> DetailsItemWidget::create(
         const std::shared_ptr<dtk::Context>& context,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<JSONWidget>(new JSONWidget);
+        auto out = std::shared_ptr<DetailsItemWidget>(new DetailsItemWidget);
         out->_init(context, item, parent);
         return out;
     }
 
-    void JSONWidget::setOpen(bool value)
+    void DetailsItemWidget::setOpen(bool value)
     {
         _bellows->setOpen(value);
     }
 
-    void JSONWidget::setSearch(const std::string& value)
+    void DetailsItemWidget::setSearch(const std::string& value)
     {
         if (value == _search)
             return;
@@ -61,44 +120,40 @@ namespace toucan
         _textUpdate();
     }
 
-    void JSONWidget::setGeometry(const dtk::Box2I& value)
+    void DetailsItemWidget::setGeometry(const dtk::Box2I& value)
     {
         IWidget::setGeometry(value);
         _bellows->setGeometry(value);
     }
 
-    void JSONWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void DetailsItemWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IWidget::sizeHintEvent(event);
         _setSizeHint(_bellows->getSizeHint());
     }
 
-    void JSONWidget::_textUpdate()
+    void DetailsItemWidget::_textUpdate()
     {
-        if (!_search.empty())
+        for (size_t i = 0; i < _text.size() && i < _labels.size(); ++i)
         {
-            std::vector<std::string> text;
-            for (const auto& line : _text)
+            bool visible = true;
+            if (!_search.empty())
             {
-                if (dtk::contains(line, _search, dtk::CaseCompare::Insensitive))
-                {
-                    text.push_back(line);
-                }
+                visible &=
+                    dtk::contains(_text[i].first, _search, dtk::CaseCompare::Insensitive) ||
+                    dtk::contains(_text[i].second, _search, dtk::CaseCompare::Insensitive);
             }
-            _label->setText(dtk::join(text, '\n'));
-        }
-        else
-        {
-            _label->setText(dtk::join(_text, '\n'));
+            _labels[i].first->setVisible(visible);
+            _labels[i].second->setVisible(visible);
         }
     }
 
-    void JSONTool::_init(
+    void DetailsTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IToolWidget::_init(context, app, "toucan::JSONTool", "JSON", parent);
+        IToolWidget::_init(context, app, "toucan::DetailsTool", "Details", parent);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -175,8 +230,7 @@ namespace toucan
                             auto context = getContext();
                             for (const auto& item : selection)
                             {
-                                auto widget = JSONWidget::create(context, item, _scrollLayout);
-                                widget->setSearch(_searchBox->getText());
+                                auto widget = DetailsItemWidget::create(context, item, _scrollLayout);
                                 _widgets.push_back(widget);
                             }
                         });
@@ -193,26 +247,26 @@ namespace toucan
             });
     }
 
-    JSONTool::~JSONTool()
+    DetailsTool::~DetailsTool()
     {}
 
-    std::shared_ptr<JSONTool> JSONTool::create(
+    std::shared_ptr<DetailsTool> DetailsTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<JSONTool>(new JSONTool);
+        auto out = std::shared_ptr<DetailsTool>(new DetailsTool);
         out->_init(context, app, parent);
         return out;
     }
 
-    void JSONTool::setGeometry(const dtk::Box2I& value)
+    void DetailsTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void JSONTool::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void DetailsTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());
