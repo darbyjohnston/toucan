@@ -20,7 +20,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(stack),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(stack),
             timeRange,
             "toucan::StackItem",
             parent);
@@ -29,7 +29,7 @@ namespace toucan
         _text = !stack->name().empty() ? stack->name() : "Stack";
         _color = dtk::Color4F(.2F, .2F, .2F);
 
-        setTooltip(_text);
+        setTooltip(stack->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
@@ -66,6 +66,7 @@ namespace toucan
 
     void StackItem::setScale(double value)
     {
+        IItem::setScale(value);
         _timeLayout->setScale(value);
     }
 
@@ -93,7 +94,7 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
+        const dtk::Box2I& g = _label->getGeometry();
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0);
         event.render->drawRect(

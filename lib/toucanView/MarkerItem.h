@@ -5,37 +5,37 @@
 
 #include <toucanView/IItem.h>
 #include <toucanView/ItemLabel.h>
-#include <toucanView/MarkerItem.h>
 
 #include <dtk/ui/RowLayout.h>
 
-#include <opentimelineio/clip.h>
+#include <opentimelineio/marker.h>
 
 namespace toucan
 {
-    //! Timeline clip item.
-    class ClipItem : public IItem
+    //! Get a marker color.
+    dtk::Color4F getMarkerColor(const std::string&);
+
+    //! Timeline marker item.
+    class MarkerItem : public IItem
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
-            const dtk::Color4F&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>&,
+            const OTIO_NS::TimeRange&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~ClipItem();
+        virtual ~MarkerItem();
 
         //! Create a new item.
-        static std::shared_ptr<ClipItem> create(
+        static std::shared_ptr<MarkerItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
-            const dtk::Color4F&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>&,
+            const OTIO_NS::TimeRange&,
             const std::shared_ptr<IWidget>& parent = nullptr);
-
-        void setScale(double) override;
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
@@ -47,13 +47,13 @@ namespace toucan
     private:
         void _textUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> _clip;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker> _marker;
+        OTIO_NS::TimeRange _markerTimeRange;
         std::string _text;
         dtk::Color4F _color;
+        dtk::Color4F _markerColor;
 
-        std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<ItemLabel> _label;
-        std::vector<std::shared_ptr<MarkerItem> > _markerItems;
 
         struct SizeData
         {

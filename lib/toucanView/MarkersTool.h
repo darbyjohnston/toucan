@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/IToolWidget.h>
+#include <toucanView/SelectionModel.h>
 
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
@@ -46,7 +47,7 @@ namespace toucan
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }
 

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/IToolWidget.h>
+#include <toucanView/SelectionModel.h>
 
 #include <toucanRender/ImageGraph.h>
 
@@ -23,22 +24,22 @@ namespace toucan
 {
     class File;
 
-    //! Details item widget.
-    class DetailsItemWidget : public dtk::IWidget
+    //! Information item widget.
+    class InfoItemWidget : public dtk::IWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~DetailsItemWidget();
+        virtual ~InfoItemWidget();
 
         //! Create a new widget.
-        static std::shared_ptr<DetailsItemWidget> create(
+        static std::shared_ptr<InfoItemWidget> create(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set whether the widget is open.
@@ -53,7 +54,7 @@ namespace toucan
     private:
         void _textUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
         std::vector<std::pair<std::string, std::string> > _text;
         std::string _search;
         std::shared_ptr<dtk::Bellows> _bellows;
@@ -61,38 +62,8 @@ namespace toucan
         std::vector<std::pair<std::shared_ptr<dtk::Label>, std::shared_ptr<dtk::Label> > > _labels;
     };
 
-    //! Details widget.
-    class DetailsWidget : public dtk::IWidget
-    {
-    protected:
-        void _init(
-            const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
-            const std::shared_ptr<IWidget>& parent);
-
-    public:
-        virtual ~DetailsWidget();
-
-        //! Create a new widget.
-        static std::shared_ptr<DetailsWidget> create(
-            const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
-            const std::shared_ptr<IWidget>& parent = nullptr);
-
-        //! Set whether the widget is open.
-        void setOpen(bool);
-
-        void setGeometry(const dtk::Box2I&) override;
-        void sizeHintEvent(const dtk::SizeHintEvent&) override;
-
-    private:
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
-        std::shared_ptr<dtk::Bellows> _bellows;
-        std::shared_ptr<dtk::GridLayout> _layout;
-    };
-
-    //! Details tool.
-    class DetailsTool : public IToolWidget
+    //! Infoformation tool.
+    class InfoTool : public IToolWidget
     {
     protected:
         void _init(
@@ -101,10 +72,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~DetailsTool();
+        virtual ~InfoTool();
 
         //! Create a new tool.
-        static std::shared_ptr<DetailsTool> create(
+        static std::shared_ptr<InfoTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -116,12 +87,12 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
-        std::vector<std::shared_ptr<DetailsItemWidget> > _widgets;
+        std::vector<std::shared_ptr<InfoItemWidget> > _widgets;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<dtk::SearchBox> _searchBox;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }
 

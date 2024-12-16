@@ -17,7 +17,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(gap),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(gap),
             opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
             "toucan::ClipItem",
             parent);
@@ -26,7 +26,7 @@ namespace toucan
         _text = !gap->name().empty() ? gap->name() : "Gap";
         _color = dtk::Color4F(.3F, .3F, .3F);
 
-        setTooltip(_text);
+        setTooltip(gap->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);

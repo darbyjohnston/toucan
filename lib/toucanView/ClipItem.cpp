@@ -15,11 +15,12 @@ namespace toucan
         const std::shared_ptr<IWidget>& parent)
     {
         auto opt = clip->trimmed_range_in_parent();
+        const OTIO_NS::TimeRange timeRange = opt.has_value() ? opt.value() : OTIO_NS::TimeRange();
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(clip),
-            opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(clip),
+            timeRange,
             "toucan::ClipItem",
             parent);
 
@@ -29,13 +30,20 @@ namespace toucan
         _text = !clip->name().empty() ? clip->name() : "Clip";
         _color = color;
 
-        setTooltip(_text);
+        setTooltip(clip->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
-        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+        _layout->setSpacingRole(dtk::SizeRole::None);
 
         _label = ItemLabel::create(context, _layout);
         _label->setName(_text);
+
+        const auto& markers = clip->markers();
+        for (const auto& marker : markers)
+        {
+            auto markerItem = MarkerItem::create(context, app, marker, timeRange, _layout);
+            _markerItems.push_back(markerItem);
+        }
 
         _textUpdate();
     }
@@ -53,6 +61,15 @@ namespace toucan
         auto out = std::make_shared<ClipItem>();
         out->_init(context, app, clip, color, parent);
         return out;
+    }
+
+    void ClipItem::setScale(double value)
+    {
+        IItem::setScale(value);
+        for (const auto& markerItem : _markerItems)
+        {
+            markerItem->setScale(value);
+        }
     }
 
     void ClipItem::setGeometry(const dtk::Box2I& value)
@@ -79,7 +96,7 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
+        const dtk::Box2I& g = _label->getGeometry();
         const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
         event.render->drawRect(
             g2,

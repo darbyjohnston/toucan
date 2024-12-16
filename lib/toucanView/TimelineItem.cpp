@@ -5,7 +5,6 @@
 
 #include "App.h"
 #include "FilesModel.h"
-#include "SelectionModel.h"
 #include "StackItem.h"
 
 #include <dtk/ui/ScrollArea.h>
@@ -40,9 +39,9 @@ namespace toucan
 
         StackItem::create(context, app, _timeline->tracks(), shared_from_this());
 
-        _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
+        _selectionObserver = dtk::ListObserver<SelectionItem>::create(
             _selectionModel->observeSelection(),
-            [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+            [this](const std::vector<SelectionItem>& selection)
             {
                 _select(shared_from_this(), selection);
             });
@@ -306,18 +305,19 @@ namespace toucan
         {
             std::shared_ptr<IItem> selection;
             _select(shared_from_this(), event.pos, selection);
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
+            SelectionItem item;
             if (selection)
             {
-                item = selection->getItem();
+                item.object = selection->getObject();
+                item.timeRange = selection->getTimeRange();
             }
-            if (selection && item)
+            if (selection && item.object)
             {
                 event.accept = true;
                 takeKeyFocus();
                 _mouse.mode = MouseMode::Select;
                 auto selectionPrev = _selectionModel->getSelection();
-                std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > selectionNew;
+                std::vector<SelectionItem> selectionNew;
                 if (static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers)
                 {
                     selectionNew = selectionPrev;
@@ -567,11 +567,18 @@ namespace toucan
 
     void TimelineItem::_select(
         const std::shared_ptr<dtk::IWidget>& widget,
-        const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+        const std::vector<SelectionItem>& selection)
     {
         if (auto iitem = std::dynamic_pointer_cast<IItem>(widget))
         {
-            const auto i = std::find(selection.begin(), selection.end(), iitem->getItem());
+            auto object = iitem->getObject();
+            const auto i = std::find_if(
+                selection.begin(),
+                selection.end(),
+                [object](const SelectionItem& item)
+                {
+                    return object.value == item.object.value;
+                });
             iitem->setSelected(i != selection.end());
         }
         for (const auto& child : widget->getChildren())

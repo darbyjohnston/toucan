@@ -155,19 +155,38 @@
                             {
                                 "OTIO_SCHEMA": "Marker.2",
                                 "metadata": {},
-                                "name": "Marker C",
+                                "name": "Marker C0",
                                 "color": "BLUE",
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {
                                         "OTIO_SCHEMA": "RationalTime.1",
                                         "rate": 24.0,
-                                        "value": 3.0
+                                        "value": 2.0
                                     },
                                     "start_time": {
                                         "OTIO_SCHEMA": "RationalTime.1",
                                         "rate": 24.0,
                                         "value": 0.0
+                                    }
+                                }
+                            },
+                            {
+                                "OTIO_SCHEMA": "Marker.2",
+                                "metadata": {},
+                                "name": "Marker C1",
+                                "color": "PURPLE",
+                                "marked_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1",
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24.0,
+                                        "value": 21.0
+                                    },
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24.0,
+                                        "value": 1.0
                                     }
                                 }
                             }

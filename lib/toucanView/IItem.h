@@ -21,7 +21,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const OTIO_NS::TimeRange&,
             const std::string& objectName,
             const std::shared_ptr<IWidget>& parent);
@@ -29,8 +29,8 @@ namespace toucan
     public:
         virtual ~IItem() = 0;
 
-        //! Get the OTIO item.
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& getItem() const;
+        //! Get the OTIO object.
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& getObject() const;
         
         //! Get whether the item is selected.
         bool isSelected() const;
@@ -41,7 +41,7 @@ namespace toucan
     protected:
         virtual void _timeUnitsUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
         TimeUnits _timeUnits = TimeUnits::First;
         bool _selected = false;
 

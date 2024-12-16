@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/IToolWidget.h>
+#include <toucanView/SelectionModel.h>
 
 #include <dtk/ui/Bellows.h>
 #include <dtk/ui/Label.h>
@@ -24,7 +25,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -33,7 +34,7 @@ namespace toucan
         //! Create a new widget.
         static std::shared_ptr<JSONWidget> create(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set whether the widget is open.
@@ -48,11 +49,13 @@ namespace toucan
     private:
         void _textUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
+        std::vector<std::string> _lineNumbers;
         std::vector<std::string> _text;
         std::string _search;
         std::shared_ptr<dtk::Bellows> _bellows;
-        std::shared_ptr<dtk::Label> _label;
+        std::shared_ptr<dtk::Label> _lineNumbersLabel;
+        std::shared_ptr<dtk::Label> _textLabel;
     };
 
     //! JSON tool.
@@ -87,7 +90,7 @@ namespace toucan
         std::shared_ptr<dtk::SearchBox> _searchBox;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }
 

@@ -10,14 +10,14 @@ namespace toucan
     void IItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
         const OTIO_NS::TimeRange& timeRange,
         const std::string& objectName,
         const std::shared_ptr<IWidget>& parent)
     {
         ITimeWidget::_init(context, timeRange, objectName, parent);
 
-        _item = item;
+        _object = object;
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
             app->getTimeUnitsModel()->observeTimeUnits(),
@@ -31,9 +31,9 @@ namespace toucan
     IItem::~IItem()
     {}
 
-    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& IItem::getItem() const
+    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& IItem::getObject() const
     {
-        return _item;
+        return _object;
     }
 
     bool IItem::isSelected() const

@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/IItem.h>
+#include <toucanView/SelectionModel.h>
 #include <toucanView/ThumbnailGenerator.h>
 
 #include <dtk/core/LRUCache.h>
@@ -81,7 +82,7 @@ namespace toucan
             std::shared_ptr<IItem>&);
         void _select(
             const std::shared_ptr<dtk::IWidget>&,
-            const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
+            const std::vector<SelectionItem>&);
 
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
         OTIO_NS::TimeRange _timeRange;
@@ -119,6 +120,6 @@ namespace toucan
         };
         MouseData _mouse;
 
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem > > _selectionObserver;
     };
 }

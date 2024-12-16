@@ -5,7 +5,6 @@
 
 #include "App.h"
 #include "FilesModel.h"
-#include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
@@ -49,9 +48,9 @@ namespace toucan
             {
                 if (file)
                 {
-                    _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
+                    _selectionObserver = dtk::ListObserver<SelectionItem>::create(
                         file->getSelectionModel()->observeSelection(),
-                        [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+                        [this](const std::vector<SelectionItem>& selection)
                         {
                         });
                 }

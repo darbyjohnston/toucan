@@ -5,32 +5,46 @@
 
 #include "App.h"
 #include "FilesModel.h"
-#include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
 #include <dtk/ui/ToolButton.h>
+#include <dtk/core/Format.h>
 #include <dtk/core/String.h>
 
 namespace toucan
 {
     void JSONWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::JSONWidget", parent);
 
-        _item = item;
-        _text = dtk::split(item->to_json_string(), { '\n' });
+        _object = object;
+        _text = dtk::split(object->to_json_string(), { '\n' });
+        for (int i = 0; i < _text.size(); ++i)
+        {
+            _lineNumbers.push_back(dtk::Format("{0}").arg(i, dtk::digits(_text.size()), '0'));
+        }
 
-        _bellows = dtk::Bellows::create(context, item->name(), shared_from_this());
+        _bellows = dtk::Bellows::create(context, object->name(), shared_from_this());
         _bellows->setOpen(true);
 
-        _label = dtk::Label::create(context);
-        _label->setFontRole(dtk::FontRole::Mono);
-        _label->setMarginRole(dtk::SizeRole::MarginSmall);
-        _bellows->setWidget(_label);
+        auto hLayout = dtk::HorizontalLayout::create(context);
+        hLayout->setSpacingRole(dtk::SizeRole::None);
+        _bellows->setWidget(hLayout);
+
+        _lineNumbersLabel = dtk::Label::create(context, hLayout);
+        _lineNumbersLabel->setBackgroundRole(dtk::ColorRole::Base);
+        _lineNumbersLabel->setFontRole(dtk::FontRole::Mono);
+        _lineNumbersLabel->setMarginRole(dtk::SizeRole::MarginSmall);
+        _lineNumbersLabel->setHStretch(dtk::Stretch::Fixed);
+
+        _textLabel = dtk::Label::create(context, hLayout);
+        _textLabel->setFontRole(dtk::FontRole::Mono);
+        _textLabel->setMarginRole(dtk::SizeRole::MarginSmall);
+        _textLabel->setHStretch(dtk::Stretch::Expanding);
 
         _textUpdate();
     }
@@ -40,11 +54,11 @@ namespace toucan
 
     std::shared_ptr<JSONWidget> JSONWidget::create(
         const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<JSONWidget>(new JSONWidget);
-        out->_init(context, item, parent);
+        out->_init(context, object, parent);
         return out;
     }
 
@@ -77,19 +91,23 @@ namespace toucan
     {
         if (!_search.empty())
         {
+            std::vector<std::string> lineNumbers;
             std::vector<std::string> text;
-            for (const auto& line : _text)
+            for (size_t i = 0; i < _lineNumbers.size() && i < _text.size(); ++i)
             {
-                if (dtk::contains(line, _search, dtk::CaseCompare::Insensitive))
+                if (dtk::contains(_text[i], _search, dtk::CaseCompare::Insensitive))
                 {
-                    text.push_back(line);
+                    lineNumbers.push_back(_lineNumbers[i]);
+                    text.push_back(_text[i]);
                 }
             }
-            _label->setText(dtk::join(text, '\n'));
+            _lineNumbersLabel->setText(dtk::join(lineNumbers, '\n'));
+            _textLabel->setText(dtk::join(text, '\n'));
         }
         else
         {
-            _label->setText(dtk::join(_text, '\n'));
+            _lineNumbersLabel->setText(dtk::join(_lineNumbers, '\n'));
+            _textLabel->setText(dtk::join(_text, '\n'));
         }
     }
 
@@ -163,9 +181,9 @@ namespace toucan
             {
                 if (file)
                 {
-                    _selectionObserver = dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >::create(
+                    _selectionObserver = dtk::ListObserver<SelectionItem>::create(
                         file->getSelectionModel()->observeSelection(),
-                        [this](const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& selection)
+                        [this](const std::vector<SelectionItem>& selection)
                         {
                             for (const auto& widget : _widgets)
                             {
@@ -175,7 +193,7 @@ namespace toucan
                             auto context = getContext();
                             for (const auto& item : selection)
                             {
-                                auto widget = JSONWidget::create(context, item, _scrollLayout);
+                                auto widget = JSONWidget::create(context, item.object, _scrollLayout);
                                 widget->setSearch(_searchBox->getText());
                                 _widgets.push_back(widget);
                             }

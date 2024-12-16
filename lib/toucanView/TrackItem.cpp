@@ -25,7 +25,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(track),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
             timeRange,
             "toucan::TrackItem",
             parent);
@@ -36,7 +36,7 @@ namespace toucan
             dtk::Color4F(.2F, .2F, .3F) :
             dtk::Color4F(.2F, .3F, .2F);
 
-        setTooltip(_text);
+        setTooltip(track->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
@@ -81,6 +81,7 @@ namespace toucan
 
     void TrackItem::setScale(double value)
     {
+        IItem::setScale(value);
         _timeLayout->setScale(value);
     }
 
@@ -108,7 +109,7 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
+        const dtk::Box2I& g = _label->getGeometry();
 
         const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0);
         event.render->drawRect(
