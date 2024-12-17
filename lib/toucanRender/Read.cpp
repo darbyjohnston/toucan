@@ -80,7 +80,8 @@ namespace toucan
             // Read the image.
             out = _ffRead->getImage(offsetTime);
 
-            if (3 == _spec.nchannels)
+            const auto& spec = out.spec();
+            if (3 == spec.nchannels)
             {
                 // Add an alpha channel.
                 const int channelOrder[] = { 0, 1, 2, -1 };
@@ -108,7 +109,9 @@ namespace toucan
                 _spec.nchannels * _spec.channel_bytes(),
                 _spec.width * _spec.nchannels * _spec.channel_bytes(),
                 0);
-            if (3 == _spec.nchannels)
+
+            const auto& spec = buf.spec();
+            if (3 == spec.nchannels)
             {
                 // Add an alpha channel.
                 const int channelOrder[] = { 0, 1, 2, -1 };

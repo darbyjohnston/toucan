@@ -25,7 +25,7 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * _timeScalar, offsetTime.rate()).floor();
+            const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * _timeScalar, _time.rate()).floor();
             _inputs[0]->setTime(scaledTime);
             buf = _inputs[0]->exec();
         }

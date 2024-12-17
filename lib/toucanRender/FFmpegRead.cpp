@@ -541,7 +541,7 @@ namespace toucan
                                     1);
                                 sws_scale_frame(_swsContext, _avFrame2, _avFrame);
 
-                                _currentTime += OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
+                                _currentTime = frameTime + OTIO_NS::RationalTime(1.0, _timeRange.duration().rate());
 
                                 decoding = 1;
                                 break;

@@ -37,14 +37,18 @@ namespace toucan
             _inputs[0]->setTime(offsetTime);
             auto fg = _inputs[0]->exec();
             _inputs[1]->setTime(offsetTime);
-            auto bg = _inputs[1]->exec();
-            if (_premult)
+            buf = _inputs[1]->exec();
+            const auto fgSpec = fg.spec();
+            if (_premult &&
+                fgSpec.width > 0 &&
+                fgSpec.height > 0)
             {
                 fg = OIIO::ImageBufAlgo::premult(fg);
             }
-            const auto& fgSpec = fg.spec();
-            const auto& bgSpec = bg.spec();
-            if (bgSpec.width > 0 &&
+            const auto& bgSpec = buf.spec();
+            if (fgSpec.width > 0 &&
+                fgSpec.height > 0 &&
+                bgSpec.width > 0 &&
                 bgSpec.height > 0 &&
                 (fgSpec.width != bgSpec.width || fgSpec.height != bgSpec.height))
             {
@@ -54,17 +58,20 @@ namespace toucan
                     0.0, 
                     OIIO::ROI(0, bgSpec.width, 0, bgSpec.height));
             }
-            buf = OIIO::ImageBufAlgo::over(fg, bg);
+            if (fgSpec.width > 0 &&
+                fgSpec.height > 0)
+            {
+                buf = OIIO::ImageBufAlgo::over(fg, buf);
+            }
         }
         else if (1 == _inputs.size() && _inputs[0])
         {
             _inputs[0]->setTime(offsetTime);
-            auto fg = _inputs[0]->exec();
+            buf = _inputs[0]->exec();
             if (_premult)
             {
-                fg = OIIO::ImageBufAlgo::premult(fg);
+                buf = OIIO::ImageBufAlgo::premult(buf);
             }
-            buf = fg;
         }
         return buf;
     }

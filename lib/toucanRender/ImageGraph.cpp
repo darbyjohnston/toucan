@@ -333,10 +333,6 @@ namespace toucan
     {
         std::shared_ptr<IImageNode> out;
 
-        OTIO_NS::RationalTime timeOffset =
-            trimmedRangeInParent.start_time() -
-            item->trimmed_range().start_time();
-
         if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
         {
             // Get the media reference.
@@ -360,11 +356,12 @@ namespace toucan
                     }
                     _loadCache.add(externalRef, read);
                 }
-
-                //! \bug Workaround for when the available range does not match
-                //! the range in the media.
                 if (read)
                 {
+                    OTIO_NS::RationalTime timeOffset = -item->trimmed_range().start_time();
+
+                    //! \bug Workaround for when the available range does not match
+                    //! the range in the media.
                     const OTIO_NS::TimeRange& timeRange = read->getTimeRange();
                     const auto availableOpt = externalRef->available_range();
                     if (availableOpt.has_value() &&
@@ -372,8 +369,9 @@ namespace toucan
                     {
                         timeOffset += availableOpt.value().start_time() - timeRange.start_time();
                     }
-                }
 
+                    read->setTimeOffset(timeOffset);
+                }
                 out = read;
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
@@ -398,6 +396,10 @@ namespace toucan
                         e.what(),
                         dtk::LogType::Error);
                 }
+                if (read)
+                {
+                    read->setTimeOffset(-item->trimmed_range().start_time());
+                }
                 out = read;
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
@@ -418,9 +420,11 @@ namespace toucan
         {
             out = _effects(host, effects, out);
         }
+
+        // Set the time offset.
         if (out)
         {
-            out->setTimeOffset(timeOffset);
+            out->setTimeOffset(out->getTimeOffset() + trimmedRangeInParent.start_time());
         }
 
         return out;
