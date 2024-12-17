@@ -7,7 +7,7 @@
 #include "FilesModel.h"
 #include "PlaybackModel.h"
 
-#include <toucanUtil/File.h>
+#include <toucanRender/Util.h>
 
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/GridLayout.h>
