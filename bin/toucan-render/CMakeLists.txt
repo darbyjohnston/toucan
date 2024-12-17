@@ -5,7 +5,7 @@ set(SOURCE
     main.cpp)
 
 add_executable(toucan-render ${HEADERS} ${SOURCE})
-target_link_libraries(toucan-render toucan)
+target_link_libraries(toucan-render toucanRender)
 set_target_properties(toucan-render PROPERTIES FOLDER bin)
 add_dependencies(toucan-render ${TOUCAN_PLUGINS})
 

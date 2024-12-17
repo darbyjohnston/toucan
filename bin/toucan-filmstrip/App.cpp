@@ -3,72 +3,67 @@
 
 #include "App.h"
 
-#include <toucan/Util.h>
+#include <toucanRender/Util.h>
+
+#include <dtk/core/CmdLine.h>
+#include <dtk/core/Time.h>
 
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
 {
-    App::App(std::vector<std::string>& argv)
+    void App::_init(
+        const std::shared_ptr<dtk::Context>& context,
+        std::vector<std::string>& argv)
     {
-        _exe = argv.front();
-        argv.erase(argv.begin());
-
-        _args.list.push_back(std::make_shared<CmdLineValueArg<std::string> >(
+        std::vector<std::shared_ptr<dtk::ICmdLineArg> > args;
+        args.push_back(dtk::CmdLineValueArg<std::string>::create(
             _args.input,
             "input",
             "Input .otio file."));
-        auto outArg = std::make_shared<CmdLineValueArg<std::string> >(
+        auto outArg = dtk::CmdLineValueArg<std::string>::create(
             _args.output,
             "output",
             "Output image file.");
-        _args.list.push_back(outArg);
+        args.push_back(outArg);
 
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+        std::vector<std::shared_ptr<dtk::ICmdLineOption> > options;
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.verbose,
             std::vector<std::string>{ "-v" },
             "Print verbose output."));
-        _options.list.push_back(std::make_shared<CmdLineFlagOption>(
+        options.push_back(dtk::CmdLineFlagOption::create(
             _options.help,
             std::vector<std::string>{ "-h" },
             "Print help."));
 
-        if (!argv.empty())
-        {
-            for (const auto& option : _options.list)
-            {
-                option->parse(argv);
-            }
-            if (!_options.help)
-            {
-                for (const auto& arg : _args.list)
-                {
-                    arg->parse(argv);
-                }
-                if (argv.size())
-                {
-                    _options.help = true;
-                }
-            }
-        }
-        else
-        {
-            _options.help = true;
-        }
+        IApp::_init(
+            context,
+            argv,
+            "toucan-filmstrip",
+            "Render timeline files into filmstrips",
+            args,
+            options);
     }
-        
+
+    App::App()
+    {}
+
     App::~App()
     {}
-    
-    int App::run()
+
+    std::shared_ptr<App> App::create(
+        const std::shared_ptr<dtk::Context>&context,
+        std::vector<std::string>&argv)
     {
-        if (_options.help)
-        {
-            _printHelp();
-            return 1;
-        }
-        
-        const std::filesystem::path parentPath = std::filesystem::path(_exe).parent_path();
+        auto out = std::shared_ptr<App>(new App);
+        out->_init(context, argv);
+        return out;
+    }
+    
+    void App::run()
+    {
+        const std::filesystem::path parentPath = std::filesystem::path(getExeName()).parent_path();
         const std::filesystem::path inputPath(_args.input);
         const std::filesystem::path outputPath(_args.output);
         const auto outputSplit = splitFileNameNumber(outputPath.stem().string());
@@ -84,17 +79,10 @@ namespace toucan
         const int frames = timeRange.duration().value();
         
         // Create the image graph.
-        std::shared_ptr<MessageLog> log;
-        if (_options.verbose)
-        {
-            log = std::make_shared<MessageLog>();
-        }
-        ImageGraphOptions imageGraphOptions;
-        imageGraphOptions.log = log;
         _graph = std::make_shared<ImageGraph>(
+            _context,
             inputPath.parent_path(),
-            _timelineWrapper,
-            imageGraphOptions);
+            _timelineWrapper);
         const IMATH_NAMESPACE::V2d imageSize = _graph->getImageSize();
 
         // Create the image host.
@@ -105,11 +93,7 @@ namespace toucan
 #else // _WINDOWS
         searchPath.push_back(parentPath / ".." / "..");
 #endif // _WINDOWS
-        ImageEffectHostOptions imageHostOptions;
-        imageHostOptions.log = log;
-        _host = std::make_shared<ImageEffectHost>(
-            searchPath,
-            imageHostOptions);
+        _host = std::make_shared<ImageEffectHost>(_context, searchPath);
 
         // Initialize the filmstrip.
         OIIO::ImageBuf filmstripBuf;
@@ -162,34 +146,6 @@ namespace toucan
 
         // Write the image.
         filmstripBuf.write(outputPath.string());
-    
-        return 0;
-    }
-
-    void App::_printHelp()
-    {
-        std::cout << "Usage:" << std::endl;
-        std::cout << std::endl;
-        std::cout << "    toucan-filmstrip (input) (output) [options...]" << std::endl;
-        std::cout << std::endl;
-        std::cout << "Arguments:" << std::endl;
-        std::cout << std::endl;
-        for (const auto& arg : _args.list)
-        {
-            std::cout << "    " << arg->getName() << " - " << arg->getHelp() << std::endl;
-            std::cout << std::endl;
-        }
-        std::cout << std::endl;
-        std::cout << "Options:" << std::endl;
-        std::cout << std::endl;
-        for (const auto& option : _options.list)
-        {
-            for (const auto& line : option->getHelp())
-            {
-                std::cout << "    " << line << std::endl;
-            }
-            std::cout << std::endl;
-        }        
     }
 }
 

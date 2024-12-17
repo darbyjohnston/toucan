@@ -22,11 +22,11 @@ namespace toucan
     };
     DTK_ENUM(TimeUnits);
 
-    //! Convert to a string.
-    std::string toString(TimeUnits);
+    //! Convert a time to a string.
+    std::string toString(const OTIO_NS::RationalTime&, TimeUnits);
 
-    //! Convert from a string.
-    TimeUnits fromString(const std::string&);
+    //! Convert a string to a time.
+    OTIO_NS::RationalTime fromString(const std::string&, TimeUnits, double rate);
 
     //! Time units model. 
     class TimeUnitsModel : public std::enable_shared_from_this<TimeUnitsModel>
@@ -44,12 +44,6 @@ namespace toucan
 
         //! Set the time units.
         void setTimeUnits(TimeUnits);
-
-        //! Convert a time to a string.
-        std::string toString(const OTIO_NS::RationalTime&) const;
-
-        //! Convert a string to a time.
-        OTIO_NS::RationalTime fromString(const std::string&, double rate) const;
 
     private:
         std::weak_ptr<dtk::Context> _context;

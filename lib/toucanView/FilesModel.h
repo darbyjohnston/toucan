@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "File.h"
+#include <toucanView/File.h>
 
 #include <dtk/ui/RecentFilesModel.h>
 #include <dtk/core/Context.h>

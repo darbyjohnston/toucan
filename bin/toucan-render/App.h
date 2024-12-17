@@ -3,10 +3,11 @@
 
 #pragma once
 
-#include <toucan/CmdLine.h>
-#include <toucan/ImageEffectHost.h>
-#include <toucan/ImageGraph.h>
-#include <toucan/TimelineWrapper.h>
+#include <toucanRender/ImageEffectHost.h>
+#include <toucanRender/ImageGraph.h>
+#include <toucanRender/TimelineWrapper.h>
+
+#include <dtk/core/IApp.h>
 
 #include <OpenImageIO/imagebuf.h>
 
@@ -18,30 +19,34 @@ extern "C"
 
 namespace toucan
 {
-    class App : public std::enable_shared_from_this<App>
+    class App : public dtk::IApp
     {
+    protected:
+        void _init(
+            const std::shared_ptr<dtk::Context>&,
+            std::vector<std::string>&);
+
+        App();
+
     public:
-        App(std::vector<std::string>&);
-        
         ~App();
         
-        int run();
+        static std::shared_ptr<App> create(
+            const std::shared_ptr<dtk::Context>&,
+            std::vector<std::string>&);
+
+        void run() override;
     
     private:
         void _writeRawFrame(const OIIO::ImageBuf&);
         void _writeY4mHeader();
         void _writeY4mFrame(const OIIO::ImageBuf&);
-        
-        void _printHelp();
-        
-        std::string _exe;
-        
+                
         struct Args
         {
             std::string input;
             std::string output;
             bool outputRaw = false;
-            std::vector<std::shared_ptr<ICmdLineArg> > list;
         };
         Args _args;
         
@@ -55,8 +60,6 @@ namespace toucan
             std::string raw;
             std::string y4m;
             bool verbose = false;
-            bool help = false;
-            std::vector<std::shared_ptr<ICmdLineOption> > list;
         };
         Options _options;
 

@@ -171,8 +171,6 @@ namespace toucan
     {
         IWidget::_init(context, "toucan::TimeEdit", parent);
 
-        _timeUnitsModel = timeUnitsModel;
-
         _layout = dtk::HorizontalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
@@ -189,7 +187,7 @@ namespace toucan
             {
                 if (_callback)
                 {
-                    _callback(_timeUnitsModel->fromString(text, _time.rate()));
+                    _callback(fromString(text, _timeUnits, _time.rate()));
                 }
             });
 
@@ -206,8 +204,9 @@ namespace toucan
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
             timeUnitsModel->observeTimeUnits(),
-            [this](TimeUnits)
+            [this](TimeUnits value)
             {
+                _timeUnits = value;
                 _timeUpdate();
             });
     }
@@ -303,7 +302,7 @@ namespace toucan
 
     void TimeEdit::_timeUpdate()
     {
-        _lineEdit->setText(_timeUnitsModel->toString(_time));
+        _lineEdit->setText(toString(_time, _timeUnits));
     }
 
     void TimeEdit::_timeInc(int value)
@@ -331,8 +330,6 @@ namespace toucan
     {
         IWidget::_init(context, "toucan::TimeLabel", parent);
 
-        _timeUnitsModel = timeUnitsModel;
-
         _label = dtk::Label::create(context, shared_from_this());
         _label->setFontRole(dtk::FontRole::Mono);
         _label->setMarginRole(dtk::SizeRole::MarginInside);
@@ -343,6 +340,7 @@ namespace toucan
             timeUnitsModel->observeTimeUnits(),
             [this](TimeUnits value)
             {
+                _timeUnits = value;
                 _timeUpdate();
             });
     }
@@ -387,6 +385,6 @@ namespace toucan
 
     void TimeLabel::_timeUpdate()
     {
-        _label->setText(_timeUnitsModel->toString(_time));
+        _label->setText(toString(_time, _timeUnits));
     }
 }

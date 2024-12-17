@@ -7,17 +7,6 @@
 
 #include <opentimelineio/timeline.h>
 
-namespace OTIO_NS
-{
-    //! \todo Move to OTIO?
-    bool operator == (
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
-    bool operator < (
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
-}
-
 namespace toucan
 {
     //! Selection type.
@@ -25,8 +14,25 @@ namespace toucan
     {
         All,
         Tracks,
-        Clips
+        Clips,
+        Markers
     };
+
+    //! Selection item.
+    struct SelectionItem
+    {
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> object;
+        OTIO_NS::TimeRange timeRange;
+
+        bool operator == (const SelectionItem&) const;
+        bool operator != (const SelectionItem&) const;
+    };
+
+    //! Get the range of multiple items.
+    std::optional<OTIO_NS::TimeRange> getTimeRange(
+        const std::vector<SelectionItem>&, 
+        const OTIO_NS::RationalTime& startTime,
+        double rate);
 
     //! Selection model.
     class SelectionModel : public std::enable_shared_from_this<SelectionModel>
@@ -37,13 +43,13 @@ namespace toucan
         virtual ~SelectionModel();
 
         //! Get the selection.
-        const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >& getSelection() const;
+        const std::vector<SelectionItem >& getSelection() const;
 
         //! Observe the selection.
-        std::shared_ptr<dtk::IObservableList<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > observeSelection() const;
+        std::shared_ptr<dtk::IObservableList<SelectionItem> > observeSelection() const;
 
         //! Set the seldction.
-        void setSelection(const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
+        void setSelection(const std::vector<SelectionItem>&);
 
         //! Select all of the given type.
         void selectAll(
@@ -57,6 +63,19 @@ namespace toucan
         void invertSelection(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 
     private:
-        std::shared_ptr<dtk::ObservableList<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selection;
+        void _getTracks(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+        void _getClips(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+        void _getGaps(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+        void _getMarkers(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+
+        std::shared_ptr<dtk::ObservableList<SelectionItem> > _selection;
     };
 }

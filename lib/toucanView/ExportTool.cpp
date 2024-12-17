@@ -7,7 +7,7 @@
 #include "FilesModel.h"
 #include "PlaybackModel.h"
 
-#include <toucan/Util.h>
+#include <toucanRender/Util.h>
 
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/GridLayout.h>
@@ -290,6 +290,7 @@ namespace toucan
             return;
 
         _graph = std::make_shared<ImageGraph>(
+            getContext(),
             _file->getPath(),
             _file->getTimelineWrapper());
         _imageSize = _graph->getImageSize();

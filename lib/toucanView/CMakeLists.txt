@@ -10,14 +10,20 @@ set(HEADERS
     IItem.h
     IToolWidget.h
     InfoBar.h
+    InfoTool.h
+    ItemLabel.h
     JSONTool.h
+    LogTool.h
     MainWindow.h
+    MarkerItem.h
+    MarkersTool.h
     MenuBar.h
     PlaybackBar.h
     PlaybackModel.h
     SelectionModel.h
     StackItem.h
     ThumbnailGenerator.h
+    TimeLayout.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
@@ -40,14 +46,20 @@ set(SOURCE
     IItem.cpp
     IToolWidget.cpp
     InfoBar.cpp
+    InfoTool.cpp
+    ItemLabel.cpp
     JSONTool.cpp
+    LogTool.cpp
     MainWindow.cpp
+    MarkerItem.cpp
+    MarkersTool.cpp
     MenuBar.cpp
     PlaybackBar.cpp
     PlaybackModel.cpp
     SelectionModel.cpp
     StackItem.cpp
     ThumbnailGenerator.cpp
+    TimeLayout.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
     TimelineItem.cpp
@@ -59,6 +71,6 @@ set(SOURCE
     WindowModel.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
-target_link_libraries(toucanView PUBLIC toucan dtk::dtkUI)
+target_link_libraries(toucanView PUBLIC toucanRender dtk::dtkUI)
 set_target_properties(toucanView PROPERTIES FOLDER lib)
 add_dependencies(toucanView ${TOUCAN_PLUGINS})

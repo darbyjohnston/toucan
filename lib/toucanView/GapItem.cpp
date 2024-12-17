@@ -4,10 +4,6 @@
 #include "GapItem.h"
 
 #include <dtk/ui/DrawUtil.h>
-#include <dtk/core/Random.h>
-#include <dtk/core/RenderUtil.h>
-
-#include <opentimelineio/gap.h>
 
 namespace toucan
 {
@@ -15,24 +11,64 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto opt = gap->trimmed_range_in_parent();
+        OTIO_NS::TimeRange timeRange = gap->transformed_time_range(
+            gap->trimmed_range(),
+            timeline->tracks());
+        if (timeline->global_start_time().has_value())
+        {
+            timeRange = OTIO_NS::TimeRange(
+                timeline->global_start_time().value() + timeRange.start_time(),
+                timeRange.duration());
+        }
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(gap),
-            opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(gap),
+            timeRange,
             "toucan::ClipItem",
             parent);
-
-        setTooltip(gap->name());
 
         _gap = gap;
         _text = !gap->name().empty() ? gap->name() : "Gap";
         _color = dtk::Color4F(.3F, .3F, .3F);
 
-        setTooltip(_text);
+        setTooltip(gap->schema_name() + ": " + _text);
+
+        _layout = dtk::VerticalLayout::create(context, shared_from_this());
+        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+
+        _label = ItemLabel::create(context, _layout);
+        _label->setName(_text);
+
+        const auto& markers = gap->markers();
+        if (!markers.empty())
+        {
+            _markerLayout = TimeLayout::create(context, timeRange, _layout);
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange markerTimeRange = gap->transformed_time_range(
+                    marker->marked_range(),
+                    timeline->tracks());
+                if (timeline->global_start_time().has_value())
+                {
+                    markerTimeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerTimeRange.start_time(),
+                        markerTimeRange.duration());
+                }
+                auto markerItem = MarkerItem::create(
+                    context,
+                    app,
+                    marker,
+                    markerTimeRange,
+                    _markerLayout);
+                _markerItems.push_back(markerItem);
+            }
+        }
+
+        _textUpdate();
     }
     
     GapItem::~GapItem()
@@ -42,11 +78,35 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<GapItem>();
-        out->_init(context, app, gap, parent);
+        out->_init(context, app, gap, timeline, parent);
         return out;
+    }
+
+    void GapItem::setScale(double value)
+    {
+        IItem::setScale(value);
+        if (_markerLayout)
+        {
+            _markerLayout->setScale(value);
+        }
+    }
+
+    void GapItem::setGeometry(const dtk::Box2I& value)
+    {
+        IItem::setGeometry(value);
+        _layout->setGeometry(value);
+        _geom.g2 = dtk::margin(value, -_size.border, 0, -_size.border, 0);
+        _geom.g3 = dtk::margin(_label->getGeometry(), -_size.border, 0, -_size.border, 0);
+        _selectionRect = _geom.g3;
+    }
+
+    dtk::Box2I GapItem::getChildrenClipRect() const
+    {
+        return _geom.g2;
     }
 
     void GapItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -57,26 +117,9 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
-            _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
-            _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
-            _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
-            _draw.glyphs.clear();
         }
-        dtk::Size2I sizeHint(
-            _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            _size.textSize.h + _size.margin * 2 + _size.border * 2);
-        _setSizeHint(sizeHint);
-    }
-
-    void GapItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
-    {
-        IItem::clipEvent(clipRect, clipped);
-        if (clipped)
-        {
-            _draw.glyphs.clear();
-        }
+        _setSizeHint(_layout->getSizeHint());
     }
 
     void GapItem::drawEvent(
@@ -84,26 +127,22 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
-
-        const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
         event.render->drawRect(
-            g2,
+            _geom.g3,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
+    }
 
-        const dtk::Box2I g3 = dtk::margin(g2, -_size.margin);
-        if (!_text.empty() && _draw.glyphs.empty())
+    void GapItem::_timeUnitsUpdate()
+    {
+        _textUpdate();
+    }
+
+    void GapItem::_textUpdate()
+    {
+        if (_label)
         {
-            _draw.glyphs = event.fontSystem->getGlyphs(_text, _size.fontInfo);
+            std::string text = toString(_timeRange.duration(), _timeUnits);
+            _label->setDuration(text);
         }
-        dtk::ClipRectEnabledState clipRectEnabledState(event.render);
-        dtk::ClipRectState clipRectState(event.render);
-        event.render->setClipRectEnabled(true);
-        event.render->setClipRect(intersect(g3, drawRect));
-        event.render->drawText(
-            _draw.glyphs,
-            _size.fontMetrics,
-            dtk::V2I(g3.min.x, g3.min.y + g3.h() / 2 - _size.fontMetrics.lineHeight / 2),
-            event.style->getColorRole(dtk::ColorRole::Text));
     }
 }

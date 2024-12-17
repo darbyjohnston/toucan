@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "IToolWidget.h"
+#include <toucanView/IToolWidget.h>
 
-#include <toucan/ImageGraph.h>
+#include <toucanRender/ImageGraph.h>
 
 #include <dtk/ui/ButtonGroup.h>
 #include <dtk/ui/PushButton.h>

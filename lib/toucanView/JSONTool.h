@@ -3,7 +3,8 @@
 
 #pragma once
 
-#include "IToolWidget.h"
+#include <toucanView/IToolWidget.h>
+#include <toucanView/SelectionModel.h>
 
 #include <dtk/ui/Bellows.h>
 #include <dtk/ui/Label.h>
@@ -24,7 +25,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -33,14 +34,14 @@ namespace toucan
         //! Create a new widget.
         static std::shared_ptr<JSONWidget> create(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set whether the widget is open.
         void setOpen(bool);
 
-        //! Set the filter.
-        void setFilter(const std::string&);
+        //! Set the search.
+        void setSearch(const std::string&);
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
@@ -48,11 +49,13 @@ namespace toucan
     private:
         void _textUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
+        std::vector<std::string> _lineNumbers;
         std::vector<std::string> _text;
-        std::string _filter;
-        std::shared_ptr<dtk::Label> _label;
+        std::string _search;
         std::shared_ptr<dtk::Bellows> _bellows;
+        std::shared_ptr<dtk::Label> _lineNumbersLabel;
+        std::shared_ptr<dtk::Label> _textLabel;
     };
 
     //! JSON tool.
@@ -80,14 +83,14 @@ namespace toucan
         std::shared_ptr<File> _file;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
-        std::shared_ptr<dtk::SearchBox> _searchBox;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
+        std::shared_ptr<dtk::SearchBox> _searchBox;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }
 

@@ -15,14 +15,23 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto opt = track->trimmed_range_in_parent();
+        OTIO_NS::TimeRange timeRange = track->transformed_time_range(
+            track->trimmed_range(),
+            timeline->tracks());
+        if (timeline->global_start_time().has_value())
+        {
+            timeRange = OTIO_NS::TimeRange(
+                timeline->global_start_time().value() + timeRange.start_time(),
+                timeRange.duration());
+        }
         IItem::_init(
             context,
             app,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(track),
-            opt.has_value() ? opt.value() : OTIO_NS::TimeRange(),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
+            timeRange,
             "toucan::TrackItem",
             parent);
 
@@ -32,8 +41,40 @@ namespace toucan
             dtk::Color4F(.2F, .2F, .3F) :
             dtk::Color4F(.2F, .3F, .2F);
 
-        setTooltip(_text);
+        setTooltip(track->schema_name() + ": " + _text);
 
+        _layout = dtk::VerticalLayout::create(context, shared_from_this());
+        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
+
+        _label = ItemLabel::create(context, _layout);
+        _label->setName(_text);
+
+        const auto& markers = track->markers();
+        if (!markers.empty())
+        {
+            _markerLayout = TimeLayout::create(context, timeRange, _layout);
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange markerTimeRange = track->transformed_time_range(
+                    marker->marked_range(),
+                    timeline->tracks());
+                if (timeline->global_start_time().has_value())
+                {
+                    markerTimeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerTimeRange.start_time(),
+                        markerTimeRange.duration());
+                }
+                auto markerItem = MarkerItem::create(
+                    context,
+                    app,
+                    marker,
+                    markerTimeRange,
+                    _markerLayout);
+                _markerItems.push_back(markerItem);
+            }
+        }
+
+        _timeLayout = TimeLayout::create(context, timeRange, _layout);
         for (const auto& child : track->children())
         {
             if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(child))
@@ -42,13 +83,15 @@ namespace toucan
                     OTIO_NS::Track::Kind::video == track->kind() ?
                     dtk::Color4F(.4F, .4F, .6F) :
                     dtk::Color4F(.4F, .6F, .4F);
-                ClipItem::create(context, app, clip, color, shared_from_this());
+                ClipItem::create(context, app, clip, timeline , color, _timeLayout);
             }
             else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(child))
             {
-                GapItem::create( context, app, gap, shared_from_this());
+                GapItem::create( context, app, gap, timeline, _timeLayout);
             }
         }
+
+        _textUpdate();
     }
 
     TrackItem::~TrackItem()
@@ -58,29 +101,36 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<TrackItem>();
-        out->_init(context, app, track, parent);
+        out->_init(context, app, track, timeline, parent);
         return out;
+    }
+
+    void TrackItem::setScale(double value)
+    {
+        IItem::setScale(value);
+        if (_markerLayout)
+        {
+            _markerLayout->setScale(value);
+        }
+        _timeLayout->setScale(value);
     }
 
     void TrackItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);
-        const dtk::Box2I& g = getGeometry();
-        const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2 + _size.border * 2;
-        for (const auto& child : getChildren())
-        {
-            if (auto item = std::dynamic_pointer_cast<IItem>(child))
-            {
-                const OTIO_NS::TimeRange& timeRange = item->getTimeRange();
-                const int x0 = timeToPos(timeRange.start_time());
-                const int x1 = timeToPos(timeRange.end_time_exclusive());
-                const dtk::Size2I& sizeHint = child->getSizeHint();
-                child->setGeometry(dtk::Box2I(x0, y, x1 - x0 + 1, sizeHint.h));
-            }
-        }
+        _layout->setGeometry(value);
+        _geom.g2 = dtk::margin(value, -_size.border, 0, -_size.border, 0);
+        _geom.g3 = dtk::margin(_label->getGeometry(), -_size.border, 0, -_size.border, 0);
+        _selectionRect = _geom.g3;
+    }
+
+    dtk::Box2I TrackItem::getChildrenClipRect() const
+    {
+        return _geom.g2;
     }
 
     void TrackItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -91,32 +141,9 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
-            _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
-            _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
-            _size.textSize = event.fontSystem->getSize(_text, _size.fontInfo);
-            _draw.glyphs.clear();
         }
-        dtk::Size2I sizeHint(
-            _timeRange.duration().rescaled_to(1.0).value() * _scale,
-            0);
-        for (const auto& child : getChildren())
-        {
-            const dtk::Size2I& childSizeHint = child->getSizeHint();
-            sizeHint.h = std::max(sizeHint.h, childSizeHint.h);
-        }
-        sizeHint.h += _size.textSize.h + _size.margin * 2 + _size.border * 4;
-        _setSizeHint(sizeHint);
-    }
-
-    void TrackItem::clipEvent(const dtk::Box2I& clipRect, bool clipped)
-    {
-        IItem::clipEvent(clipRect, clipped);
-        if (clipped)
-        {
-            _draw.glyphs.clear();
-        }
+        _setSizeHint(_layout->getSizeHint());
     }
 
     void TrackItem::drawEvent(
@@ -124,30 +151,22 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
-
-        const dtk::Box2I g2(
-            g.min.x + _size.border,
-            g.min.y,
-            g.w() - _size.border * 2,
-            _size.fontMetrics.lineHeight + _size.margin * 2);
         event.render->drawRect(
-            g2,
+            _geom.g3,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
+    }
 
-        const dtk::Box2I g3 = dtk::margin(g2, -_size.margin);
-        if (!_text.empty() && _draw.glyphs.empty())
+    void TrackItem::_timeUnitsUpdate()
+    {
+        _textUpdate();
+    }
+
+    void TrackItem::_textUpdate()
+    {
+        if (_label)
         {
-            _draw.glyphs = event.fontSystem->getGlyphs(_text, _size.fontInfo);
+            std::string text = toString(_timeRange.duration(), _timeUnits);
+            _label->setDuration(text);
         }
-        dtk::ClipRectEnabledState clipRectEnabledState(event.render);
-        dtk::ClipRectState clipRectState(event.render);
-        event.render->setClipRectEnabled(true);
-        event.render->setClipRect(intersect(g3, drawRect));
-        event.render->drawText(
-            _draw.glyphs,
-            _size.fontMetrics,
-            g3.min,
-            event.style->getColorRole(dtk::ColorRole::Text));
     }
 }

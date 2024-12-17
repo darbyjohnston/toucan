@@ -3,6 +3,9 @@
 
 #include "App.h"
 
+#include <dtk/core/Context.h>
+#include <dtk/core/Init.h>
+
 #include <iostream>
 
 using namespace toucan;
@@ -17,8 +20,11 @@ int main(int argc, char** argv)
     }
     try
     {
-        auto app = std::make_shared<App>(args);
-        out = app->run();
+        auto context = dtk::Context::create();
+        dtk::coreInit(context);
+        auto app = App::create(context, args);
+        app->run();
+        out = app->getExit();
     }
     catch (const std::exception& e)
     {

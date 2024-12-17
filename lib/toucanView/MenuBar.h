@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "PlaybackModel.h"
-#include "WindowModel.h"
+#include <toucanView/PlaybackModel.h>
+#include <toucanView/WindowModel.h>
 
 #include <dtk/ui/MenuBar.h>
 #include <dtk/core/ObservableList.h>

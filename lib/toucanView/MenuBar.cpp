@@ -9,7 +9,7 @@
 #include "SelectionModel.h"
 #include "ViewModel.h"
 
-#include <toucan/TimelineAlgo.h>
+#include <toucanRender/TimelineAlgo.h>
 
 #include <dtk/ui/Action.h>
 #include <dtk/ui/FileBrowser.h>
@@ -266,6 +266,19 @@ namespace toucan
             });
         _menus["Select"]->addItem(_actions["Select/AllClips"]);
 
+        _actions["Select/AllMarkers"] = std::make_shared<dtk::Action>(
+            "All Markers",
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getSelectionModel()->selectAll(
+                        _file->getTimeline(),
+                        SelectionType::Markers);
+                }
+            });
+        _menus["Select"]->addItem(_actions["Select/AllMarkers"]);
+
         _actions["Select/None"] = std::make_shared<dtk::Action>(
             "None",
             dtk::Key::A,
@@ -483,6 +496,7 @@ namespace toucan
                     if (timeRangeOpt.has_value())
                     {
                         _file->getPlaybackModel()->setInOutRange(timeRangeOpt.value());
+                        _file->getPlaybackModel()->setCurrentTime(timeRangeOpt.value().start_time());
                     }
                     else
                     {
@@ -665,8 +679,8 @@ namespace toucan
         const std::vector<Component> components =
         {
             { WindowComponent::ToolBar, "ToolBar", "Tool Bar", "", "" },
-            { WindowComponent::ToolsPanel, "ToolsPanel", "Tools Panel", "PanelRight", "Toggle the tools panel" },
-            { WindowComponent::PlaybackPanel, "PlaybackPanel", "Playback Panel", "PanelBottom", "Toggle the playback panel" }
+            { WindowComponent::Tools, "Tools", "Tools", "PanelRight", "Toggle the tools" },
+            { WindowComponent::Playback, "Playback", "Playback", "PanelBottom", "Toggle the playback controls" }
         };
         std::weak_ptr<App> appWeak(app);
         for (const auto& component : components)
@@ -793,10 +807,10 @@ namespace toucan
             {
                 auto i = value.find(WindowComponent::ToolBar);
                 _menus["Window"]->setItemChecked(_actions["Window/ToolBar"], i->second);
-                i = value.find(WindowComponent::ToolsPanel);
-                _menus["Window"]->setItemChecked(_actions["Window/ToolsPanel"], i->second);
-                i = value.find(WindowComponent::PlaybackPanel);
-                _menus["Window"]->setItemChecked(_actions["Window/PlaybackPanel"], i->second);
+                i = value.find(WindowComponent::Tools);
+                _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
+                i = value.find(WindowComponent::Playback);
+                _menus["Window"]->setItemChecked(_actions["Window/Playback"], i->second);
             });
 
         _displayScaleObserver = dtk::ValueObserver<float>::create(
@@ -833,6 +847,7 @@ namespace toucan
         _menus["Select"]->setItemEnabled(_actions["Select/All"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/AllTracks"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/AllClips"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllMarkers"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/None"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/Invert"], file);
     }

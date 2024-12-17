@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "WindowModel.h"
+#include <toucanView/WindowModel.h>
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/RowLayout.h>
@@ -66,7 +66,7 @@ namespace toucan
         std::map<std::shared_ptr<File>, std::shared_ptr<FileTab> > _fileTabs;
         std::shared_ptr<dtk::TabWidget> _toolWidget;
         std::vector<std::shared_ptr<IToolWidget> > _toolWidgets;
-        std::shared_ptr<dtk::VerticalLayout> _bottomLayout;
+        std::shared_ptr<dtk::VerticalLayout> _playbackLayout;
         std::shared_ptr<PlaybackBar> _playbackBar;
         std::shared_ptr<TimelineWidget> _timelineWidget;
         std::shared_ptr<InfoBar> _infoBar;

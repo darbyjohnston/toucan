@@ -16,8 +16,8 @@ namespace toucan
     DTK_ENUM_IMPL(
         WindowComponent,
         "ToolBar",
-        "ToolsPanel",
-        "PlaybackPanel");
+        "Tools",
+        "Playback");
 
     WindowModel::WindowModel(const std::shared_ptr<dtk::Context>& context)
     {
@@ -26,8 +26,8 @@ namespace toucan
         std::map<WindowComponent, bool> components =
         {
             { WindowComponent::ToolBar, true },
-            { WindowComponent::ToolsPanel, true },
-            { WindowComponent::PlaybackPanel, true }
+            { WindowComponent::Tools, true },
+            { WindowComponent::Playback, true }
         };
         bool tooltips = true;
         try

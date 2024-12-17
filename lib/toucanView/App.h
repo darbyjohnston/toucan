@@ -12,7 +12,6 @@ namespace toucan
     class FilesModel;
     class ImageEffectHost;
     class MainWindow;
-    class MessageLog;
     class TimeUnitsModel;
     class WindowModel;
 
@@ -48,7 +47,6 @@ namespace toucan
         void open(const std::filesystem::path&);
 
     private:
-        std::shared_ptr<MessageLog> _messageLog;
         std::string _path;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;

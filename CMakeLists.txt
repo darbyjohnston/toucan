@@ -45,12 +45,12 @@ else()
 endif()
 
 set(TOUCAN_PLUGINS
-    toucanColorSpace
-    toucanDraw
-    toucanFilter
-    toucanGenerator
-    toucanTransform
-    toucanTransition)
+    toucanColorPlugin
+    toucanDrawPlugin
+    toucanFilterPlugin
+    toucanGeneratorPlugin
+    toucanTransformPlugin
+    toucanTransitionPlugin)
 
 enable_testing()
 
@@ -66,10 +66,8 @@ find_package(OpenColorIO)
 find_package(OpenImageIO)
 find_package(OTIO)
 find_package(OpenFX)
-if(toucan_VIEW)
-    find_package(lunasvg)
-    find_package(dtk)
-endif()
+find_package(lunasvg)
+find_package(dtk)
 
 include_directories(lib)
 include_directories(tests)

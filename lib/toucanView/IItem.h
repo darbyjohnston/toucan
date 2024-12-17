@@ -3,6 +3,9 @@
 
 #pragma once
 
+#include <toucanView/TimeLayout.h>
+#include <toucanView/TimeUnitsModel.h>
+
 #include <dtk/ui/IWidget.h>
 
 #include <opentimelineio/timeline.h>
@@ -12,45 +15,43 @@ namespace toucan
     class App;
 
     //! Base class for timeline items.
-    class IItem : public dtk::IWidget
+    class IItem : public ITimeWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&,
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const OTIO_NS::TimeRange&,
-            const std::string&,
+            const std::string& objectName,
             const std::shared_ptr<IWidget>& parent);
 
     public:
         virtual ~IItem() = 0;
 
-        //! Get the OTIO item.
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& getItem() const;
-
-        //! Get the time range.
-        const OTIO_NS::TimeRange& getTimeRange();
-
-        //! Set the item scale.
-        void setScale(double);
+        //! Get the OTIO object.
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& getObject() const;
         
+        //! Get the item selection rectangle.
+        const dtk::Box2I& getSelectionRect() const;
+
         //! Get whether the item is selected.
         bool isSelected() const;
 
         //! Set whether the item is selected.
         void setSelected(bool);
 
-        //! Convert a position to a time.
-        OTIO_NS::RationalTime posToTime(double) const;
-
-        //! Convert a time to a position.
-        int timeToPos(const OTIO_NS::RationalTime&) const;
+        void setGeometry(const dtk::Box2I&) override;
 
     protected:
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> _item;
-        OTIO_NS::TimeRange _timeRange;
-        double _scale = 100.0;
+        virtual void _timeUnitsUpdate();
+
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
+        TimeUnits _timeUnits = TimeUnits::First;
+        dtk::Box2I _selectionRect;
         bool _selected = false;
+
+    private:
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 }

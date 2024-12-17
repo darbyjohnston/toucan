@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "IItem.h"
-#include "ThumbnailGenerator.h"
-#include "TimeUnitsModel.h"
+#include <toucanView/IItem.h>
+#include <toucanView/SelectionModel.h>
+#include <toucanView/ThumbnailGenerator.h>
 
 #include <dtk/core/LRUCache.h>
 #include <dtk/core/ObservableList.h>
@@ -59,6 +59,9 @@ namespace toucan
         void mousePressEvent(dtk::MouseClickEvent&) override;
         void mouseReleaseEvent(dtk::MouseClickEvent&) override;
 
+    protected:
+        void _timeUnitsUpdate() override;
+
     private:
         dtk::Size2I _getLabelMaxSize(
             const std::shared_ptr<dtk::FontSystem>&) const;
@@ -73,19 +76,19 @@ namespace toucan
             const dtk::Box2I&,
             const dtk::DrawEvent&);
 
-        std::shared_ptr<IItem> _select(
-            const std::shared_ptr<dtk::IWidget>&,
-            const dtk::V2I&);
         void _select(
             const std::shared_ptr<dtk::IWidget>&,
-            const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> >&);
+            const dtk::V2I&,
+            std::shared_ptr<IItem>&);
+        void _select(
+            const std::shared_ptr<dtk::IWidget>&,
+            const std::vector<SelectionItem>&);
 
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline> _timeline;
         OTIO_NS::TimeRange _timeRange;
         OTIO_NS::RationalTime _currentTime = OTIO_NS::RationalTime(-1.0, -1.0);
         std::function<void(const OTIO_NS::RationalTime&)> _currentTimeCallback;
         OTIO_NS::TimeRange _inOutRange;
-        std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<SelectionModel> _selectionModel;
         std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
         dtk::LRUCache<OTIO_NS::RationalTime, std::shared_ptr<dtk::Image> > _thumbnails;
@@ -117,7 +120,6 @@ namespace toucan
         };
         MouseData _mouse;
 
-        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
-        std::shared_ptr<dtk::ListObserver<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> > > _selectionObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem > > _selectionObserver;
     };
 }

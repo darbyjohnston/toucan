@@ -3,12 +3,12 @@
 
 #pragma once
 
-#include <toucan/ImageEffectHost.h>
-#include <toucan/ImageGraph.h>
-#include <toucan/MessageLog.h>
-#include <toucan/TimelineWrapper.h>
+#include <toucanRender/ImageEffectHost.h>
+#include <toucanRender/ImageGraph.h>
+#include <toucanRender/TimelineWrapper.h>
 
 #include <dtk/core/Image.h>
+#include <dtk/core/LogSystem.h>
 
 #include <atomic>
 #include <filesystem>
@@ -33,10 +33,10 @@ namespace toucan
     {
     public:
         ThumbnailGenerator(
+            const std::shared_ptr<dtk::Context>&,
             const std::filesystem::path&,
             const std::shared_ptr<TimelineWrapper>&,
-            const std::shared_ptr<ImageEffectHost>&,
-            const std::shared_ptr<MessageLog>& = nullptr);
+            const std::shared_ptr<ImageEffectHost>&);
 
         ~ThumbnailGenerator();
 
@@ -55,10 +55,10 @@ namespace toucan
         void _run();
         void _cancel();
 
+        std::shared_ptr<dtk::LogSystem> _logSystem;
         std::filesystem::path _path;
         std::shared_ptr<TimelineWrapper> _timelineWrapper;
         std::shared_ptr<ImageEffectHost> _host;
-        std::shared_ptr<MessageLog> _log;
         std::shared_ptr<ImageGraph> _graph;
         float _aspect = 1.F;
 

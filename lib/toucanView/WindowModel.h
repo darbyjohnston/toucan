@@ -13,8 +13,8 @@ namespace toucan
     enum class WindowComponent
     {
         ToolBar,
-        ToolsPanel,
-        PlaybackPanel,
+        Tools,
+        Playback,
 
         Count,
         First = ToolBar

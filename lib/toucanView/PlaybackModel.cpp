@@ -3,7 +3,7 @@
 
 #include "PlaybackModel.h"
 
-#include <toucan/TimelineAlgo.h>
+#include <toucanRender/TimelineAlgo.h>
 
 #include <opentimelineio/clip.h>
 
