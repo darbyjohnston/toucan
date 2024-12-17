@@ -28,6 +28,9 @@ namespace toucan
     //! Convert a string to a time.
     OTIO_NS::RationalTime fromString(const std::string&, TimeUnits, double rate);
 
+    //! Convert a range to a string.
+    std::string toString(const OTIO_NS::TimeRange&, TimeUnits);
+
     //! Time units model. 
     class TimeUnitsModel : public std::enable_shared_from_this<TimeUnitsModel>
     {

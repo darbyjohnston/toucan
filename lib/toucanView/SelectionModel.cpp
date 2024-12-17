@@ -126,10 +126,12 @@ namespace toucan
     {
         for (const auto& track : timeline->find_children<OTIO_NS::Track>())
         {
-            OTIO_NS::TimeRange timeRange;
-            if (track->trimmed_range_in_parent().has_value())
+            OTIO_NS::TimeRange timeRange = track->transformed_time_range(track->trimmed_range(), timeline->tracks());
+            if (timeline->global_start_time().has_value())
             {
-                timeRange = track->trimmed_range_in_parent().value();
+                timeRange = OTIO_NS::TimeRange(
+                    timeline->global_start_time().value() + timeRange.start_time(),
+                    timeRange.duration());
             }
             out.push_back({
                 OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
@@ -143,10 +145,12 @@ namespace toucan
     {
         for (const auto& clip : timeline->find_children<OTIO_NS::Clip>())
         {
-            OTIO_NS::TimeRange timeRange;
-            if (clip->trimmed_range_in_parent().has_value())
+            OTIO_NS::TimeRange timeRange = clip->transformed_time_range(clip->trimmed_range(), timeline->tracks());
+            if (timeline->global_start_time().has_value())
             {
-                timeRange = clip->trimmed_range_in_parent().value();
+                timeRange = OTIO_NS::TimeRange(
+                    timeline->global_start_time().value() + timeRange.start_time(),
+                    timeRange.duration());
             }
             out.push_back({
                 OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(clip),
@@ -160,10 +164,12 @@ namespace toucan
     {
         for (const auto& gap : timeline->find_children<OTIO_NS::Gap>())
         {
-            OTIO_NS::TimeRange timeRange;
-            if (gap->trimmed_range_in_parent().has_value())
+            OTIO_NS::TimeRange timeRange = gap->transformed_time_range(gap->trimmed_range(), timeline->tracks());
+            if (timeline->global_start_time().has_value())
             {
-                timeRange = gap->trimmed_range_in_parent().value();
+                timeRange = OTIO_NS::TimeRange(
+                    timeline->global_start_time().value() + timeRange.start_time(),
+                    timeRange.duration());
             }
             out.push_back({
                 OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(gap),
@@ -190,14 +196,16 @@ namespace toucan
             const auto& markers = item->markers();
             for (const auto& marker : markers)
             {
-                OTIO_NS::TimeRange timeRange = marker->marked_range();
-                if (auto parent = item->parent())
+                OTIO_NS::TimeRange timeRange = item->transformed_time_range(marker->marked_range(), timeline->tracks());
+                if (timeline->global_start_time().has_value())
                 {
-                    timeRange = item->transformed_time_range(timeRange, parent);
+                    timeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + timeRange.start_time(),
+                        timeRange.duration());
                 }
                 out.push_back({
                     OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(marker),
-                    marker->marked_range() });
+                    timeRange });
             }
         }
     }

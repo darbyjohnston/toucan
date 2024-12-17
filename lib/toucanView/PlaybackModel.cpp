@@ -36,8 +36,8 @@ namespace toucan
     {
         if (_timeRange->setIfChanged(value))
         {
-            _currentTime->setIfChanged(value.start_time());
             _inOutRange->setIfChanged(value);
+            _currentTime->setIfChanged(value.start_time());
         }
     }
 

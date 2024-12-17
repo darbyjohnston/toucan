@@ -1,6 +1,7 @@
 set(HEADERS
     App.h
     ClipItem.h
+    DetailsTool.h
     ExportTool.h
     FileTab.h
     File.h
@@ -10,13 +11,11 @@ set(HEADERS
     IItem.h
     IToolWidget.h
     InfoBar.h
-    InfoTool.h
     ItemLabel.h
     JSONTool.h
     LogTool.h
     MainWindow.h
     MarkerItem.h
-    MarkersTool.h
     MenuBar.h
     PlaybackBar.h
     PlaybackModel.h
@@ -37,6 +36,7 @@ set(HEADERS
 set(SOURCE
     App.cpp
     ClipItem.cpp
+    DetailsTool.cpp
     ExportTool.cpp
     FileTab.cpp
     File.cpp
@@ -46,13 +46,11 @@ set(SOURCE
     IItem.cpp
     IToolWidget.cpp
     InfoBar.cpp
-    InfoTool.cpp
     ItemLabel.cpp
     JSONTool.cpp
     LogTool.cpp
     MainWindow.cpp
     MarkerItem.cpp
-    MarkersTool.cpp
     MenuBar.cpp
     PlaybackBar.cpp
     PlaybackModel.cpp

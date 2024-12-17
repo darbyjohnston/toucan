@@ -5,6 +5,7 @@
 
 #include <toucanView/IToolWidget.h>
 #include <toucanView/SelectionModel.h>
+#include <toucanView/TimeUnitsModel.h>
 
 #include <toucanRender/ImageGraph.h>
 
@@ -16,6 +17,7 @@
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/ui/SearchBox.h>
+#include <dtk/ui/ToolButton.h>
 #include <dtk/core/ObservableList.h>
 
 #include <utility>
@@ -24,22 +26,26 @@ namespace toucan
 {
     class File;
 
-    //! Information item widget.
-    class InfoItemWidget : public dtk::IWidget
+    //! Details widget.
+    class DetailsWidget : public dtk::IWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
+            const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
+            const SelectionItem&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~InfoItemWidget();
+        virtual ~DetailsWidget();
 
         //! Create a new widget.
-        static std::shared_ptr<InfoItemWidget> create(
+        static std::shared_ptr<DetailsWidget> create(
             const std::shared_ptr<dtk::Context>&,
-            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
+            const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
+            const SelectionItem&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Set whether the widget is open.
@@ -53,17 +59,26 @@ namespace toucan
 
     private:
         void _textUpdate();
+        void _searchUpdate();
 
-        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
+        std::weak_ptr<App> _app;
+        std::shared_ptr<File> _file;
+        TimeUnits _timeUnits = TimeUnits::First;
+        SelectionItem _item;
         std::vector<std::pair<std::string, std::string> > _text;
         std::string _search;
+
         std::shared_ptr<dtk::Bellows> _bellows;
         std::shared_ptr<dtk::GridLayout> _layout;
+        std::shared_ptr<dtk::ToolButton> _startFrameButton;
+        std::shared_ptr<dtk::ToolButton> _inOutButton;
         std::vector<std::pair<std::shared_ptr<dtk::Label>, std::shared_ptr<dtk::Label> > > _labels;
+
+        std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;
     };
 
-    //! Infoformation tool.
-    class InfoTool : public IToolWidget
+    //! Details tool.
+    class DetailsTool : public IToolWidget
     {
     protected:
         void _init(
@@ -72,10 +87,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~InfoTool();
+        virtual ~DetailsTool();
 
         //! Create a new tool.
-        static std::shared_ptr<InfoTool> create(
+        static std::shared_ptr<DetailsTool> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -87,7 +102,7 @@ namespace toucan
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<dtk::VerticalLayout> _scrollLayout;
-        std::vector<std::shared_ptr<InfoItemWidget> > _widgets;
+        std::vector<std::shared_ptr<DetailsWidget> > _widgets;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<dtk::SearchBox> _searchBox;
 

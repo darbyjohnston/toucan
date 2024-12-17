@@ -104,7 +104,7 @@ namespace toucan
     {
         const auto& files = _files->get();
         const int index = dtk::clamp(value, 0, static_cast<int>(files.size()) - 1);
-        _current->setIfChanged(files[index]);
+        _current->setIfChanged(index >= 0 ? files[index] : nullptr);
         _currentIndex->setIfChanged(index);
     }
 
