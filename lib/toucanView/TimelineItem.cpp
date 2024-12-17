@@ -37,7 +37,7 @@ namespace toucan
         _thumbnails.setMax(100);
         _thumbnailGenerator = file->getThumbnailGenerator();
 
-        StackItem::create(context, app, _timeline->tracks(), shared_from_this());
+        StackItem::create(context, app, _timeline->tracks(), _timeline, shared_from_this());
 
         _selectionObserver = dtk::ListObserver<SelectionItem>::create(
             _selectionModel->observeSelection(),
@@ -554,7 +554,10 @@ namespace toucan
     {
         if (auto iitem = std::dynamic_pointer_cast<IItem>(widget))
         {
-            out = iitem;
+            if (dtk::contains(iitem->getSelectionRect(), pos))
+            {
+                out = iitem;
+            }
         }
         for (const auto& child : widget->getChildren())
         {

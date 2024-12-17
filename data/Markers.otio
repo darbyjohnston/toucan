@@ -1,12 +1,78 @@
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {},
-    "name": "Gap",
+    "name": "Markers",
+    "global_start_time": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 24.0,
+        "value": 100.0
+    },
     "tracks": {
-        "OTIO_SCHEMA": "Stack.1", 
+        "OTIO_SCHEMA": "Stack.1",
+        "markers": [
+            {
+                "OTIO_SCHEMA": "Marker.2",
+                "metadata": {},
+                "name": "Stack Marker",
+                "color": "GREEN",
+                "marked_range": {
+                    "OTIO_SCHEMA": "TimeRange.1",
+                    "duration": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24.0,
+                        "value": 9.0
+                    },
+                    "start_time": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24.0,
+                        "value": 0.0
+                    }
+                }
+            }
+        ],
         "children": [
             {
-                "OTIO_SCHEMA": "Track.1", 
+                "OTIO_SCHEMA": "Track.1",
+                "markers": [
+                    {
+                        "OTIO_SCHEMA": "Marker.2",
+                        "metadata": {},
+                        "name": "Track Marker 0",
+                        "color": "ORANGE",
+                        "marked_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 4.0
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 0.0
+                            }
+                        }
+                    },
+                    {
+                        "OTIO_SCHEMA": "Marker.2",
+                        "metadata": {},
+                        "name": "Track Marker 1",
+                        "color": "YELLOW",
+                        "marked_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 5.0
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 4.0
+                            }
+                        }
+                    }
+                ],
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.1",
@@ -45,7 +111,7 @@
                             {
                                 "OTIO_SCHEMA": "Marker.2",
                                 "metadata": {},
-                                "name": "Marker A",
+                                "name": "Letter_A Marker",
                                 "color": "RED",
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
@@ -62,26 +128,9 @@
                                 }
                             }
                         ]
-                    },
-                    {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "ExternalReference.1",
-                            "available_range": {
-                                "OTIO_SCHEMA": "TimeRange.1",
-                                "duration": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 3
-                                },
-                                "start_time": {
-                                    "OTIO_SCHEMA": "RationalTime.1",
-                                    "rate": 24,
-                                    "value": 0
-                                }
-                            },
-                            "target_url": "Letter_B.png"
-                        },
+                    },                    {
+                        "OTIO_SCHEMA": "Gap.1",
+                        "name": "Gap",
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
@@ -95,13 +144,12 @@
                                 "value": 0
                             }
                         },
-                        "name": "Letter_B",
                         "markers": [
                             {
                                 "OTIO_SCHEMA": "Marker.2",
                                 "metadata": {},
-                                "name": "Marker B",
-                                "color": "Green",
+                                "name": "Gap Marker",
+                                "color": "GREEN",
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {
@@ -155,7 +203,7 @@
                             {
                                 "OTIO_SCHEMA": "Marker.2",
                                 "metadata": {},
-                                "name": "Marker C0",
+                                "name": "Letter_C Marker 0",
                                 "color": "BLUE",
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
@@ -174,14 +222,14 @@
                             {
                                 "OTIO_SCHEMA": "Marker.2",
                                 "metadata": {},
-                                "name": "Marker C1",
+                                "name": "Letter_C Marker 1",
                                 "color": "PURPLE",
                                 "marked_range": {
                                     "OTIO_SCHEMA": "TimeRange.1",
                                     "duration": {
                                         "OTIO_SCHEMA": "RationalTime.1",
                                         "rate": 24.0,
-                                        "value": 21.0
+                                        "value": 2.0
                                     },
                                     "start_time": {
                                         "OTIO_SCHEMA": "RationalTime.1",

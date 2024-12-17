@@ -15,12 +15,17 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
-        OTIO_NS::TimeRange timeRange;
-        if (track->trimmed_range_in_parent().has_value())
+        OTIO_NS::TimeRange timeRange = track->transformed_time_range(
+            track->trimmed_range(),
+            timeline->tracks());
+        if (timeline->global_start_time().has_value())
         {
-            timeRange = track->trimmed_range_in_parent().value();
+            timeRange = OTIO_NS::TimeRange(
+                timeline->global_start_time().value() + timeRange.start_time(),
+                timeRange.duration());
         }
         IItem::_init(
             context,
@@ -44,8 +49,32 @@ namespace toucan
         _label = ItemLabel::create(context, _layout);
         _label->setName(_text);
 
-        _timeLayout = TimeLayout::create(context, timeRange, _layout);
+        const auto& markers = track->markers();
+        if (!markers.empty())
+        {
+            _markerLayout = TimeLayout::create(context, timeRange, _layout);
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange markerTimeRange = track->transformed_time_range(
+                    marker->marked_range(),
+                    timeline->tracks());
+                if (timeline->global_start_time().has_value())
+                {
+                    markerTimeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerTimeRange.start_time(),
+                        markerTimeRange.duration());
+                }
+                auto markerItem = MarkerItem::create(
+                    context,
+                    app,
+                    marker,
+                    markerTimeRange,
+                    _markerLayout);
+                _markerItems.push_back(markerItem);
+            }
+        }
 
+        _timeLayout = TimeLayout::create(context, timeRange, _layout);
         for (const auto& child : track->children())
         {
             if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(child))
@@ -54,11 +83,11 @@ namespace toucan
                     OTIO_NS::Track::Kind::video == track->kind() ?
                     dtk::Color4F(.4F, .4F, .6F) :
                     dtk::Color4F(.4F, .6F, .4F);
-                ClipItem::create(context, app, clip, color, _timeLayout);
+                ClipItem::create(context, app, clip, timeline , color, _timeLayout);
             }
             else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(child))
             {
-                GapItem::create( context, app, gap, _timeLayout);
+                GapItem::create( context, app, gap, timeline, _timeLayout);
             }
         }
 
@@ -72,16 +101,21 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<TrackItem>();
-        out->_init(context, app, track, parent);
+        out->_init(context, app, track, timeline, parent);
         return out;
     }
 
     void TrackItem::setScale(double value)
     {
         IItem::setScale(value);
+        if (_markerLayout)
+        {
+            _markerLayout->setScale(value);
+        }
         _timeLayout->setScale(value);
     }
 
@@ -89,6 +123,14 @@ namespace toucan
     {
         IItem::setGeometry(value);
         _layout->setGeometry(value);
+        _geom.g2 = dtk::margin(value, -_size.border, 0, -_size.border, 0);
+        _geom.g3 = dtk::margin(_label->getGeometry(), -_size.border, 0, -_size.border, 0);
+        _selectionRect = _geom.g3;
+    }
+
+    dtk::Box2I TrackItem::getChildrenClipRect() const
+    {
+        return _geom.g2;
     }
 
     void TrackItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -109,11 +151,8 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = _label->getGeometry();
-
-        const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0);
         event.render->drawRect(
-            g2,
+            _geom.g3,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
     }
 

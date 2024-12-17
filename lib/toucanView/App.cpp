@@ -11,7 +11,6 @@
 #include <dtk/ui/DialogSystem.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/MessageDialog.h>
-#include <dtk/ui/RecentFilesModel.h>
 #include <dtk/ui/Settings.h>
 
 #include <dtk/core/CmdLine.h>

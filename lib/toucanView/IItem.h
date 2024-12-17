@@ -32,17 +32,23 @@ namespace toucan
         //! Get the OTIO object.
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& getObject() const;
         
+        //! Get the item selection rectangle.
+        const dtk::Box2I& getSelectionRect() const;
+
         //! Get whether the item is selected.
         bool isSelected() const;
 
         //! Set whether the item is selected.
         void setSelected(bool);
 
+        void setGeometry(const dtk::Box2I&) override;
+
     protected:
         virtual void _timeUnitsUpdate();
 
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
         TimeUnits _timeUnits = TimeUnits::First;
+        dtk::Box2I _selectionRect;
         bool _selected = false;
 
     private:

@@ -14,9 +14,16 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline ,
         const std::shared_ptr<IWidget>& parent)
     {
-        const OTIO_NS::TimeRange timeRange = stack->trimmed_range();
+        OTIO_NS::TimeRange timeRange = stack->trimmed_range();
+        if (timeline->global_start_time().has_value())
+        {
+            timeRange = OTIO_NS::TimeRange(
+                timeline->global_start_time().value() + timeRange.start_time(),
+                timeRange.duration());
+        }
         IItem::_init(
             context,
             app,
@@ -37,13 +44,40 @@ namespace toucan
         _label = ItemLabel::create(context, _layout);
         _label->setName(_text);
 
-        _timeLayout = TimeStackLayout::create(context, timeRange, _layout);
+        const auto& markers = stack->markers();
+        if (!markers.empty())
+        {
+            _markerLayout = TimeLayout::create(context, timeRange, _layout);
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange markerTimeRange = marker->marked_range();
+                if (timeline->global_start_time().has_value())
+                {
+                    markerTimeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerTimeRange.start_time(),
+                        markerTimeRange.duration());
+                }
+                auto markerItem = MarkerItem::create(
+                    context,
+                    app,
+                    marker,
+                    markerTimeRange,
+                    _markerLayout);
+                _markerItems.push_back(markerItem);
+            }
+        }
 
+        _timeLayout = TimeStackLayout::create(context, timeRange, _layout);
         for (const auto& child : stack->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
             {
-                TrackItem::create(context, app, track, _timeLayout);
+                TrackItem::create(
+                    context,
+                    app,
+                    track,
+                    timeline,
+                    _timeLayout);
             }
         }
 
@@ -57,16 +91,21 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<StackItem>();
-        out->_init(context, app, stack, parent);
+        out->_init(context, app, stack, timeline, parent);
         return out;
     }
 
     void StackItem::setScale(double value)
     {
         IItem::setScale(value);
+        if (_markerLayout)
+        {
+            _markerLayout->setScale(value);
+        }
         _timeLayout->setScale(value);
     }
 
@@ -74,6 +113,14 @@ namespace toucan
     {
         IItem::setGeometry(value);
         _layout->setGeometry(value);
+        _geom.g2 = dtk::margin(value, -_size.border, 0, -_size.border, 0);
+        _geom.g3 = dtk::margin(_label->getGeometry(), -_size.border, 0, -_size.border, 0);
+        _selectionRect = _geom.g3;
+    }
+
+    dtk::Box2I StackItem::getChildrenClipRect() const
+    {
+        return _geom.g2;
     }
 
     void StackItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -94,11 +141,8 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = _label->getGeometry();
-
-        const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0);
         event.render->drawRect(
-            g2,
+            _geom.g3,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
     }
 

@@ -14,7 +14,8 @@ namespace toucan
     {
         All,
         Tracks,
-        Clips
+        Clips,
+        Markers
     };
 
     //! Selection item.
@@ -66,6 +67,12 @@ namespace toucan
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             std::vector<SelectionItem>&);
         void _getClips(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+        void _getGaps(
+            const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
+            std::vector<SelectionItem>&);
+        void _getMarkers(
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             std::vector<SelectionItem>&);
 

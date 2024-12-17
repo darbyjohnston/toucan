@@ -31,6 +31,9 @@ namespace toucan
         //! Set the scale.
         virtual void setScale(double);
 
+        //! Get the minimum width.
+        int getMinWidth() const;
+
         //! Convert a position to a time.
         OTIO_NS::RationalTime posToTime(double) const;
 
@@ -40,6 +43,7 @@ namespace toucan
     protected:
         OTIO_NS::TimeRange _timeRange;
         double _scale = 100.0;
+        int _minWidth = 0;
     };
 
     //! Time layout.
@@ -84,6 +88,15 @@ namespace toucan
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
+
+    private:
+        struct SizeData
+        {
+            bool init = true;
+            float displayScale = 0.F;
+            int spacing = 0;
+        };
+        SizeData _size;
     };
 }
 

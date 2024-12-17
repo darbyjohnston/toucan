@@ -4,6 +4,8 @@
 #include "SelectionModel.h"
 
 #include <opentimelineio/clip.h>
+#include <opentimelineio/gap.h>
+#include <opentimelineio/marker.h>
 
 namespace toucan
 {
@@ -71,12 +73,17 @@ namespace toucan
             objects.push_back({ timeline->tracks(), timeline->tracks()->trimmed_range() });
             _getTracks(timeline, objects);
             _getClips(timeline, objects);
+            _getGaps(timeline, objects);
+            _getMarkers(timeline, objects);
             break;
         case SelectionType::Tracks:
             _getTracks(timeline, objects);
             break;
         case SelectionType::Clips:
             _getClips(timeline, objects);
+            break;
+        case SelectionType::Markers:
+            _getMarkers(timeline, objects);
             break;
         default: break;
         }
@@ -94,6 +101,8 @@ namespace toucan
         objects.push_back({ timeline->tracks(), timeline->tracks()->trimmed_range() });
         _getTracks(timeline, objects);
         _getClips(timeline, objects);
+        _getGaps(timeline, objects);
+        _getMarkers(timeline, objects);
         const auto& selection = _selection->get();
         auto i = objects.begin();
         while (i != objects.end())
@@ -115,7 +124,7 @@ namespace toucan
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         std::vector<SelectionItem>& out)
     {
-        for (auto& track : timeline->find_children<OTIO_NS::Track>())
+        for (const auto& track : timeline->find_children<OTIO_NS::Track>())
         {
             OTIO_NS::TimeRange timeRange;
             if (track->trimmed_range_in_parent().has_value())
@@ -132,16 +141,64 @@ namespace toucan
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         std::vector<SelectionItem>& out)
     {
-        for (auto& track : timeline->find_children<OTIO_NS::Track>())
+        for (const auto& clip : timeline->find_children<OTIO_NS::Clip>())
         {
             OTIO_NS::TimeRange timeRange;
-            if (track->trimmed_range_in_parent().has_value())
+            if (clip->trimmed_range_in_parent().has_value())
             {
-                timeRange = track->trimmed_range_in_parent().value();
+                timeRange = clip->trimmed_range_in_parent().value();
             }
             out.push_back({
-                OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
+                OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(clip),
                 timeRange });
+        }
+    }
+
+    void SelectionModel::_getGaps(
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        std::vector<SelectionItem>& out)
+    {
+        for (const auto& gap : timeline->find_children<OTIO_NS::Gap>())
+        {
+            OTIO_NS::TimeRange timeRange;
+            if (gap->trimmed_range_in_parent().has_value())
+            {
+                timeRange = gap->trimmed_range_in_parent().value();
+            }
+            out.push_back({
+                OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(gap),
+                timeRange });
+        }
+    }
+
+    void SelectionModel::_getMarkers(
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        std::vector<SelectionItem>& out)
+    {
+        //! \bug timeline->find_children<OTIO_NS::Item>() does not include the stack?
+        {
+            const auto& markers = timeline->tracks()->markers();
+            for (const auto& marker : markers)
+            {
+                out.push_back({
+                    OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(marker),
+                    marker->marked_range() });
+            }
+        }
+        for (const auto& item : timeline->find_children<OTIO_NS::Item>())
+        {
+            const auto& markers = item->markers();
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange timeRange = marker->marked_range();
+                if (auto parent = item->parent())
+                {
+                    timeRange = item->transformed_time_range(timeRange, parent);
+                }
+                out.push_back({
+                    OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(marker),
+                    marker->marked_range() });
+            }
         }
     }
 }

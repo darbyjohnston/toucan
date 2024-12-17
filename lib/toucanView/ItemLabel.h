@@ -29,6 +29,9 @@ namespace toucan
         //! Set the duration.
         void setDuration(const std::string&);
 
+        //! Set the margin size role.
+        void setMarginRole(dtk::SizeRole);
+
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
         void clipEvent(const dtk::Box2I&, bool) override;
@@ -37,12 +40,14 @@ namespace toucan
     private:
         std::string _name;
         std::string _duration;
+        dtk::SizeRole _marginRole = dtk::SizeRole::MarginInside;
 
         struct SizeData
         {
             bool init = true;
             float displayScale = 0.F;
             int margin = 0;
+            int margin2 = 0;
             dtk::FontInfo fontInfo;
             dtk::FontMetrics fontMetrics;
             dtk::Size2I nameSize;

@@ -73,13 +73,8 @@ namespace toucan
             parent);
 
         _marker = marker;
-        _markerTimeRange = OTIO_NS::TimeRange(
-            timeRange.start_time() +
-            _marker->marked_range().start_time().rescaled_to(timeRange.duration().rate()),
-            _marker->marked_range().duration().rescaled_to(timeRange.duration().rate()));
-        _text = !marker->name().empty() ? marker->name() : "Marker";
-        _color = dtk::Color4F(.3F, .3F, .3F);
-        _markerColor = getMarkerColor(marker->color());
+        _text = !marker->name().empty() ? marker->name() : "Clip";
+        _color = getMarkerColor(marker->color());
 
         setTooltip(marker->schema_name() + ": " + _text);
 
@@ -107,8 +102,12 @@ namespace toucan
     void MarkerItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);
-        const dtk::Box2I g = margin(value, 0, 0, 0, -_size.border * 2);
-        _label->setGeometry(value);
+        const dtk::Box2I g(
+            value.min.x + value.h(),
+            value.min.y,
+            value.w() - value.h(),
+            value.h());
+        _label->setGeometry(g);
     }
 
     void MarkerItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -119,11 +118,13 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
+            _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
         }
         dtk::Size2I sizeHint = _label->getSizeHint();
         sizeHint.h += _size.border * 2;
         _setSizeHint(sizeHint);
+        _minWidth = sizeHint.h;
     }
 
     void MarkerItem::drawEvent(
@@ -135,19 +136,10 @@ namespace toucan
         const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
         event.render->drawRect(
             g2,
-            _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
+            _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : dtk::Color4F(.3F, .3F, .3F));
 
-        const double t0 = timeToPos(_markerTimeRange.start_time());
-        double t1 = timeToPos(
-            _markerTimeRange.duration().value() > 0.0 ? 
-            _markerTimeRange.end_time_exclusive() :
-            _markerTimeRange.start_time() + OTIO_NS::RationalTime(1.0, _markerTimeRange.duration().rate()));
-        const dtk::Box2I g3(
-            t0,
-            g2.max.y + 1 - _size.border * 2,
-            std::max(t1 - t0, _size.border * 2.0),
-            _size.border * 2);
-        event.render->drawRect(g3, _markerColor);
+        const dtk::Box2I g3(g.min.x, g.min.y, g.h(), g.h());
+        event.render->drawMesh(dtk::circle(dtk::center(g3), g3.h() / 4), _color);
     }
 
     void MarkerItem::_timeUnitsUpdate()

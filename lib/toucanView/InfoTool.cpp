@@ -86,6 +86,8 @@ namespace toucan
         }
         else if (auto marker = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Marker>(object))
         {
+            _text.push_back(std::make_pair("Color:", marker->color()));
+
             OTIO_NS::TimeRange timeRange = marker->marked_range();
             std::string text = dtk::Format("{0} @ {1} / {2} @ {3}").
                 arg(timeRange.start_time().value()).

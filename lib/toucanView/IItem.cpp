@@ -36,6 +36,11 @@ namespace toucan
         return _object;
     }
 
+    const dtk::Box2I& IItem::getSelectionRect() const
+    {
+        return _selectionRect;
+    }
+
     bool IItem::isSelected() const
     {
         return _selected;
@@ -47,6 +52,12 @@ namespace toucan
             return;
         _selected = value;
         _setDrawUpdate();
+    }
+
+    void IItem::setGeometry(const dtk::Box2I& value)
+    {
+        ITimeWidget::setGeometry(value);
+        _selectionRect = value;
     }
 
     void IItem::_timeUnitsUpdate()

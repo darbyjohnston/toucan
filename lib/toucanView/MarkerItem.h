@@ -48,10 +48,8 @@ namespace toucan
         void _textUpdate();
 
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker> _marker;
-        OTIO_NS::TimeRange _markerTimeRange;
         std::string _text;
         dtk::Color4F _color;
-        dtk::Color4F _markerColor;
 
         std::shared_ptr<ItemLabel> _label;
 
@@ -59,6 +57,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            int margin = 0;
             int border = 0;
         };
         SizeData _size;

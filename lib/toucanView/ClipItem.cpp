@@ -11,11 +11,19 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const dtk::Color4F& color,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto opt = clip->trimmed_range_in_parent();
-        const OTIO_NS::TimeRange timeRange = opt.has_value() ? opt.value() : OTIO_NS::TimeRange();
+        OTIO_NS::TimeRange timeRange = clip->transformed_time_range(
+            clip->trimmed_range(),
+            timeline->tracks());
+        if (timeline->global_start_time().has_value())
+        {
+            timeRange = OTIO_NS::TimeRange(
+                timeline->global_start_time().value() + timeRange.start_time(),
+                timeRange.duration());
+        }
         IItem::_init(
             context,
             app,
@@ -24,8 +32,6 @@ namespace toucan
             "toucan::ClipItem",
             parent);
 
-        _setMousePressEnabled(0, 0);
-
         _clip = clip;
         _text = !clip->name().empty() ? clip->name() : "Clip";
         _color = color;
@@ -33,16 +39,34 @@ namespace toucan
         setTooltip(clip->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
-        _layout->setSpacingRole(dtk::SizeRole::None);
+        _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
 
         _label = ItemLabel::create(context, _layout);
         _label->setName(_text);
 
         const auto& markers = clip->markers();
-        for (const auto& marker : markers)
+        if (!markers.empty())
         {
-            auto markerItem = MarkerItem::create(context, app, marker, timeRange, _layout);
-            _markerItems.push_back(markerItem);
+            _markerLayout = TimeLayout::create(context, timeRange, _layout);
+            for (const auto& marker : markers)
+            {
+                OTIO_NS::TimeRange markerTimeRange = clip->transformed_time_range(
+                    marker->marked_range(),
+                    timeline->tracks());
+                if (timeline->global_start_time().has_value())
+                {
+                    markerTimeRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerTimeRange.start_time(),
+                        markerTimeRange.duration());
+                }
+                auto markerItem = MarkerItem::create(
+                    context,
+                    app,
+                    marker,
+                    markerTimeRange,
+                    _markerLayout);
+                _markerItems.push_back(markerItem);
+            }
         }
 
         _textUpdate();
@@ -55,20 +79,21 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const dtk::Color4F& color,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<ClipItem>();
-        out->_init(context, app, clip, color, parent);
+        out->_init(context, app, clip, timeline, color, parent);
         return out;
     }
 
     void ClipItem::setScale(double value)
     {
         IItem::setScale(value);
-        for (const auto& markerItem : _markerItems)
+        if (_markerLayout)
         {
-            markerItem->setScale(value);
+            _markerLayout->setScale(value);
         }
     }
 
@@ -76,6 +101,14 @@ namespace toucan
     {
         IItem::setGeometry(value);
         _layout->setGeometry(value);
+        _geom.g2 = dtk::margin(value, -_size.border, 0, -_size.border, 0);
+        _geom.g3 = dtk::margin(_label->getGeometry(), -_size.border, 0, -_size.border, 0);
+        _selectionRect = _geom.g3;
+    }
+
+    dtk::Box2I ClipItem::getChildrenClipRect() const
+    {
+        return _geom.g2;
     }
 
     void ClipItem::sizeHintEvent(const dtk::SizeHintEvent& event)
@@ -96,10 +129,8 @@ namespace toucan
         const dtk::DrawEvent& event)
     {
         IItem::drawEvent(drawRect, event);
-        const dtk::Box2I& g = _label->getGeometry();
-        const dtk::Box2I g2 = dtk::margin(g, -_size.border, 0, -_size.border, 0);
         event.render->drawRect(
-            g2,
+            _geom.g3,
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
     }
 

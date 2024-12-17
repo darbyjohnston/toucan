@@ -125,7 +125,9 @@ namespace toucan
 
     void TimelineWidget::frameView()
     {
-        _scrollWidget->setScrollPos(dtk::V2I());
+        dtk::V2I pos = _scrollWidget->getScrollPos();
+        pos.x = 0;
+        _scrollWidget->setScrollPos(pos);
         _scale = _getTimelineScale();
         if (_timelineItem)
         {

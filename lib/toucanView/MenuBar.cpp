@@ -266,6 +266,19 @@ namespace toucan
             });
         _menus["Select"]->addItem(_actions["Select/AllClips"]);
 
+        _actions["Select/AllMarkers"] = std::make_shared<dtk::Action>(
+            "All Markers",
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getSelectionModel()->selectAll(
+                        _file->getTimeline(),
+                        SelectionType::Markers);
+                }
+            });
+        _menus["Select"]->addItem(_actions["Select/AllMarkers"]);
+
         _actions["Select/None"] = std::make_shared<dtk::Action>(
             "None",
             dtk::Key::A,
@@ -483,6 +496,7 @@ namespace toucan
                     if (timeRangeOpt.has_value())
                     {
                         _file->getPlaybackModel()->setInOutRange(timeRangeOpt.value());
+                        _file->getPlaybackModel()->setCurrentTime(timeRangeOpt.value().start_time());
                     }
                     else
                     {
@@ -833,6 +847,7 @@ namespace toucan
         _menus["Select"]->setItemEnabled(_actions["Select/All"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/AllTracks"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/AllClips"], file);
+        _menus["Select"]->setItemEnabled(_actions["Select/AllMarkers"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/None"], file);
         _menus["Select"]->setItemEnabled(_actions["Select/Invert"], file);
     }

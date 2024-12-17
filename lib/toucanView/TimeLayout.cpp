@@ -43,6 +43,11 @@ namespace toucan
         _setSizeUpdate();
     }
 
+    int ITimeWidget::getMinWidth() const
+    {
+        return _minWidth;
+    }
+
     OTIO_NS::RationalTime ITimeWidget::posToTime(double value) const
     {
         OTIO_NS::RationalTime out;
@@ -101,10 +106,14 @@ namespace toucan
             if (auto timeWidget = std::dynamic_pointer_cast<ITimeWidget>(child))
             {
                 const OTIO_NS::TimeRange& timeRange = timeWidget->getTimeRange();
-                const double t0 = timeToPos(timeRange.start_time());
-                const double t1 = timeToPos(timeRange.end_time_exclusive());
+                const int t0 = timeToPos(timeRange.start_time());
+                const int t1 = timeToPos(timeRange.end_time_exclusive());
                 const dtk::Size2I& childSizeHint = child->getSizeHint();
-                child->setGeometry(dtk::Box2I(t0, value.min.y, t1 - t0, childSizeHint.h));
+                child->setGeometry(dtk::Box2I(
+                    t0,
+                    value.min.y,
+                    std::max(t1 - t0, timeWidget->getMinWidth()),
+                    childSizeHint.h));
             };
         }
     }
@@ -159,7 +168,7 @@ namespace toucan
                 const double t1 = timeToPos(timeRange.end_time_exclusive());
                 const dtk::Size2I& childSizeHint = child->getSizeHint();
                 child->setGeometry(dtk::Box2I(t0, y, t1 - t0, childSizeHint.h));
-                y += childSizeHint.h;
+                y += childSizeHint.h + _size.spacing;
             };
         }
     }
@@ -167,14 +176,27 @@ namespace toucan
     void TimeStackLayout::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         ITimeWidget::sizeHintEvent(event);
-        dtk::Size2I sizeHint;
-        for (const auto& child : getChildren())
+        const bool displayScaleChanged = event.displayScale != _size.displayScale;
+        if (_size.init || displayScaleChanged)
         {
-            if (auto timeWidget = std::dynamic_pointer_cast<ITimeWidget>(child))
+            _size.init = false;
+            _size.displayScale = event.displayScale;
+            _size.spacing = event.style->getSizeRole(dtk::SizeRole::SpacingTool, event.displayScale);
+        }
+
+        dtk::Size2I sizeHint;
+        const auto& children = getChildren();
+        if (!children.empty())
+        {
+            for (const auto& child : children)
             {
-                const dtk::Size2I& childSizeHint = timeWidget->getSizeHint();
-                sizeHint.h += childSizeHint.h;
+                if (auto timeWidget = std::dynamic_pointer_cast<ITimeWidget>(child))
+                {
+                    const dtk::Size2I& childSizeHint = timeWidget->getSizeHint();
+                    sizeHint.h += childSizeHint.h;
+                }
             }
+            sizeHint.h += (children.size() - 1) * _size.spacing;
         }
         sizeHint.w = _timeRange.duration().rescaled_to(1.0).value() * _scale;
         _setSizeHint(sizeHint);

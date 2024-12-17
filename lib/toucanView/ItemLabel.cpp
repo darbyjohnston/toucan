@@ -35,9 +35,18 @@ namespace toucan
 
     void ItemLabel::setDuration(const std::string& value)
     {
-        if (value == _name)
+        if (value == _duration)
             return;
         _duration = value;
+        _setSizeUpdate();
+        _setDrawUpdate();
+    }
+
+    void ItemLabel::setMarginRole(dtk::SizeRole value)
+    {
+        if (value == _marginRole)
+            return;
+        _marginRole = value;
         _setSizeUpdate();
         _setDrawUpdate();
     }
@@ -55,7 +64,8 @@ namespace toucan
         {
             _size.init = false;
             _size.displayScale = event.displayScale;
-            _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginSmall, event.displayScale);
+            _size.margin = event.style->getSizeRole(_marginRole, event.displayScale);
+            _size.margin2 = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Label, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             _size.nameSize = event.fontSystem->getSize(_name, _size.fontInfo);
@@ -64,8 +74,10 @@ namespace toucan
             _draw.durationGlyphs.clear();
         }
         dtk::Size2I sizeHint;
-        sizeHint.w = _size.nameSize.w + _size.margin * 2 +
-            _size.durationSize.w + _size.margin * 2;
+        sizeHint.w =
+            _size.nameSize.w + _size.margin2 * 2 +
+            _size.durationSize.w + _size.margin2 * 2 +
+            _size.margin * 2;
         sizeHint.h = std::max(_size.nameSize.h, _size.durationSize.h) + _size.margin * 2;
         _setSizeHint(sizeHint);
     }
@@ -84,12 +96,13 @@ namespace toucan
     {
         IWidget::drawEvent(drawRect, event);
         const dtk::Box2I& g = getGeometry();
+        const dtk::Box2I g2 = margin(g, -_size.margin);
 
         int w = _size.nameSize.w + _size.margin * 2;
-        int h = _size.fontMetrics.lineHeight + _size.margin * 2;
-        const dtk::Box2I g2(
-            g.min.x,
-            g.min.y + g.h() / 2 - h / 2,
+        int h = _size.fontMetrics.lineHeight;
+        const dtk::Box2I g3(
+            g2.min.x,
+            g2.min.y + g2.h() / 2 - h / 2,
             w,
             h);
         if (!_name.empty() && _draw.nameGlyphs.empty())
@@ -99,16 +112,16 @@ namespace toucan
         event.render->drawText(
             _draw.nameGlyphs,
             _size.fontMetrics,
-            g2.min + _size.margin,
+            dtk::V2I(g3.min.x + _size.margin2, g3.min.y),
             event.style->getColorRole(dtk::ColorRole::Text));
 
-        w = _size.durationSize.w + _size.margin * 2;
-        const dtk::Box2I g3(
-            g.max.x - w,
-            g.min.y + g.h() / 2 - h / 2,
+        w = _size.durationSize.w + _size.margin2 * 2;
+        const dtk::Box2I g4(
+            g2.max.x - w,
+            g2.min.y + g2.h() / 2 - h / 2,
             w,
             h);
-        if (!dtk::intersects(g2, g3))
+        if (!dtk::intersects(g4, g3))
         {
             if (!_duration.empty() && _draw.durationGlyphs.empty())
             {
@@ -117,7 +130,7 @@ namespace toucan
             event.render->drawText(
                 _draw.durationGlyphs,
                 _size.fontMetrics,
-                g3.min + _size.margin,
+                dtk::V2I(g4.min.x + _size.margin2, g4.min.y),
                 event.style->getColorRole(dtk::ColorRole::Text));
         }
     }
