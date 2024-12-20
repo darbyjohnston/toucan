@@ -372,7 +372,7 @@ namespace toucan
     dtk::Size2I TimelineItem::_getLabelMaxSize(
         const std::shared_ptr<dtk::FontSystem>& fontSystem) const
     {
-        const std::string labelMax = toString(_timeRange.duration(), _timeUnits);
+        const std::string labelMax = toString(_timeRange.end_time_inclusive(), _timeUnits);
         const dtk::Size2I labelMaxSize = fontSystem->getSize(labelMax, _size.fontInfo);
         return labelMaxSize;
     }
