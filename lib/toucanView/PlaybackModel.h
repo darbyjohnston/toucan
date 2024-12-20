@@ -23,7 +23,11 @@ namespace toucan
     {
         FrameStart,
         FramePrev,
+        FramePrevX10,
+        FramePrevX100,
         FrameNext,
+        FrameNextX10,
+        FrameNextX100,
         FrameEnd,
         ClipNext,
         ClipPrev

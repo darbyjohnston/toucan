@@ -346,6 +346,36 @@ namespace toucan
             });
         _menus["Time"]->addItem(_actions["Time/FramePrev"]);
 
+        _actions["Time/FramePrevX10"] = std::make_shared<dtk::Action>(
+            "Previous Frame X10",
+            dtk::Key::Left,
+            static_cast<int>(dtk::KeyModifier::Shift),
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getPlaybackModel()->timeAction(
+                        TimeAction::FramePrevX10,
+                        _file->getTimeline());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/FramePrevX10"]);
+
+        _actions["Time/FramePrevX100"] = std::make_shared<dtk::Action>(
+            "Previous Frame X100",
+            dtk::Key::Left,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getPlaybackModel()->timeAction(
+                        TimeAction::FramePrevX100,
+                        _file->getTimeline());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/FramePrevX100"]);
+
         _actions["Time/FrameNext"] = std::make_shared<dtk::Action>(
             "Next Frame",
             "FrameNext",
@@ -361,6 +391,36 @@ namespace toucan
                 }
             });
         _menus["Time"]->addItem(_actions["Time/FrameNext"]);
+
+        _actions["Time/FrameNextX10"] = std::make_shared<dtk::Action>(
+            "Next Frame X10",
+            dtk::Key::Right,
+            static_cast<int>(dtk::KeyModifier::Shift),
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getPlaybackModel()->timeAction(
+                        TimeAction::FrameNextX10,
+                        _file->getTimeline());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/FrameNextX10"]);
+
+        _actions["Time/FrameNextX100"] = std::make_shared<dtk::Action>(
+            "Next Frame X100",
+            dtk::Key::Right,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [this]
+            {
+                if (_file)
+                {
+                    _file->getPlaybackModel()->timeAction(
+                        TimeAction::FrameNextX100,
+                        _file->getTimeline());
+                }
+            });
+        _menus["Time"]->addItem(_actions["Time/FrameNextX100"]);
 
         _actions["Time/FrameEnd"] = std::make_shared<dtk::Action>(
             "End Frame",
@@ -383,7 +443,7 @@ namespace toucan
         _actions["Time/ClipNext"] = std::make_shared<dtk::Action>(
             "Next Clip",
             dtk::Key::Right,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Alt),
             [this]
             {
                 if (_file)
@@ -398,7 +458,7 @@ namespace toucan
         _actions["Time/ClipPrev"] = std::make_shared<dtk::Action>(
             "Previous Clip",
             dtk::Key::Left,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Alt),
             [this]
             {
                 if (_file)
@@ -857,7 +917,11 @@ namespace toucan
         const bool file = _file.get();
         _menus["Time"]->setItemEnabled(_actions["Time/FrameStart"], file);
         _menus["Time"]->setItemEnabled(_actions["Time/FramePrev"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FramePrevX10"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FramePrevX100"], file);
         _menus["Time"]->setItemEnabled(_actions["Time/FrameNext"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameNextX10"], file);
+        _menus["Time"]->setItemEnabled(_actions["Time/FrameNextX100"], file);
         _menus["Time"]->setItemEnabled(_actions["Time/FrameEnd"], file);
         _menus["Time"]->setItemEnabled(_actions["Time/ClipPrev"], file);
         _menus["Time"]->setItemEnabled(_actions["Time/ClipNext"], file);
