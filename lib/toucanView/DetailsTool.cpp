@@ -246,12 +246,12 @@ namespace toucan
 
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto openButton = dtk::ToolButton::create(context, hLayout);
-        openButton->setIcon("BellowsOpen");
-        openButton->setTooltip("Open all");
-        auto closeButton = dtk::ToolButton::create(context, hLayout);
-        closeButton->setIcon("BellowsClosed");
-        closeButton->setTooltip("Close all");
+        _openButton = dtk::ToolButton::create(context, hLayout);
+        _openButton->setIcon("BellowsOpen");
+        _openButton->setTooltip("Open all");
+        _closeButton = dtk::ToolButton::create(context, hLayout);
+        _closeButton->setIcon("BellowsClosed");
+        _closeButton->setTooltip("Close all");
 
         _searchBox->setCallback(
             [this](const std::string& text)
@@ -262,7 +262,7 @@ namespace toucan
                 }
             });
 
-        openButton->setClickedCallback(
+        _openButton->setClickedCallback(
             [this]
             {
                 for (const auto& widget : _widgets)
@@ -271,7 +271,7 @@ namespace toucan
                 }
             });
 
-        closeButton->setClickedCallback(
+        _closeButton->setClickedCallback(
             [this]
             {
                 for (const auto& widget : _widgets)
@@ -296,6 +296,7 @@ namespace toucan
                             }
                             _widgets.clear();
                             auto context = getContext();
+                            const std::string& search = _searchBox->getText();
                             for (const auto& item : selection)
                             {
                                 auto widget = DetailsWidget::create(
@@ -304,8 +305,11 @@ namespace toucan
                                     file,
                                     item,
                                     _scrollLayout);
+                                widget->setSearch(search);
                                 _widgets.push_back(widget);
                             }
+                            _openButton->setEnabled(!_widgets.empty());
+                            _closeButton->setEnabled(!_widgets.empty());
                         });
                 }
                 else
@@ -315,6 +319,8 @@ namespace toucan
                         widget->setParent(nullptr);
                     }
                     _widgets.clear();
+                    _openButton->setEnabled(false);
+                    _closeButton->setEnabled(false);
                     _selectionObserver.reset();
                 }
             });

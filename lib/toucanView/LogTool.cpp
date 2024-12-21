@@ -9,7 +9,6 @@
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
-#include <dtk/ui/ToolButton.h>
 #include <dtk/core/String.h>
 
 namespace toucan
@@ -51,13 +50,13 @@ namespace toucan
 
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto clearButton = dtk::ToolButton::create(context, hLayout);
-        clearButton->setIcon("Clear");
-        clearButton->setTooltip("Clear the log");
+        _clearButton = dtk::ToolButton::create(context, hLayout);
+        _clearButton->setIcon("Clear");
+        _clearButton->setTooltip("Clear the log");
 
         _textUpdate();
 
-        clearButton->setClickedCallback(
+        _clearButton->setClickedCallback(
             [this]
             {
                 _text.clear();
@@ -134,5 +133,7 @@ namespace toucan
             }
         }
         _label->setText(dtk::join(text, '\n'));
+
+        _clearButton->setEnabled(!_text.empty());
     }
 }
