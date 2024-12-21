@@ -3,15 +3,19 @@
 
 #pragma once
 
-#include <dtk/ui/MenuBar.h>
+#include <toucanView/WindowModel.h>
+
+#include <dtk/ui/Menu.h>
+#include <dtk/core/ObservableList.h>
+#include <dtk/core/ObservableMap.h>
 
 namespace toucan
 {
     class App;
     class MainWindow;
 
-    //! Menu bar.
-    class MenuBar : public dtk::MenuBar
+    //! Window menu.
+    class WindowMenu : public dtk::Menu
     {
     protected:
         void _init(
@@ -21,10 +25,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~MenuBar();
+        virtual ~WindowMenu();
 
-        //! Create a new menu bar.
-        static std::shared_ptr<MenuBar> create(
+        //! Create a new menu.
+        static std::shared_ptr<WindowMenu> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<MainWindow>&,
@@ -36,6 +40,11 @@ namespace toucan
     private:
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
+
+        std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<dtk::MapObserver<WindowComponent, bool> > _componentsObserver;
+        std::shared_ptr<dtk::ValueObserver<float> > _displayScaleObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _tooltipsObserver;
     };
 }
 

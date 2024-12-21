@@ -5,6 +5,7 @@ set(HEADERS
     ExportTool.h
     FileTab.h
     File.h
+    FileMenu.h
     FilesModel.h
     GapItem.h
     GraphTool.h
@@ -19,19 +20,24 @@ set(HEADERS
     MarkerItem.h
     MenuBar.h
     PlaybackBar.h
+    PlaybackMenu.h
     PlaybackModel.h
+    SelectMenu.h
     SelectionModel.h
     StackItem.h
     ThumbnailGenerator.h
     TimeLayout.h
+    TimeMenu.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
     TimelineWidget.h
     ToolBar.h
     TrackItem.h
+    ViewMenu.h
     ViewModel.h
     Viewport.h
+    WindowMenu.h
     WindowModel.h)
 
 set(SOURCE
@@ -41,6 +47,7 @@ set(SOURCE
     ExportTool.cpp
     FileTab.cpp
     File.cpp
+    FileMenu.cpp
     FilesModel.cpp
     GapItem.cpp
     GraphTool.cpp
@@ -55,9 +62,12 @@ set(SOURCE
     MarkerItem.cpp
     MenuBar.cpp
     PlaybackBar.cpp
+    PlaybackMenu.cpp
     PlaybackModel.cpp
+    SelectMenu.cpp
     SelectionModel.cpp
     StackItem.cpp
+    TimeMenu.cpp
     ThumbnailGenerator.cpp
     TimeLayout.cpp
     TimeUnitsModel.cpp
@@ -66,8 +76,10 @@ set(SOURCE
     TimelineWidget.cpp
     ToolBar.cpp
     TrackItem.cpp
+    ViewMenu.cpp
     ViewModel.cpp
     Viewport.cpp
+    WindowMenu.cpp
     WindowModel.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
