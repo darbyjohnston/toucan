@@ -5,6 +5,7 @@
 
 #include "App.h"
 #include "FilesModel.h"
+#include "MainWindow.h"
 #include "SelectionModel.h"
 
 #include <dtk/ui/Action.h>
@@ -17,44 +18,41 @@ namespace toucan
     void FileMenu::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<MainWindow>& window,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         dtk::Menu::_init(context, parent);
 
-        _app = app;
         _filesModel = app->getFilesModel();
 
         auto appWeak = std::weak_ptr<App>(app);
+        auto windowWeak = std::weak_ptr<MainWindow>(window);
         _actions["File/Open"] = std::make_shared<dtk::Action>(
             "Open",
             "FileOpen",
             dtk::Key::O,
             static_cast<int>(dtk::KeyModifier::Control),
-            [this]
+            [this, appWeak, windowWeak]
             {
-                if (auto context = getContext())
+                auto context = getContext();
+                auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>();
+                if (_file)
                 {
-                    if (auto fileBrowserSystem = context->getSystem<dtk::FileBrowserSystem>())
-                    {
-                        if (_file)
-                        {
-                            fileBrowserSystem->setPath(_file->getPath().parent_path());
-                        }
-                        dtk::FileBrowserOptions options = fileBrowserSystem->getOptions();
-                        options.extensions.clear();
-                        options.extensions.push_back(".otio");
-                        options.extensions.push_back(".otiod");
-                        options.extensions.push_back(".otioz");
-                        fileBrowserSystem->setOptions(options);
-                        fileBrowserSystem->open(
-                            getWindow(),
-                            [this](const std::filesystem::path& path)
-                            {
-                                _app.lock()->open(path);
-                            },
-                            _filesModel->getRecentFilesModel());
-                    }
+                    fileBrowserSystem->setPath(_file->getPath().parent_path());
                 }
+                dtk::FileBrowserOptions options = fileBrowserSystem->getOptions();
+                options.extensions.clear();
+                options.extensions.push_back(".otio");
+                options.extensions.push_back(".otiod");
+                options.extensions.push_back(".otioz");
+                fileBrowserSystem->setOptions(options);
+                fileBrowserSystem->open(
+                    windowWeak.lock(),
+                    [appWeak](const std::filesystem::path& path)
+                    {
+                        appWeak.lock()->open(path);
+                    },
+                    _filesModel->getRecentFilesModel());
             });
         _actions["File/Open"]->toolTip = "Open a file";
         addItem(_actions["File/Open"]);
@@ -156,7 +154,7 @@ namespace toucan
 
         _recentFilesObserver = dtk::ListObserver<std::filesystem::path>::create(
             _filesModel->getRecentFilesModel()->observeRecent(),
-            [this](const std::vector<std::filesystem::path>& files)
+            [this, appWeak](const std::vector<std::filesystem::path>& files)
             {
                 _menus["RecentFiles"]->clear();
                 _recentFilesActions.clear();
@@ -165,9 +163,9 @@ namespace toucan
                     auto file = *i;
                     auto item = std::make_shared<dtk::Action>(
                         file.string(),
-                        [this, file]
+                        [this, appWeak, file]
                         {
-                            _app.lock()->open(file);
+                            appWeak.lock()->open(file);
                             close();
                         });
                     _menus["RecentFiles"]->addItem(item);
@@ -182,10 +180,11 @@ namespace toucan
     std::shared_ptr<FileMenu> FileMenu::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<MainWindow>& window,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<FileMenu>(new FileMenu);
-        out->_init(context, app, parent);
+        out->_init(context, app, window, parent);
         return out;
     }
 

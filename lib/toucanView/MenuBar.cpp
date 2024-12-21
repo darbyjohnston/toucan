@@ -20,7 +20,7 @@ namespace toucan
     {
         dtk::MenuBar::_init(context, parent);
 
-        auto fileMenu = FileMenu::create(context, app);
+        auto fileMenu = FileMenu::create(context, app, window);
         addMenu("File", fileMenu);
         _menus["File"] = fileMenu;
         _actions.insert(fileMenu->getActions().begin(), fileMenu->getActions().end());

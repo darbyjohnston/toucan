@@ -6,6 +6,7 @@ set(HEADERS
     FileTab.h
     File.h
     FileMenu.h
+    FileToolBar.h
     FilesModel.h
     GapItem.h
     GraphTool.h
@@ -36,9 +37,11 @@ set(HEADERS
     TrackItem.h
     ViewMenu.h
     ViewModel.h
+    ViewToolBar.h
     Viewport.h
     WindowMenu.h
-    WindowModel.h)
+    WindowModel.h
+    WindowToolBar.h)
 
 set(SOURCE
     App.cpp
@@ -48,6 +51,7 @@ set(SOURCE
     FileTab.cpp
     File.cpp
     FileMenu.cpp
+    FileToolBar.cpp
     FilesModel.cpp
     GapItem.cpp
     GraphTool.cpp
@@ -78,9 +82,11 @@ set(SOURCE
     TrackItem.cpp
     ViewMenu.cpp
     ViewModel.cpp
+    ViewToolBar.cpp
     Viewport.cpp
     WindowMenu.cpp
-    WindowModel.cpp)
+    WindowModel.cpp
+    WindowToolBar.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
 target_link_libraries(toucanView PUBLIC toucanRender dtk::dtkUI)

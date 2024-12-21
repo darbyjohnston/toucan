@@ -15,6 +15,7 @@ namespace toucan
     class App;
     class File;
     class FilesModel;
+    class MainWindow;
 
     //! File bar.
     class FileMenu : public dtk::Menu
@@ -23,6 +24,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<MainWindow>&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -32,6 +34,7 @@ namespace toucan
         static std::shared_ptr<FileMenu> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<MainWindow>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Get the actions.
@@ -40,7 +43,6 @@ namespace toucan
     private:
         void _menuUpdate();
 
-        std::weak_ptr<App> _app;
         std::shared_ptr<FilesModel> _filesModel;
         std::shared_ptr<File> _file;
 
