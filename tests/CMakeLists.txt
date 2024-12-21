@@ -1,2 +1,5 @@
 add_subdirectory(toucanRenderTest)
+if(toucan_VIEW)
+    add_subdirectory(toucanViewTest)
+endif()
 add_subdirectory(toucan-test)

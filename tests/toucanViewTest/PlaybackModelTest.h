@@ -3,12 +3,11 @@
 
 #pragma once
 
-#include <toucanRender/ImageEffectHost.h>
+#include <dtk/core/Context.h>
 
 namespace toucan
 {
-    void imageGraphTest(
+    void playbackModelTest(
         const std::shared_ptr<dtk::Context>&,
-        const std::shared_ptr<ImageEffectHost>&,
-        const std::filesystem::path&);
+        const std::filesystem::path& path);
 }
