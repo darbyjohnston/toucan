@@ -85,6 +85,7 @@ namespace toucan
         std::shared_ptr<dtk::ListObserver<std::filesystem::path> > _recentFilesObserver;
         std::shared_ptr<dtk::ValueObserver<Playback> > _playbackObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _hudObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _fullScreenObserver;
         std::shared_ptr<dtk::MapObserver<WindowComponent, bool> > _componentsObserver;
         std::shared_ptr<dtk::ValueObserver<float> > _displayScaleObserver;

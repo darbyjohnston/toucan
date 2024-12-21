@@ -6,6 +6,7 @@
 #include "FilesModel.h"
 #include "MainWindow.h"
 #include "TimeUnitsModel.h"
+#include "ViewModel.h"
 #include "WindowModel.h"
 
 #include <dtk/ui/DialogSystem.h>
@@ -54,7 +55,7 @@ namespace toucan
         fileBrowserSystem->setNativeFileDialog(false);
 
         _filesModel = std::make_shared<FilesModel>(context, _host);
-
+        _globalViewModel = std::make_shared<GlobalViewModel>(context);
         _windowModel = std::make_shared<WindowModel>(context);
 
         _window = MainWindow::create(
@@ -96,6 +97,11 @@ namespace toucan
     const std::shared_ptr<FilesModel>& App::getFilesModel() const
     {
         return _filesModel;
+    }
+
+    const std::shared_ptr<GlobalViewModel>& App::getGlobalViewModel() const
+    {
+        return _globalViewModel;
     }
 
     const std::shared_ptr<WindowModel>& App::getWindowModel() const

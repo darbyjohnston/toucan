@@ -8,6 +8,7 @@ set(HEADERS
     FilesModel.h
     GapItem.h
     GraphTool.h
+    HUDWidget.h
     IItem.h
     IToolWidget.h
     InfoBar.h
@@ -43,6 +44,7 @@ set(SOURCE
     FilesModel.cpp
     GapItem.cpp
     GraphTool.cpp
+    HUDWidget.cpp
     IItem.cpp
     IToolWidget.cpp
     InfoBar.cpp

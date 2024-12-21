@@ -700,6 +700,30 @@ namespace toucan
             });
         _actions["View/Frame"]->toolTip = "Frame the view";
         _menus["View"]->addItem(_actions["View/Frame"]);
+
+        _menus["View"]->addDivider();
+
+        std::weak_ptr<App> appWeak(app);
+        _actions["View/HUD"] = std::make_shared<dtk::Action>(
+            "HUD",
+            dtk::Key::H,
+            static_cast<int>(dtk::KeyModifier::Control),
+            [appWeak](bool value)
+            {
+                if (auto app = appWeak.lock())
+                {
+                    app->getGlobalViewModel()->setHUD(value);
+                }
+            });
+        _actions["View/HUD"]->toolTip = "Toggle the HUD (Heads Up Display)";
+        _menus["View"]->addItem(_actions["View/HUD"]);
+
+        _hudObserver = dtk::ValueObserver<bool>::create(
+            app->getGlobalViewModel()->observeHUD(),
+            [this](bool value)
+            {
+                _menus["View"]->setItemChecked(_actions["View/HUD"], value);
+            });
     }
 
     void MenuBar::_windowMenuInit(
@@ -740,7 +764,8 @@ namespace toucan
         {
             { WindowComponent::ToolBar, "ToolBar", "Tool Bar", "", "" },
             { WindowComponent::Tools, "Tools", "Tools", "PanelRight", "Toggle the tools" },
-            { WindowComponent::Playback, "Playback", "Playback", "PanelBottom", "Toggle the playback controls" }
+            { WindowComponent::Playback, "Playback", "Playback", "PanelBottom", "Toggle the playback controls" },
+            { WindowComponent::InfoBar, "InfoBar", "InfoBar", "", "Toggle the information bar" }
         };
         std::weak_ptr<App> appWeak(app);
         for (const auto& component : components)
@@ -871,6 +896,8 @@ namespace toucan
                 _menus["Window"]->setItemChecked(_actions["Window/Tools"], i->second);
                 i = value.find(WindowComponent::Playback);
                 _menus["Window"]->setItemChecked(_actions["Window/Playback"], i->second);
+                i = value.find(WindowComponent::InfoBar);
+                _menus["Window"]->setItemChecked(_actions["Window/InfoBar"], i->second);
             });
 
         _displayScaleObserver = dtk::ValueObserver<float>::create(
@@ -973,6 +1000,7 @@ namespace toucan
         _menus["View"]->setItemEnabled(_actions["View/ZoomOut"], file);
         _menus["View"]->setItemEnabled(_actions["View/ZoomReset"], file);
         _menus["View"]->setItemEnabled(_actions["View/Frame"], file);
+        _menus["View"]->setItemEnabled(_actions["View/HUD"], file);
     }
 
     void MenuBar::_windowMenuUpdate()

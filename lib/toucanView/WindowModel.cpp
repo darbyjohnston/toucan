@@ -17,23 +17,23 @@ namespace toucan
         WindowComponent,
         "ToolBar",
         "Tools",
-        "Playback");
+        "Playback",
+        "InfoBar");
 
     WindowModel::WindowModel(const std::shared_ptr<dtk::Context>& context)
     {
-        _context = context;
-
+        _settings = context->getSystem<dtk::Settings>();
         std::map<WindowComponent, bool> components =
         {
             { WindowComponent::ToolBar, true },
             { WindowComponent::Tools, true },
-            { WindowComponent::Playback, true }
+            { WindowComponent::Playback, true },
+            { WindowComponent::InfoBar, true }
         };
         bool tooltips = true;
         try
         {
-            auto settings = context->getSystem<dtk::Settings>();
-            const auto json = std::any_cast<nlohmann::json>(settings->get("WindowModel"));
+            const auto json = std::any_cast<nlohmann::json>(_settings->get("WindowModel"));
             for (auto& i : components)
             {
                 std::stringstream ss;
@@ -67,9 +67,7 @@ namespace toucan
             json[ss.str()] = i.second;
         }
         json["Tooltips"] = _tooltips->get();
-        auto context = _context.lock();
-        auto settings = context->getSystem<dtk::Settings>();
-        settings->set("WindowModel", json);
+        _settings->set("WindowModel", json);
     }
 
     const std::map<WindowComponent, bool> WindowModel::getComponents() const

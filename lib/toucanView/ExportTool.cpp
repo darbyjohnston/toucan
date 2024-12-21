@@ -409,6 +409,7 @@ namespace toucan
                 getContext(),
                 "Export",
                 "Exporting:");
+            _dialog->setMessage(dtk::Format("{0} / {1}").arg(0).arg(_timeRange.duration().value()));
             _dialog->setCloseCallback(
                 [this]
                 {
@@ -488,6 +489,9 @@ namespace toucan
                     (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
                     0.0;
                 _dialog->setValue(v);
+                _dialog->setMessage(dtk::Format("{0} / {1}").
+                    arg((_time - _timeRange.start_time()).value()).
+                    arg(_timeRange.duration().value()));
             }
             else
             {

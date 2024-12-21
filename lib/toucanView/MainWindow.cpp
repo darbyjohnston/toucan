@@ -100,7 +100,7 @@ namespace toucan
         _timelineWidget = TimelineWidget::create(context, app, _playbackLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
-        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+        _infoBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _infoBar = InfoBar::create(context, app, _layout);
 
@@ -183,6 +183,10 @@ namespace toucan
 
                 i = value.find(WindowComponent::Playback);
                 _playbackLayout->setVisible(i->second);
+
+                i = value.find(WindowComponent::InfoBar);
+                _infoBarDivider->setVisible(i->second);
+                _infoBar->setVisible(i->second);
             });
 
         _tooltipsObserver = dtk::ValueObserver<bool>::create(

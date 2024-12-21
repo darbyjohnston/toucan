@@ -4,6 +4,9 @@
 #include "FileTab.h"
 
 #include "App.h"
+#include "File.h"
+#include "HUDWidget.h"
+#include "ViewModel.h"
 #include "Viewport.h"
 
 namespace toucan
@@ -15,8 +18,17 @@ namespace toucan
         const std::shared_ptr<IWidget>& parent)
     {
         dtk::IWidget::_init(context, "toucan::FileTab", parent);
+
         _viewport = Viewport::create(context, file, shared_from_this());
-        _viewport->setStretch(dtk::Stretch::Expanding);
+
+        _hudWidget = HUDWidget::create(context, app, file, shared_from_this());
+
+        _hudObserver = dtk::ValueObserver<bool>::create(
+            app->getGlobalViewModel()->observeHUD(),
+            [this](bool value)
+            {
+                _hudWidget->setVisible(value);
+            });
     }
 
     FileTab::~FileTab()
@@ -37,6 +49,7 @@ namespace toucan
     {
         dtk::IWidget::setGeometry(value);
         _viewport->setGeometry(value);
+        _hudWidget->setGeometry(value);
     }
 
     void FileTab::sizeHintEvent(const dtk::SizeHintEvent& event)
