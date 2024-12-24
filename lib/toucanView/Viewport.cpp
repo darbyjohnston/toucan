@@ -4,22 +4,24 @@
 #include "Viewport.h"
 
 #include "App.h"
-#include "File.h"
 #include "ViewModel.h"
 
 namespace toucan
 {
     void Viewport::_init(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<App>& app,
         const std::shared_ptr<File>& file,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         IWidget::_init(context, "toucan::Viewport", parent);
 
         _setMouseHoverEnabled(true);
-        _setMousePressEnabled(true);
+        _setMousePressEnabled(true, 0, 0);
 
         _viewModel = file->getViewModel();
+        _imageSize.w = file->getImageSize().x;
+        _imageSize.h = file->getImageSize().y;
         _viewPos = dtk::ObservableValue<dtk::V2I>::create();
         _viewZoom = dtk::ObservableValue<float>::create(1.F);
         _frameView = dtk::ObservableValue<bool>::create(true);
@@ -29,6 +31,40 @@ namespace toucan
             [this](const std::shared_ptr<dtk::Image>& value)
             {
                 _image = value;
+                _setDrawUpdate();
+            });
+
+        _bObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeBFile(),
+            [this](const std::shared_ptr<File>& value)
+            {
+                if (value)
+                {
+                    const auto& imageSize = value->getImageSize();
+                    _bImageSize.w = imageSize.x;
+                    _bImageSize.h = imageSize.y;
+                    _bImageObserver = dtk::ValueObserver<std::shared_ptr<dtk::Image> >::create(
+                        value->observeCurrentImage(),
+                        [this](const std::shared_ptr<dtk::Image>& value)
+                        {
+                            _bImage = value;
+                            _setDrawUpdate();
+                        });
+                }
+                else
+                {
+                    _bImageSize = dtk::Size2I();
+                    _bImage.reset();
+                    _bImageObserver.reset();
+                    _setDrawUpdate();
+                }
+            });
+
+        _compareOptionsObserver = dtk::ValueObserver<CompareOptions>::create(
+            app->getFilesModel()->observeCompareOptions(),
+            [this](const CompareOptions& value)
+            {
+                _compareOptions = value;
                 _setDrawUpdate();
             });
 
@@ -75,11 +111,12 @@ namespace toucan
 
     std::shared_ptr<Viewport> Viewport::create(
         const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<App>& app,
         const std::shared_ptr<File>& file,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
         auto out = std::shared_ptr<Viewport>(new Viewport);
-        out->_init(context, file, parent);
+        out->_init(context, app, file, parent);
         return out;
     }
 
@@ -171,28 +208,174 @@ namespace toucan
         event.render->drawRect(
             g,
             dtk::Color4F(0.F, 0.F, 0.F));
-        if (_image)
+
+        if (_frameView->get())
         {
-            if (_frameView->get())
-            {
-                _frameUpdate();
-            }
-            const dtk::Size2I& imageSize = _image->getSize();
-            dtk::M44F vm;
-            vm = vm * dtk::translate(dtk::V3F(g.min.x, g.min.y, 0.F));
-            vm = vm * dtk::translate(dtk::V3F(_viewPos->get().x, _viewPos->get().y, 0.F));
-            vm = vm * dtk::scale(dtk::V3F(_viewZoom->get(), _viewZoom->get(), 1.F));
-            const auto m = event.render->getTransform();
-            event.render->setTransform(m * vm);
-            dtk::ImageOptions options;
-            options.imageFilters.magnify = dtk::ImageFilter::Nearest;
-            event.render->drawImage(
-                _image,
-                dtk::Box2I(0, 0, imageSize.w, imageSize.h),
-                dtk::Color4F(1.F, 1.F, 1.F),
-                options);
-            event.render->setTransform(m);
+            _frameUpdate();
         }
+        dtk::M44F vm;
+        vm = vm * dtk::translate(dtk::V3F(g.min.x, g.min.y, 0.F));
+        vm = vm * dtk::translate(dtk::V3F(_viewPos->get().x, _viewPos->get().y, 0.F));
+        vm = vm * dtk::scale(dtk::V3F(_viewZoom->get(), _viewZoom->get(), 1.F));
+        const auto m = event.render->getTransform();
+        event.render->setTransform(m * vm);
+
+        dtk::ImageOptions options;
+        options.imageFilters.magnify = dtk::ImageFilter::Nearest;
+
+        switch (_compareOptions.mode)
+        {
+        case CompareMode::A:
+            if (_image)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
+        case CompareMode::B:
+            if (_bImage)
+            {
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(0, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
+        case CompareMode::Split:
+            if (_image && _bImage)
+            {
+                dtk::TriMesh2F mesh;
+                dtk::Box2I box(0, 0, _image->getWidth() / 2, _image->getHeight());
+                mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
+                mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
+                mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
+                mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
+                mesh.t.push_back(dtk::V2F(0.F, 0.F));
+                mesh.t.push_back(dtk::V2F(.5F, 0.F));
+                mesh.t.push_back(dtk::V2F(.5F, 1.F));
+                mesh.t.push_back(dtk::V2F(0.F, 1.F));
+                dtk::Triangle2 triangle;
+                triangle.v[0].v = 1;
+                triangle.v[1].v = 2;
+                triangle.v[2].v = 3;
+                triangle.v[0].t = 1;
+                triangle.v[1].t = 2;
+                triangle.v[2].t = 3;
+                mesh.triangles.push_back(triangle);
+                triangle.v[0].v = 3;
+                triangle.v[1].v = 4;
+                triangle.v[2].v = 1;
+                triangle.v[0].t = 3;
+                triangle.v[1].t = 4;
+                triangle.v[2].t = 1;
+                mesh.triangles.push_back(triangle);
+                event.render->drawImage(
+                    _image,
+                    mesh,
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+
+                mesh.v.clear();
+                mesh.t.clear();
+                mesh.triangles.clear();
+                box = dtk::Box2I(_image->getWidth() / 2, 0, _bImage->getWidth() / 2, _bImage->getHeight());
+                mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
+                mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
+                mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
+                mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
+                mesh.t.push_back(dtk::V2F(.5F, 0.F));
+                mesh.t.push_back(dtk::V2F(1.F, 0.F));
+                mesh.t.push_back(dtk::V2F(1.F, 1.F));
+                mesh.t.push_back(dtk::V2F(.5F, 1.F));
+                triangle.v[0].v = 1;
+                triangle.v[1].v = 2;
+                triangle.v[2].v = 3;
+                triangle.v[0].t = 1;
+                triangle.v[1].t = 2;
+                triangle.v[2].t = 3;
+                mesh.triangles.push_back(triangle);
+                triangle.v[0].v = 3;
+                triangle.v[1].v = 4;
+                triangle.v[2].v = 1;
+                triangle.v[0].t = 3;
+                triangle.v[1].t = 4;
+                triangle.v[2].t = 1;
+                mesh.triangles.push_back(triangle);
+                event.render->drawImage(
+                    _bImage,
+                    mesh,
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            else if (_image)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            else if (_bImage)
+            {
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(0, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
+        case CompareMode::Horizontal:
+        {
+            int x = 0;
+            if (_image)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+                x += _image->getWidth();
+            }
+            if (_bImage)
+            {
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(x, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
+        }
+        case CompareMode::Vertical:
+        {
+            int y = 0;
+            if (_image)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+                y += _image->getHeight();
+            }
+            if (_bImage)
+            {
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(0, y, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
+        }
+        default: break;
+        }
+
+        event.render->setTransform(m);
     }
 
     void Viewport::mouseMoveEvent(dtk::MouseMoveEvent& event)
@@ -243,18 +426,39 @@ namespace toucan
         }
     }
 
+    dtk::Size2I Viewport::_getSize() const
+    {
+        dtk::Size2I out = _imageSize;
+        switch (_compareOptions.mode)
+        {
+        case CompareMode::B:
+            out = _bImageSize;
+            break;
+        case CompareMode::Horizontal:
+            out.w += _bImageSize.w;
+            out.h = std::max(out.h, _bImageSize.h);
+            break;
+        case CompareMode::Vertical:
+            out.w = std::max(out.w, _bImageSize.w);
+            out.h += _bImageSize.h;
+            break;
+        default: break;
+        }
+        return out;
+    }
+
     void Viewport::_frameUpdate()
     {
-        if (_frameView->get() && _image)
+        if (_frameView->get())
         {
             const dtk::Box2I& g = getGeometry();
-            const dtk::Size2I imageSize = _image->getSize();
-            float zoom = g.w() / static_cast<float>(imageSize.w);
-            if (zoom * imageSize.h > g.h())
+            const dtk::Size2I size = _getSize();
+            float zoom = g.w() / static_cast<float>(size.w);
+            if (zoom * size.h > g.h())
             {
-                zoom = g.h() / static_cast<double>(imageSize.h);
+                zoom = g.h() / static_cast<double>(size.h);
             }
-            const dtk::V2I c(imageSize.w / 2, imageSize.h / 2);
+            const dtk::V2I c(size.w / 2, size.h / 2);
             const dtk::V2I pos = dtk::V2I(
                 g.w() / 2.F - c.x * zoom,
                 g.h() / 2.F - c.y * zoom);

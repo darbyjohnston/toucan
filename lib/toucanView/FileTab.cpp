@@ -19,7 +19,7 @@ namespace toucan
     {
         dtk::IWidget::_init(context, "toucan::FileTab", parent);
 
-        _viewport = Viewport::create(context, file, shared_from_this());
+        _viewport = Viewport::create(context, app, file, shared_from_this());
 
         _hudWidget = HUDWidget::create(context, app, file, shared_from_this());
 

@@ -4,8 +4,6 @@
 #include "LogTool.h"
 
 #include "App.h"
-#include "FilesModel.h"
-#include "SelectionModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
@@ -48,9 +46,7 @@ namespace toucan
         _searchBox->setHStretch(dtk::Stretch::Expanding);
         _searchBox->setTooltip("Search the log");
 
-        auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
-        hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        _clearButton = dtk::ToolButton::create(context, hLayout);
+        _clearButton = dtk::ToolButton::create(context, _bottomLayout);
         _clearButton->setIcon("Clear");
         _clearButton->setTooltip("Clear the log");
 

@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 
 #include "App.h"
+#include "CompareTool.h"
 #include "DetailsTool.h"
 #include "ExportTool.h"
 #include "FileTab.h"
@@ -80,6 +81,7 @@ namespace toucan
         _tabWidget->setVStretch(dtk::Stretch::Expanding);
 
         _toolWidget = dtk::TabWidget::create(context, _hSplitter);
+        _toolWidgets.push_back(CompareTool::create(context, app));
         _toolWidgets.push_back(DetailsTool::create(context, app));
         _toolWidgets.push_back(JSONTool::create(context, app));
         _toolWidgets.push_back(GraphTool::create(context, app));

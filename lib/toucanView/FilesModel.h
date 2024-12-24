@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/File.h>
+#include <toucanView/PlaybackModel.h>
 
 #include <dtk/ui/RecentFilesModel.h>
 #include <dtk/core/Context.h>
@@ -14,6 +15,42 @@ namespace toucan
 {
     class File;
     class ImageEffectHost;
+
+    //! Compare modes.
+    enum class CompareMode
+    {
+        A,
+        B,
+        Split,
+        Horizontal,
+        Vertical,
+
+        Count,
+        First = A
+    };
+    DTK_ENUM(CompareMode);
+    
+    //! Compare times.
+    enum class CompareTime
+    {
+        Relative,
+        Absolute,
+
+        Count,
+        First = Relative
+    };
+    DTK_ENUM(CompareTime);
+
+    //! Compare options.
+    struct CompareOptions
+    {
+        CompareMode mode = CompareMode::A;
+        CompareTime time = CompareTime::Relative;
+        bool fitSize = false;
+
+        bool operator == (const CompareOptions&) const;
+        bool operator != (const CompareOptions&) const;
+    };
 
     //! Timeline files model.
     class FilesModel : public std::enable_shared_from_this<FilesModel>
@@ -61,10 +98,38 @@ namespace toucan
         //! Go to the previous file.
         void prev();
 
+        //! Get the B file.
+        const std::shared_ptr<File>& getBFile() const;
+
+        //! Observe the B file.
+        std::shared_ptr<dtk::IObservableValue<std::shared_ptr<File> > > observeBFile() const;
+
+        //! Get the B file index.
+        int getBIndex() const;
+
+        //! Observe the B file index.
+        std::shared_ptr<dtk::IObservableValue<int> > observeBIndex() const;
+
+        //! Set the B file index.
+        void setBIndex(int);
+
+        //! Get the compare options.
+        const CompareOptions& getCompareOptions() const;
+
+        //! Observe the compare options.
+        std::shared_ptr<dtk::IObservableValue<CompareOptions> > observeCompareOptions() const;
+
+        //! Set the compare options.
+        void setCompareOptions(const CompareOptions&);
+
         //! Get the recent files model.
         const std::shared_ptr<dtk::RecentFilesModel>& getRecentFilesModel() const;
 
     private:
+        std::shared_ptr<File> _getBFile() const;
+
+        void _fileUpdate();
+
         std::weak_ptr<dtk::Context> _context;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<dtk::ObservableList<std::shared_ptr<File> > > _files;
@@ -72,7 +137,12 @@ namespace toucan
         std::shared_ptr<dtk::ObservableValue<int> > _remove;
         std::shared_ptr<dtk::ObservableValue<std::shared_ptr<File> > > _current;
         std::shared_ptr<dtk::ObservableValue<int> > _currentIndex;
+        std::shared_ptr<dtk::ObservableValue<std::shared_ptr<File> > > _bFile;
+        std::shared_ptr<dtk::ObservableValue<int> > _bIndex;
+        std::shared_ptr<dtk::ObservableValue<CompareOptions> > _compareOptions;
         std::shared_ptr<dtk::RecentFilesModel> _recentFilesModel;
+
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
     };
 }
 

@@ -14,8 +14,6 @@
 
 namespace toucan
 {
-    class File;
-
     //! Log tool.
     class LogTool : public IToolWidget
     {
@@ -49,7 +47,6 @@ namespace toucan
         std::shared_ptr<dtk::SearchBox> _searchBox;
         std::shared_ptr<dtk::ToolButton> _clearButton;
 
-        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ListObserver<dtk::LogItem> > _logObserver;
     };
 }

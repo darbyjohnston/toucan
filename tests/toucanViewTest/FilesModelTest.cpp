@@ -55,6 +55,27 @@ namespace toucan
                     {
                         currentIndex = value;
                     });
+
+                bFileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+                    model->observeBFile(),
+                    [this](const std::shared_ptr<File>& value)
+                    {
+                        bFile = value;
+                    });
+
+                bIndexObserver = dtk::ValueObserver<int>::create(
+                    model->observeBIndex(),
+                    [this](int value)
+                    {
+                        bIndex = value;
+                    });
+
+                compareOptionsObserver = dtk::ValueObserver<CompareOptions>::create(
+                    model->observeCompareOptions(),
+                    [this](const CompareOptions& value)
+                    {
+                        compareOptions = value;
+                    });
             }
 
             std::shared_ptr<FilesModel> model;
@@ -63,12 +84,18 @@ namespace toucan
             int remove = -1;
             std::shared_ptr<File> current;
             int currentIndex = -1;
+            std::shared_ptr<File> bFile;
+            int bIndex = -1;
+            CompareOptions compareOptions;
 
             std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > filesObserver;
             std::shared_ptr<dtk::ValueObserver<int> > addObserver;
             std::shared_ptr<dtk::ValueObserver<int> > removeObserver;
             std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > currentObserver;
             std::shared_ptr<dtk::ValueObserver<int> > currentIndexObserver;
+            std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > bFileObserver;
+            std::shared_ptr<dtk::ValueObserver<int> > bIndexObserver;
+            std::shared_ptr<dtk::ValueObserver<CompareOptions> > compareOptionsObserver;
         };
     }
 
@@ -167,6 +194,37 @@ namespace toucan
             assert(1 == test.currentIndex);
             assert(test.current);
             assert(test.current == test.files[1]);
+        }
+        {
+            Test test(context, host);
+            test.model->open(timelinePath);
+            test.model->open(timelinePath2);
+
+            test.model->setBIndex(1);
+            assert(test.files[1] == test.bFile);
+            assert(1 == test.bIndex);
+
+            test.model->close();
+            assert(!test.bFile);
+            assert(-1 == test.bIndex);
+
+            test.model->setBIndex(0);
+            assert(test.files[0] == test.bFile);
+            assert(0 == test.bIndex);
+
+            test.model->closeAll();
+            assert(!test.bFile);
+            assert(-1 == test.bIndex);
+        }
+        {
+            Test test(context, host);
+            test.model->open(timelinePath);
+            test.model->open(timelinePath2);
+
+            test.model->setBIndex(0);
+            test.model->setBIndex(-1);
+            assert(!test.bFile);
+            assert(-1 == test.bIndex);
         }
     }
 }

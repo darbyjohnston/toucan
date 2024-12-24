@@ -16,7 +16,7 @@
 
 #if defined(toucan_VIEW)
 #include <dtk/ui/Init.h>
-#endif // toucan_EDIT
+#endif // toucan_VIEW
 #include <dtk/core/Context.h>
 #include <dtk/core/Init.h>
 
