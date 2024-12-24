@@ -5,6 +5,7 @@
 
 #include <opentimelineio/anyVector.h>
 
+#include <Imath/ImathBox.h>
 #include <Imath/ImathVec.h>
 
 #include <filesystem>
@@ -28,6 +29,11 @@ namespace toucan
 
     //! Get the zero padding for the given number.
     size_t getNumberPadding(const std::string&);
+
+    //! Resize and position B to fit into A.
+    IMATH_NAMESPACE::Box2i fit(
+        const IMATH_NAMESPACE::V2i& a,
+        const IMATH_NAMESPACE::V2i& b);
 
     //! Conversion to any vector.
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i&);

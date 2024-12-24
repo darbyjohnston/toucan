@@ -9,6 +9,10 @@
 #include <dtk/core/Math.h>
 #include <dtk/core/String.h>
 
+#include <nlohmann/json.hpp>
+
+#include <sstream>
+
 namespace toucan
 {
     DTK_ENUM_IMPL(
@@ -41,8 +45,34 @@ namespace toucan
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<ImageEffectHost>& host) :
         _context(context),
+        _settings(context->getSystem<dtk::Settings>()),
         _host(host)
     {
+        CompareOptions compareOptions;
+        try
+        {
+            const auto json = std::any_cast<nlohmann::json>(_settings->get("FilesModel"));
+            auto i = json.find("CompareMode");
+            if (i != json.end() && i->is_string())
+            {
+                std::stringstream ss(i->get<std::string>());
+                ss >> compareOptions.mode;
+            }
+            i = json.find("CompareTime");
+            if (i != json.end() && i->is_string())
+            {
+                std::stringstream ss(i->get<std::string>());
+                ss >> compareOptions.time;
+            }
+            i = json.find("FitSize");
+            if (i != json.end() && i->is_boolean())
+            {
+                compareOptions.fitSize = i->get<bool>();
+            }
+        }
+        catch (const std::exception&)
+        {}
+
         _files = dtk::ObservableList< std::shared_ptr<File> >::create();
         _add = dtk::ObservableValue<int>::create(-1);
         _remove = dtk::ObservableValue<int>::create(-1);
@@ -50,12 +80,26 @@ namespace toucan
         _currentIndex = dtk::ObservableValue<int>::create(-1);
         _bFile = dtk::ObservableValue<std::shared_ptr<File> >::create();
         _bIndex = dtk::ObservableValue<int>::create(-1);
-        _compareOptions = dtk::ObservableValue<CompareOptions>::create();
+        _compareOptions = dtk::ObservableValue<CompareOptions>::create(compareOptions);
         _recentFilesModel = dtk::RecentFilesModel::create(context);
     }
 
     FilesModel::~FilesModel()
-    {}
+    {
+        nlohmann::json json;
+        {
+            std::stringstream ss;
+            ss << _compareOptions->get().mode;
+            json["CompareMode"] = ss.str();
+        }
+        {
+            std::stringstream ss;
+            ss << _compareOptions->get().time;
+            json["CompareTime"] = ss.str();
+        }
+        json["FitSize"] = _compareOptions->get().fitSize;
+        _settings->set("FilesModel", json);
+    }
 
     void FilesModel::open(const std::filesystem::path& path)
     {
@@ -212,21 +256,21 @@ namespace toucan
 
     void FilesModel::setBIndex(int value)
     {
-        if (_bIndex->setIfChanged(value))
+        const auto& files = _files->get();
+        const int index = dtk::clamp(value, -1, static_cast<int>(files.size()) - 1);
+        if (_bIndex->setIfChanged(index))
         {
             auto file = _current->get();
-            OTIO_NS::RationalTime time;
-            if (file)
-            {
-                time = file->getPlaybackModel()->getCurrentTime();
-            }
             auto bFile = _getBFile();
-            if (bFile)
+            if (file && bFile)
             {
                 if (bFile != file)
                 {
                     bFile->getPlaybackModel()->setPlayback(Playback::Stop);
                 }
+                const OTIO_NS::RationalTime time =
+                    file->getPlaybackModel()->getCurrentTime() +
+                    _getBTimeOffset(file, bFile);
                 bFile->getPlaybackModel()->setCurrentTime(time);
             }
             _bFile->setIfChanged(bFile);
@@ -245,7 +289,17 @@ namespace toucan
 
     void FilesModel::setCompareOptions(const CompareOptions& value)
     {
-        _compareOptions->setIfChanged(value);
+        if (_compareOptions->setIfChanged(value))
+        {
+            auto file = _current->get();
+            auto bFile = _bFile->get();
+            if (file && bFile)
+            {
+                bFile->getPlaybackModel()->setCurrentTime(
+                    file->getPlaybackModel()->getCurrentTime() +
+                    _getBTimeOffset(file, bFile));
+            }
+        }
     }
 
     const std::shared_ptr<dtk::RecentFilesModel>& FilesModel::getRecentFilesModel() const
@@ -265,6 +319,19 @@ namespace toucan
         return out;
     }
 
+    OTIO_NS::RationalTime FilesModel::_getBTimeOffset(
+        const std::shared_ptr<File>& file,
+        const std::shared_ptr<File>& bFile) const
+    {
+        OTIO_NS::RationalTime out(0.0, 1.0);
+        if (CompareTime::Relative == _compareOptions->get().time)
+        {
+            out = bFile->getPlaybackModel()->getTimeRange().start_time() -
+                file->getPlaybackModel()->getTimeRange().start_time();
+        }
+        return out;
+    }
+
     void FilesModel::_fileUpdate()
     {
         if (auto file = _current->get())
@@ -273,9 +340,13 @@ namespace toucan
                 file->getPlaybackModel()->observeCurrentTime(),
                 [this](const OTIO_NS::RationalTime& value)
                 {
-                    if (auto file = _bFile->get())
+                    auto file = _current->get();
+                    auto bFile = _bFile->get();
+                    if (file && bFile)
                     {
-                        file->getPlaybackModel()->setCurrentTime(value);
+                        bFile->getPlaybackModel()->setCurrentTime(
+                            value +
+                            _getBTimeOffset(file, bFile));
                     }
                 });
         }

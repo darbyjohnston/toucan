@@ -7,6 +7,7 @@
 #include <toucanView/PlaybackModel.h>
 
 #include <dtk/ui/RecentFilesModel.h>
+#include <dtk/ui/Settings.h>
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableList.h>
 #include <dtk/core/ObservableValue.h>
@@ -127,10 +128,14 @@ namespace toucan
 
     private:
         std::shared_ptr<File> _getBFile() const;
+        OTIO_NS::RationalTime _getBTimeOffset(
+            const std::shared_ptr<File>&,
+            const std::shared_ptr<File>&) const;
 
         void _fileUpdate();
 
         std::weak_ptr<dtk::Context> _context;
+        std::shared_ptr<dtk::Settings> _settings;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<dtk::ObservableList<std::shared_ptr<File> > > _files;
         std::shared_ptr<dtk::ObservableValue<int> > _add;

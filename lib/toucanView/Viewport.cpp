@@ -3,6 +3,8 @@
 
 #include "Viewport.h"
 
+#include <toucanRender/Util.h>
+
 #include "App.h"
 #include "ViewModel.h"
 
@@ -220,9 +222,29 @@ namespace toucan
         const auto m = event.render->getTransform();
         event.render->setTransform(m * vm);
 
+        IMATH_NAMESPACE::V2i imageSize(_imageSize.w, _imageSize.h);
+        if (_image)
+        {
+            imageSize.x = _image->getWidth();
+            imageSize.y = _image->getHeight();
+        }
+        IMATH_NAMESPACE::V2i bImageSize(_bImageSize.w, _bImageSize.h);
+        if (_bImage)
+        {
+            bImageSize.x = _bImage->getWidth();
+            bImageSize.y = _bImage->getHeight();
+        }
+        IMATH_NAMESPACE::Box2i bImageBox;
+        bImageBox.min.x = 0;
+        bImageBox.min.y = 0;
+        bImageBox.max.x = bImageSize.x - 1;
+        bImageBox.max.y = bImageSize.y - 1;
+        if (_compareOptions.fitSize)
+        {
+            bImageBox = fit(imageSize, bImageSize);
+        }
         dtk::ImageOptions options;
         options.imageFilters.magnify = dtk::ImageFilter::Nearest;
-
         switch (_compareOptions.mode)
         {
         case CompareMode::A:
@@ -230,7 +252,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -240,7 +262,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(0, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Box2I(
+                        bImageBox.min.x,
+                        bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -249,7 +275,7 @@ namespace toucan
             if (_image && _bImage)
             {
                 dtk::TriMesh2F mesh;
-                dtk::Box2I box(0, 0, _image->getWidth() / 2, _image->getHeight());
+                dtk::Box2I box(0, 0, imageSize.x / 2, imageSize.y);
                 mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
@@ -282,7 +308,11 @@ namespace toucan
                 mesh.v.clear();
                 mesh.t.clear();
                 mesh.triangles.clear();
-                box = dtk::Box2I(_image->getWidth() / 2, 0, _bImage->getWidth() / 2, _bImage->getHeight());
+                box = dtk::Box2I(
+                    imageSize.x / 2,
+                    bImageBox.min.y,
+                    (bImageBox.max.x - bImageBox.min.x + 1) / 2,
+                    bImageBox.max.y - bImageBox.min.y + 1);
                 mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
@@ -315,7 +345,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -323,7 +353,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(0, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Box2I(
+                        bImageBox.min.x,
+                        bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -335,7 +369,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
                 x += _image->getWidth();
@@ -344,7 +378,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(x, 0, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Box2I(
+                        x + bImageBox.min.x,
+                        bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -366,7 +404,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(0, y, _bImage->getWidth(), _bImage->getHeight()),
+                    dtk::Box2I(
+                        bImageBox.min.x,
+                        y + bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -429,18 +471,19 @@ namespace toucan
     dtk::Size2I Viewport::_getSize() const
     {
         dtk::Size2I out = _imageSize;
+        const dtk::Size2I bImageSize = _compareOptions.fitSize ? _imageSize : _bImageSize;
         switch (_compareOptions.mode)
         {
         case CompareMode::B:
-            out = _bImageSize;
+            out = bImageSize;
             break;
         case CompareMode::Horizontal:
-            out.w += _bImageSize.w;
-            out.h = std::max(out.h, _bImageSize.h);
+            out.w += bImageSize.w;
+            out.h = std::max(out.h, bImageSize.h);
             break;
         case CompareMode::Vertical:
-            out.w = std::max(out.w, _bImageSize.w);
-            out.h += _bImageSize.h;
+            out.w = std::max(out.w, bImageSize.w);
+            out.h += bImageSize.h;
             break;
         default: break;
         }

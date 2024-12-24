@@ -45,6 +45,9 @@ namespace toucan
                 options.extensions.push_back(".otio");
                 options.extensions.push_back(".otiod");
                 options.extensions.push_back(".otioz");
+                options.extensions.push_back(".mov");
+                options.extensions.push_back(".mp4");
+                options.extensions.push_back(".m4v");
                 fileBrowserSystem->setOptions(options);
                 fileBrowserSystem->open(
                     windowWeak.lock(),

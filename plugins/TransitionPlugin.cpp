@@ -196,20 +196,63 @@ OfxStatus DissolvePlugin::_render(
     double value,
     OfxPropertySetHandle inArgs)
 {
+    const auto& sourceFromSpec = sourceFromBuf.spec();
+    const auto& sourceToSpec = sourceToBuf.spec();
+    OIIO::ImageBuf tmpBuf;
+    const OIIO::ImageBuf* sourceToBufP = &sourceToBuf;
+    if (sourceFromSpec.width > 0 && sourceFromSpec.height > 0 &&
+        sourceToSpec.width > 0 && sourceToSpec.height > 0 &&
+        sourceToSpec.width != sourceFromSpec.width ||
+        sourceToSpec.height != sourceFromSpec.height)
+    {
+        int width = sourceToSpec.width;
+        int height = sourceToSpec.height;
+        const double fgAspect = sourceToSpec.width / static_cast<double>(sourceToSpec.height);
+        const double bgAspect = sourceFromSpec.width / static_cast<double>(sourceFromSpec.height);
+        if (fgAspect > bgAspect)
+        {
+            width = sourceFromSpec.width;
+            height = width / fgAspect;
+        }
+        else
+        {
+            height = sourceFromSpec.height;
+            width = height * fgAspect;
+        }
+        const auto resizedBuf = OIIO::ImageBufAlgo::resize(
+            sourceToBuf,
+            "",
+            0.0,
+            OIIO::ROI(0, width, 0, height));
+        tmpBuf = OIIO::ImageBuf(OIIO::ImageSpec(
+            sourceFromSpec.width,
+            sourceFromSpec.height,
+            sourceFromSpec.nchannels,
+            sourceFromSpec.format));
+        OIIO::ImageBufAlgo::paste(
+            tmpBuf,
+            sourceFromSpec.width / 2 - width / 2,
+            sourceFromSpec.height / 2 - height / 2,
+            0,
+            0,
+            resizedBuf);
+        sourceToBufP = &tmpBuf;
+    }
+
     const float v = value;
     const float iv = 1.0 - value;
 
-    OIIO::ImageBuf sourceFromFillBuf(sourceFromBuf.spec());
+    OIIO::ImageBuf sourceFromFillBuf(sourceFromSpec);
     OIIO::ImageBufAlgo::fill(
         sourceFromFillBuf,
         { iv, iv, iv, iv },
         sourceFromBuf.roi());
 
-    OIIO::ImageBuf sourceToFillBuf(sourceToBuf.spec());
+    OIIO::ImageBuf sourceToFillBuf(sourceToBufP->spec());
     OIIO::ImageBufAlgo::fill(
         sourceToFillBuf,
         { v, v, v, v },
-        sourceToBuf.roi());
+        sourceToBufP->roi());
 
     OIIO::ImageBufAlgo::add(
         outputBuf,
@@ -217,8 +260,8 @@ OfxStatus DissolvePlugin::_render(
             sourceFromBuf,
             sourceFromFillBuf, sourceFromBuf.roi()),
         OIIO::ImageBufAlgo::mul(
-            sourceToBuf,
-            sourceToFillBuf, sourceToBuf.roi()));
+            *sourceToBufP,
+            sourceToFillBuf, sourceToBufP->roi()));
 
     return kOfxStatOK;
 }
