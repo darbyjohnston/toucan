@@ -20,6 +20,7 @@ namespace toucan
         "A",
         "B",
         "Split",
+        "Overlay",
         "Horizontal",
         "Vertical");
 

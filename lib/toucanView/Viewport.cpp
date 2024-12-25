@@ -362,6 +362,45 @@ namespace toucan
                     options);
             }
             break;
+        case CompareMode::Overlay:
+            if (_image && _bImage)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    dtk::Color4F(1.F, 1.F, 1.F, .5F),
+                    options);
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(
+                        bImageBox.min.x,
+                        bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
+                    dtk::Color4F(1.F, 1.F, 1.F, .5F),
+                    options);
+            }
+            else if (_image)
+            {
+                event.render->drawImage(
+                    _image,
+                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            else if (_bImage)
+            {
+                event.render->drawImage(
+                    _bImage,
+                    dtk::Box2I(
+                        bImageBox.min.x,
+                        bImageBox.min.y,
+                        bImageBox.max.x - bImageBox.min.x + 1,
+                        bImageBox.max.y - bImageBox.min.y + 1),
+                    dtk::Color4F(1.F, 1.F, 1.F),
+                    options);
+            }
+            break;
         case CompareMode::Horizontal:
         {
             int x = 0;
