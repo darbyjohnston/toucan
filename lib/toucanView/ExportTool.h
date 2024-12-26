@@ -19,6 +19,7 @@
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/ui/TabWidget.h>
+#include <dtk/ui/ToolButton.h>
 #include <dtk/core/Timer.h>
 
 namespace toucan
@@ -47,10 +48,29 @@ namespace toucan
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
+        struct SettingsValues
+        {
+            std::string dir;
+            int sizeChoice = 0;
+            dtk::Size2I customSize = dtk::Size2I(1920, 1080);
+            int currentTab = 0;
+            std::string imageBaseName = "render.";
+            int imagePadding = 0;
+            std::string imageExtension = ".tiff";
+            std::string movieBaseName = "render";
+            std::string movieExtension = ".mov";
+            std::string movieCodec = "MJPEG";
+        };
+
+        void _initSettings(const std::shared_ptr<dtk::Context>&, SettingsValues&);
+        void _initCommonUI(const std::shared_ptr<dtk::Context>&, const SettingsValues&);
+        void _initImageUI(const std::shared_ptr<dtk::Context>&, const SettingsValues&);
+        void _initMovieUI(const std::shared_ptr<dtk::Context>&, const SettingsValues&);
+
         enum class ExportType
         {
             Sequence,
-            Still,
+            Frame,
             Movie
         };
 
@@ -65,21 +85,22 @@ namespace toucan
         OTIO_NS::RationalTime _time;
         std::shared_ptr<ImageGraph> _graph;
         IMATH_NAMESPACE::V2d _imageSize = IMATH_NAMESPACE::V2d(0, 0);
+        IMATH_NAMESPACE::V2d _outputSize = IMATH_NAMESPACE::V2d(0, 0);
         std::vector<std::string> _movieCodecs;
         std::shared_ptr<ffmpeg::Write> _ffWrite;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
-        std::shared_ptr<dtk::VerticalLayout> _outputLayout;
-        std::shared_ptr<dtk::FileEdit> _outputPathEdit;
+        std::shared_ptr<dtk::FileEdit> _dirEdit;
+        std::shared_ptr<dtk::ComboBox> _sizeComboBox;
+        std::shared_ptr<dtk::IntEdit> _widthEdit;
+        std::shared_ptr<dtk::IntEdit> _heightEdit;
         std::shared_ptr<dtk::TabWidget> _tabWidget;
-        std::shared_ptr<dtk::VerticalLayout> _imageLayout;
         std::shared_ptr<dtk::LineEdit> _imageBaseNameEdit;
         std::shared_ptr<dtk::IntEdit> _imagePaddingEdit;
         std::shared_ptr<dtk::LineEdit> _imageExtensionEdit;
         std::shared_ptr<dtk::Label> _imageFilenameLabel;
         std::shared_ptr<dtk::PushButton> _exportSequenceButton;
-        std::shared_ptr<dtk::PushButton> _exportStillButton;
-        std::shared_ptr<dtk::VerticalLayout> _movieLayout;
+        std::shared_ptr<dtk::PushButton> _exportFrameButton;
         std::shared_ptr<dtk::LineEdit> _movieBaseNameEdit;
         std::shared_ptr<dtk::LineEdit> _movieExtensionEdit;
         std::shared_ptr<dtk::ComboBox> _movieCodecComboBox;

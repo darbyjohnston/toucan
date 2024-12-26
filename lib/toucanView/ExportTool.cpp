@@ -14,6 +14,9 @@
 #include <dtk/ui/Settings.h>
 #include <dtk/ui/Window.h>
 #include <dtk/core/Context.h>
+#include <dtk/core/Format.h>
+
+#include <OpenImageIO/imagebufalgo.h>
 
 #include <nlohmann/json.hpp>
 
@@ -31,205 +34,13 @@ namespace toucan
         _host = app->getHost();
         _movieCodecs = ffmpeg::getVideoCodecStrings();
 
-        std::string outputPath;
-        int currentTab = 0;
-        std::string imageBaseName = "render.";
-        int imagePadding = 0;
-        std::string imageExtension = ".tiff";
-        std::string movieBaseName = "render";
-        std::string movieExtension = ".mov";
-        std::string movieCodec = "MJPEG";
-        try
-        {
-            auto settings = context->getSystem<dtk::Settings>();
-            const auto json = std::any_cast<nlohmann::json>(settings->get("ExportWidget"));
-            auto i = json.find("OutputPath");
-            if (i != json.end() && i->is_string())
-            {
-                outputPath = i->get<std::string>();
-            }
-            i = json.find("CurrentTab");
-            if (i != json.end() && i->is_number())
-            {
-                currentTab = i->get<int>();
-            }
-            i = json.find("ImageBaseName");
-            if (i != json.end() && i->is_string())
-            {
-                imageBaseName = i->get<std::string>();
-            }
-            i = json.find("ImagePadding");
-            if (i != json.end() && i->is_number())
-            {
-                imagePadding = i->get<int>();
-            }
-            i = json.find("ImageExtension");
-            if (i != json.end() && i->is_string())
-            {
-                imageExtension = i->get<std::string>();
-            }
-            i = json.find("MovieBaseName");
-            if (i != json.end() && i->is_string())
-            {
-                movieBaseName = i->get<std::string>();
-            }
-            i = json.find("MovieExtension");
-            if (i != json.end() && i->is_string())
-            {
-                movieExtension = i->get<std::string>();
-            }
-            i = json.find("MovieCodec");
-            if (i != json.end() && i->is_string())
-            {
-                movieCodec = i->get<std::string>();
-            }
-        }
-        catch (const std::exception&)
-        {}
-
-        _layout = dtk::VerticalLayout::create(context, shared_from_this());
-        _layout->setSpacingRole(dtk::SizeRole::None);
-
-        _outputLayout = dtk::VerticalLayout::create(context, _layout);
-        _outputLayout->setMarginRole(dtk::SizeRole::Margin);
-        auto label = dtk::Label::create(context, "Output directory:", _outputLayout);
-        _outputPathEdit = dtk::FileEdit::create(context, _outputLayout);
-        _outputPathEdit->setPath(outputPath);
-
-        auto divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
-
-        _tabWidget = dtk::TabWidget::create(context, _layout);
-
-        _imageLayout = dtk::VerticalLayout::create(context);
-        _imageLayout->setMarginRole(dtk::SizeRole::Margin);
-        _tabWidget->addTab("Images", _imageLayout);
-
-        auto gridLayout = dtk::GridLayout::create(context, _imageLayout);
-
-        label = dtk::Label::create(context, "Base name:", gridLayout);
-        gridLayout->setGridPos(label, 0, 0);
-        _imageBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
-        _imageBaseNameEdit->setText(imageBaseName);
-        gridLayout->setGridPos(_imageBaseNameEdit, 0, 1);
-
-        label = dtk::Label::create(context, "Number padding:", gridLayout);
-        gridLayout->setGridPos(label, 1, 0);
-        _imagePaddingEdit = dtk::IntEdit::create(context, gridLayout);
-        _imagePaddingEdit->setRange(dtk::RangeI(0, 9));
-        _imagePaddingEdit->setValue(imagePadding);
-        gridLayout->setGridPos(_imagePaddingEdit, 1, 1);
-
-        label = dtk::Label::create(context, "Extension:", gridLayout);
-        gridLayout->setGridPos(label, 2, 0);
-        _imageExtensionEdit = dtk::LineEdit::create(context, gridLayout);
-        _imageExtensionEdit->setText(imageExtension);
-        gridLayout->setGridPos(_imageExtensionEdit, 2, 1);
-
-        label = dtk::Label::create(context, "Filename:", gridLayout);
-        gridLayout->setGridPos(label, 3, 0);
-        _imageFilenameLabel = dtk::Label::create(context, gridLayout);
-        gridLayout->setGridPos(_imageFilenameLabel, 3, 1);
-
-        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _imageLayout);
-
-        _exportSequenceButton = dtk::PushButton::create(
-            context,
-            "Export Sequence",
-            _imageLayout);
-
-        _exportStillButton = dtk::PushButton::create(
-            context,
-            "Export Still Frame",
-            _imageLayout);
-
-        _movieLayout = dtk::VerticalLayout::create(context);
-        _movieLayout->setMarginRole(dtk::SizeRole::Margin);
-        _tabWidget->addTab("Movie", _movieLayout);
-        _tabWidget->setCurrentTab(currentTab);
-
-        gridLayout = dtk::GridLayout::create(context, _movieLayout);
-
-        label = dtk::Label::create(context, "Base name:", gridLayout);
-        gridLayout->setGridPos(label, 0, 0);
-        _movieBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
-        _movieBaseNameEdit->setText(movieBaseName);
-        gridLayout->setGridPos(_movieBaseNameEdit, 0, 1);
-
-        label = dtk::Label::create(context, "Extension:", gridLayout);
-        gridLayout->setGridPos(label, 1, 0);
-        _movieExtensionEdit = dtk::LineEdit::create(context, gridLayout);
-        _movieExtensionEdit->setText(movieExtension);
-        gridLayout->setGridPos(_movieExtensionEdit, 1, 1);
-
-        label = dtk::Label::create(context, "Filename:", gridLayout);
-        gridLayout->setGridPos(label, 2, 0);
-        _movieFilenameLabel = dtk::Label::create(context, gridLayout);
-        gridLayout->setGridPos(_movieFilenameLabel, 2, 1);
-
-        label = dtk::Label::create(context, "Codec:", gridLayout);
-        gridLayout->setGridPos(label, 3, 0);
-        _movieCodecComboBox = dtk::ComboBox::create(context, _movieCodecs, gridLayout);
-        ffmpeg::VideoCodec ffmpegVideoCodec = ffmpeg::VideoCodec::First;
-        ffmpeg::fromString(movieCodec, ffmpegVideoCodec);
-        _movieCodecComboBox->setCurrentIndex(static_cast<int>(ffmpegVideoCodec));
-        gridLayout->setGridPos(_movieCodecComboBox, 3, 1);
-
-        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _movieLayout);
-
-        _exportMovieButton = dtk::PushButton::create(
-            context,
-            "Export Movie",
-            _movieLayout);
+        SettingsValues settingsValues;
+        _initSettings(context, settingsValues);
+        _initCommonUI(context, settingsValues);
+        _initImageUI(context, settingsValues);
+        _initMovieUI(context, settingsValues);
         
         _widgetUpdate();
-
-        _imageBaseNameEdit->setTextChangedCallback(
-            [this](const std::string&)
-            {
-                _widgetUpdate();
-            });
-
-        _imagePaddingEdit->setCallback(
-            [this](int)
-            {
-                _widgetUpdate();
-            });
-
-        _imageExtensionEdit->setTextChangedCallback(
-            [this](const std::string&)
-            {
-                _widgetUpdate();
-            });
-
-        _movieBaseNameEdit->setTextChangedCallback(
-            [this](const std::string&)
-            {
-                _widgetUpdate();
-            });
-
-        _movieExtensionEdit->setTextChangedCallback(
-            [this](const std::string&)
-            {
-                _widgetUpdate();
-            });
-
-        _exportSequenceButton->setClickedCallback(
-            [this]
-            {
-                _export(ExportType::Sequence);
-            });
-
-        _exportStillButton->setClickedCallback(
-            [this]
-            {
-                _export(ExportType::Still);
-            });
-
-        _exportMovieButton->setClickedCallback(
-            [this]
-            {
-                _export(ExportType::Movie);
-            });
 
         _timer = dtk::Timer::create(context);
         _timer->setRepeating(true);
@@ -240,7 +51,7 @@ namespace toucan
             {
                 _file = file;
                 _exportSequenceButton->setEnabled(_file.get());
-                _exportStillButton->setEnabled(_file.get());
+                _exportFrameButton->setEnabled(_file.get());
                 _exportMovieButton->setEnabled(_file.get());
             });
     }
@@ -248,7 +59,9 @@ namespace toucan
     ExportWidget::~ExportWidget()
     {
         nlohmann::json json;
-        json["OutputPath"] = _outputPathEdit->getPath().string();
+        json["Dir"] = _dirEdit->getPath().string();
+        json["SizeChoice"] = _sizeComboBox->getCurrentIndex();
+        json["CustomSize"] = { _widthEdit->getValue(), _heightEdit->getValue() };
         json["CurrentTab"] = _tabWidget->getCurrentTab();
         json["ImageBaseName"] = _imageBaseNameEdit->getText();
         json["ImagePadding"] = _imagePaddingEdit->getValue();
@@ -284,82 +97,357 @@ namespace toucan
         _setSizeHint(_layout->getSizeHint());
     }
 
+    void ExportWidget::_initSettings(
+        const std::shared_ptr<dtk::Context>& context,
+        SettingsValues& settingsValues)
+    {
+        try
+        {
+            auto settings = context->getSystem<dtk::Settings>();
+            const auto json = std::any_cast<nlohmann::json>(settings->get("ExportWidget"));
+            auto i = json.find("Dir");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.dir = i->get<std::string>();
+            }
+            i = json.find("SizeChoice");
+            if (i != json.end() && i->is_number())
+            {
+                settingsValues.sizeChoice = i->get<int>();
+            }
+            i = json.find("CustomSize");
+            if (i != json.end() &&
+                i->is_array() &&
+                i->size() == 2 &&
+                (*i)[0].is_number() &&
+                (*i)[1].is_number())
+            {
+                settingsValues.customSize.w = (*i)[0].get<int>();
+                settingsValues.customSize.h = (*i)[1].get<int>();
+            }
+            i = json.find("CurrentTab");
+            if (i != json.end() && i->is_number())
+            {
+                settingsValues.currentTab = i->get<int>();
+            }
+            i = json.find("ImageBaseName");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.imageBaseName = i->get<std::string>();
+            }
+            i = json.find("ImagePadding");
+            if (i != json.end() && i->is_number())
+            {
+                settingsValues.imagePadding = i->get<int>();
+            }
+            i = json.find("ImageExtension");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.imageExtension = i->get<std::string>();
+            }
+            i = json.find("MovieBaseName");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.movieBaseName = i->get<std::string>();
+            }
+            i = json.find("MovieExtension");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.movieExtension = i->get<std::string>();
+            }
+            i = json.find("MovieCodec");
+            if (i != json.end() && i->is_string())
+            {
+                settingsValues.movieCodec = i->get<std::string>();
+            }
+        }
+        catch (const std::exception&)
+        {}
+    }
+
+    void ExportWidget::_initCommonUI(
+        const std::shared_ptr<dtk::Context>& context,
+        const SettingsValues& settingsValues)
+    {
+        _layout = dtk::VerticalLayout::create(context, shared_from_this());
+        _layout->setSpacingRole(dtk::SizeRole::None);
+
+        auto vLayout = dtk::VerticalLayout::create(context, _layout);
+        vLayout->setMarginRole(dtk::SizeRole::Margin);
+
+        auto gridLayout = dtk::GridLayout::create(context, vLayout);
+
+        auto label = dtk::Label::create(context, "Directory:", gridLayout);
+        gridLayout->setGridPos(label, 0, 0);
+        _dirEdit = dtk::FileEdit::create(context, gridLayout);
+        _dirEdit->setPath(settingsValues.dir);
+        _dirEdit->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_dirEdit, 0, 1);
+
+        label = dtk::Label::create(context, "Image size:", gridLayout);
+        gridLayout->setGridPos(label, 1, 0);
+        auto hLayout = dtk::HorizontalLayout::create(context, gridLayout);
+        hLayout->setSpacingRole(dtk::SizeRole::SpacingSmall);
+        gridLayout->setGridPos(hLayout, 1, 1);
+        _sizeComboBox = dtk::ComboBox::create(
+            context,
+            std::vector<std::string>{ "Default", "Custom" },
+            hLayout);
+        _sizeComboBox->setCurrentIndex(settingsValues.sizeChoice);
+        _sizeComboBox->setHStretch(dtk::Stretch::Expanding);
+        _widthEdit = dtk::IntEdit::create(context, hLayout);
+        _widthEdit->setRange(dtk::RangeI(1, 15360));
+        _widthEdit->setValue(settingsValues.customSize.w);
+        _heightEdit = dtk::IntEdit::create(context, hLayout);
+        _heightEdit->setRange(dtk::RangeI(1, 15360));
+        _heightEdit->setValue(settingsValues.customSize.h);
+
+        dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+
+        _tabWidget = dtk::TabWidget::create(context, _layout);
+
+        _sizeComboBox->setIndexCallback(
+            [this](int value)
+            {
+                _widgetUpdate();
+            });
+    }
+
+    void ExportWidget::_initImageUI(
+        const std::shared_ptr<dtk::Context>& context,
+        const SettingsValues& settingsValues)
+    {
+        auto vLayout = dtk::VerticalLayout::create(context);
+        vLayout->setMarginRole(dtk::SizeRole::Margin);
+        _tabWidget->addTab("Images", vLayout);
+
+        auto gridLayout = dtk::GridLayout::create(context, vLayout);
+
+        auto label = dtk::Label::create(context, "Base name:", gridLayout);
+        gridLayout->setGridPos(label, 0, 0);
+        _imageBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
+        _imageBaseNameEdit->setText(settingsValues.imageBaseName);
+        _imageBaseNameEdit->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_imageBaseNameEdit, 0, 1);
+
+        label = dtk::Label::create(context, "Number padding:", gridLayout);
+        gridLayout->setGridPos(label, 1, 0);
+        _imagePaddingEdit = dtk::IntEdit::create(context, gridLayout);
+        _imagePaddingEdit->setRange(dtk::RangeI(0, 9));
+        _imagePaddingEdit->setValue(settingsValues.imagePadding);
+        gridLayout->setGridPos(_imagePaddingEdit, 1, 1);
+
+        label = dtk::Label::create(context, "Extension:", gridLayout);
+        gridLayout->setGridPos(label, 2, 0);
+        _imageExtensionEdit = dtk::LineEdit::create(context, gridLayout);
+        _imageExtensionEdit->setText(settingsValues.imageExtension);
+        _imageExtensionEdit->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_imageExtensionEdit, 2, 1);
+
+        label = dtk::Label::create(context, "Filename:", gridLayout);
+        gridLayout->setGridPos(label, 3, 0);
+        _imageFilenameLabel = dtk::Label::create(context, gridLayout);
+        _imageFilenameLabel->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_imageFilenameLabel, 3, 1);
+
+        dtk::Divider::create(context, dtk::Orientation::Vertical, vLayout);
+
+        _exportSequenceButton = dtk::PushButton::create(
+            context,
+            "Export Sequence",
+            vLayout);
+
+        _exportFrameButton = dtk::PushButton::create(
+            context,
+            "Export Frame",
+            vLayout);
+
+        _imageBaseNameEdit->setTextChangedCallback(
+            [this](const std::string&)
+            {
+                _widgetUpdate();
+            });
+
+        _imagePaddingEdit->setCallback(
+            [this](int)
+            {
+                _widgetUpdate();
+            });
+
+        _imageExtensionEdit->setTextChangedCallback(
+            [this](const std::string&)
+            {
+                _widgetUpdate();
+            });
+
+        _exportSequenceButton->setClickedCallback(
+            [this]
+            {
+                _export(ExportType::Sequence);
+            });
+
+        _exportFrameButton->setClickedCallback(
+            [this]
+            {
+                _export(ExportType::Frame);
+            });
+    }
+
+    void ExportWidget::_initMovieUI(
+        const std::shared_ptr<dtk::Context>& context,
+        const SettingsValues& settingsValues)
+    {
+        auto vLayout = dtk::VerticalLayout::create(context);
+        vLayout->setMarginRole(dtk::SizeRole::Margin);
+        _tabWidget->addTab("Movie", vLayout);
+        _tabWidget->setCurrentTab(settingsValues.currentTab);
+
+        auto gridLayout = dtk::GridLayout::create(context, vLayout);
+
+        auto label = dtk::Label::create(context, "Base name:", gridLayout);
+        gridLayout->setGridPos(label, 0, 0);
+        _movieBaseNameEdit = dtk::LineEdit::create(context, gridLayout);
+        _movieBaseNameEdit->setText(settingsValues.movieBaseName);
+        _movieBaseNameEdit->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_movieBaseNameEdit, 0, 1);
+
+        label = dtk::Label::create(context, "Extension:", gridLayout);
+        gridLayout->setGridPos(label, 1, 0);
+        _movieExtensionEdit = dtk::LineEdit::create(context, gridLayout);
+        _movieExtensionEdit->setText(settingsValues.movieExtension);
+        _movieExtensionEdit->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_movieExtensionEdit, 1, 1);
+
+        label = dtk::Label::create(context, "Filename:", gridLayout);
+        gridLayout->setGridPos(label, 2, 0);
+        _movieFilenameLabel = dtk::Label::create(context, gridLayout);
+        _movieFilenameLabel->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_movieFilenameLabel, 2, 1);
+
+        label = dtk::Label::create(context, "Codec:", gridLayout);
+        gridLayout->setGridPos(label, 3, 0);
+        _movieCodecComboBox = dtk::ComboBox::create(context, _movieCodecs, gridLayout);
+        ffmpeg::VideoCodec ffmpegVideoCodec = ffmpeg::VideoCodec::First;
+        ffmpeg::fromString(settingsValues.movieCodec, ffmpegVideoCodec);
+        _movieCodecComboBox->setCurrentIndex(static_cast<int>(ffmpegVideoCodec));
+        _movieCodecComboBox->setHStretch(dtk::Stretch::Expanding);
+        gridLayout->setGridPos(_movieCodecComboBox, 3, 1);
+
+        dtk::Divider::create(context, dtk::Orientation::Vertical, vLayout);
+
+        _exportMovieButton = dtk::PushButton::create(
+            context,
+            "Export Movie",
+            vLayout);
+
+        _movieBaseNameEdit->setTextChangedCallback(
+            [this](const std::string&)
+            {
+                _widgetUpdate();
+            });
+
+        _movieExtensionEdit->setTextChangedCallback(
+            [this](const std::string&)
+            {
+                _widgetUpdate();
+            });
+
+        _exportMovieButton->setClickedCallback(
+            [this]
+            {
+                _export(ExportType::Movie);
+            });
+    }
+
     void ExportWidget::_export(ExportType type)
     {
         if (!_file)
             return;
-
-        _graph = std::make_shared<ImageGraph>(
-            getContext(),
-            _file->getPath(),
-            _file->getTimelineWrapper());
-        _imageSize = _graph->getImageSize();
-
-        switch (type)
+        try
         {
-        case ExportType::Sequence:
-            _timeRange = _file->getPlaybackModel()->getInOutRange();
-            break;
-        case ExportType::Still:
-            _timeRange = OTIO_NS::TimeRange(
-                _file->getPlaybackModel()->getCurrentTime(),
-                OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
-            break;
-        case ExportType::Movie:
-        {
-            _timeRange = _file->getPlaybackModel()->getInOutRange();
-            const std::string baseName = _movieBaseNameEdit->getText();
-            const std::string extension = _movieExtensionEdit->getText();
-            const std::filesystem::path path = _outputPathEdit->getPath() / (baseName + extension);
-            ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
-            ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
-            try
+            _graph = std::make_shared<ImageGraph>(
+                getContext(),
+                _file->getPath(),
+                _file->getTimelineWrapper());
+            _imageSize = _graph->getImageSize();
+            _outputSize = _imageSize;
+            if (_sizeComboBox->getCurrentIndex() != 0)
             {
+                _outputSize.x = _widthEdit->getValue();
+                _outputSize.y = _heightEdit->getValue();
+            }
+
+            switch (type)
+            {
+            case ExportType::Sequence:
+                _timeRange = _file->getPlaybackModel()->getInOutRange();
+                break;
+            case ExportType::Frame:
+                _timeRange = OTIO_NS::TimeRange(
+                    _file->getPlaybackModel()->getCurrentTime(),
+                    OTIO_NS::RationalTime(1.0, _file->getPlaybackModel()->getTimeRange().duration().rate()));
+                break;
+            case ExportType::Movie:
+            {
+                _timeRange = _file->getPlaybackModel()->getInOutRange();
+                const std::string baseName = _movieBaseNameEdit->getText();
+                const std::string extension = _movieExtensionEdit->getText();
+                const std::filesystem::path path = _dirEdit->getPath() / (baseName + extension);
+                ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
+                ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
                 _ffWrite = std::make_shared<ffmpeg::Write>(
                     path,
-                    OIIO::ImageSpec(_imageSize.x, _imageSize.y, 3),
+                    OIIO::ImageSpec(_outputSize.x, _outputSize.y, 3),
                     _timeRange,
                     videoCodec);
+                break;
             }
-            catch (const std::exception& e)
-            {
-                auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
-                dialogSystem->message("ERROR", e.what(), getWindow());
+            default: break;
             }
-            break;
-        }
-        default: break;
-        }
 
-        _dialog = dtk::ProgressDialog::create(
-            getContext(),
-            "Export",
-            "Exporting:",
-            getWindow());
-        _dialog->setCloseCallback(
-            [this]
-            {
-                _timer->stop();
-                _graph.reset();
-                _ffWrite.reset();
-                _dialog.reset();
-            });
-        _dialog->show();
+            _dialog = dtk::ProgressDialog::create(
+                getContext(),
+                "Export",
+                "Exporting:");
+            _dialog->setMessage(dtk::Format("{0} / {1}").arg(0).arg(_timeRange.duration().value()));
+            _dialog->setCloseCallback(
+                [this]
+                {
+                    _timer->stop();
+                    _graph.reset();
+                    _ffWrite.reset();
+                    _dialog.reset();
+                });
+            _dialog->open(getWindow());
 
-        _time = _timeRange.start_time();
-        _timer->start(
-            std::chrono::microseconds(0),
-            [this]
-            {
-                _exportFrame();
-            });
+            _time = _timeRange.start_time();
+            _timer->start(
+                std::chrono::microseconds(0),
+                [this]
+                {
+                    _exportFrame();
+                });
+        }
+        catch (const std::exception& e)
+        {
+            auto dialogSystem = getContext()->getSystem<dtk::DialogSystem>();
+            dialogSystem->message("ERROR", e.what(), getWindow());
+        }
     }
 
     void ExportWidget::_exportFrame()
     {
         if (auto node = _graph->exec(_host, _time))
         {
-            const auto buf = node->exec();
+            auto buf = node->exec();
+            if (_outputSize != _imageSize)
+            {
+                buf = OIIO::ImageBufAlgo::resize(
+                    buf,
+                    "",
+                    0.F,
+                    OIIO::ROI(0, _outputSize.x, 0, _outputSize.y));
+            }
             try
             {
                 if (_ffWrite)
@@ -369,7 +457,7 @@ namespace toucan
                 else
                 {
                     const std::string fileName = getSequenceFrame(
-                        _outputPathEdit->getPath().string(),
+                        _dirEdit->getPath().string(),
                         _imageBaseNameEdit->getText(),
                         _time.to_frames(),
                         _imagePaddingEdit->getValue(),
@@ -401,6 +489,9 @@ namespace toucan
                     (_time - _timeRange.start_time()).value() / static_cast<double>(duration.value()) :
                     0.0;
                 _dialog->setValue(v);
+                _dialog->setMessage(dtk::Format("{0} / {1}").
+                    arg((_time - _timeRange.start_time()).value()).
+                    arg(_timeRange.duration().value()));
             }
             else
             {
@@ -411,8 +502,12 @@ namespace toucan
 
     void ExportWidget::_widgetUpdate()
     {
+        const int index = _sizeComboBox->getCurrentIndex();
+        _widthEdit->setVisible(index != 0);
+        _heightEdit->setVisible(index != 0);
+
         _imageFilenameLabel->setText(getSequenceFrame(
-            _outputPathEdit->getPath().string(),
+            _dirEdit->getPath().string(),
             _imageBaseNameEdit->getText(),
             0,
             _imagePaddingEdit->getValue(),

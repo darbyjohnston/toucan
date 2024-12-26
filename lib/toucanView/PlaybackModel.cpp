@@ -36,8 +36,8 @@ namespace toucan
     {
         if (_timeRange->setIfChanged(value))
         {
-            _currentTime->setIfChanged(value.start_time());
             _inOutRange->setIfChanged(value);
+            _currentTime->setIfChanged(value.start_time());
         }
     }
 
@@ -101,8 +101,20 @@ namespace toucan
         case TimeAction::FramePrev:
             setCurrentTime(currentTime - OTIO_NS::RationalTime(1.0, currentTime.rate()));
             break;
+        case TimeAction::FramePrevX10:
+            setCurrentTime(currentTime - OTIO_NS::RationalTime(10.0, currentTime.rate()));
+            break;
+        case TimeAction::FramePrevX100:
+            setCurrentTime(currentTime - OTIO_NS::RationalTime(100.0, currentTime.rate()));
+            break;
         case TimeAction::FrameNext:
             setCurrentTime(currentTime + OTIO_NS::RationalTime(1.0, currentTime.rate()));
+            break;
+        case TimeAction::FrameNextX10:
+            setCurrentTime(currentTime + OTIO_NS::RationalTime(10.0, currentTime.rate()));
+            break;
+        case TimeAction::FrameNextX100:
+            setCurrentTime(currentTime + OTIO_NS::RationalTime(100.0, currentTime.rate()));
             break;
         case TimeAction::FrameEnd:
             setCurrentTime(timeRange.end_time_inclusive());

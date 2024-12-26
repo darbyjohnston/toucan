@@ -3,6 +3,8 @@
 
 #include "Comp.h"
 
+#include "Util.h"
+
 #include <OpenImageIO/imagebufalgo.h>
 
 namespace toucan
@@ -35,33 +37,46 @@ namespace toucan
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
         {
             _inputs[0]->setTime(offsetTime);
-            auto fg = _inputs[0]->exec();
+            auto fgBuf = _inputs[0]->exec();
             _inputs[1]->setTime(offsetTime);
             buf = _inputs[1]->exec();
-            const auto fgSpec = fg.spec();
+            const auto fgSpec = fgBuf.spec();
             if (_premult &&
                 fgSpec.width > 0 &&
                 fgSpec.height > 0)
             {
-                fg = OIIO::ImageBufAlgo::premult(fg);
+                fgBuf = OIIO::ImageBufAlgo::premult(fgBuf);
             }
             const auto& bgSpec = buf.spec();
-            if (fgSpec.width > 0 &&
-                fgSpec.height > 0 &&
-                bgSpec.width > 0 &&
-                bgSpec.height > 0 &&
+            if (fgSpec.width > 0 && fgSpec.height > 0 &&
+                bgSpec.width > 0 && bgSpec.height > 0 &&
                 (fgSpec.width != bgSpec.width || fgSpec.height != bgSpec.height))
             {
-                fg = OIIO::ImageBufAlgo::resize(
-                    fg,
+                IMATH_NAMESPACE::Box2i fit = toucan::fit(
+                    IMATH_NAMESPACE::V2i(bgSpec.width, bgSpec.height),
+                    IMATH_NAMESPACE::V2i(fgSpec.width, fgSpec.height));
+                const auto resizedBuf = OIIO::ImageBufAlgo::resize(
+                    fgBuf,
                     "",
-                    0.0, 
-                    OIIO::ROI(0, bgSpec.width, 0, bgSpec.height));
+                    0.0,
+                    OIIO::ROI(0, fit.max.x - fit.min.x + 1, 0, fit.max.y - fit.min.y + 1));
+                fgBuf = OIIO::ImageBuf(OIIO::ImageSpec(
+                    bgSpec.width,
+                    bgSpec.height,
+                    bgSpec.nchannels,
+                    bgSpec.format));
+                OIIO::ImageBufAlgo::paste(
+                    fgBuf,
+                    fit.min.x,
+                    fit.min.y,
+                    0,
+                    0,
+                    resizedBuf);
             }
             if (fgSpec.width > 0 &&
                 fgSpec.height > 0)
             {
-                buf = OIIO::ImageBufAlgo::over(fg, buf);
+                buf = OIIO::ImageBufAlgo::over(fgBuf, buf);
             }
         }
         else if (1 == _inputs.size() && _inputs[0])

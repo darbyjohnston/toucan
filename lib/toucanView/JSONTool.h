@@ -11,6 +11,7 @@
 #include <dtk/ui/RowLayout.h>
 #include <dtk/ui/ScrollWidget.h>
 #include <dtk/ui/SearchBox.h>
+#include <dtk/ui/ToolButton.h>
 #include <dtk/core/ObservableList.h>
 
 #include <opentimelineio/item.h>
@@ -88,6 +89,8 @@ namespace toucan
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
         std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<dtk::SearchBox> _searchBox;
+        std::shared_ptr<dtk::ToolButton> _openButton;
+        std::shared_ptr<dtk::ToolButton> _closeButton;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;

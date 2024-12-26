@@ -7,7 +7,6 @@
 #include "FilesModel.h"
 
 #include <dtk/core/Format.h>
-#include <dtk/core/String.h>
 
 namespace toucan
 {
@@ -35,8 +34,8 @@ namespace toucan
                     const IMATH_NAMESPACE::V2i& imageSize = file->getImageSize();
                     const size_t trackCount = file->getTimeline()->find_children<OTIO_NS::Track>().size();
 
-                    text = dtk::Format("{0}: {1}x{2}, {3} image channels, {4} pixel data, {5} tracks").
-                        arg(dtk::elide(file->getPath().filename().string())).
+                    text = dtk::Format("{0}: {1}x{2}x{3} {4}, {5} tracks").
+                        arg(file->getPath().filename().string()).
                         arg(imageSize.x).
                         arg(imageSize.y).
                         arg(file->getImageChannels()).

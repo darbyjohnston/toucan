@@ -10,6 +10,7 @@
 namespace toucan
 {
     class FilesModel;
+    class GlobalViewModel;
     class ImageEffectHost;
     class MainWindow;
     class TimeUnitsModel;
@@ -40,6 +41,9 @@ namespace toucan
         //! Get the files model.
         const std::shared_ptr<FilesModel>& getFilesModel() const;
 
+        //! Get the global view model.
+        const std::shared_ptr<GlobalViewModel>& getGlobalViewModel() const;
+
         //! Get the window model.
         const std::shared_ptr<WindowModel>& getWindowModel() const;
 
@@ -51,6 +55,7 @@ namespace toucan
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<FilesModel> _filesModel;
+        std::shared_ptr<GlobalViewModel> _globalViewModel;
         std::shared_ptr<WindowModel> _windowModel;
         std::shared_ptr<MainWindow> _window;
     };

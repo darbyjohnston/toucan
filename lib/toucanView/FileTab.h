@@ -3,12 +3,13 @@
 
 #pragma once
 
-#include <dtk/ui/RowLayout.h>
+#include <dtk/ui/IWidget.h>
 
 namespace toucan
 {
     class App;
     class File;
+    class HUDWidget;
     class Viewport;
 
     //! Timeline file tab.
@@ -36,6 +37,8 @@ namespace toucan
 
     private:
         std::shared_ptr<Viewport> _viewport;
+        std::shared_ptr<HUDWidget> _hudWidget;
+        std::shared_ptr<dtk::ValueObserver<bool> > _hudObserver;
     };
 }
 

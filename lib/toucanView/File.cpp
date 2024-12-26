@@ -28,7 +28,7 @@ namespace toucan
         _playbackModel->setTimeRange(timeRange);
         _playbackModel->setCurrentTime(timeRange.start_time());
 
-        _viewModel = std::make_shared<ViewModel>();
+        _viewModel = std::make_shared<ViewModel>(context);
 
         _selectionModel = std::make_shared<SelectionModel>();
 

@@ -5,6 +5,8 @@
 
 #include "Util.h"
 
+#include <toucanRender/FFmpegRead.h>
+
 #include <dtk/core/String.h>
 
 #include <opentimelineio/clip.h>
@@ -241,7 +243,16 @@ namespace toucan
         }
         else
         {
-            throw std::runtime_error("Unrecognized file: " + _path.string());
+            auto read = std::make_shared<ffmpeg::Read>(path);
+            _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
+            _timeline->tracks()->append_child(track);
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> clip(new OTIO_NS::Clip);
+            track->append_child(clip);
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::ExternalReference> ref(
+                new OTIO_NS::ExternalReference(path.string()));
+            clip->set_media_reference(ref);
+            clip->set_source_range(read->getTimeRange());
         }
 
         const auto globalStartTime = _timeline->global_start_time();

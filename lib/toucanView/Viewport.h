@@ -3,12 +3,15 @@
 
 #pragma once
 
+#include <toucanView/FilesModel.h>
+
 #include <dtk/ui/IWidget.h>
 
 #include <dtk/core/Image.h>
 
 namespace toucan
 {
+    class App;
     class File;
     class ViewModel;
 
@@ -18,6 +21,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&,
             const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent);
 
@@ -27,6 +31,7 @@ namespace toucan
         //! Create a new widget.
         static std::shared_ptr<Viewport> create(
             const std::shared_ptr<dtk::Context>&,
+            const std::shared_ptr<App>&,
             const std::shared_ptr<File>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
@@ -76,16 +81,25 @@ namespace toucan
         void scrollEvent(dtk::ScrollEvent&) override;
 
     private:
+        dtk::Size2I _getSize() const;
+
         void _frameUpdate();
 
         std::shared_ptr<ViewModel> _viewModel;
+        dtk::Size2I _imageSize;
         std::shared_ptr<dtk::Image> _image;
+        dtk::Size2I _bImageSize;
+        std::shared_ptr<dtk::Image> _bImage;
+        CompareOptions _compareOptions;
         std::shared_ptr<dtk::ObservableValue<dtk::V2I> > _viewPos;
         std::shared_ptr<dtk::ObservableValue<float> > _viewZoom;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
         dtk::V2I _viewMousePress;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _bObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _bImageObserver;
+        std::shared_ptr<dtk::ValueObserver<CompareOptions> > _compareOptionsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomInObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomOutObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomResetObserver;

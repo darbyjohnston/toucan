@@ -3,51 +3,51 @@
 
 #pragma once
 
-#include <toucanView/IToolWidget.h>
-#include <toucanView/SelectionModel.h>
-
+#include <dtk/ui/Action.h>
 #include <dtk/ui/RowLayout.h>
-#include <dtk/ui/ScrollWidget.h>
-#include <dtk/ui/SearchBox.h>
+#include <dtk/ui/ToolButton.h>
 #include <dtk/core/ObservableList.h>
-
-#include <opentimelineio/item.h>
 
 namespace toucan
 {
+    class App;
     class File;
 
-    //! Markers tool.
-    class MarkersTool : public IToolWidget
+    //! View tool bar.
+    class ViewToolBar : public dtk::IWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~MarkersTool();
+        virtual ~ViewToolBar();
 
-        //! Create a new tool.
-        static std::shared_ptr<MarkersTool> create(
+        //! Create a new tool bar.
+        static std::shared_ptr<ViewToolBar> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::map<std::string, std::shared_ptr<dtk::Action> >&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
 
     private:
+        void _widgetUpdate();
+
+        size_t _filesSize = 0;
         std::shared_ptr<File> _file;
 
-        std::shared_ptr<dtk::VerticalLayout> _layout;
-        std::shared_ptr<dtk::SearchBox> _searchBox;
-        std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
-        std::shared_ptr<dtk::HorizontalLayout> _bottomLayout;
+        std::shared_ptr<dtk::HorizontalLayout> _layout;
+        std::map<std::string, std::shared_ptr<dtk::ToolButton> > _buttons;
 
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
+        std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
     };
 }
 

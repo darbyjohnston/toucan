@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <dtk/ui/Settings.h>
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableMap.h>
 #include <dtk/core/ObservableValue.h>
@@ -15,6 +16,7 @@ namespace toucan
         ToolBar,
         Tools,
         Playback,
+        InfoBar,
 
         Count,
         First = ToolBar
@@ -54,7 +56,7 @@ namespace toucan
         void setTooltips(bool);
 
     private:
-        std::weak_ptr<dtk::Context> _context;
+        std::shared_ptr<dtk::Settings> _settings;
         std::shared_ptr<dtk::ObservableMap<WindowComponent, bool> > _components;
         std::shared_ptr<dtk::ObservableValue<bool> > _tooltips;
     };

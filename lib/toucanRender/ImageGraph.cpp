@@ -167,7 +167,7 @@ namespace toucan
                     const auto& effects = track->effects();
                     if (trackNode && !effects.empty())
                     {
-                        trackNode = _effects(host, effects, trackNode);
+                        trackNode = _effects(host, track->trimmed_range(), effects, trackNode);
                     }
 
                     // Composite this track over the previous track.
@@ -191,7 +191,7 @@ namespace toucan
         const auto& effects = stack->effects();
         if (!effects.empty())
         {
-            node = _effects(host, effects, node);
+            node = _effects(host, stack->trimmed_range(), effects, node);
         }
 
         // Set the time.
@@ -418,7 +418,7 @@ namespace toucan
         const auto& effects = item->effects();
         if (out && !effects.empty())
         {
-            out = _effects(host, effects, out);
+            out = _effects(host, item->trimmed_range(), effects, out);
         }
 
         // Set the time offset.
@@ -432,6 +432,7 @@ namespace toucan
 
     std::shared_ptr<IImageNode> ImageGraph::_effects(
         const std::shared_ptr<ImageEffectHost>& host,
+        const OTIO_NS::TimeRange& trimmedRange,
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
         const std::shared_ptr<IImageNode>& input)
     {
@@ -442,6 +443,7 @@ namespace toucan
             {
                 auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
                     static_cast<float>(linearTimeWarp->time_scalar()),
+                    trimmedRange,
                     std::vector<std::shared_ptr<IImageNode> >{ out });
                 out = linearTimeWarpNode;
             }

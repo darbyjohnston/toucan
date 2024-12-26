@@ -8,6 +8,9 @@ project(
     LANGUAGES CXX C)
 
 set(toucan_VIEW ON CACHE BOOL "Build viewer application")
+if(toucan_VIEW)
+    add_definitions(-Dtoucan_VIEW)
+endif()
 
 list(PREPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 

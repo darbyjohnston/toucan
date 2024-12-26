@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "InfoTool.h"
+#include "DetailsTool.h"
 
 #include "App.h"
 #include "FilesModel.h"
+#include "PlaybackModel.h"
 
 #include <dtk/ui/Divider.h>
 #include <dtk/ui/Spacer.h>
-#include <dtk/ui/ToolButton.h>
 #include <dtk/core/Format.h>
 #include <dtk/core/String.h>
 
@@ -16,92 +16,164 @@
 
 namespace toucan
 {
-    void InfoItemWidget::_init(
+    void DetailsWidget::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
+        const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
+        const SelectionItem& item,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IWidget::_init(context, "toucan::InfoItemWidget", parent);
+        IWidget::_init(context, "toucan::DetailsWidget", parent);
 
-        _object = object;
+        _file = file;
+        _item = item;
 
-        _bellows = dtk::Bellows::create(context, object->name(), shared_from_this());
+        _bellows = dtk::Bellows::create(context, item.object->name(), shared_from_this());
         _bellows->setOpen(true);
+        auto hLayout = dtk::HorizontalLayout::create(context);
+        hLayout->setSpacingRole(dtk::SizeRole::None);
+        _startFrameButton = dtk::ToolButton::create(context, hLayout);
+        _startFrameButton->setIcon("ArrowRight");
+        _startFrameButton->setTooltip("Go to the start frame");
+        if (item.timeRange.duration().value() > 1.0)
+        {
+            _inOutButton = dtk::ToolButton::create(context, hLayout);
+            _inOutButton->setIcon("FrameInOut");
+            _inOutButton->setTooltip("Set the in/out points");
+        }
+        _bellows->setToolWidget(hLayout);
 
         _layout = dtk::GridLayout::create(context);
         _layout->setRowBackgroundRole(dtk::ColorRole::Base);
         _layout->setSpacingRole(dtk::SizeRole::None);
         _bellows->setWidget(_layout);
 
-        _text.push_back(std::make_pair("Schema:", object->schema_name()));
-        _text.push_back(std::make_pair("Name:", object->name()));
+        OTIO_NS::TimeRange timeRange = item.timeRange;
+        _startFrameButton->setClickedCallback(
+            [this, timeRange]
+            {
+                if (_file)
+                {
+                    _file->getPlaybackModel()->setCurrentTime(timeRange.start_time());
+                }
+            });
 
-        if (auto item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(object))
+        if (_inOutButton)
+        {
+            _inOutButton->setClickedCallback(
+                [this, timeRange]
+                {
+                    if (_file)
+                    {
+                        _file->getPlaybackModel()->setInOutRange(timeRange);
+                        _file->getPlaybackModel()->setCurrentTime(timeRange.start_time());
+                    }
+                });
+        }
+
+        _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
+            app->getTimeUnitsModel()->observeTimeUnits(),
+            [this](TimeUnits value)
+            {
+                _timeUnits = value;
+                _textUpdate();
+                _searchUpdate();
+            });
+    }
+
+    DetailsWidget::~DetailsWidget()
+    {}
+
+    std::shared_ptr<DetailsWidget> DetailsWidget::create(
+        const std::shared_ptr<dtk::Context>& context,
+        const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
+        const SelectionItem& item,
+        const std::shared_ptr<dtk::IWidget>& parent)
+    {
+        auto out = std::shared_ptr<DetailsWidget>(new DetailsWidget);
+        out->_init(context, app, file, item, parent);
+        return out;
+    }
+
+    void DetailsWidget::setOpen(bool value)
+    {
+        _bellows->setOpen(value);
+    }
+
+    void DetailsWidget::setSearch(const std::string& value)
+    {
+        if (value == _search)
+            return;
+        _search = value;
+        _searchUpdate();
+    }
+
+    void DetailsWidget::setGeometry(const dtk::Box2I& value)
+    {
+        IWidget::setGeometry(value);
+        _bellows->setGeometry(value);
+    }
+
+    void DetailsWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
+    {
+        IWidget::sizeHintEvent(event);
+        _setSizeHint(_bellows->isVisible(false) ? _bellows->getSizeHint() : dtk::Size2I());
+    }
+
+    void DetailsWidget::_textUpdate()
+    {
+        _text.clear();
+        for (const auto& label : _labels)
+        {
+            label.first->setParent(nullptr);
+            if (label.second)
+            {
+                label.second->setParent(nullptr);
+            }
+        }
+        _labels.clear();
+
+        _text.push_back(std::make_pair("Schema:", _item.object->schema_name()));
+        _text.push_back(std::make_pair("Name:", _item.object->name()));
+
+        if (auto item = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(_item.object))
         {
             _text.push_back(std::make_pair(
                 "Enabled:",
                 dtk::Format("{0}").arg(item->enabled())));
-
             std::string text;
             if (item->source_range().has_value())
             {
-                OTIO_NS::TimeRange timeRange = item->source_range().value();
-                text = dtk::Format("{0} @ {1} / {2} @ {3}").
-                    arg(timeRange.start_time().value()).
-                    arg(timeRange.start_time().rate()).
-                    arg(timeRange.duration().value()).
-                    arg(timeRange.duration().rate());
+                text = toString(item->source_range().value(), _timeUnits);
             }
             _text.push_back(std::make_pair("Source range:", text));
+            _text.push_back(std::make_pair("Available range:",
+                toString(item->available_range(), _timeUnits)));
+            _text.push_back(std::make_pair("Trimmed range:",
+                toString(item->trimmed_range(), _timeUnits)));
 
-            OTIO_NS::TimeRange timeRange = item->available_range();
-            text = dtk::Format("{0} @ {1} / {2} @ {3}").
-                arg(timeRange.start_time().value()).
-                arg(timeRange.start_time().rate()).
-                arg(timeRange.duration().value()).
-                arg(timeRange.duration().rate());
-            _text.push_back(std::make_pair("Available range:", text));
-
-            timeRange = item->trimmed_range();
-            text = dtk::Format("{0} @ {1} / {2} @ {3}").
-                arg(timeRange.start_time().value()).
-                arg(timeRange.start_time().rate()).
-                arg(timeRange.duration().value()).
-                arg(timeRange.duration().rate());
-            _text.push_back(std::make_pair("Trimmed range:", text));
-
-            text.clear();
             //! \todo Calling trimmed_range_in_parent() on a stack causes a crash?
+            text.clear();
             auto stack = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Stack>(item);
             if (!stack && item->trimmed_range_in_parent().has_value())
             {
-                timeRange = item->trimmed_range_in_parent().value();
-                text = dtk::Format("{0} @ {1} / {2} @ {3}").
-                    arg(timeRange.start_time().value()).
-                    arg(timeRange.start_time().rate()).
-                    arg(timeRange.duration().value()).
-                    arg(timeRange.duration().rate());
+                text = toString(item->trimmed_range_in_parent().value(), _timeUnits);
             }
             _text.push_back(std::make_pair("Trimmed range in parent:", text));
         }
-        else if (auto marker = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Marker>(object))
+        else if (auto marker = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Marker>(_item.object))
         {
             _text.push_back(std::make_pair("Color:", marker->color()));
-
-            OTIO_NS::TimeRange timeRange = marker->marked_range();
-            std::string text = dtk::Format("{0} @ {1} / {2} @ {3}").
-                arg(timeRange.start_time().value()).
-                arg(timeRange.start_time().rate()).
-                arg(timeRange.duration().value()).
-                arg(timeRange.duration().rate());
-            _text.push_back(std::make_pair("Range:", text));
-
+            _text.push_back(std::make_pair("Range:",
+                toString(marker->marked_range(), _timeUnits)));
             _text.push_back(std::make_pair("Comment:", marker->comment()));
         }
 
         int row = 0;
         for (const auto& text : _text)
         {
+            auto context = getContext();
             auto label = dtk::Label::create(context, text.first, _layout);
             label->setMarginRole(dtk::SizeRole::MarginSmall);
             _layout->setGridPos(label, row, 0);
@@ -115,50 +187,11 @@ namespace toucan
             _labels.push_back(std::make_pair(label, label2));
             ++row;
         }
-
-        _textUpdate();
     }
 
-    InfoItemWidget::~InfoItemWidget()
-    {}
-
-    std::shared_ptr<InfoItemWidget> InfoItemWidget::create(
-        const std::shared_ptr<dtk::Context>& context,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
-        const std::shared_ptr<dtk::IWidget>& parent)
+    void DetailsWidget::_searchUpdate()
     {
-        auto out = std::shared_ptr<InfoItemWidget>(new InfoItemWidget);
-        out->_init(context, object, parent);
-        return out;
-    }
-
-    void InfoItemWidget::setOpen(bool value)
-    {
-        _bellows->setOpen(value);
-    }
-
-    void InfoItemWidget::setSearch(const std::string& value)
-    {
-        if (value == _search)
-            return;
-        _search = value;
-        _textUpdate();
-    }
-
-    void InfoItemWidget::setGeometry(const dtk::Box2I& value)
-    {
-        IWidget::setGeometry(value);
-        _bellows->setGeometry(value);
-    }
-
-    void InfoItemWidget::sizeHintEvent(const dtk::SizeHintEvent& event)
-    {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_bellows->getSizeHint());
-    }
-
-    void InfoItemWidget::_textUpdate()
-    {
+        size_t visibleCount = 0;
         for (size_t i = 0; i < _text.size() && i < _labels.size(); ++i)
         {
             bool visible = true;
@@ -173,15 +206,22 @@ namespace toucan
             {
                 _labels[i].second->setVisible(visible);
             }
+            if (visible)
+            {
+                ++visibleCount;
+            }
         }
+        _bellows->setVisible(visibleCount > 0);
     }
 
-    void InfoTool::_init(
+    void DetailsTool::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        IToolWidget::_init(context, app, "toucan::InfoTool", "Info", parent);
+        IToolWidget::_init(context, app, "toucan::DetailsTool", "Details", parent);
+
+        _app = app;
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -206,12 +246,12 @@ namespace toucan
 
         auto hLayout = dtk::HorizontalLayout::create(context, _bottomLayout);
         hLayout->setSpacingRole(dtk::SizeRole::SpacingTool);
-        auto openButton = dtk::ToolButton::create(context, hLayout);
-        openButton->setIcon("BellowsOpen");
-        openButton->setTooltip("Open all");
-        auto closeButton = dtk::ToolButton::create(context, hLayout);
-        closeButton->setIcon("BellowsClosed");
-        closeButton->setTooltip("Close all");
+        _openButton = dtk::ToolButton::create(context, hLayout);
+        _openButton->setIcon("BellowsOpen");
+        _openButton->setTooltip("Open all");
+        _closeButton = dtk::ToolButton::create(context, hLayout);
+        _closeButton->setIcon("BellowsClosed");
+        _closeButton->setTooltip("Close all");
 
         _searchBox->setCallback(
             [this](const std::string& text)
@@ -222,7 +262,7 @@ namespace toucan
                 }
             });
 
-        openButton->setClickedCallback(
+        _openButton->setClickedCallback(
             [this]
             {
                 for (const auto& widget : _widgets)
@@ -231,7 +271,7 @@ namespace toucan
                 }
             });
 
-        closeButton->setClickedCallback(
+        _closeButton->setClickedCallback(
             [this]
             {
                 for (const auto& widget : _widgets)
@@ -248,7 +288,7 @@ namespace toucan
                 {
                     _selectionObserver = dtk::ListObserver<SelectionItem>::create(
                         file->getSelectionModel()->observeSelection(),
-                        [this](const std::vector<SelectionItem>& selection)
+                        [this, file](const std::vector<SelectionItem>& selection)
                         {
                             for (const auto& widget : _widgets)
                             {
@@ -256,11 +296,20 @@ namespace toucan
                             }
                             _widgets.clear();
                             auto context = getContext();
+                            const std::string& search = _searchBox->getText();
                             for (const auto& item : selection)
                             {
-                                auto widget = InfoItemWidget::create(context, item.object, _scrollLayout);
+                                auto widget = DetailsWidget::create(
+                                    context,
+                                    _app.lock(),
+                                    file,
+                                    item,
+                                    _scrollLayout);
+                                widget->setSearch(search);
                                 _widgets.push_back(widget);
                             }
+                            _openButton->setEnabled(!_widgets.empty());
+                            _closeButton->setEnabled(!_widgets.empty());
                         });
                 }
                 else
@@ -270,31 +319,33 @@ namespace toucan
                         widget->setParent(nullptr);
                     }
                     _widgets.clear();
+                    _openButton->setEnabled(false);
+                    _closeButton->setEnabled(false);
                     _selectionObserver.reset();
                 }
             });
     }
 
-    InfoTool::~InfoTool()
+    DetailsTool::~DetailsTool()
     {}
 
-    std::shared_ptr<InfoTool> InfoTool::create(
+    std::shared_ptr<DetailsTool> DetailsTool::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
         const std::shared_ptr<dtk::IWidget>& parent)
     {
-        auto out = std::shared_ptr<InfoTool>(new InfoTool);
+        auto out = std::shared_ptr<DetailsTool>(new DetailsTool);
         out->_init(context, app, parent);
         return out;
     }
 
-    void InfoTool::setGeometry(const dtk::Box2I& value)
+    void DetailsTool::setGeometry(const dtk::Box2I& value)
     {
         IToolWidget::setGeometry(value);
         _layout->setGeometry(value);
     }
 
-    void InfoTool::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void DetailsTool::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IToolWidget::sizeHintEvent(event);
         _setSizeHint(_layout->getSizeHint());

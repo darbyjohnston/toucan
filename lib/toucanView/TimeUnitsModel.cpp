@@ -5,6 +5,7 @@
 
 #include <dtk/ui/Settings.h>
 #include <dtk/core/Error.h>
+#include <dtk/core/Format.h>
 #include <dtk/core/String.h>
 
 #include <nlohmann/json.hpp>
@@ -65,6 +66,15 @@ namespace toucan
         default: break;
         }
         return out;
+    }
+
+    std::string toString(const OTIO_NS::TimeRange& timeRange, TimeUnits units)
+    {
+        return dtk::Format("{0} - {1} : {2} @ {3}").
+            arg(toString(timeRange.start_time(), units)).
+            arg(toString(timeRange.end_time_inclusive(), units)).
+            arg(toString(timeRange.duration(), units)).
+            arg(timeRange.duration().rate());
     }
 
     TimeUnitsModel::TimeUnitsModel(const std::shared_ptr<dtk::Context>& context)

@@ -73,6 +73,32 @@ namespace toucan
         return out;
     }
 
+    IMATH_NAMESPACE::Box2i fit(
+        const IMATH_NAMESPACE::V2i& a,
+        const IMATH_NAMESPACE::V2i& b)
+    {
+        IMATH_NAMESPACE::Box2i out;
+        int w = b.x;
+        int h = b.y;
+        const double aAspect = a.y > 0 ? (a.x / static_cast<double>(a.y)) : 1.0;
+        const double bAspect = b.y > 0 ? (b.x / static_cast<double>(b.y)) : 1.0;
+        if (bAspect > aAspect)
+        {
+            w = a.x;
+            h = w / bAspect;
+        }
+        else
+        {
+            h = a.y;
+            w = h * bAspect;
+        }
+        out.min.x = a.x / 2 - w / 2;
+        out.min.y = a.y / 2 - h / 2;
+        out.max.x = out.min.x + w - 1;
+        out.max.y = out.min.y + h - 1;
+        return out;
+    }
+
     OTIO_NS::AnyVector vecToAny(const IMATH_NAMESPACE::V2i& vec)
     {
         return OTIO_NS::AnyVector

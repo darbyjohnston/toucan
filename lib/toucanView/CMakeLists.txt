@@ -1,63 +1,79 @@
 set(HEADERS
     App.h
     ClipItem.h
+    CompareTool.h
+    DetailsTool.h
     ExportTool.h
     FileTab.h
     File.h
+    FileMenu.h
+    FileToolBar.h
     FilesModel.h
     GapItem.h
     GraphTool.h
+    HUDWidget.h
     IItem.h
     IToolWidget.h
     InfoBar.h
-    InfoTool.h
     ItemLabel.h
     JSONTool.h
     LogTool.h
     MainWindow.h
     MarkerItem.h
-    MarkersTool.h
     MenuBar.h
     PlaybackBar.h
+    PlaybackMenu.h
     PlaybackModel.h
+    SelectMenu.h
     SelectionModel.h
     StackItem.h
     ThumbnailGenerator.h
     TimeLayout.h
+    TimeMenu.h
     TimeUnitsModel.h
     TimeWidgets.h
     TimelineItem.h
     TimelineWidget.h
     ToolBar.h
     TrackItem.h
+    ViewMenu.h
     ViewModel.h
+    ViewToolBar.h
     Viewport.h
-    WindowModel.h)
+    WindowMenu.h
+    WindowModel.h
+    WindowToolBar.h)
 
 set(SOURCE
     App.cpp
     ClipItem.cpp
+    CompareTool.cpp
+    DetailsTool.cpp
     ExportTool.cpp
     FileTab.cpp
     File.cpp
+    FileMenu.cpp
+    FileToolBar.cpp
     FilesModel.cpp
     GapItem.cpp
     GraphTool.cpp
+    HUDWidget.cpp
     IItem.cpp
     IToolWidget.cpp
     InfoBar.cpp
-    InfoTool.cpp
     ItemLabel.cpp
     JSONTool.cpp
     LogTool.cpp
     MainWindow.cpp
     MarkerItem.cpp
-    MarkersTool.cpp
     MenuBar.cpp
     PlaybackBar.cpp
+    PlaybackMenu.cpp
     PlaybackModel.cpp
+    SelectMenu.cpp
     SelectionModel.cpp
     StackItem.cpp
+    TimeMenu.cpp
     ThumbnailGenerator.cpp
     TimeLayout.cpp
     TimeUnitsModel.cpp
@@ -66,9 +82,13 @@ set(SOURCE
     TimelineWidget.cpp
     ToolBar.cpp
     TrackItem.cpp
+    ViewMenu.cpp
     ViewModel.cpp
+    ViewToolBar.cpp
     Viewport.cpp
-    WindowModel.cpp)
+    WindowMenu.cpp
+    WindowModel.cpp
+    WindowToolBar.cpp)
 
 add_library(toucanView ${HEADERS} ${SOURCE})
 target_link_libraries(toucanView PUBLIC toucanRender dtk::dtkUI)

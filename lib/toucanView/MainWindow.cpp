@@ -4,14 +4,14 @@
 #include "MainWindow.h"
 
 #include "App.h"
+#include "CompareTool.h"
+#include "DetailsTool.h"
 #include "ExportTool.h"
 #include "FileTab.h"
 #include "FilesModel.h"
 #include "GraphTool.h"
 #include "InfoBar.h"
-#include "InfoTool.h"
 #include "JSONTool.h"
-#include "MarkersTool.h"
 #include "LogTool.h"
 #include "MenuBar.h"
 #include "PlaybackBar.h"
@@ -81,10 +81,10 @@ namespace toucan
         _tabWidget->setVStretch(dtk::Stretch::Expanding);
 
         _toolWidget = dtk::TabWidget::create(context, _hSplitter);
-        _toolWidgets.push_back(InfoTool::create(context, app));
+        _toolWidgets.push_back(CompareTool::create(context, app));
+        _toolWidgets.push_back(DetailsTool::create(context, app));
         _toolWidgets.push_back(JSONTool::create(context, app));
         _toolWidgets.push_back(GraphTool::create(context, app));
-        _toolWidgets.push_back(MarkersTool::create(context, app));
         _toolWidgets.push_back(ExportTool::create(context, app));
         _toolWidgets.push_back(LogTool::create(context, app));
         for (const auto& toolWidget : _toolWidgets)
@@ -102,7 +102,7 @@ namespace toucan
         _timelineWidget = TimelineWidget::create(context, app, _playbackLayout);
         _timelineWidget->setVStretch(dtk::Stretch::Expanding);
 
-        divider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
+        _infoBarDivider = dtk::Divider::create(context, dtk::Orientation::Vertical, _layout);
 
         _infoBar = InfoBar::create(context, app, _layout);
 
@@ -185,6 +185,10 @@ namespace toucan
 
                 i = value.find(WindowComponent::Playback);
                 _playbackLayout->setVisible(i->second);
+
+                i = value.find(WindowComponent::InfoBar);
+                _infoBarDivider->setVisible(i->second);
+                _infoBar->setVisible(i->second);
             });
 
         _tooltipsObserver = dtk::ValueObserver<bool>::create(

@@ -6,10 +6,12 @@
 namespace toucan
 {
     LinearTimeWarpNode::LinearTimeWarpNode(
-        float timeScalar,
+        double timeScalar,
+        const OTIO_NS::TimeRange& timeRange,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode("LinearTimeWarp", inputs),
-        _timeScalar(timeScalar)
+        _timeScalar(timeScalar),
+        _timeRange(timeRange)
     {}
 
     LinearTimeWarpNode::~LinearTimeWarpNode()
@@ -25,7 +27,15 @@ namespace toucan
             {
                 offsetTime -= _timeOffset;
             }
-            const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * _timeScalar, _time.rate()).floor();
+            double timeScalar = _timeScalar;
+            if (timeScalar < 0.0)
+            {
+                timeScalar *= -1.0;
+                offsetTime = _timeRange.duration() -
+                    OTIO_NS::RationalTime(1.0, _timeRange.duration().rate()) -
+                    offsetTime;
+            }
+            const OTIO_NS::RationalTime scaledTime = OTIO_NS::RationalTime(offsetTime.value() * timeScalar, _time.rate()).floor();
             _inputs[0]->setTime(scaledTime);
             buf = _inputs[0]->exec();
         }

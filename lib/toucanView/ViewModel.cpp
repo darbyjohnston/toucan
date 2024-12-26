@@ -3,11 +3,13 @@
 
 #include "ViewModel.h"
 
+#include <nlohmann/json.hpp>
+
 #include <sstream>
 
 namespace toucan
 {
-    ViewModel::ViewModel()
+    ViewModel::ViewModel(const std::shared_ptr<dtk::Context>& context)
     {
         _zoomIn = dtk::ObservableValue<bool>::create(false);
         _zoomOut = dtk::ObservableValue<bool>::create(false);
@@ -61,5 +63,46 @@ namespace toucan
     void ViewModel::setFrameView(bool value)
     {
         _frameView->setIfChanged(value);
+    }
+
+    GlobalViewModel::GlobalViewModel(const std::shared_ptr<dtk::Context>& context)
+    {
+        _settings = context->getSystem<dtk::Settings>();
+        bool hud = false;
+        try
+        {
+            const auto json = std::any_cast<nlohmann::json>(_settings->get("GlobalViewModel"));
+            auto i = json.find("HUD");
+            if (i != json.end() && i->is_boolean())
+            {
+                hud = i->get<bool>();
+            }
+        }
+        catch (const std::exception&)
+        {}
+
+        _hud = dtk::ObservableValue<bool>::create(hud);
+    }
+
+    GlobalViewModel::~GlobalViewModel()
+    {
+        nlohmann::json json;
+        json["HUD"] = _hud->get();
+        _settings->set("GlobalViewModel", json);
+    }
+
+    bool GlobalViewModel::getHUD() const
+    {
+        return _hud->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<bool> > GlobalViewModel::observeHUD() const
+    {
+        return _hud;
+    }
+
+    void GlobalViewModel::setHUD(bool value)
+    {
+        _hud->setIfChanged(value);
     }
 }
