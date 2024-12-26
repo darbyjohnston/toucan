@@ -3,6 +3,7 @@
 
 #include "MenuBar.h"
 
+#include "CompareMenu.h"
 #include "FileMenu.h"
 #include "PlaybackMenu.h"
 #include "SelectMenu.h"
@@ -24,6 +25,11 @@ namespace toucan
         addMenu("File", fileMenu);
         _menus["File"] = fileMenu;
         _actions.insert(fileMenu->getActions().begin(), fileMenu->getActions().end());
+
+        auto compareMenu = CompareMenu::create(context, app);
+        addMenu("Compare", compareMenu);
+        _menus["Compare"] = compareMenu;
+        _actions.insert(compareMenu->getActions().begin(), compareMenu->getActions().end());
 
         auto selectMenu = SelectMenu::create(context, app);
         addMenu("Select", selectMenu);
