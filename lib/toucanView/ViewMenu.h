@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <toucanView/ViewModel.h>
+
 #include <dtk/ui/Menu.h>
 #include <dtk/core/ObservableValue.h>
 
@@ -41,6 +43,7 @@ namespace toucan
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
+        std::shared_ptr<dtk::ValueObserver<ViewOptions> > _optionsObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _hudObserver;
     };
 }

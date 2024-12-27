@@ -5,16 +5,6 @@
 
 #include "App.h"
 #include "FilesModel.h"
-#include "MainWindow.h"
-#include "SelectionModel.h"
-#include "ViewModel.h"
-
-#include <toucanRender/TimelineAlgo.h>
-
-#include <dtk/ui/Action.h>
-#include <dtk/ui/FileBrowser.h>
-#include <dtk/ui/RecentFilesModel.h>
-#include <dtk/core/Format.h>
 
 namespace toucan
 {
@@ -89,6 +79,38 @@ namespace toucan
 
         addDivider();
 
+        _actions["View/Flip"] = std::make_shared<dtk::Action>(
+            "Flip Vertical",
+            dtk::Key::V,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.flip = value;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Flip"]);
+
+        _actions["View/Flop"] = std::make_shared<dtk::Action>(
+            "Flop Horizontal",
+            dtk::Key::H,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.flop = value;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Flop"]);
+
+        addDivider();
+
         std::weak_ptr<App> appWeak(app);
         _actions["View/HUD"] = std::make_shared<dtk::Action>(
             "HUD",
@@ -149,16 +171,30 @@ namespace toucan
                 {
                     setItemChecked(_actions["View/Frame"], value);
                 });
+
+            _optionsObserver = dtk::ValueObserver<ViewOptions>::create(
+                _file->getViewModel()->observeOptions(),
+                [this](const ViewOptions& value)
+                {
+                    setItemChecked(_actions["View/Flip"], value.flip);
+                    setItemChecked(_actions["View/Flop"], value.flop);
+                });
         }
         else
         {
+            setItemChecked(_actions["View/Frame"], false);
+            setItemChecked(_actions["View/Flip"], false);
+            setItemChecked(_actions["View/Flop"], false);
             _frameViewObserver.reset();
+            _optionsObserver.reset();
         }
 
         setItemEnabled(_actions["View/ZoomIn"], file);
         setItemEnabled(_actions["View/ZoomOut"], file);
         setItemEnabled(_actions["View/ZoomReset"], file);
         setItemEnabled(_actions["View/Frame"], file);
+        setItemEnabled(_actions["View/Flip"], file);
+        setItemEnabled(_actions["View/Flop"], file);
         setItemEnabled(_actions["View/HUD"], file);
     }
 }

@@ -106,6 +106,14 @@ namespace toucan
             {
                 setFrameView(value);
             });
+
+        _optionsObserver = dtk::ValueObserver<ViewOptions>::create(
+            _viewModel->observeOptions(),
+            [this](const ViewOptions& value)
+            {
+                _options = value;
+                _setDrawUpdate();
+            });
     }
 
     Viewport::~Viewport()
@@ -252,7 +260,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    _getMesh(dtk::Box2I(0, 0, imageSize.x, imageSize.y)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -262,17 +270,17 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(
+                    _getMesh(dtk::Box2I(
                         bImageBox.min.x,
                         bImageBox.min.y,
                         bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
+                        bImageBox.max.y - bImageBox.min.y + 1)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
             break;
         case CompareMode::Split:
-            if (_image && _bImage)
+            if (_image)
             {
                 dtk::TriMesh2F mesh;
                 dtk::Box2I box(0, 0, imageSize.x / 2, imageSize.y);
@@ -280,10 +288,10 @@ namespace toucan
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
                 mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
-                mesh.t.push_back(dtk::V2F(0.F, 0.F));
-                mesh.t.push_back(dtk::V2F(.5F, 0.F));
-                mesh.t.push_back(dtk::V2F(.5F, 1.F));
-                mesh.t.push_back(dtk::V2F(0.F, 1.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 1.F : 0.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? .5F : .5F, _options.flip ? 1.F : 0.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? .5F : .5F, _options.flip ? 0.F : 1.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 0.F : 1.F));
                 dtk::Triangle2 triangle;
                 triangle.v[0].v = 1;
                 triangle.v[1].v = 2;
@@ -304,11 +312,11 @@ namespace toucan
                     mesh,
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
-
-                mesh.v.clear();
-                mesh.t.clear();
-                mesh.triangles.clear();
-                box = dtk::Box2I(
+            }
+            if (_bImage)
+            {
+                dtk::TriMesh2F mesh;
+                dtk::Box2I box(
                     imageSize.x / 2,
                     bImageBox.min.y,
                     (bImageBox.max.x - bImageBox.min.x + 1) / 2,
@@ -317,10 +325,11 @@ namespace toucan
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
                 mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
                 mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
-                mesh.t.push_back(dtk::V2F(.5F, 0.F));
-                mesh.t.push_back(dtk::V2F(1.F, 0.F));
-                mesh.t.push_back(dtk::V2F(1.F, 1.F));
-                mesh.t.push_back(dtk::V2F(.5F, 1.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? .5F : .5F, _options.flip ? 1.F : 0.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? 0.F : 1.F, _options.flip ? 1.F : 0.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? 0.F : 1.F, _options.flip ? 0.F : 1.F));
+                mesh.t.push_back(dtk::V2F(_options.flop ? .5F : .5F, _options.flip ? 0.F : 1.F));
+                dtk::Triangle2 triangle;
                 triangle.v[0].v = 1;
                 triangle.v[1].v = 2;
                 triangle.v[2].v = 3;
@@ -341,42 +350,22 @@ namespace toucan
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
-            else if (_image)
-            {
-                event.render->drawImage(
-                    _image,
-                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
-                    dtk::Color4F(1.F, 1.F, 1.F),
-                    options);
-            }
-            else if (_bImage)
-            {
-                event.render->drawImage(
-                    _bImage,
-                    dtk::Box2I(
-                        bImageBox.min.x,
-                        bImageBox.min.y,
-                        bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
-                    dtk::Color4F(1.F, 1.F, 1.F),
-                    options);
-            }
             break;
         case CompareMode::Overlay:
             if (_image && _bImage)
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    _getMesh(dtk::Box2I(0, 0, imageSize.x, imageSize.y)),
                     dtk::Color4F(1.F, 1.F, 1.F, .5F),
                     options);
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(
+                    _getMesh(dtk::Box2I(
                         bImageBox.min.x,
                         bImageBox.min.y,
                         bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
+                        bImageBox.max.y - bImageBox.min.y + 1)),
                     dtk::Color4F(1.F, 1.F, 1.F, .5F),
                     options);
             }
@@ -384,7 +373,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    _getMesh(dtk::Box2I(0, 0, imageSize.x, imageSize.y)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -392,11 +381,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(
+                    _getMesh(dtk::Box2I(
                         bImageBox.min.x,
                         bImageBox.min.y,
                         bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
+                        bImageBox.max.y - bImageBox.min.y + 1)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -408,7 +397,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, imageSize.x, imageSize.y),
+                    _getMesh(dtk::Box2I(0, 0, imageSize.x, imageSize.y)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
                 x += _image->getWidth();
@@ -417,11 +406,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(
+                    _getMesh(dtk::Box2I(
                         x + bImageBox.min.x,
                         bImageBox.min.y,
                         bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
+                        bImageBox.max.y - bImageBox.min.y + 1)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -434,7 +423,7 @@ namespace toucan
             {
                 event.render->drawImage(
                     _image,
-                    dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight()),
+                    _getMesh(dtk::Box2I(0, 0, _image->getWidth(), _image->getHeight())),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
                 y += _image->getHeight();
@@ -443,11 +432,11 @@ namespace toucan
             {
                 event.render->drawImage(
                     _bImage,
-                    dtk::Box2I(
+                    _getMesh(dtk::Box2I(
                         bImageBox.min.x,
                         y + bImageBox.min.y,
                         bImageBox.max.x - bImageBox.min.x + 1,
-                        bImageBox.max.y - bImageBox.min.y + 1),
+                        bImageBox.max.y - bImageBox.min.y + 1)),
                     dtk::Color4F(1.F, 1.F, 1.F),
                     options);
             }
@@ -527,6 +516,35 @@ namespace toucan
         default: break;
         }
         return out;
+    }
+
+    dtk::TriMesh2F Viewport::_getMesh(const dtk::Box2I& box) const
+    {
+        dtk::TriMesh2F mesh;
+        mesh.v.push_back(dtk::V2F(box.min.x, box.min.y));
+        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.min.y));
+        mesh.v.push_back(dtk::V2F(box.max.x + 1, box.max.y + 1));
+        mesh.v.push_back(dtk::V2F(box.min.x, box.max.y + 1));
+        mesh.t.push_back(dtk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 1.F : 0.F));
+        mesh.t.push_back(dtk::V2F(_options.flop ? 0.F : 1.F, _options.flip ? 1.F : 0.F));
+        mesh.t.push_back(dtk::V2F(_options.flop ? 0.F : 1.F, _options.flip ? 0.F : 1.F));
+        mesh.t.push_back(dtk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 0.F : 1.F));
+        dtk::Triangle2 triangle;
+        triangle.v[0].v = 1;
+        triangle.v[1].v = 2;
+        triangle.v[2].v = 3;
+        triangle.v[0].t = 1;
+        triangle.v[1].t = 2;
+        triangle.v[2].t = 3;
+        mesh.triangles.push_back(triangle);
+        triangle.v[0].v = 3;
+        triangle.v[1].v = 4;
+        triangle.v[2].v = 1;
+        triangle.v[0].t = 3;
+        triangle.v[1].t = 4;
+        triangle.v[2].t = 1;
+        mesh.triangles.push_back(triangle);
+        return mesh;
     }
 
     void Viewport::_frameUpdate()

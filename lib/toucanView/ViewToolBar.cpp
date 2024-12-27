@@ -69,6 +69,14 @@ namespace toucan
                 _filesSize = files.size();
                 _widgetUpdate();
             });
+
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
+            {
+                _file = file;
+                _widgetUpdate();
+            });
     }
 
     ViewToolBar::~ViewToolBar()

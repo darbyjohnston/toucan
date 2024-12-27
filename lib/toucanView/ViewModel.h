@@ -11,6 +11,16 @@
 
 namespace toucan
 {
+    //! View options.
+    struct ViewOptions
+    {
+        bool flip = false;
+        bool flop = false;
+
+        bool operator == (const ViewOptions&) const;
+        bool operator != (const ViewOptions&) const;
+    };
+
     //! View model.
     class ViewModel : public std::enable_shared_from_this<ViewModel>
     {
@@ -46,11 +56,21 @@ namespace toucan
         //! Set whether frame view is enabled.
         void setFrameView(bool);
 
+        //! Get the view options.
+        const ViewOptions& getOptions() const;
+
+        //! Observe the view options.
+        std::shared_ptr<dtk::IObservableValue<ViewOptions> > observeOptions() const;
+
+        //! Set the view options.
+        void setOptions(const ViewOptions&);
+
     private:
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomIn;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomOut;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomReset;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
+        std::shared_ptr<dtk::ObservableValue<ViewOptions> > _options;
     };
 
     //! Global view model.

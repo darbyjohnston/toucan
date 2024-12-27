@@ -9,12 +9,25 @@
 
 namespace toucan
 {
+    bool ViewOptions::operator == (const ViewOptions& other) const
+    {
+        return
+            flip == other.flip &&
+            flop == other.flop;
+    }
+
+    bool ViewOptions::operator != (const ViewOptions& other) const
+    {
+        return !(*this == other);
+    }
+
     ViewModel::ViewModel(const std::shared_ptr<dtk::Context>& context)
     {
         _zoomIn = dtk::ObservableValue<bool>::create(false);
         _zoomOut = dtk::ObservableValue<bool>::create(false);
         _zoomReset = dtk::ObservableValue<bool>::create(false);
         _frameView = dtk::ObservableValue<bool>::create(true);
+        _options = dtk::ObservableValue<ViewOptions>::create();
     }
 
     ViewModel::~ViewModel()
@@ -63,6 +76,21 @@ namespace toucan
     void ViewModel::setFrameView(bool value)
     {
         _frameView->setIfChanged(value);
+    }
+
+    const ViewOptions& ViewModel::getOptions() const
+    {
+        return _options->get();
+    }
+
+    std::shared_ptr<dtk::IObservableValue<ViewOptions> > ViewModel::observeOptions() const
+    {
+        return _options;
+    }
+
+    void ViewModel::setOptions(const ViewOptions& value)
+    {
+        _options->setIfChanged(value);
     }
 
     GlobalViewModel::GlobalViewModel(const std::shared_ptr<dtk::Context>& context)
