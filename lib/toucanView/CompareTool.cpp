@@ -91,7 +91,7 @@ namespace toucan
     {
         IToolWidget::_init(context, app, "toucan::CompareTool", "Compare", parent);
 
-        _app = app;
+        _filesModel = app->getFilesModel();
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -134,32 +134,29 @@ namespace toucan
         _modeComboBox->setIndexCallback(
             [this](int value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
+                CompareOptions options = _filesModel->getCompareOptions();
                 options.mode = static_cast<CompareMode>(value);
-                app->getFilesModel()->setCompareOptions(options);
+                _filesModel->setCompareOptions(options);
             });
 
         _matchStartTimeCheckBox->setCheckedCallback(
             [this](bool value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
+                CompareOptions options = _filesModel->getCompareOptions();
                 options.matchStartTime = value;
-                app->getFilesModel()->setCompareOptions(options);
+                _filesModel->setCompareOptions(options);
             });
 
         _fitSizeCheckBox->setCheckedCallback(
             [this](bool value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
+                CompareOptions options = _filesModel->getCompareOptions();
                 options.fitSize = value;
-                app->getFilesModel()->setCompareOptions(options);
+                _filesModel->setCompareOptions(options);
             });
 
         _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
-            app->getFilesModel()->observeFiles(),
+            _filesModel->observeFiles(),
             [this](const std::vector<std::shared_ptr<File> >& value)
             {
                 _files = value;
@@ -168,7 +165,7 @@ namespace toucan
             });
 
         _fileIndexObserver = dtk::ValueObserver<int>::create(
-            app->getFilesModel()->observeCurrentIndex(),
+            _filesModel->observeCurrentIndex(),
             [this](int value)
             {
                 _currentIndex = value;
@@ -176,7 +173,7 @@ namespace toucan
             });
 
         _bIndexObserver = dtk::ValueObserver<int>::create(
-            app->getFilesModel()->observeBIndex(),
+            _filesModel->observeBIndex(),
             [this](int value)
             {
                 _bIndex = value;
@@ -184,7 +181,7 @@ namespace toucan
             });
         
         _compareOptionsObserver = dtk::ValueObserver<CompareOptions>::create(
-            app->getFilesModel()->observeCompareOptions(),
+            _filesModel->observeCompareOptions(),
             [this](const CompareOptions& value)
             {
                 _modeComboBox->setCurrentIndex(static_cast<int>(value.mode));
@@ -235,14 +232,12 @@ namespace toucan
             widget->setCurrentCallback(
                 [this, i]
                 {
-                    auto app = _app.lock();
-                    app->getFilesModel()->setCurrentIndex(i);
+                    _filesModel->setCurrentIndex(i);
                 });
             widget->setBCallback(
                 [this, i](bool value)
                 {
-                    auto app = _app.lock();
-                    app->getFilesModel()->setBIndex(value ? i : -1);
+                    _filesModel->setBIndex(value ? i : -1);
                 });
             _widgets.push_back(widget);
         }

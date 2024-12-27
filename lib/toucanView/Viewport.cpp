@@ -8,6 +8,8 @@
 #include "App.h"
 #include "ViewModel.h"
 
+#include <dtk/ui/DrawUtil.h>
+
 namespace toucan
 {
     void Viewport::_init(
@@ -114,6 +116,14 @@ namespace toucan
                 _options = value;
                 _setDrawUpdate();
             });
+
+        _globalOptionsObserver = dtk::ValueObserver<GlobalViewOptions>::create(
+            app->getGlobalViewModel()->observeOptions(),
+            [this](const GlobalViewOptions& value)
+            {
+                _globalOptions = value;
+                _setDrawUpdate();
+            });
     }
 
     Viewport::~Viewport()
@@ -214,11 +224,25 @@ namespace toucan
     void Viewport::drawEvent(const dtk::Box2I& drawRect, const dtk::DrawEvent& event)
     {
         IWidget::drawEvent(drawRect, event);
-        const dtk::Box2I& g = getGeometry();
-        event.render->drawRect(
-            g,
-            dtk::Color4F(0.F, 0.F, 0.F));
 
+        // Draw the background.
+        const dtk::Box2I& g = getGeometry();
+        switch (_globalOptions.background)
+        {
+        case ViewBackground::Solid:
+            event.render->drawRect(g, _globalOptions.solidColor);
+            break;
+        case ViewBackground::Checkers:
+            event.render->drawColorMesh(dtk::checkers(
+                g,
+                _globalOptions.checkersColor0,
+                _globalOptions.checkersColor1,
+                dtk::Size2I(_globalOptions.checkersSize, _globalOptions.checkersSize)));
+            break;
+        default: break;
+        }
+
+        // Setup the view transform.
         if (_frameView->get())
         {
             _frameUpdate();
@@ -230,6 +254,7 @@ namespace toucan
         const auto m = event.render->getTransform();
         event.render->setTransform(m * vm);
 
+        // Draw the images.
         IMATH_NAMESPACE::V2i imageSize(_imageSize.w, _imageSize.h);
         if (_image)
         {
@@ -446,6 +471,7 @@ namespace toucan
         default: break;
         }
 
+        // Reset the transform.
         event.render->setTransform(m);
     }
 

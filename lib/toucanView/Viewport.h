@@ -97,6 +97,7 @@ namespace toucan
         std::shared_ptr<dtk::ObservableValue<float> > _viewZoom;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
         ViewOptions _options;
+        GlobalViewOptions _globalOptions;
         dtk::V2I _viewMousePress;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;
@@ -108,6 +109,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomResetObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameObserver;
         std::shared_ptr<dtk::ValueObserver<ViewOptions> > _optionsObserver;
+        std::shared_ptr<dtk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
     };
 }
 

@@ -79,7 +79,7 @@ namespace toucan
         void _widgetUpdate();
         void _indexUpdate();
 
-        std::weak_ptr<App> _app;
+        std::shared_ptr<FilesModel> _filesModel;
         std::vector<std::shared_ptr<File> > _files;
         int _currentIndex = -1;
         int _bIndex = -1;

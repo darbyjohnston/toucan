@@ -182,7 +182,9 @@ namespace toucan
             {
                 if (auto app = appWeak.lock())
                 {
-                    app->getGlobalViewModel()->setHUD(value);
+                    auto options = app->getGlobalViewModel()->getOptions();
+                    options.hud = value;
+                    app->getGlobalViewModel()->setOptions(options);
                 }
             });
         _actions["View/HUD"]->toolTip = "Toggle the HUD (Heads Up Display)";
@@ -196,11 +198,11 @@ namespace toucan
                 _menuUpdate();
             });
 
-        _hudObserver = dtk::ValueObserver<bool>::create(
-            app->getGlobalViewModel()->observeHUD(),
-            [this](bool value)
+        _globalOptionsObserver = dtk::ValueObserver<GlobalViewOptions>::create(
+            app->getGlobalViewModel()->observeOptions(),
+            [this](const GlobalViewOptions& value)
             {
-                setItemChecked(_actions["View/HUD"], value);
+                setItemChecked(_actions["View/HUD"], value.hud);
             });
     }
 

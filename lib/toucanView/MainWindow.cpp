@@ -4,6 +4,7 @@
 #include "MainWindow.h"
 
 #include "App.h"
+#include "BackgroundTool.h"
 #include "CompareTool.h"
 #include "DetailsTool.h"
 #include "ExportTool.h"
@@ -85,6 +86,7 @@ namespace toucan
         _toolWidgets.push_back(DetailsTool::create(context, app));
         _toolWidgets.push_back(JSONTool::create(context, app));
         _toolWidgets.push_back(GraphTool::create(context, app));
+        _toolWidgets.push_back(BackgroundTool::create(context, app));
         _toolWidgets.push_back(ExportTool::create(context, app));
         _toolWidgets.push_back(LogTool::create(context, app));
         for (const auto& toolWidget : _toolWidgets)

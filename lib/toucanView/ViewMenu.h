@@ -44,7 +44,7 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
         std::shared_ptr<dtk::ValueObserver<ViewOptions> > _optionsObserver;
-        std::shared_ptr<dtk::ValueObserver<bool> > _hudObserver;
+        std::shared_ptr<dtk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
     };
 }
 

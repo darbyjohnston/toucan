@@ -6,7 +6,6 @@
 #include "App.h"
 #include "File.h"
 #include "HUDWidget.h"
-#include "ViewModel.h"
 #include "Viewport.h"
 
 namespace toucan
@@ -23,11 +22,11 @@ namespace toucan
 
         _hudWidget = HUDWidget::create(context, app, file, shared_from_this());
 
-        _hudObserver = dtk::ValueObserver<bool>::create(
-            app->getGlobalViewModel()->observeHUD(),
-            [this](bool value)
+        _viewOptionsObserver = dtk::ValueObserver<GlobalViewOptions>::create(
+            app->getGlobalViewModel()->observeOptions(),
+            [this](const GlobalViewOptions& value)
             {
-                _hudWidget->setVisible(value);
+                _hudWidget->setVisible(value.hud);
             });
     }
 
