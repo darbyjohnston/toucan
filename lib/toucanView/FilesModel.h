@@ -31,24 +31,13 @@ namespace toucan
         First = A
     };
     DTK_ENUM(CompareMode);
-    
-    //! Compare times.
-    enum class CompareTime
-    {
-        Relative,
-        Absolute,
-
-        Count,
-        First = Relative
-    };
-    DTK_ENUM(CompareTime);
 
     //! Compare options.
     struct CompareOptions
     {
         CompareMode mode = CompareMode::A;
-        CompareTime time = CompareTime::Relative;
-        bool fitSize = false;
+        bool matchStartTime = true;
+        bool fitSize = true;
 
         bool operator == (const CompareOptions&) const;
         bool operator != (const CompareOptions&) const;

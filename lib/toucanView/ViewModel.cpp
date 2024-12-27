@@ -13,7 +13,8 @@ namespace toucan
     {
         return
             flip == other.flip &&
-            flop == other.flop;
+            flop == other.flop &&
+            channelDisplay == other.channelDisplay;
     }
 
     bool ViewOptions::operator != (const ViewOptions& other) const

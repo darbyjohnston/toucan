@@ -252,6 +252,7 @@ namespace toucan
             bImageBox = fit(imageSize, bImageSize);
         }
         dtk::ImageOptions options;
+        options.channelDisplay = _options.channelDisplay;
         options.imageFilters.magnify = dtk::ImageFilter::Nearest;
         switch (_compareOptions.mode)
         {

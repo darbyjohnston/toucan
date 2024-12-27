@@ -24,16 +24,11 @@ namespace toucan
         "Horizontal",
         "Vertical");
 
-    DTK_ENUM_IMPL(
-        CompareTime,
-        "Relative",
-        "Absolute");
-
     bool CompareOptions::operator == (const CompareOptions& other) const
     {
         return
             mode == other.mode &&
-            time == other.time &&
+            matchStartTime == other.matchStartTime &&
             fitSize == other.fitSize;;
     }
 
@@ -59,11 +54,10 @@ namespace toucan
                 std::stringstream ss(i->get<std::string>());
                 ss >> compareOptions.mode;
             }
-            i = json.find("CompareTime");
-            if (i != json.end() && i->is_string())
+            i = json.find("MatchStartTime");
+            if (i != json.end() && i->is_boolean())
             {
-                std::stringstream ss(i->get<std::string>());
-                ss >> compareOptions.time;
+                compareOptions.matchStartTime = i->get<bool>();
             }
             i = json.find("FitSize");
             if (i != json.end() && i->is_boolean())
@@ -93,11 +87,7 @@ namespace toucan
             ss << _compareOptions->get().mode;
             json["CompareMode"] = ss.str();
         }
-        {
-            std::stringstream ss;
-            ss << _compareOptions->get().time;
-            json["CompareTime"] = ss.str();
-        }
+        json["MatchStartTime"] = _compareOptions->get().matchStartTime;
         json["FitSize"] = _compareOptions->get().fitSize;
         _settings->set("FilesModel", json);
     }
@@ -325,7 +315,7 @@ namespace toucan
         const std::shared_ptr<File>& bFile) const
     {
         OTIO_NS::RationalTime out(0.0, 1.0);
-        if (CompareTime::Relative == _compareOptions->get().time)
+        if (_compareOptions->get().matchStartTime)
         {
             out = bFile->getPlaybackModel()->getTimeRange().start_time() -
                 file->getPlaybackModel()->getTimeRange().start_time();

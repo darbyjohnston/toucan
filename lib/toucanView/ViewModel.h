@@ -6,6 +6,7 @@
 #include <dtk/ui/Settings.h>
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableValue.h>
+#include <dtk/core/RenderOptions.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -16,6 +17,7 @@ namespace toucan
     {
         bool flip = false;
         bool flop = false;
+        dtk::ChannelDisplay channelDisplay = dtk::ChannelDisplay::Color;
 
         bool operator == (const ViewOptions&) const;
         bool operator != (const ViewOptions&) const;

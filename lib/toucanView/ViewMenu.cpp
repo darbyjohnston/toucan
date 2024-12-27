@@ -111,6 +111,68 @@ namespace toucan
 
         addDivider();
 
+        _actions["View/Red"] = std::make_shared<dtk::Action>(
+            "Red",
+            dtk::Key::R,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.channelDisplay = value ? dtk::ChannelDisplay::Red : dtk::ChannelDisplay::Color;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Red"]);
+
+        _actions["View/Green"] = std::make_shared<dtk::Action>(
+            "Green",
+            dtk::Key::G,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.channelDisplay = value ? dtk::ChannelDisplay::Green : dtk::ChannelDisplay::Color;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Green"]);
+
+        _actions["View/Blue"] = std::make_shared<dtk::Action>(
+            "Blue",
+            dtk::Key::B,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.channelDisplay = value ? dtk::ChannelDisplay::Blue : dtk::ChannelDisplay::Color;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Blue"]);
+
+        _actions["View/Alpha"] = std::make_shared<dtk::Action>(
+            "Alpha",
+            dtk::Key::A,
+            0,
+            [this](bool value)
+            {
+                if (_file)
+                {
+                    ViewOptions options = _file->getViewModel()->getOptions();
+                    options.channelDisplay = value ? dtk::ChannelDisplay::Alpha : dtk::ChannelDisplay::Color;
+                    _file->getViewModel()->setOptions(options);
+                }
+            });
+        addItem(_actions["View/Alpha"]);
+
+        addDivider();
+
         std::weak_ptr<App> appWeak(app);
         _actions["View/HUD"] = std::make_shared<dtk::Action>(
             "HUD",
@@ -178,6 +240,10 @@ namespace toucan
                 {
                     setItemChecked(_actions["View/Flip"], value.flip);
                     setItemChecked(_actions["View/Flop"], value.flop);
+                    setItemChecked(_actions["View/Red"], dtk::ChannelDisplay::Red == value.channelDisplay);
+                    setItemChecked(_actions["View/Green"], dtk::ChannelDisplay::Green == value.channelDisplay);
+                    setItemChecked(_actions["View/Blue"], dtk::ChannelDisplay::Blue == value.channelDisplay);
+                    setItemChecked(_actions["View/Alpha"], dtk::ChannelDisplay::Alpha == value.channelDisplay);
                 });
         }
         else
