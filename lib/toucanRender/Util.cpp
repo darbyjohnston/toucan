@@ -3,10 +3,21 @@
 
 #include "Util.h"
 
+#include <cctype>
 #include <sstream>
 
 namespace toucan
 {
+    std::string toLower(const std::string& value)
+    {
+        std::string out;
+        for (auto i : value)
+        {
+            out.push_back(std::tolower(i));
+        }
+        return out;
+    }
+
     std::pair<std::string, std::string> splitURLProtocol(const std::string& url)
     {
         std::pair<std::string, std::string> out;

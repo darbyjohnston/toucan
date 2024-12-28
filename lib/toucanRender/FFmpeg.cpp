@@ -3,6 +3,8 @@
 
 #include "FFmpeg.h"
 
+#include "Util.h"
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -29,7 +31,7 @@ namespace toucan
         bool hasVideoExtension(const std::string& value)
         {
             const std::vector<std::string> extensions = getVideoExtensions();
-            const auto i = std::find(extensions.begin(), extensions.end(), value);
+            const auto i = std::find(extensions.begin(), extensions.end(), toLower(value));
             return i != extensions.end();
         }
 

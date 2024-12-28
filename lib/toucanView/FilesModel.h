@@ -118,9 +118,7 @@ namespace toucan
 
     private:
         std::shared_ptr<File> _getBFile() const;
-        OTIO_NS::RationalTime _getBTimeOffset(
-            const std::shared_ptr<File>&,
-            const std::shared_ptr<File>&) const;
+        void _setBTime(const OTIO_NS::RationalTime&);
 
         void _fileUpdate();
 

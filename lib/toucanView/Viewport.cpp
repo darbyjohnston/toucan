@@ -383,7 +383,7 @@ namespace toucan
                 event.render->drawImage(
                     _image,
                     _getMesh(dtk::Box2I(0, 0, imageSize.x, imageSize.y)),
-                    dtk::Color4F(1.F, 1.F, 1.F, .5F),
+                    dtk::Color4F(1.F, 1.F, 1.F),
                     options);
                 event.render->drawImage(
                     _bImage,

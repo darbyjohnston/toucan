@@ -13,6 +13,9 @@
 
 namespace toucan
 {
+    //! Convert to lower case.
+    std::string toLower(const std::string&);
+
     //! Split the URL protocol.
     std::pair<std::string, std::string> splitURLProtocol(const std::string&);
 
