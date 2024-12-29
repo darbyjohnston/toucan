@@ -69,7 +69,7 @@ namespace toucan
         _actions["Time/FramePrevX100"] = std::make_shared<dtk::Action>(
             "Previous Frame X100",
             dtk::Key::Left,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -115,7 +115,7 @@ namespace toucan
         _actions["Time/FrameNextX100"] = std::make_shared<dtk::Action>(
             "Next Frame X100",
             dtk::Key::Right,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -247,7 +247,7 @@ namespace toucan
         _actions["Time/InOutPointSelection"] = std::make_shared<dtk::Action>(
             "Set In/Out Points To Selection",
             dtk::Key::P,
-            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)

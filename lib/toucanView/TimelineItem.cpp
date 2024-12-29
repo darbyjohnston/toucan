@@ -30,7 +30,7 @@ namespace toucan
         _setMousePressEnabled(
             true,
             0,
-            0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control));
+            0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier));
 
         _timeline = file->getTimeline();
         _timeRange = file->getTimelineWrapper()->getTimeRange();
@@ -308,7 +308,7 @@ namespace toucan
         if (0 == event.button &&
             (0 == event.modifiers ||
                 static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers ||
-                static_cast<int>(dtk::KeyModifier::Control) == event.modifiers))
+                static_cast<int>(dtk::commandKeyModifier) == event.modifiers))
         {
             std::shared_ptr<IItem> selection;
             _select(shared_from_this(), event.pos, selection);
@@ -330,7 +330,7 @@ namespace toucan
                     selectionNew = selectionPrev;
                     selectionNew.insert(selectionNew.end(), item);
                 }
-                else if (static_cast<int>(dtk::KeyModifier::Control) == event.modifiers)
+                else if (static_cast<int>(dtk::commandKeyModifier) == event.modifiers)
                 {
                     selectionNew = selectionPrev;
                     auto i = std::find(selectionNew.begin(), selectionNew.end(), item);

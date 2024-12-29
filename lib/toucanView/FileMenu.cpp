@@ -31,7 +31,7 @@ namespace toucan
             "Open",
             "FileOpen",
             dtk::Key::O,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this, appWeak, windowWeak]
             {
                 auto context = getContext();
@@ -64,7 +64,7 @@ namespace toucan
             "Close",
             "FileClose",
             dtk::Key::E,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this] { _filesModel->close(); });
         _actions["File/Close"]->toolTip = "Close the current file";
         addItem(_actions["File/Close"]);
@@ -73,7 +73,7 @@ namespace toucan
             "Close All",
             "FileCloseAll",
             dtk::Key::E,
-            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier),
             [this] { _filesModel->closeAll(); });
         _actions["File/CloseAll"]->toolTip = "Close all files";
         addItem(_actions["File/CloseAll"]);
@@ -107,7 +107,7 @@ namespace toucan
         _actions["File/Exit"] = std::make_shared<dtk::Action>(
             "Exit",
             dtk::Key::Q,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [appWeak]
             {
                 if (auto app = appWeak.lock())

@@ -177,7 +177,7 @@ namespace toucan
         _actions["View/HUD"] = std::make_shared<dtk::Action>(
             "HUD",
             dtk::Key::H,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [appWeak](bool value)
             {
                 if (auto app = appWeak.lock())
