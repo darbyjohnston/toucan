@@ -603,6 +603,7 @@ OfxStatus UnsharpMaskPlugin::_render(
     _paramSuite->paramGetValue(_contrastParam[handle], &contrast);
     _paramSuite->paramGetValue(_thresholdParam[handle], &threshold);
 
+    //! \bug The unsharp_mask() function does not seem to be working?
     OIIO::ImageBufAlgo::unsharp_mask(
         outputBuf,
         sourceBuf,
