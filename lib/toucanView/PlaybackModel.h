@@ -7,6 +7,9 @@
 
 #include <dtk/core/ObservableValue.h>
 #include <dtk/core/Timer.h>
+#include <dtk/core/Vector.h>
+
+#include <optional>
 
 namespace toucan
 {
@@ -39,6 +42,14 @@ namespace toucan
         Stop,
         Forward,
         Reverse
+    };
+
+    //! Timeline view state.
+    struct TimelineViewState
+    {
+        dtk::V2I pos;
+        double scale = 1.0;
+        bool frameView = true;
     };
 
     //! Playback model.
@@ -110,6 +121,12 @@ namespace toucan
         //! Toggle the playback.
         void togglePlayback();
 
+        //! Get the timeline view state.
+        const std::optional<TimelineViewState>& getViewState() const;
+
+        //! Set the timeline view state.
+        void setViewState(const std::optional<TimelineViewState>&);
+
     private:
         void _timeUpdate();
 
@@ -118,6 +135,7 @@ namespace toucan
         std::shared_ptr<dtk::ObservableValue<OTIO_NS::TimeRange> > _inOutRange;
         std::shared_ptr<dtk::ObservableValue<Playback> > _playback;
         Playback _playbackPrev = Playback::Forward;
+        std::optional<TimelineViewState> _viewState;
         std::shared_ptr<dtk::Timer> _timer;
     };
 }

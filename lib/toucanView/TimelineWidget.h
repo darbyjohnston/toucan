@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <toucanView/PlaybackModel.h>
 #include <toucanView/TimeUnitsModel.h>
 
 #include <dtk/ui/ScrollWidget.h>
@@ -37,20 +38,20 @@ namespace toucan
         //! Set the view zoom.
         void setViewZoom(double);
 
-        //! Set the view zoom.
+        //! Set the view zoom with focus.
         void setViewZoom(double, const dtk::V2I& focus);
 
         //! Get whether frame view is enabled.
         bool hasFrameView() const;
-
-        //! Frame the view.
-        void frameView();
 
         //! Observe whether frame view is enabled.
         std::shared_ptr<dtk::IObservableValue<bool> > observeFrameView() const;
 
         //! Set whether frame view is enabled.
         void setFrameView(bool);
+
+        //! Frame the view.
+        void frameView();
 
         void setGeometry(const dtk::Box2I&) override;
         void sizeHintEvent(const dtk::SizeHintEvent&) override;
@@ -78,8 +79,9 @@ namespace toucan
         OTIO_NS::RationalTime _currentTime;
         OTIO_NS::TimeRange _inOutRange;
         double _scale = 100.0;
-        bool _sizeInit = true;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
+        bool _sizeInit = true;
+        std::optional<TimelineViewState> _viewState;
 
         std::shared_ptr<dtk::ScrollWidget> _scrollWidget;
         std::shared_ptr<TimelineItem> _timelineItem;

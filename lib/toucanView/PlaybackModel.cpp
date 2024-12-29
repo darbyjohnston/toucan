@@ -344,6 +344,16 @@ namespace toucan
             Playback::Stop);
     }
 
+    const std::optional<TimelineViewState>& PlaybackModel::getViewState() const
+    {
+        return _viewState;
+    }
+
+    void PlaybackModel::setViewState(const std::optional<TimelineViewState>& value)
+    {
+        _viewState = value;
+    }
+
     void PlaybackModel::_timeUpdate()
     {
         switch (_playback->get())
