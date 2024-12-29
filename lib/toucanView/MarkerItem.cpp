@@ -60,6 +60,7 @@ namespace toucan
     void MarkerItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>& marker,
         const OTIO_NS::TimeRange& timeRange,
         const std::shared_ptr<IWidget>& parent)
@@ -67,6 +68,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
+            file,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(marker),
             timeRange,
             "toucan::ClipItem",
@@ -90,12 +92,13 @@ namespace toucan
     std::shared_ptr<MarkerItem> MarkerItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>& marker,
         const OTIO_NS::TimeRange& timeRange,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<MarkerItem>();
-        out->_init(context, app, marker, timeRange, parent);
+        out->_init(context, app, file, marker, timeRange, parent);
         return out;
     }
 

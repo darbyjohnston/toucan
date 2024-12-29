@@ -153,7 +153,7 @@ namespace toucan
             _text.push_back(std::make_pair("Trimmed range:",
                 toString(item->trimmed_range(), _timeUnits)));
 
-            //! \todo Calling trimmed_range_in_parent() on a stack causes a crash?
+            //! \bug Calling trimmed_range_in_parent() on a stack causes a crash?
             text.clear();
             auto stack = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Stack>(item);
             if (!stack && item->trimmed_range_in_parent().has_value())

@@ -20,6 +20,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
+            file,
             nullptr,
             file->getTimelineWrapper()->getTimeRange(),
             "toucan::TimelineItem",
@@ -37,7 +38,13 @@ namespace toucan
         _thumbnails.setMax(100);
         _thumbnailGenerator = file->getThumbnailGenerator();
 
-        StackItem::create(context, app, _timeline->tracks(), _timeline, shared_from_this());
+        StackItem::create(
+            context,
+            app,
+            file,
+            _timeline->tracks(),
+            _timeline,
+            shared_from_this());
 
         _selectionObserver = dtk::ListObserver<SelectionItem>::create(
             _selectionModel->observeSelection(),

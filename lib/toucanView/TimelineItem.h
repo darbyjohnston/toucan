@@ -12,7 +12,6 @@
 
 namespace toucan
 {
-    class File;
     class SelectionModel;
 
     //! Timeline item.

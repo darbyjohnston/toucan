@@ -14,6 +14,7 @@ namespace toucan
     void TrackItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
@@ -27,9 +28,13 @@ namespace toucan
                 timeline->global_start_time().value() + timeRange.start_time(),
                 timeRange.duration());
         }
+        timeRange = OTIO_NS::TimeRange(
+            timeRange.start_time().round(),
+            timeRange.duration().round());
         IItem::_init(
             context,
             app,
+            file,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
             timeRange,
             "toucan::TrackItem",
@@ -67,6 +72,7 @@ namespace toucan
                 auto markerItem = MarkerItem::create(
                     context,
                     app,
+                    file,
                     marker,
                     markerTimeRange,
                     _markerLayout);
@@ -83,11 +89,11 @@ namespace toucan
                     OTIO_NS::Track::Kind::video == track->kind() ?
                     dtk::Color4F(.4F, .4F, .6F) :
                     dtk::Color4F(.4F, .6F, .4F);
-                ClipItem::create(context, app, clip, timeline , color, _timeLayout);
+                ClipItem::create(context, app, file, clip, timeline , color, _timeLayout);
             }
             else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(child))
             {
-                GapItem::create( context, app, gap, timeline, _timeLayout);
+                GapItem::create( context, app, file, gap, timeline, _timeLayout);
             }
         }
 
@@ -100,12 +106,13 @@ namespace toucan
     std::shared_ptr<TrackItem> TrackItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<TrackItem>();
-        out->_init(context, app, track, timeline, parent);
+        out->_init(context, app, file, track, timeline, parent);
         return out;
     }
 

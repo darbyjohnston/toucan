@@ -160,9 +160,10 @@ namespace toucan
 
     void TimelineWidget::setGeometry(const dtk::Box2I& value)
     {
-        const bool changed = value != getGeometry();
+        const dtk::Box2I viewportPrev = _scrollWidget->getViewport();
         IWidget::setGeometry(value);
         _scrollWidget->setGeometry(value);
+        const bool changed = _scrollWidget->getViewport() != viewportPrev;
         if (_sizeInit || (changed && _frameView->get()))
         {
             _sizeInit = false;

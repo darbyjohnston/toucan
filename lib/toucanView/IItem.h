@@ -7,12 +7,14 @@
 #include <toucanView/TimeUnitsModel.h>
 
 #include <dtk/ui/IWidget.h>
+#include <dtk/ui/Menu.h>
 
 #include <opentimelineio/timeline.h>
 
 namespace toucan
 {
     class App;
+    class File;
 
     //! Base class for timeline items.
     class IItem : public ITimeWidget
@@ -21,6 +23,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const OTIO_NS::TimeRange&,
             const std::string& objectName,
@@ -42,14 +45,20 @@ namespace toucan
         void setSelected(bool);
 
         void setGeometry(const dtk::Box2I&) override;
+        void mousePressEvent(dtk::MouseClickEvent&) override;
+        void mouseReleaseEvent(dtk::MouseClickEvent&) override;
 
     protected:
         virtual void _timeUnitsUpdate();
+        virtual void _buildMenu(const std::shared_ptr<dtk::Menu>&);
 
+        std::weak_ptr<App> _app;
+        std::weak_ptr<File> _file;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata> _object;
         TimeUnits _timeUnits = TimeUnits::First;
         dtk::Box2I _selectionRect;
         bool _selected = false;
+        std::shared_ptr<dtk::Menu> _menu;
 
     private:
         std::shared_ptr<dtk::ValueObserver<TimeUnits> > _timeUnitsObserver;

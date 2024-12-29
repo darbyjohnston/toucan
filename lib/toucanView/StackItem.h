@@ -18,6 +18,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const std::shared_ptr<IWidget>& parent);
@@ -29,6 +30,7 @@ namespace toucan
         static std::shared_ptr<StackItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const std::shared_ptr<IWidget>& parent = nullptr);

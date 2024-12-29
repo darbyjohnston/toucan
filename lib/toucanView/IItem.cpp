@@ -4,12 +4,15 @@
 #include "IItem.h"
 
 #include "App.h"
+#include "File.h"
+#include "PlaybackModel.h"
 
 namespace toucan
 {
     void IItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
         const OTIO_NS::TimeRange& timeRange,
         const std::string& objectName,
@@ -17,6 +20,8 @@ namespace toucan
     {
         ITimeWidget::_init(context, timeRange, objectName, parent);
 
+        _app = app;
+        _file = file;
         _object = object;
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
@@ -60,6 +65,73 @@ namespace toucan
         _selectionRect = value;
     }
 
+    void IItem::mousePressEvent(dtk::MouseClickEvent& event)
+    {
+        ITimeWidget::mousePressEvent(event);
+        if ((1 == event.button && 0 == event.modifiers) ||
+            (0 == event.button && static_cast<int>(dtk::KeyModifier::Super) == event.modifiers))
+        {
+            event.accept = true;
+            _menu = dtk::Menu::create(getContext());
+            _buildMenu(_menu);
+            auto weak = std::weak_ptr<IItem>(std::dynamic_pointer_cast<IItem>(shared_from_this()));
+            _menu->setCloseCallback(
+                [weak]
+                {
+                    if (auto item = weak.lock())
+                    {
+                        item->_menu.reset();
+                    }
+                });
+            _menu->open(
+                getWindow(),
+                dtk::Box2I(event.pos.x, event.pos.y, 0, 0));
+        }
+    }
+
+    void IItem::mouseReleaseEvent(dtk::MouseClickEvent& event)
+    {
+        ITimeWidget::mouseReleaseEvent(event);
+    }
+
     void IItem::_timeUnitsUpdate()
     {}
+
+    void IItem::_buildMenu(const std::shared_ptr<dtk::Menu>& menu)
+    {
+        auto action = std::make_shared<dtk::Action>(
+            "Go To Start",
+            [this]
+            {
+                if (auto file = _file.lock())
+                {
+                    file->getPlaybackModel()->setCurrentTime(_timeRange.start_time());
+                }
+            });
+        menu->addItem(action);
+        menu->addDivider();
+        if (_timeRange.duration().value() > 1.0)
+        {
+            action = std::make_shared<dtk::Action>(
+                "Set In/Out Points",
+                [this]
+                {
+                    if (auto file = _file.lock())
+                    {
+                        file->getPlaybackModel()->setInOutRange(_timeRange);
+                    }
+                });
+            menu->addItem(action);
+        }
+        action = std::make_shared<dtk::Action>(
+            "Reset In/Out Points",
+            [this]
+            {
+                if (auto file = _file.lock())
+                {
+                    file->getPlaybackModel()->resetInOutPoints();
+                }
+            });
+        menu->addItem(action);
+    }
 }
