@@ -263,6 +263,10 @@ namespace toucan
         setItemEnabled(_actions["View/Frame"], file);
         setItemEnabled(_actions["View/Flip"], file);
         setItemEnabled(_actions["View/Flop"], file);
+        setItemEnabled(_actions["View/Red"], file);
+        setItemEnabled(_actions["View/Green"], file);
+        setItemEnabled(_actions["View/Blue"], file);
+        setItemEnabled(_actions["View/Alpha"], file);
         setItemEnabled(_actions["View/HUD"], file);
     }
 }

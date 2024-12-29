@@ -3,7 +3,11 @@
 
 #pragma once
 
+#include <toucanView/SelectionModel.h>
+
 #include <dtk/ui/Menu.h>
+
+#include <opentimelineio/version.h>
 
 #include <map>
 
@@ -37,10 +41,16 @@ namespace toucan
         void _menuUpdate();
 
         std::shared_ptr<File> _file;
+        OTIO_NS::TimeRange _timeRange;
+        OTIO_NS::TimeRange _inOutRange;
+        bool _selection = false;
 
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
+        std::shared_ptr<dtk::ValueObserver<OTIO_NS::TimeRange> > _inOutRangeObserver;
+        std::shared_ptr<dtk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }
 

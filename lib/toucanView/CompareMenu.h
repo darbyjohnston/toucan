@@ -35,13 +35,17 @@ namespace toucan
         const std::map<std::string, std::shared_ptr<dtk::Action> >& getActions() const;
 
     private:
+        void _menuUpdate();
+
         std::shared_ptr<FilesModel> _filesModel;
+        std::shared_ptr<File> _file;
 
         std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
         std::vector<std::shared_ptr<dtk::Action> > _bFileActions;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
+        std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<dtk::ValueObserver<int> > _bIndexObserver;
         std::shared_ptr<dtk::ValueObserver<CompareOptions> > _modeObserver;
     };

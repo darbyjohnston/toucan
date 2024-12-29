@@ -109,7 +109,9 @@ namespace toucan
                 }
             });
         menu->addItem(action);
+
         menu->addDivider();
+
         if (_timeRange.duration().value() > 1.0)
         {
             action = std::make_shared<dtk::Action>(
@@ -123,6 +125,7 @@ namespace toucan
                 });
             menu->addItem(action);
         }
+
         action = std::make_shared<dtk::Action>(
             "Reset In/Out Points",
             [this]
@@ -133,5 +136,13 @@ namespace toucan
                 }
             });
         menu->addItem(action);
+        bool enabled = true;
+        if (auto file = _file.lock())
+        {
+            enabled =
+                file->getPlaybackModel()->getInOutRange() !=
+                file->getPlaybackModel()->getTimeRange();
+        }
+        menu->setItemEnabled(action, enabled);
     }
 }

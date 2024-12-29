@@ -102,6 +102,7 @@ namespace toucan
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
+                _menuUpdate();
             });
     }
 

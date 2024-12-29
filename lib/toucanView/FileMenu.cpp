@@ -88,7 +88,7 @@ namespace toucan
 
         _actions["File/Next"] = std::make_shared<dtk::Action>(
             "Next",
-            dtk::Key::PageUp,
+            dtk::Key::PageDown,
             0,
             [this] { _filesModel->next(); });
         _actions["File/Next"]->toolTip = "Switch to the next file";
@@ -96,7 +96,7 @@ namespace toucan
 
         _actions["File/Prev"] = std::make_shared<dtk::Action>(
             "Previous",
-            dtk::Key::PageDown,
+            dtk::Key::PageUp,
             0,
             [this] { _filesModel->prev(); });
         _actions["File/Prev"]->toolTip = "Switch to the previous file";

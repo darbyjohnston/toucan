@@ -60,7 +60,7 @@ namespace toucan
 
         _actions["Compare/Overlay"] = std::make_shared<dtk::Action>(
             "Overlay",
-            dtk::Key::O,
+            dtk::Key::E,
             static_cast<int>(dtk::KeyModifier::Shift),
             [this](bool)
             {
@@ -126,6 +126,14 @@ namespace toucan
                 }
             });
 
+        _fileObserver = dtk::ValueObserver<std::shared_ptr<File> >::create(
+            app->getFilesModel()->observeCurrent(),
+            [this](const std::shared_ptr<File>& file)
+            {
+                _file = file;
+                _menuUpdate();
+            });
+
         _bIndexObserver = dtk::ValueObserver<int>::create(
             _filesModel->observeBIndex(),
             [this](int index)
@@ -153,5 +161,17 @@ namespace toucan
     const std::map<std::string, std::shared_ptr<dtk::Action> >& CompareMenu::getActions() const
     {
         return _actions;
+    }
+
+    void CompareMenu::_menuUpdate()
+    {
+        const bool file = _file.get();
+        setSubMenuEnabled(_menus["BFile"], file);
+        setItemEnabled(_actions["Compare/A"], file);
+        setItemEnabled(_actions["Compare/B"], file);
+        setItemEnabled(_actions["Compare/Split"], file);
+        setItemEnabled(_actions["Compare/Overlay"], file);
+        setItemEnabled(_actions["Compare/Horizontal"], file);
+        setItemEnabled(_actions["Compare/Vertical"], file);
     }
 }
