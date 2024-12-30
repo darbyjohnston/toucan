@@ -4,6 +4,7 @@
 #include "Util.h"
 
 #include <cctype>
+#include <map>
 #include <sstream>
 
 namespace toucan
@@ -80,6 +81,41 @@ namespace toucan
         if (!value.empty() && '0' == value[0])
         {
             out = value.size();
+        }
+        return out;
+    }
+
+    std::vector<std::filesystem::path> getSequence(const std::filesystem::path& path)
+    {
+        std::vector<std::filesystem::path> out;
+        const auto split = splitFileNameNumber(path.stem().string());
+        if (split.second.empty())
+        {
+            out.push_back(path);
+        }
+        else
+        {
+            std::map<int64_t, std::filesystem::path> map;
+            const size_t padding = getNumberPadding(split.second);
+            const std::filesystem::path extension = path.extension();
+            for (auto const& entry : std::filesystem::directory_iterator(path.parent_path()))
+            {
+                if (entry.is_regular_file())
+                {
+                    const auto split2 = splitFileNameNumber(entry.path().stem().string());
+                    if (split.first == split2.first &&
+                        !split2.second.empty() &&
+                        padding == getNumberPadding(split2.second) &&
+                        entry.path().extension() == extension)
+                    {
+                        map[std::atoi(split2.second.c_str())] = entry.path();
+                    }
+                }
+            }
+            for (const auto& i : map)
+            {
+                out.push_back(i.second);
+            }
         }
         return out;
     }

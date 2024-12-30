@@ -6,9 +6,12 @@
 #include "App.h"
 #include "File.h"
 
+#include <toucanRender/Util.h>
+
 #include <dtk/ui/DrawUtil.h>
 
 #include <opentimelineio/externalReference.h>
+#include <opentimelineio/imageSequenceReference.h>
 
 namespace toucan
 {
@@ -161,6 +164,25 @@ namespace toucan
                 {
                     auto file = _file.lock();
                     const std::filesystem::path path = file->getTimelineWrapper()->getMediaPath(externalReference->target_url());
+                    auto app = _app.lock();
+                    app->open(path);
+                });
+            menu->addItem(action);
+            menu->addDivider();
+        }
+        else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(_clip->media_reference()))
+        {
+            auto action = std::make_shared<dtk::Action>(
+                "Open Image Sequence",
+                [this, sequenceRef]
+                {
+                    auto file = _file.lock();
+                    const std::string path = getSequenceFrame(
+                        file->getTimelineWrapper()->getMediaPath(sequenceRef->target_url_base()),
+                        sequenceRef->name_prefix(),
+                        sequenceRef->start_frame(),
+                        sequenceRef->frame_zero_padding(),
+                        sequenceRef->name_suffix());
                     auto app = _app.lock();
                     app->open(path);
                 });

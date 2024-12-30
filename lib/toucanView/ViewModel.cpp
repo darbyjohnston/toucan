@@ -105,6 +105,7 @@ namespace toucan
     bool GlobalViewOptions::operator == (const GlobalViewOptions& other) const
     {
         return
+            hud == other.hud &&
             background == other.background &&
             solidColor == other.solidColor &&
             checkersColor0 == other.checkersColor0 &&

@@ -20,12 +20,6 @@ namespace toucan
         //! Swap the numerator and denominator.
         AVRational swap(AVRational);
 
-        //! Get a list of supported video extensions.
-        std::vector<std::string> getVideoExtensions();
-
-        //! Check if the given extension is supported.
-        bool hasVideoExtension(const std::string&);
-
         //! Video codecs.
         enum class VideoCodec
         {

@@ -23,18 +23,6 @@ namespace toucan
             return AVRational({ value.den, value.num });
         }
 
-        std::vector<std::string> getVideoExtensions()
-        {
-            return std::vector<std::string>({ ".mov", ".mp4", ".m4v", ".y4m" });
-        }
-
-        bool hasVideoExtension(const std::string& value)
-        {
-            const std::vector<std::string> extensions = getVideoExtensions();
-            const auto i = std::find(extensions.begin(), extensions.end(), toLower(value));
-            return i != extensions.end();
-        }
-
         namespace
         {
             std::vector<std::pair<int, std::string> > _getVideoCodecs()

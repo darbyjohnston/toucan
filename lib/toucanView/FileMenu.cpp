@@ -8,6 +8,8 @@
 #include "MainWindow.h"
 #include "SelectionModel.h"
 
+#include <toucanRender/Read.h>
+
 #include <dtk/ui/Action.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/RecentFilesModel.h>
@@ -45,9 +47,17 @@ namespace toucan
                 options.extensions.push_back(".otio");
                 options.extensions.push_back(".otiod");
                 options.extensions.push_back(".otioz");
-                options.extensions.push_back(".mov");
-                options.extensions.push_back(".mp4");
-                options.extensions.push_back(".m4v");
+                std::set<std::string> extensionsSet;
+                std::vector<std::string> extensions = ImageReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                extensions = SequenceReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                extensions = MovieReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                options.extensions.insert(
+                    options.extensions.end(),
+                    extensionsSet.begin(),
+                    extensionsSet.end());
                 fileBrowserSystem->setOptions(options);
                 fileBrowserSystem->open(
                     windowWeak.lock(),

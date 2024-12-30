@@ -200,6 +200,7 @@ namespace toucan
             _scrollWidget->getViewport().w())
         {
             setFrameView(true);
+            frameView();
         }
     }
 

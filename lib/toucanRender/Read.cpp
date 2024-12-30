@@ -11,35 +11,44 @@
 
 namespace toucan
 {
-    ReadNode::ReadNode(
+    IReadNode::IReadNode(
+        const std::string& name,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IImageNode(name, inputs)
+    {}
+
+    IReadNode::~IReadNode()
+    {}
+
+    const OIIO::ImageSpec& IReadNode::getSpec() const
+    {
+        return _spec;
+    }
+
+    const OTIO_NS::TimeRange& IReadNode::getTimeRange() const
+    {
+        return _timeRange;
+    }
+
+    ImageReadNode::ImageReadNode(
         const std::filesystem::path& path,
         const MemoryReference& memoryReference,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("Read", inputs),
+        IReadNode("ImageRead", inputs),
         _path(path),
         _memoryReader(getMemoryReader(memoryReference))
     {
-        // Open the file and get information.
-        if (ffmpeg::hasVideoExtension(path.extension().string()))
+        _input = OIIO::ImageInput::open(_path.string(), nullptr, _memoryReader.get());
+        if (!_input)
         {
-            _ffRead = std::make_unique<ffmpeg::Read>(path, memoryReference);
-            _spec = _ffRead->getSpec();
-            _timeRange = _ffRead->getTimeRange();
+            std::stringstream ss;
+            ss << "Cannot open file: " << _path.string();
+            throw std::runtime_error(ss.str());
         }
-        else
-        {
-            _input = OIIO::ImageInput::open(_path.string(), nullptr, _memoryReader.get());
-            if (!_input)
-            {
-                std::stringstream ss;
-                ss << "Cannot open file: " << _path.string();
-                throw std::runtime_error(ss.str());
-            }
-            _spec = _input->spec();
-        }
+        _spec = _input->spec();
     }
 
-    ReadNode::~ReadNode()
+    ImageReadNode::~ImageReadNode()
     {
         if (_input)
         {
@@ -47,85 +56,62 @@ namespace toucan
         }
     }
 
-    const OIIO::ImageSpec& ReadNode::getSpec() const
-    {
-        return _spec;
-    }
-
-    const OTIO_NS::TimeRange& ReadNode::getTimeRange() const
-    {
-        return _timeRange;
-    }
-
-    std::string ReadNode::getLabel() const
+    std::string ImageReadNode::getLabel() const
     {
         std::stringstream ss;
         ss << _name << ": " << _path.filename().string();
         return ss.str();
     }
 
-    OIIO::ImageBuf ReadNode::exec()
+    OIIO::ImageBuf ImageReadNode::exec()
     {
         OIIO::ImageBuf out;
 
-        if (_ffRead)
+        // Read the image.
+        auto pixels = std::unique_ptr<unsigned char[]>(
+            new unsigned char[_spec.width * _spec.height * _spec.nchannels * _spec.channel_bytes()]);
+        _input->read_image(
+            0,
+            0,
+            0,
+            _spec.nchannels,
+            _spec.format,
+            &pixels[0]);
+
+        OIIO::ImageBuf buf(
+            OIIO::ImageSpec(_spec.width, _spec.height, _spec.nchannels, _spec.format),
+            pixels.get(),
+            _spec.nchannels * _spec.channel_bytes(),
+            _spec.width * _spec.nchannels * _spec.channel_bytes(),
+            0);
+
+        const auto& spec = buf.spec();
+        if (3 == spec.nchannels)
         {
-            // Get the time.
-            OTIO_NS::RationalTime offsetTime = _time;
-            if (!_timeOffset.is_invalid_time())
-            {
-                offsetTime -= _timeOffset;
-            }
-
-            // Read the image.
-            out = _ffRead->getImage(offsetTime);
-
-            const auto& spec = out.spec();
-            if (3 == spec.nchannels)
-            {
-                // Add an alpha channel.
-                const int channelOrder[] = { 0, 1, 2, -1 };
-                const float channelValues[] = { 0, 0, 0, 1.0 };
-                const std::string channelNames[] = { "", "", "", "A" };
-                out = OIIO::ImageBufAlgo::channels(out, 4, channelOrder, channelValues, channelNames);
-            }
+            // Add an alpha channel.
+            const int channelOrder[] = { 0, 1, 2, -1 };
+            const float channelValues[] = { 0, 0, 0, 1.0 };
+            const std::string channelNames[] = { "", "", "", "A" };
+            out = OIIO::ImageBufAlgo::channels(buf, 4, channelOrder, channelValues, channelNames);
         }
         else
         {
-            // Read the image.
-            auto pixels = std::unique_ptr<unsigned char[]>(
-                new unsigned char[_spec.width * _spec.height * _spec.nchannels * _spec.channel_bytes()]);
-            _input->read_image(
-                0,
-                0,
-                0,
-                _spec.nchannels,
-                _spec.format,
-                &pixels[0]);
-
-            OIIO::ImageBuf buf(
-                OIIO::ImageSpec(_spec.width, _spec.height, _spec.nchannels, _spec.format),
-                pixels.get(),
-                _spec.nchannels * _spec.channel_bytes(),
-                _spec.width * _spec.nchannels * _spec.channel_bytes(),
-                0);
-
-            const auto& spec = buf.spec();
-            if (3 == spec.nchannels)
-            {
-                // Add an alpha channel.
-                const int channelOrder[] = { 0, 1, 2, -1 };
-                const float channelValues[] = { 0, 0, 0, 1.0 };
-                const std::string channelNames[] = { "", "", "", "A" };
-                out = OIIO::ImageBufAlgo::channels(buf, 4, channelOrder, channelValues, channelNames);
-            }
-            else
-            {
-                OIIO::ImageBufAlgo::copy(out, buf);
-            }
+            OIIO::ImageBufAlgo::copy(out, buf);
         }
 
         return out;
+    }
+
+    std::vector<std::string> ImageReadNode::getExtensions()
+    {
+        return std::vector<std::string>({ ".exr", ".tif", ".tiff", ".jpg", ".jpeg", ".png" });
+    }
+
+    bool ImageReadNode::hasExtension(const std::string& value)
+    {
+        const std::vector<std::string> extensions = getExtensions();
+        const auto i = std::find(extensions.begin(), extensions.end(), toLower(value));
+        return i != extensions.end();
     }
 
     SequenceReadNode::SequenceReadNode(
@@ -138,7 +124,7 @@ namespace toucan
         int frameZeroPadding,
         const MemoryReferences& memoryReferences,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode("SequenceRead", inputs),
+        IReadNode("SequenceRead", inputs),
         _base(base),
         _namePrefix(namePrefix),
         _nameSuffix(nameSuffix),
@@ -165,6 +151,9 @@ namespace toucan
         {
             _spec = input->spec();
         }
+        _timeRange = OTIO_NS::TimeRange(
+            OTIO_NS::RationalTime(_startFrame, _rate),
+            OTIO_NS::RationalTime(1.0, _rate));
     }
 
     SequenceReadNode::~SequenceReadNode()
@@ -180,11 +169,6 @@ namespace toucan
             _frameZeroPadding,
             _nameSuffix);
         return ss.str();
-    }
-
-    const OIIO::ImageSpec& SequenceReadNode::getSpec() const
-    {
-        return _spec;
     }
 
     OIIO::ImageBuf SequenceReadNode::exec()
@@ -246,5 +230,79 @@ namespace toucan
         }
 
         return out;
+    }
+
+    std::vector<std::string> SequenceReadNode::getExtensions()
+    {
+        return std::vector<std::string>({ ".exr", ".tif", ".png" });
+    }
+
+    bool SequenceReadNode::hasExtension(const std::string& value)
+    {
+        const std::vector<std::string> extensions = getExtensions();
+        const auto i = std::find(extensions.begin(), extensions.end(), toLower(value));
+        return i != extensions.end();
+    }
+
+    MovieReadNode::MovieReadNode(
+        const std::filesystem::path& path,
+        const MemoryReference& memoryReference,
+        const std::vector<std::shared_ptr<IImageNode> >& inputs) :
+        IReadNode("MovieReadNode", inputs),
+        _path(path),
+        _memoryReader(getMemoryReader(memoryReference))
+    {
+        _ffRead = std::make_unique<ffmpeg::Read>(path, memoryReference);
+        _spec = _ffRead->getSpec();
+        _timeRange = _ffRead->getTimeRange();
+    }
+
+    MovieReadNode::~MovieReadNode()
+    {}
+
+    std::string MovieReadNode::getLabel() const
+    {
+        std::stringstream ss;
+        ss << _name << ": " << _path.filename().string();
+        return ss.str();
+    }
+
+    OIIO::ImageBuf MovieReadNode::exec()
+    {
+        OIIO::ImageBuf out;
+
+        // Get the time.
+        OTIO_NS::RationalTime offsetTime = _time;
+        if (!_timeOffset.is_invalid_time())
+        {
+            offsetTime -= _timeOffset;
+        }
+
+        // Read the image.
+        out = _ffRead->getImage(offsetTime);
+
+        const auto& spec = out.spec();
+        if (3 == spec.nchannels)
+        {
+            // Add an alpha channel.
+            const int channelOrder[] = { 0, 1, 2, -1 };
+            const float channelValues[] = { 0, 0, 0, 1.0 };
+            const std::string channelNames[] = { "", "", "", "A" };
+            out = OIIO::ImageBufAlgo::channels(out, 4, channelOrder, channelValues, channelNames);
+        }
+
+        return out;
+    }
+
+    std::vector<std::string> MovieReadNode::getExtensions()
+    {
+        return std::vector<std::string>({ ".mov", ".mp4", ".m4v", ".y4m" });
+    }
+
+    bool MovieReadNode::hasExtension(const std::string& value)
+    {
+        const std::vector<std::string> extensions = getExtensions();
+        const auto i = std::find(extensions.begin(), extensions.end(), toLower(value));
+        return i != extensions.end();
     }
 }

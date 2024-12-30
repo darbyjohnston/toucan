@@ -33,6 +33,9 @@ namespace toucan
     //! Get the zero padding for the given number.
     size_t getNumberPadding(const std::string&);
 
+    //! Find an image sequence given a single frame.
+    std::vector<std::filesystem::path> getSequence(const std::filesystem::path&);
+
     //! Resize and position B to fit into A.
     IMATH_NAMESPACE::Box2i fit(
         const IMATH_NAMESPACE::V2i& a,

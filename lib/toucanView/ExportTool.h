@@ -56,7 +56,7 @@ namespace toucan
             int currentTab = 0;
             std::string imageBaseName = "render.";
             int imagePadding = 0;
-            std::string imageExtension = ".tiff";
+            std::string imageExtension = ".tif";
             std::string movieBaseName = "render";
             std::string movieExtension = ".mov";
             std::string movieCodec = "MJPEG";
