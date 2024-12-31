@@ -4,6 +4,7 @@
 #include "App.h"
 
 #include <toucanRender/FFmpegWrite.h>
+#include <toucanRender/Read.h>
 #include <toucanRender/Util.h>
 
 #include <dtk/core/CmdLine.h>
@@ -209,7 +210,7 @@ namespace toucan
 
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
-        if (ffmpeg::hasVideoExtension(outputPath.extension().string()))
+        if (MovieReadNode::hasExtension(outputPath.extension().string()))
         {
             ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
             ffmpeg::fromString(_options.videoCodec, videoCodec);
