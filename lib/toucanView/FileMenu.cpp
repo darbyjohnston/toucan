@@ -8,6 +8,8 @@
 #include "MainWindow.h"
 #include "SelectionModel.h"
 
+#include <toucanRender/Read.h>
+
 #include <dtk/ui/Action.h>
 #include <dtk/ui/FileBrowser.h>
 #include <dtk/ui/RecentFilesModel.h>
@@ -31,7 +33,7 @@ namespace toucan
             "Open",
             "FileOpen",
             dtk::Key::O,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this, appWeak, windowWeak]
             {
                 auto context = getContext();
@@ -45,9 +47,17 @@ namespace toucan
                 options.extensions.push_back(".otio");
                 options.extensions.push_back(".otiod");
                 options.extensions.push_back(".otioz");
-                options.extensions.push_back(".mov");
-                options.extensions.push_back(".mp4");
-                options.extensions.push_back(".m4v");
+                std::set<std::string> extensionsSet;
+                std::vector<std::string> extensions = ImageReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                extensions = SequenceReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                extensions = MovieReadNode::getExtensions();
+                extensionsSet.insert(extensions.begin(), extensions.end());
+                options.extensions.insert(
+                    options.extensions.end(),
+                    extensionsSet.begin(),
+                    extensionsSet.end());
                 fileBrowserSystem->setOptions(options);
                 fileBrowserSystem->open(
                     windowWeak.lock(),
@@ -64,7 +74,7 @@ namespace toucan
             "Close",
             "FileClose",
             dtk::Key::E,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this] { _filesModel->close(); });
         _actions["File/Close"]->toolTip = "Close the current file";
         addItem(_actions["File/Close"]);
@@ -73,7 +83,7 @@ namespace toucan
             "Close All",
             "FileCloseAll",
             dtk::Key::E,
-            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier),
             [this] { _filesModel->closeAll(); });
         _actions["File/CloseAll"]->toolTip = "Close all files";
         addItem(_actions["File/CloseAll"]);
@@ -88,7 +98,7 @@ namespace toucan
 
         _actions["File/Next"] = std::make_shared<dtk::Action>(
             "Next",
-            dtk::Key::PageUp,
+            dtk::Key::PageDown,
             0,
             [this] { _filesModel->next(); });
         _actions["File/Next"]->toolTip = "Switch to the next file";
@@ -96,7 +106,7 @@ namespace toucan
 
         _actions["File/Prev"] = std::make_shared<dtk::Action>(
             "Previous",
-            dtk::Key::PageDown,
+            dtk::Key::PageUp,
             0,
             [this] { _filesModel->prev(); });
         _actions["File/Prev"]->toolTip = "Switch to the previous file";
@@ -107,7 +117,7 @@ namespace toucan
         _actions["File/Exit"] = std::make_shared<dtk::Action>(
             "Exit",
             dtk::Key::Q,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [appWeak]
             {
                 if (auto app = appWeak.lock())

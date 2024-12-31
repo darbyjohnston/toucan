@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <toucanView/ViewModel.h>
+
 #include <dtk/ui/IWidget.h>
 
 namespace toucan
@@ -38,7 +40,7 @@ namespace toucan
     private:
         std::shared_ptr<Viewport> _viewport;
         std::shared_ptr<HUDWidget> _hudWidget;
-        std::shared_ptr<dtk::ValueObserver<bool> > _hudObserver;
+        std::shared_ptr<dtk::ValueObserver<GlobalViewOptions> > _viewOptionsObserver;
     };
 }
 

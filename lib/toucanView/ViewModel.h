@@ -6,11 +6,23 @@
 #include <dtk/ui/Settings.h>
 #include <dtk/core/Context.h>
 #include <dtk/core/ObservableValue.h>
+#include <dtk/core/RenderOptions.h>
 
 #include <opentimelineio/timeline.h>
 
 namespace toucan
 {
+    //! View options.
+    struct ViewOptions
+    {
+        bool flip = false;
+        bool flop = false;
+        dtk::ChannelDisplay channelDisplay = dtk::ChannelDisplay::Color;
+
+        bool operator == (const ViewOptions&) const;
+        bool operator != (const ViewOptions&) const;
+    };
+
     //! View model.
     class ViewModel : public std::enable_shared_from_this<ViewModel>
     {
@@ -46,11 +58,46 @@ namespace toucan
         //! Set whether frame view is enabled.
         void setFrameView(bool);
 
+        //! Get the view options.
+        const ViewOptions& getOptions() const;
+
+        //! Observe the view options.
+        std::shared_ptr<dtk::IObservableValue<ViewOptions> > observeOptions() const;
+
+        //! Set the view options.
+        void setOptions(const ViewOptions&);
+
     private:
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomIn;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomOut;
         std::shared_ptr<dtk::ObservableValue<bool> > _zoomReset;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
+        std::shared_ptr<dtk::ObservableValue<ViewOptions> > _options;
+    };
+
+    //! View background options.
+    enum ViewBackground
+    {
+        Solid,
+        Checkers,
+
+        Count,
+        First = Solid
+    };
+    DTK_ENUM(ViewBackground);
+
+    //! Global view options.
+    struct GlobalViewOptions
+    {
+        bool hud = false;
+        ViewBackground background = ViewBackground::Solid;
+        dtk::Color4F solidColor = dtk::Color4F(0.F, 0.F, 0.F, 1.F);
+        dtk::Color4F checkersColor0 = dtk::Color4F(0.F, 0.F, 0.F, 1.F);
+        dtk::Color4F checkersColor1 = dtk::Color4F(1.F, 1.F, 1.F, 1.F);
+        int checkersSize = 50;
+
+        bool operator == (const GlobalViewOptions&) const;
+        bool operator != (const GlobalViewOptions&) const;
     };
 
     //! Global view model.
@@ -61,17 +108,17 @@ namespace toucan
 
         virtual ~GlobalViewModel();
 
-        //! Get whether the HUD is visible.
-        bool getHUD() const;
+        //! Get the view options.
+        const GlobalViewOptions& getOptions() const;
 
-        //! Observe whether the HUD is visible.
-        std::shared_ptr<dtk::IObservableValue<bool> > observeHUD() const;
+        //! Observe the view options.
+        std::shared_ptr<dtk::IObservableValue<GlobalViewOptions> > observeOptions() const;
 
-        //! Set whether the HUD is visible.
-        void setHUD(bool);
+        //! Set the view options.
+        void setOptions(const GlobalViewOptions&);
 
     private:
         std::shared_ptr<dtk::Settings> _settings;
-        std::shared_ptr<dtk::ObservableValue<bool> > _hud;
+        std::shared_ptr<dtk::ObservableValue<GlobalViewOptions> > _options;
     };
 }

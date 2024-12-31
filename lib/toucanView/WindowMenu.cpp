@@ -31,7 +31,7 @@ namespace toucan
             "Full Screen",
             "WindowFullScreen",
             dtk::Key::U,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [windowWeak](bool value)
             {
                 if (auto window = windowWeak.lock())

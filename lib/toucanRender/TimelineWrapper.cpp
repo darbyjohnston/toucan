@@ -5,7 +5,7 @@
 
 #include "Util.h"
 
-#include <toucanRender/FFmpegRead.h>
+#include <toucanRender/Read.h>
 
 #include <dtk/core/String.h>
 
@@ -241,9 +241,9 @@ namespace toucan
                 }
             }
         }
-        else
+        else if (MovieReadNode::hasExtension(path.extension().string()))
         {
-            auto read = std::make_shared<ffmpeg::Read>(path);
+            auto read = std::make_shared<MovieReadNode>(path);
             _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
             _timeline->tracks()->append_child(track);
@@ -253,6 +253,53 @@ namespace toucan
                 new OTIO_NS::ExternalReference(path.string()));
             clip->set_media_reference(ref);
             clip->set_source_range(read->getTimeRange());
+        }
+        else if (ImageReadNode::hasExtension(path.extension().string()) ||
+            SequenceReadNode::hasExtension(path.extension().string()))
+        {
+            const auto sequence = getSequence(path);
+            const auto split = splitFileNameNumber(sequence.front().stem().string());
+            if (split.second.empty())
+            {
+                auto read = std::make_shared<ImageReadNode>(path);
+                _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
+                _timeline->tracks()->append_child(track);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> clip(new OTIO_NS::Clip);
+                track->append_child(clip);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::ExternalReference> ref(
+                    new OTIO_NS::ExternalReference(path.string()));
+                clip->set_media_reference(ref);
+                clip->set_source_range(OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(0.0, 24.0),
+                    OTIO_NS::RationalTime(1.0, 24.0)));
+            }
+            else
+            {
+                const std::string base = sequence.front().parent_path().string();
+                const std::string prefix = split.first;
+                const std::string suffix = sequence.front().extension().string();
+                const int start = std::atoi(split.second.c_str());
+                const int step = 1;
+                const double rate = 24.0;
+                const int padding = getNumberPadding(split.second);
+                auto read = std::make_shared<SequenceReadNode>(base, prefix, suffix, start, 1, rate, padding);
+                _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
+                _timeline->tracks()->append_child(track);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> clip(new OTIO_NS::Clip);
+                track->append_child(clip);
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::ImageSequenceReference> ref(
+                    new OTIO_NS::ImageSequenceReference(base, prefix, suffix, start, 1, rate, padding));
+                clip->set_media_reference(ref);
+                clip->set_source_range(OTIO_NS::TimeRange(
+                    OTIO_NS::RationalTime(start, rate),
+                    OTIO_NS::RationalTime(sequence.size(), rate)));
+            }
+        }
+        else
+        {
+            throw std::runtime_error("Unrecognized file");
         }
 
         const auto globalStartTime = _timeline->global_start_time();

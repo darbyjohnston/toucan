@@ -5,7 +5,6 @@
 
 #include "App.h"
 #include "FilesModel.h"
-#include "PlaybackModel.h"
 #include "TimelineItem.h"
 
 namespace toucan
@@ -39,16 +38,33 @@ namespace toucan
             app->getFilesModel()->observeCurrent(),
             [this, appWeak](const std::shared_ptr<File>& file)
             {
+                if (_file)
+                {
+                    TimelineViewState viewState;
+                    viewState.pos = _scrollWidget->getScrollPos();
+                    viewState.scale = _scale;
+                    viewState.frameView = _frameView->get();
+                    _file->getPlaybackModel()->setViewState(viewState);
+                }
                 _file = file;
                 if (file)
                 {
                     _timeRange = file->getPlaybackModel()->getTimeRange();
-                    _sizeInit = true;
+                    _viewState = file->getPlaybackModel()->getViewState();
+                    if (_viewState.has_value())
+                    {
+                        _scale = _viewState->scale;
+                    }
+                    else
+                    {
+                        _sizeInit = true;
+                    }
 
                     _timelineItem = TimelineItem::create(
                         getContext(),
                         appWeak.lock(),
                         file);
+                    _timelineItem->setScale(_scale);
                     _timelineItem->setCurrentTimeCallback(
                         [this](const OTIO_NS::RationalTime& value)
                         {
@@ -123,20 +139,6 @@ namespace toucan
             _scrollWidget->getScrollPos());
     }
 
-    void TimelineWidget::frameView()
-    {
-        dtk::V2I pos = _scrollWidget->getScrollPos();
-        pos.x = 0;
-        _scrollWidget->setScrollPos(pos);
-        _scale = _getTimelineScale();
-        if (_timelineItem)
-        {
-            _timelineItem->setScale(_scale);
-        }
-        _setSizeUpdate();
-        _setDrawUpdate();
-    }
-
     bool TimelineWidget::hasFrameView() const
     {
         return _frameView->get();
@@ -158,14 +160,39 @@ namespace toucan
         }
     }
 
+    void TimelineWidget::frameView()
+    {
+        dtk::V2I pos = _scrollWidget->getScrollPos();
+        pos.x = 0;
+        _scrollWidget->setScrollPos(pos);
+        _scale = _getTimelineScale();
+        if (_timelineItem)
+        {
+            _timelineItem->setScale(_scale);
+        }
+        _setSizeUpdate();
+        _setDrawUpdate();
+    }
+
     void TimelineWidget::setGeometry(const dtk::Box2I& value)
     {
-        const bool changed = value != getGeometry();
+        const dtk::Box2I viewportPrev = _scrollWidget->getViewport();
         IWidget::setGeometry(value);
         _scrollWidget->setGeometry(value);
-        if (_sizeInit || (changed && _frameView->get()))
+        const bool changed = _scrollWidget->getViewport() != viewportPrev;
+        if (_sizeInit)
         {
             _sizeInit = false;
+            frameView();
+        }
+        else if (_viewState.has_value())
+        {
+            _scrollWidget->setScrollPos(_viewState->pos);
+            setFrameView(_viewState->frameView);
+            _viewState.reset();
+        }
+        else if (changed && _frameView->get())
+        {
             frameView();
         }
         else if (_timelineItem &&
@@ -173,6 +200,7 @@ namespace toucan
             _scrollWidget->getViewport().w())
         {
             setFrameView(true);
+            frameView();
         }
     }
 

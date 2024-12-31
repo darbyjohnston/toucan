@@ -55,30 +55,30 @@ namespace toucan
         const OTIO_NS::RationalTime& value,
         CurrentTime behavior)
     {
-        OTIO_NS::RationalTime time = value;
+        const OTIO_NS::TimeRange& timeRange = _inOutRange->get();
+        OTIO_NS::RationalTime time = value.rescaled_to(timeRange.duration()).round();
         if (!time.is_invalid_time())
         {
-            const OTIO_NS::TimeRange& range = _inOutRange->get();
             switch (behavior)
             {
             case CurrentTime::Clamp:
-                if (time > range.end_time_inclusive())
+                if (time > timeRange.end_time_inclusive())
                 {
-                    time = range.end_time_inclusive();
+                    time = timeRange.end_time_inclusive();
                 }
-                else if (time < range.start_time())
+                else if (time < timeRange.start_time())
                 {
-                    time = range.start_time();
+                    time = timeRange.start_time();
                 }
                 break;
             case CurrentTime::Loop:
-                if (time > range.end_time_inclusive())
+                if (time > timeRange.end_time_inclusive())
                 {
-                    time = range.start_time();
+                    time = timeRange.start_time();
                 }
-                else if (time < range.start_time())
+                else if (time < timeRange.start_time())
                 {
-                    time = range.end_time_inclusive();
+                    time = timeRange.end_time_inclusive();
                 }
                 break;
             default: break;
@@ -247,11 +247,15 @@ namespace toucan
 
     void PlaybackModel::setInOutRange(const OTIO_NS::TimeRange& value)
     {
+        const OTIO_NS::TimeRange timeRange = _timeRange->get();
+        OTIO_NS::TimeRange tmp(
+            value.start_time().rescaled_to(timeRange.duration()).round(),
+            value.duration().rescaled_to(timeRange.duration()).round());
         //! \bug OTIO_NS::TimeRange::clamped() seems to be off by one?
         //const OTIO_NS::TimeRange clamped = value.clamped(_timeRange->get());
-        const OTIO_NS::TimeRange clamped = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
-            std::max(value.start_time(), _timeRange->get().start_time()),
-            std::min(value.end_time_inclusive(), _timeRange->get().end_time_inclusive()));
+        OTIO_NS::TimeRange clamped = OTIO_NS::TimeRange::range_from_start_end_time_inclusive(
+            std::max(tmp.start_time(), timeRange.start_time()),
+            std::min(tmp.end_time_inclusive(), timeRange.end_time_inclusive()));
         _inOutRange->setIfChanged(clamped);
         if (_currentTime->get() < clamped.start_time())
         {
@@ -338,6 +342,16 @@ namespace toucan
             Playback::Stop == _playback->get() ?
             _playbackPrev :
             Playback::Stop);
+    }
+
+    const std::optional<TimelineViewState>& PlaybackModel::getViewState() const
+    {
+        return _viewState;
+    }
+
+    void PlaybackModel::setViewState(const std::optional<TimelineViewState>& value)
+    {
+        _viewState = value;
     }
 
     void PlaybackModel::_timeUpdate()

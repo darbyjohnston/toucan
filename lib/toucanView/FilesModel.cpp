@@ -24,16 +24,11 @@ namespace toucan
         "Horizontal",
         "Vertical");
 
-    DTK_ENUM_IMPL(
-        CompareTime,
-        "Relative",
-        "Absolute");
-
     bool CompareOptions::operator == (const CompareOptions& other) const
     {
         return
             mode == other.mode &&
-            time == other.time &&
+            matchStartTime == other.matchStartTime &&
             fitSize == other.fitSize;;
     }
 
@@ -59,11 +54,10 @@ namespace toucan
                 std::stringstream ss(i->get<std::string>());
                 ss >> compareOptions.mode;
             }
-            i = json.find("CompareTime");
-            if (i != json.end() && i->is_string())
+            i = json.find("MatchStartTime");
+            if (i != json.end() && i->is_boolean())
             {
-                std::stringstream ss(i->get<std::string>());
-                ss >> compareOptions.time;
+                compareOptions.matchStartTime = i->get<bool>();
             }
             i = json.find("FitSize");
             if (i != json.end() && i->is_boolean())
@@ -93,11 +87,7 @@ namespace toucan
             ss << _compareOptions->get().mode;
             json["CompareMode"] = ss.str();
         }
-        {
-            std::stringstream ss;
-            ss << _compareOptions->get().time;
-            json["CompareTime"] = ss.str();
-        }
+        json["MatchStartTime"] = _compareOptions->get().matchStartTime;
         json["FitSize"] = _compareOptions->get().fitSize;
         _settings->set("FilesModel", json);
     }
@@ -269,10 +259,7 @@ namespace toucan
                 {
                     bFile->getPlaybackModel()->setPlayback(Playback::Stop);
                 }
-                const OTIO_NS::RationalTime time =
-                    file->getPlaybackModel()->getCurrentTime() +
-                    _getBTimeOffset(file, bFile);
-                bFile->getPlaybackModel()->setCurrentTime(time);
+                _setBTime(file->getPlaybackModel()->getCurrentTime());
             }
             _bFile->setIfChanged(bFile);
         }
@@ -292,13 +279,9 @@ namespace toucan
     {
         if (_compareOptions->setIfChanged(value))
         {
-            auto file = _current->get();
-            auto bFile = _bFile->get();
-            if (file && bFile)
+            if (auto file = _current->get())
             {
-                bFile->getPlaybackModel()->setCurrentTime(
-                    file->getPlaybackModel()->getCurrentTime() +
-                    _getBTimeOffset(file, bFile));
+                _setBTime(file->getPlaybackModel()->getCurrentTime());
             }
         }
     }
@@ -320,17 +303,23 @@ namespace toucan
         return out;
     }
 
-    OTIO_NS::RationalTime FilesModel::_getBTimeOffset(
-        const std::shared_ptr<File>& file,
-        const std::shared_ptr<File>& bFile) const
+    void FilesModel::_setBTime(const OTIO_NS::RationalTime& value)
     {
-        OTIO_NS::RationalTime out(0.0, 1.0);
-        if (CompareTime::Relative == _compareOptions->get().time)
+        if (auto bFile = _getBFile())
         {
-            out = bFile->getPlaybackModel()->getTimeRange().start_time() -
-                file->getPlaybackModel()->getTimeRange().start_time();
+            const OTIO_NS::TimeRange timeRange = bFile->getPlaybackModel()->getTimeRange();
+            OTIO_NS::RationalTime tmp(value);
+            if (_compareOptions->get().matchStartTime)
+            {
+                auto file = _current->get();
+                const OTIO_NS::RationalTime offset =
+                    timeRange.start_time() -
+                    file->getPlaybackModel()->getTimeRange().start_time();
+                tmp = tmp + offset;
+            }
+            tmp = tmp.rescaled_to(timeRange.duration()).floor();
+            bFile->getPlaybackModel()->setCurrentTime(tmp);
         }
-        return out;
     }
 
     void FilesModel::_fileUpdate()
@@ -341,14 +330,7 @@ namespace toucan
                 file->getPlaybackModel()->observeCurrentTime(),
                 [this](const OTIO_NS::RationalTime& value)
                 {
-                    auto file = _current->get();
-                    auto bFile = _bFile->get();
-                    if (file && bFile)
-                    {
-                        bFile->getPlaybackModel()->setCurrentTime(
-                            value +
-                            _getBTimeOffset(file, bFile));
-                    }
+                    _setBTime(value);
                 });
         }
         else

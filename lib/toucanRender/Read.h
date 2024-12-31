@@ -13,36 +13,53 @@
 
 namespace toucan
 {
-    //! Read node.
-    class ReadNode : public IImageNode
+    //! Base class for read nodes.
+    class IReadNode : public IImageNode
     {
     public:
-        ReadNode(
-            const std::filesystem::path&,
-            const MemoryReference& = {},
+        IReadNode(
+            const std::string& name,
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
-        virtual ~ReadNode();
+        virtual ~IReadNode() = 0;
 
         const OIIO::ImageSpec& getSpec() const;
 
         const OTIO_NS::TimeRange& getTimeRange() const;
-        
-        std::string getLabel() const override;
 
-        OIIO::ImageBuf exec() override;
-
-    private:
-        std::filesystem::path _path;
-        std::unique_ptr<ffmpeg::Read> _ffRead;
-        std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
-        std::unique_ptr<OIIO::ImageInput> _input;
+    protected:
         OIIO::ImageSpec _spec;
         OTIO_NS::TimeRange _timeRange;
     };
 
-    //! Sequence read node.
-    class SequenceReadNode : public IImageNode
+    //! Image read node.
+    class ImageReadNode : public IReadNode
+    {
+    public:
+        ImageReadNode(
+            const std::filesystem::path&,
+            const MemoryReference & = {},
+            const std::vector<std::shared_ptr<IImageNode> > & = {});
+
+        virtual ~ImageReadNode();
+
+        std::string getLabel() const override;
+
+        OIIO::ImageBuf exec() override;
+
+        static std::vector<std::string> getExtensions();
+
+        static bool hasExtension(const std::string&);
+
+    private:
+        std::filesystem::path _path;
+        std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
+        std::unique_ptr<OIIO::ImageInput> _input;
+        OTIO_NS::TimeRange _timeRange;
+    };
+
+    //! Image sequence read node.
+    class SequenceReadNode : public IReadNode
     {
     public:
         SequenceReadNode(
@@ -52,17 +69,19 @@ namespace toucan
             int startFrame,
             int frameStep,
             double rate,
-            int frameZerNodeadding,
+            int frameZerPadding,
             const MemoryReferences& = {},
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~SequenceReadNode();
 
-        const OIIO::ImageSpec& getSpec() const;
-
         std::string getLabel() const override;
 
         OIIO::ImageBuf exec() override;
+
+        static std::vector<std::string> getExtensions();
+
+        static bool hasExtension(const std::string&);
 
     private:
         std::string _base;
@@ -73,6 +92,30 @@ namespace toucan
         double _rate = 1.0;
         int _frameZeroPadding = 0;
         MemoryReferences _memoryReferences;
-        OIIO::ImageSpec _spec;
+    };
+
+    //! Movie read node.
+    class MovieReadNode : public IReadNode
+    {
+    public:
+        MovieReadNode(
+            const std::filesystem::path&,
+            const MemoryReference & = {},
+            const std::vector<std::shared_ptr<IImageNode> > & = {});
+
+        virtual ~MovieReadNode();
+
+        std::string getLabel() const override;
+
+        OIIO::ImageBuf exec() override;
+
+        static std::vector<std::string> getExtensions();
+
+        static bool hasExtension(const std::string&);
+
+    private:
+        std::filesystem::path _path;
+        std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
+        std::unique_ptr<ffmpeg::Read> _ffRead;
     };
 }

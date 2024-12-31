@@ -91,7 +91,7 @@ namespace toucan
     {
         IToolWidget::_init(context, app, "toucan::CompareTool", "Compare", parent);
 
-        _app = app;
+        _filesModel = app->getFilesModel();
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::None);
@@ -114,49 +114,49 @@ namespace toucan
         _bottomLayout->setGridPos(label, 0, 0);
         _modeComboBox = dtk::ComboBox::create(context, getCompareModeLabels(), _bottomLayout);
         _modeComboBox->setHStretch(dtk::Stretch::Expanding);
+        _modeComboBox->setTooltip("Set the comparison mode");
         _bottomLayout->setGridPos(_modeComboBox, 0, 1);
 
-        label = dtk::Label::create(context, "Time:", _bottomLayout);
+        label = dtk::Label::create(context, "Match start time:", _bottomLayout);
         _bottomLayout->setGridPos(label, 1, 0);
-        _timeComboBox = dtk::ComboBox::create(context, getCompareTimeLabels(), _bottomLayout);
-        _timeComboBox->setHStretch(dtk::Stretch::Expanding);
-        _bottomLayout->setGridPos(_timeComboBox, 1, 1);
+        _matchStartTimeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
+        _matchStartTimeCheckBox->setHStretch(dtk::Stretch::Expanding);
+        _matchStartTimeCheckBox->setTooltip("Adjust the B file start time to match the A file");
+        _bottomLayout->setGridPos(_matchStartTimeCheckBox, 1, 1);
 
         label = dtk::Label::create(context, "Fit size:", _bottomLayout);
         _bottomLayout->setGridPos(label, 2, 0);
         _fitSizeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
         _fitSizeCheckBox->setHStretch(dtk::Stretch::Expanding);
+        _fitSizeCheckBox->setTooltip("Fit the B image size to match the A image");
         _bottomLayout->setGridPos(_fitSizeCheckBox, 2, 1);
 
         _modeComboBox->setIndexCallback(
             [this](int value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
+                CompareOptions options = _filesModel->getCompareOptions();
                 options.mode = static_cast<CompareMode>(value);
-                app->getFilesModel()->setCompareOptions(options);
+                _filesModel->setCompareOptions(options);
             });
 
-        _timeComboBox->setIndexCallback(
-            [this](int value)
+        _matchStartTimeCheckBox->setCheckedCallback(
+            [this](bool value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
-                options.time = static_cast<CompareTime>(value);
-                app->getFilesModel()->setCompareOptions(options);
+                CompareOptions options = _filesModel->getCompareOptions();
+                options.matchStartTime = value;
+                _filesModel->setCompareOptions(options);
             });
 
         _fitSizeCheckBox->setCheckedCallback(
             [this](bool value)
             {
-                auto app = _app.lock();
-                CompareOptions options = app->getFilesModel()->getCompareOptions();
+                CompareOptions options = _filesModel->getCompareOptions();
                 options.fitSize = value;
-                app->getFilesModel()->setCompareOptions(options);
+                _filesModel->setCompareOptions(options);
             });
 
         _filesObserver = dtk::ListObserver<std::shared_ptr<File> >::create(
-            app->getFilesModel()->observeFiles(),
+            _filesModel->observeFiles(),
             [this](const std::vector<std::shared_ptr<File> >& value)
             {
                 _files = value;
@@ -165,7 +165,7 @@ namespace toucan
             });
 
         _fileIndexObserver = dtk::ValueObserver<int>::create(
-            app->getFilesModel()->observeCurrentIndex(),
+            _filesModel->observeCurrentIndex(),
             [this](int value)
             {
                 _currentIndex = value;
@@ -173,7 +173,7 @@ namespace toucan
             });
 
         _bIndexObserver = dtk::ValueObserver<int>::create(
-            app->getFilesModel()->observeBIndex(),
+            _filesModel->observeBIndex(),
             [this](int value)
             {
                 _bIndex = value;
@@ -181,11 +181,11 @@ namespace toucan
             });
         
         _compareOptionsObserver = dtk::ValueObserver<CompareOptions>::create(
-            app->getFilesModel()->observeCompareOptions(),
+            _filesModel->observeCompareOptions(),
             [this](const CompareOptions& value)
             {
                 _modeComboBox->setCurrentIndex(static_cast<int>(value.mode));
-                _timeComboBox->setCurrentIndex(static_cast<int>(value.time));
+                _matchStartTimeCheckBox->setChecked(value.matchStartTime);
                 _fitSizeCheckBox->setChecked(value.fitSize);
             });
     }
@@ -232,14 +232,12 @@ namespace toucan
             widget->setCurrentCallback(
                 [this, i]
                 {
-                    auto app = _app.lock();
-                    app->getFilesModel()->setCurrentIndex(i);
+                    _filesModel->setCurrentIndex(i);
                 });
             widget->setBCallback(
                 [this, i](bool value)
                 {
-                    auto app = _app.lock();
-                    app->getFilesModel()->setBIndex(value ? i : -1);
+                    _filesModel->setBIndex(value ? i : -1);
                 });
             _widgets.push_back(widget);
         }

@@ -3,6 +3,8 @@
 
 #include "FFmpeg.h"
 
+#include "Util.h"
+
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -19,18 +21,6 @@ namespace toucan
         AVRational swap(AVRational value)
         {
             return AVRational({ value.den, value.num });
-        }
-
-        std::vector<std::string> getVideoExtensions()
-        {
-            return std::vector<std::string>({ ".mov", ".mp4", ".m4v", ".y4m" });
-        }
-
-        bool hasVideoExtension(const std::string& value)
-        {
-            const std::vector<std::string> extensions = getVideoExtensions();
-            const auto i = std::find(extensions.begin(), extensions.end(), value);
-            return i != extensions.end();
         }
 
         namespace

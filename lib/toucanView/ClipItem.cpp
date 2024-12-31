@@ -3,13 +3,22 @@
 
 #include "ClipItem.h"
 
+#include "App.h"
+#include "File.h"
+
+#include <toucanRender/Util.h>
+
 #include <dtk/ui/DrawUtil.h>
+
+#include <opentimelineio/externalReference.h>
+#include <opentimelineio/imageSequenceReference.h>
 
 namespace toucan
 {
     void ClipItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const dtk::Color4F& color,
@@ -24,9 +33,13 @@ namespace toucan
                 timeline->global_start_time().value() + timeRange.start_time(),
                 timeRange.duration());
         }
+        timeRange = OTIO_NS::TimeRange(
+            timeRange.start_time().round(),
+            timeRange.duration().round());
         IItem::_init(
             context,
             app,
+            file,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(clip),
             timeRange,
             "toucan::ClipItem",
@@ -62,6 +75,7 @@ namespace toucan
                 auto markerItem = MarkerItem::create(
                     context,
                     app,
+                    file,
                     marker,
                     markerTimeRange,
                     _markerLayout);
@@ -78,13 +92,14 @@ namespace toucan
     std::shared_ptr<ClipItem> ClipItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const dtk::Color4F& color,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<ClipItem>();
-        out->_init(context, app, clip, timeline, color, parent);
+        out->_init(context, app, file, clip, timeline, color, parent);
         return out;
     }
 
@@ -137,6 +152,44 @@ namespace toucan
     void ClipItem::_timeUnitsUpdate()
     {
         _textUpdate();
+    }
+
+    void ClipItem::_buildMenu(const std::shared_ptr<dtk::Menu>& menu)
+    {
+        if (auto externalReference = dynamic_cast<OTIO_NS::ExternalReference*>(_clip->media_reference()))
+        {
+            auto action = std::make_shared<dtk::Action>(
+                "Open Media",
+                [this, externalReference]
+                {
+                    auto file = _file.lock();
+                    const std::filesystem::path path = file->getTimelineWrapper()->getMediaPath(externalReference->target_url());
+                    auto app = _app.lock();
+                    app->open(path);
+                });
+            menu->addItem(action);
+            menu->addDivider();
+        }
+        else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(_clip->media_reference()))
+        {
+            auto action = std::make_shared<dtk::Action>(
+                "Open Image Sequence",
+                [this, sequenceRef]
+                {
+                    auto file = _file.lock();
+                    const std::string path = getSequenceFrame(
+                        file->getTimelineWrapper()->getMediaPath(sequenceRef->target_url_base()),
+                        sequenceRef->name_prefix(),
+                        sequenceRef->start_frame(),
+                        sequenceRef->frame_zero_padding(),
+                        sequenceRef->name_suffix());
+                    auto app = _app.lock();
+                    app->open(path);
+                });
+            menu->addItem(action);
+            menu->addDivider();
+        }
+        IItem::_buildMenu(menu);
     }
 
     void ClipItem::_textUpdate()

@@ -18,7 +18,7 @@
 
 namespace toucan
 {
-    class ReadNode;
+    class IReadNode;
 
     //! Create image graphs from a timeline.
     class ImageGraph : public std::enable_shared_from_this<ImageGraph>
@@ -70,6 +70,6 @@ namespace toucan
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
         int _imageChannels = 0;
         std::string _imageDataType;
-        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<ReadNode> > _loadCache;
+        dtk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<IReadNode> > _loadCache;
     };
 }

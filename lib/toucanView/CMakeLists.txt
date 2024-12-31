@@ -1,6 +1,8 @@
 set(HEADERS
     App.h
+    BackgroundTool.h
     ClipItem.h
+    CompareMenu.h
     CompareTool.h
     DetailsTool.h
     ExportTool.h
@@ -46,7 +48,9 @@ set(HEADERS
 
 set(SOURCE
     App.cpp
+    BackgroundTool.cpp
     ClipItem.cpp
+    CompareMenu.cpp
     CompareTool.cpp
     DetailsTool.cpp
     ExportTool.cpp

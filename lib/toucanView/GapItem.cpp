@@ -10,6 +10,7 @@ namespace toucan
     void GapItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
@@ -26,6 +27,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
+            file,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(gap),
             timeRange,
             "toucan::ClipItem",
@@ -61,6 +63,7 @@ namespace toucan
                 auto markerItem = MarkerItem::create(
                     context,
                     app,
+                    file,
                     marker,
                     markerTimeRange,
                     _markerLayout);
@@ -77,12 +80,13 @@ namespace toucan
     std::shared_ptr<GapItem> GapItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const std::shared_ptr<App>& app,
+        const std::shared_ptr<File>& file,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Gap>& gap,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<GapItem>();
-        out->_init(context, app, gap, timeline, parent);
+        out->_init(context, app, file, gap, timeline, parent);
         return out;
     }
 

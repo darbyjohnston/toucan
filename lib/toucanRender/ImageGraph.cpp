@@ -57,9 +57,17 @@ namespace toucan
             {
                 try
                 {
-                    auto read = std::make_shared<ReadNode>(
-                        _timelineWrapper->getMediaPath(externalRef->target_url()),
-                        _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                    const std::filesystem::path path = _timelineWrapper->getMediaPath(externalRef->target_url());
+                    const MemoryReference mem = _timelineWrapper->getMemoryReference(externalRef->target_url());
+                    std::shared_ptr<IReadNode> read;
+                    if (MovieReadNode::hasExtension(path.extension().string()))
+                    {
+                        read = std::make_shared<MovieReadNode>(path, mem);
+                    }
+                    else
+                    {
+                        read = std::make_shared<ImageReadNode>(path, mem);
+                    }
                     const auto& spec = read->getSpec();
                     if (spec.width > 0)
                     {
@@ -338,14 +346,21 @@ namespace toucan
             // Get the media reference.
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
-                std::shared_ptr<ReadNode> read;
+                std::shared_ptr<IReadNode> read;
                 if (!_loadCache.get(externalRef, read))
                 {
                     try
                     {
-                        read = std::make_shared<ReadNode>(
-                            _timelineWrapper->getMediaPath(externalRef->target_url()),
-                            _timelineWrapper->getMemoryReference(externalRef->target_url()));
+                        const std::filesystem::path path = _timelineWrapper->getMediaPath(externalRef->target_url());
+                        const MemoryReference mem = _timelineWrapper->getMemoryReference(externalRef->target_url());
+                        if (MovieReadNode::hasExtension(path.extension().string()))
+                        {
+                            read = std::make_shared<MovieReadNode>(path, mem);
+                        }
+                        else
+                        {
+                            read = std::make_shared<ImageReadNode>(path, mem);
+                        }
                     }
                     catch (const std::exception& e)
                     {

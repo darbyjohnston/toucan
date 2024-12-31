@@ -31,24 +31,13 @@ namespace toucan
         First = A
     };
     DTK_ENUM(CompareMode);
-    
-    //! Compare times.
-    enum class CompareTime
-    {
-        Relative,
-        Absolute,
-
-        Count,
-        First = Relative
-    };
-    DTK_ENUM(CompareTime);
 
     //! Compare options.
     struct CompareOptions
     {
         CompareMode mode = CompareMode::A;
-        CompareTime time = CompareTime::Relative;
-        bool fitSize = false;
+        bool matchStartTime = true;
+        bool fitSize = true;
 
         bool operator == (const CompareOptions&) const;
         bool operator != (const CompareOptions&) const;
@@ -129,9 +118,7 @@ namespace toucan
 
     private:
         std::shared_ptr<File> _getBFile() const;
-        OTIO_NS::RationalTime _getBTimeOffset(
-            const std::shared_ptr<File>&,
-            const std::shared_ptr<File>&) const;
+        void _setBTime(const OTIO_NS::RationalTime&);
 
         void _fileUpdate();
 

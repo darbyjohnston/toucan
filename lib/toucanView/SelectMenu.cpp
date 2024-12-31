@@ -21,7 +21,7 @@ namespace toucan
         _actions["Select/All"] = std::make_shared<dtk::Action>(
             "All",
             dtk::Key::A,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -74,7 +74,7 @@ namespace toucan
             "None",
             dtk::Key::A,
             static_cast<int>(dtk::KeyModifier::Shift) |
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -87,7 +87,7 @@ namespace toucan
         _actions["Select/Invert"] = std::make_shared<dtk::Action>(
             "Invert",
             dtk::Key::I,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -102,6 +102,7 @@ namespace toucan
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
+                _menuUpdate();
             });
     }
 

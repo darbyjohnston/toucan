@@ -20,6 +20,7 @@ namespace toucan
         IItem::_init(
             context,
             app,
+            file,
             nullptr,
             file->getTimelineWrapper()->getTimeRange(),
             "toucan::TimelineItem",
@@ -29,7 +30,7 @@ namespace toucan
         _setMousePressEnabled(
             true,
             0,
-            0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control));
+            0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier));
 
         _timeline = file->getTimeline();
         _timeRange = file->getTimelineWrapper()->getTimeRange();
@@ -37,7 +38,13 @@ namespace toucan
         _thumbnails.setMax(100);
         _thumbnailGenerator = file->getThumbnailGenerator();
 
-        StackItem::create(context, app, _timeline->tracks(), _timeline, shared_from_this());
+        StackItem::create(
+            context,
+            app,
+            file,
+            _timeline->tracks(),
+            _timeline,
+            shared_from_this());
 
         _selectionObserver = dtk::ListObserver<SelectionItem>::create(
             _selectionModel->observeSelection(),
@@ -301,7 +308,7 @@ namespace toucan
         if (0 == event.button &&
             (0 == event.modifiers ||
                 static_cast<int>(dtk::KeyModifier::Shift) == event.modifiers ||
-                static_cast<int>(dtk::KeyModifier::Control) == event.modifiers))
+                static_cast<int>(dtk::commandKeyModifier) == event.modifiers))
         {
             std::shared_ptr<IItem> selection;
             _select(shared_from_this(), event.pos, selection);
@@ -323,7 +330,7 @@ namespace toucan
                     selectionNew = selectionPrev;
                     selectionNew.insert(selectionNew.end(), item);
                 }
-                else if (static_cast<int>(dtk::KeyModifier::Control) == event.modifiers)
+                else if (static_cast<int>(dtk::commandKeyModifier) == event.modifiers)
                 {
                     selectionNew = selectionPrev;
                     auto i = std::find(selectionNew.begin(), selectionNew.end(), item);

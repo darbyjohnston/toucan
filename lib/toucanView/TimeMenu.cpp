@@ -6,7 +6,6 @@
 #include "App.h"
 #include "FilesModel.h"
 #include "PlaybackModel.h"
-#include "SelectionModel.h"
 
 #include <dtk/ui/Action.h>
 
@@ -69,7 +68,7 @@ namespace toucan
         _actions["Time/FramePrevX100"] = std::make_shared<dtk::Action>(
             "Previous Frame X100",
             dtk::Key::Left,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -115,7 +114,7 @@ namespace toucan
         _actions["Time/FrameNextX100"] = std::make_shared<dtk::Action>(
             "Next Frame X100",
             dtk::Key::Right,
-            static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -247,7 +246,7 @@ namespace toucan
         _actions["Time/InOutPointSelection"] = std::make_shared<dtk::Action>(
             "Set In/Out Points To Selection",
             dtk::Key::P,
-            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::KeyModifier::Control),
+            static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -276,6 +275,35 @@ namespace toucan
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
+                if (_file)
+                {
+                    _timeRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
+                        _file->getPlaybackModel()->observeTimeRange(),
+                        [this](const OTIO_NS::TimeRange& value)
+                        {
+                            _timeRange = value;
+                            _menuUpdate();
+                        });
+                    _inOutRangeObserver = dtk::ValueObserver<OTIO_NS::TimeRange>::create(
+                        _file->getPlaybackModel()->observeInOutRange(),
+                        [this](const OTIO_NS::TimeRange& value)
+                        {
+                            _inOutRange = value;
+                            _menuUpdate();
+                        });
+                    _selectionObserver = dtk::ListObserver<SelectionItem>::create(
+                        _file->getSelectionModel()->observeSelection(),
+                        [this](const std::vector<SelectionItem>& value)
+                        {
+                            _selection = !value.empty();
+                            _menuUpdate();
+                        });
+                }
+                else
+                {
+                    _timeRangeObserver.reset();
+                    _inOutRangeObserver.reset();
+                }
                 _menuUpdate();
             });
     }
@@ -311,5 +339,11 @@ namespace toucan
         setItemEnabled(_actions["Time/FrameEnd"], file);
         setItemEnabled(_actions["Time/ClipPrev"], file);
         setItemEnabled(_actions["Time/ClipNext"], file);
+        setItemEnabled(_actions["Time/InPointSet"], file);
+        setItemEnabled(_actions["Time/OutPointSet"], file);
+        setItemEnabled(_actions["Time/InPointReset"], file && _inOutRange != _timeRange);
+        setItemEnabled(_actions["Time/OutPointReset"], file && _inOutRange != _timeRange);
+        setItemEnabled(_actions["Time/InOutPointReset"], file && _inOutRange != _timeRange);
+        setItemEnabled(_actions["Time/InOutPointSelection"], file && _selection);
     }
 }

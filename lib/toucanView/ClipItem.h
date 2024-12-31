@@ -20,6 +20,7 @@ namespace toucan
         void _init(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const dtk::Color4F&,
@@ -32,6 +33,7 @@ namespace toucan
         static std::shared_ptr<ClipItem> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
+            const std::shared_ptr<File>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const dtk::Color4F&,
@@ -46,6 +48,7 @@ namespace toucan
 
     protected:
         void _timeUnitsUpdate() override;
+        void _buildMenu(const std::shared_ptr<dtk::Menu>&) override;
 
     private:
         void _textUpdate();

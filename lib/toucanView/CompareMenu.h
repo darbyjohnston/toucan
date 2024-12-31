@@ -3,18 +3,18 @@
 
 #pragma once
 
-#include <toucanView/ViewModel.h>
+#include <toucanView/FilesModel.h>
 
 #include <dtk/ui/Menu.h>
-#include <dtk/core/ObservableValue.h>
+
+#include <map>
 
 namespace toucan
 {
     class App;
-    class File;
 
-    //! View menu.
-    class ViewMenu : public dtk::Menu
+    //! Compare menu.
+    class CompareMenu : public dtk::Menu
     {
     protected:
         void _init(
@@ -23,10 +23,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~ViewMenu();
+        virtual ~CompareMenu();
 
         //! Create a new menu.
-        static std::shared_ptr<ViewMenu> create(
+        static std::shared_ptr<CompareMenu> create(
             const std::shared_ptr<dtk::Context>&,
             const std::shared_ptr<App>&,
             const std::shared_ptr<IWidget>& parent = nullptr);
@@ -37,14 +37,16 @@ namespace toucan
     private:
         void _menuUpdate();
 
+        std::shared_ptr<FilesModel> _filesModel;
         std::shared_ptr<File> _file;
 
+        std::map<std::string, std::shared_ptr<dtk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<dtk::Action> > _actions;
+        std::vector<std::shared_ptr<dtk::Action> > _bFileActions;
 
+        std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<dtk::ValueObserver<bool> > _frameViewObserver;
-        std::shared_ptr<dtk::ValueObserver<ViewOptions> > _optionsObserver;
-        std::shared_ptr<dtk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
+        std::shared_ptr<dtk::ValueObserver<int> > _bIndexObserver;
+        std::shared_ptr<dtk::ValueObserver<CompareOptions> > _modeObserver;
     };
 }
-

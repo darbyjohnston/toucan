@@ -4,6 +4,7 @@
 #pragma once
 
 #include <toucanView/FilesModel.h>
+#include <toucanView/ViewModel.h>
 
 #include <dtk/ui/IWidget.h>
 
@@ -82,6 +83,7 @@ namespace toucan
 
     private:
         dtk::Size2I _getSize() const;
+        dtk::TriMesh2F _getMesh(const dtk::Box2I&) const;
 
         void _frameUpdate();
 
@@ -94,6 +96,8 @@ namespace toucan
         std::shared_ptr<dtk::ObservableValue<dtk::V2I> > _viewPos;
         std::shared_ptr<dtk::ObservableValue<float> > _viewZoom;
         std::shared_ptr<dtk::ObservableValue<bool> > _frameView;
+        ViewOptions _options;
+        GlobalViewOptions _globalOptions;
         dtk::V2I _viewMousePress;
 
         std::shared_ptr<dtk::ValueObserver<std::shared_ptr<dtk::Image> > > _imageObserver;
@@ -104,6 +108,8 @@ namespace toucan
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomOutObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _zoomResetObserver;
         std::shared_ptr<dtk::ValueObserver<bool> > _frameObserver;
+        std::shared_ptr<dtk::ValueObserver<ViewOptions> > _optionsObserver;
+        std::shared_ptr<dtk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
     };
 }
 

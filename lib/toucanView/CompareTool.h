@@ -79,7 +79,7 @@ namespace toucan
         void _widgetUpdate();
         void _indexUpdate();
 
-        std::weak_ptr<App> _app;
+        std::shared_ptr<FilesModel> _filesModel;
         std::vector<std::shared_ptr<File> > _files;
         int _currentIndex = -1;
         int _bIndex = -1;
@@ -90,7 +90,7 @@ namespace toucan
         std::vector<std::shared_ptr<CompareWidget> > _widgets;
         std::shared_ptr<dtk::GridLayout> _bottomLayout;
         std::shared_ptr<dtk::ComboBox> _modeComboBox;
-        std::shared_ptr<dtk::ComboBox> _timeComboBox;
+        std::shared_ptr<dtk::CheckBox> _matchStartTimeCheckBox;
         std::shared_ptr<dtk::CheckBox> _fitSizeCheckBox;
 
         std::shared_ptr<dtk::ListObserver<std::shared_ptr<File> > > _filesObserver;
