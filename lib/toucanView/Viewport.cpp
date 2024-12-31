@@ -272,7 +272,7 @@ namespace toucan
         bImageBox.min.y = 0;
         bImageBox.max.x = bImageSize.x - 1;
         bImageBox.max.y = bImageSize.y - 1;
-        if (_compareOptions.fitSize)
+        if (_compareOptions.resize)
         {
             bImageBox = fit(imageSize, bImageSize);
         }
@@ -526,7 +526,7 @@ namespace toucan
     dtk::Size2I Viewport::_getSize() const
     {
         dtk::Size2I out = _imageSize;
-        const dtk::Size2I bImageSize = _compareOptions.fitSize ? _imageSize : _bImageSize;
+        const dtk::Size2I bImageSize = _compareOptions.resize ? _imageSize : _bImageSize;
         switch (_compareOptions.mode)
         {
         case CompareMode::B:
