@@ -38,8 +38,8 @@ namespace toucan
     public:
         ImageReadNode(
             const std::filesystem::path&,
-            const MemoryReference & = {},
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const MemoryReference& = {},
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~ImageReadNode();
 
@@ -100,8 +100,8 @@ namespace toucan
     public:
         MovieReadNode(
             const std::filesystem::path&,
-            const MemoryReference & = {},
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const MemoryReference& = {},
+            const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~MovieReadNode();
 
