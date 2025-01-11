@@ -159,18 +159,21 @@ namespace toucan
 
     void ThumbnailGenerator::cancelThumbnails(const std::vector<uint64_t>& ids)
     {
-        std::unique_lock<std::mutex> lock(_mutex.mutex);
-        auto i = _mutex.requests.begin();
-        while (i != _mutex.requests.end())
+        if (!ids.empty())
         {
-            const auto j = std::find(ids.begin(), ids.end(), (*i)->id);
-            if (j != ids.end())
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            auto i = _mutex.requests.begin();
+            while (i != _mutex.requests.end())
             {
-                i = _mutex.requests.erase(i);
-            }
-            else
-            {
-                ++i;
+                const auto j = std::find(ids.begin(), ids.end(), (*i)->id);
+                if (j != ids.end())
+                {
+                    i = _mutex.requests.erase(i);
+                }
+                else
+                {
+                    ++i;
+                }
             }
         }
     }
@@ -260,7 +263,8 @@ namespace toucan
             const auto& spec = buf.spec();
             if (spec.width > 0 && spec.height > 0)
             {
-                const dtk::Size2I thumbnailSize(request->height * _aspect, request->height);
+                const float aspect = spec.width / static_cast<float>(spec.height);
+                const dtk::Size2I thumbnailSize(request->height * aspect, request->height);
                 dtk::ImageInfo info;
                 info.size = thumbnailSize;
                 switch (spec.nchannels)

@@ -112,9 +112,9 @@ namespace toucan
                 {
                     if (image)
                     {
-                        event.render->drawImage(
-                            image,
-                            dtk::Box2I(x, y, image->getWidth(), image->getHeight()));
+                        const dtk::Box2I g3(x, y, image->getWidth(), image->getHeight());
+                        event.render->drawRect(g3, dtk::Color4F(0.F, 0.F, 0.F));
+                        event.render->drawImage(image, g3);
                     }
                 }
                 else

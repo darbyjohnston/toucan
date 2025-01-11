@@ -75,7 +75,8 @@ namespace toucan
         const dtk::Box2I& g = getGeometry();
         if (_timeRange.duration().value() > 0.0)
         {
-            const double n = (value.value() - _timeRange.start_time().value()) / _timeRange.duration().value();
+            const OTIO_NS::RationalTime t = value - _timeRange.start_time();
+            const double n = t.value() / _timeRange.duration().rescaled_to(t).value();
             out = g.min.x + g.w() * n;
         }
         return out;
