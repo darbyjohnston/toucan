@@ -46,8 +46,8 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageEffectHost::createNode(
-        const std::string& name,
         const OTIO_NS::AnyDictionary& metaData,
+        const std::string& name,
         const std::vector<std::shared_ptr<IImageNode> >& inputs)
     {
         std::shared_ptr<IImageNode> out;
@@ -55,7 +55,7 @@ namespace toucan
         {
             if (name == plugin.ofxPlugin->pluginIdentifier)
             {
-                out = std::make_shared<ImageEffectNode>(plugin, name, metaData, inputs);
+                out = std::make_shared<ImageEffectNode>(plugin, metaData, name, inputs);
                 break;
             }
         }

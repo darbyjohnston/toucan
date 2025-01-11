@@ -25,8 +25,8 @@ namespace toucan
 
         //! Create an image node.
         std::shared_ptr<IImageNode> createNode(
-            const std::string& name,
             const OTIO_NS::AnyDictionary&,
+            const std::string& name,
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
     private:

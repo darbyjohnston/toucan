@@ -1,26 +1,29 @@
 // SPDX-License-Identifier: Apache-2.0
 // Copyright Contributors to the toucan project.
 
-#include "TrackItem.h"
-
 #include "AudioClipItem.h"
-#include "GapItem.h"
-#include "VideoClipItem.h"
+
+#include "App.h"
+#include "File.h"
+
+#include <toucanRender/Util.h>
 
 #include <dtk/ui/DrawUtil.h>
-#include <dtk/core/RenderUtil.h>
+
+#include <opentimelineio/externalReference.h>
 
 namespace toucan
 {
-    void TrackItem::_init(
+    void AudioClipItem::_init(
         const std::shared_ptr<dtk::Context>& context,
         const ItemData& data,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        const dtk::Color4F& color,
         const std::shared_ptr<IWidget>& parent)
     {
-        OTIO_NS::TimeRange timeRange = track->transformed_time_range(
-            track->trimmed_range(),
+        OTIO_NS::TimeRange timeRange = clip->transformed_time_range(
+            clip->trimmed_range(),
             timeline->tracks());
         if (timeline->global_start_time().has_value())
         {
@@ -34,18 +37,16 @@ namespace toucan
         IItem::_init(
             context,
             data,
-            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(track),
+            OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(clip),
             timeRange,
-            "toucan::TrackItem",
+            "toucan::AudioClipItem",
             parent);
 
-        _track = track;
-        _text = !track->name().empty() ? track->name() : (track->kind() + " Track");
-        _color = OTIO_NS::Track::Kind::video == track->kind() ?
-            dtk::Color4F(.2F, .2F, .3F) :
-            dtk::Color4F(.2F, .3F, .2F);
+        _clip = clip;
+        _text = !clip->name().empty() ? clip->name() : "Audio Clip";
+        _color = color;
 
-        setTooltip(track->schema_name() + ": " + _text);
+        setTooltip(clip->schema_name() + ": " + _text);
 
         _layout = dtk::VerticalLayout::create(context, shared_from_this());
         _layout->setSpacingRole(dtk::SizeRole::SpacingTool);
@@ -53,13 +54,13 @@ namespace toucan
         _label = ItemLabel::create(context, _layout);
         _label->setName(_text);
 
-        const auto& markers = track->markers();
+        const auto& markers = clip->markers();
         if (!markers.empty())
         {
             _markerLayout = TimeLayout::create(context, timeRange, _layout);
             for (const auto& marker : markers)
             {
-                OTIO_NS::TimeRange markerTimeRange = track->transformed_time_range(
+                OTIO_NS::TimeRange markerTimeRange = clip->transformed_time_range(
                     marker->marked_range(),
                     timeline->tracks());
                 if (timeline->global_start_time().has_value())
@@ -78,72 +79,35 @@ namespace toucan
             }
         }
 
-        _timeLayout = TimeLayout::create(context, timeRange, _layout);
-        for (const auto& child : track->children())
-        {
-            if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(child))
-            {
-                if (OTIO_NS::Track::Kind::video == track->kind())
-                {
-                    VideoClipItem::create(
-                        context,
-                        data,
-                        clip,
-                        timeline,
-                        dtk::Color4F(.4F, .4F, .6F),
-                        _timeLayout);
-                }
-                else if (OTIO_NS::Track::Kind::audio == track->kind())
-                {
-                    AudioClipItem::create(
-                        context,
-                        data,
-                        clip,
-                        timeline,
-                        dtk::Color4F(.4F, .6F, .4F),
-                        _timeLayout);
-                }
-            }
-            else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(child))
-            {
-                GapItem::create(
-                    context,
-                    data,
-                    gap,
-                    timeline,
-                    _timeLayout);
-            }
-        }
-
         _textUpdate();
     }
-
-    TrackItem::~TrackItem()
+    
+    AudioClipItem::~AudioClipItem()
     {}
 
-    std::shared_ptr<TrackItem> TrackItem::create(
+    std::shared_ptr<AudioClipItem> AudioClipItem::create(
         const std::shared_ptr<dtk::Context>& context,
         const ItemData& data,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track,
+        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>& clip,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
+        const dtk::Color4F& color,
         const std::shared_ptr<IWidget>& parent)
     {
-        auto out = std::make_shared<TrackItem>();
-        out->_init(context, data, track, timeline, parent);
+        auto out = std::make_shared<AudioClipItem>();
+        out->_init(context, data, clip, timeline, color, parent);
         return out;
     }
 
-    void TrackItem::setScale(double value)
+    void AudioClipItem::setScale(double value)
     {
         IItem::setScale(value);
         if (_markerLayout)
         {
             _markerLayout->setScale(value);
         }
-        _timeLayout->setScale(value);
     }
 
-    void TrackItem::setGeometry(const dtk::Box2I& value)
+    void AudioClipItem::setGeometry(const dtk::Box2I& value)
     {
         IItem::setGeometry(value);
         _layout->setGeometry(value);
@@ -152,12 +116,12 @@ namespace toucan
         _selectionRect = _geom.g3;
     }
 
-    dtk::Box2I TrackItem::getChildrenClipRect() const
+    dtk::Box2I AudioClipItem::getChildrenClipRect() const
     {
         return _geom.g2;
     }
 
-    void TrackItem::sizeHintEvent(const dtk::SizeHintEvent& event)
+    void AudioClipItem::sizeHintEvent(const dtk::SizeHintEvent& event)
     {
         IItem::sizeHintEvent(event);
         const bool displayScaleChanged = event.displayScale != _size.displayScale;
@@ -169,8 +133,8 @@ namespace toucan
         }
         _setSizeHint(_layout->getSizeHint());
     }
-
-    void TrackItem::drawEvent(
+    
+    void AudioClipItem::drawEvent(
         const dtk::Box2I& drawRect,
         const dtk::DrawEvent& event)
     {
@@ -180,12 +144,31 @@ namespace toucan
             _selected ? event.style->getColorRole(dtk::ColorRole::Yellow) : _color);
     }
 
-    void TrackItem::_timeUnitsUpdate()
+    void AudioClipItem::_timeUnitsUpdate()
     {
         _textUpdate();
     }
 
-    void TrackItem::_textUpdate()
+    void AudioClipItem::_buildMenu(const std::shared_ptr<dtk::Menu>& menu)
+    {
+        if (auto externalReference = dynamic_cast<OTIO_NS::ExternalReference*>(_clip->media_reference()))
+        {
+            auto action = std::make_shared<dtk::Action>(
+                "Open Media",
+                [this, externalReference]
+                {
+                    auto file = _file.lock();
+                    const std::filesystem::path path = file->getTimelineWrapper()->getMediaPath(externalReference->target_url());
+                    auto app = _app.lock();
+                    app->open(path);
+                });
+            menu->addItem(action);
+            menu->addDivider();
+        }
+        IItem::_buildMenu(menu);
+    }
+
+    void AudioClipItem::_textUpdate()
     {
         if (_label)
         {

@@ -6,7 +6,6 @@
 #include <toucanView/IItem.h>
 #include <toucanView/ItemLabel.h>
 #include <toucanView/MarkerItem.h>
-#include <toucanView/ThumbnailsWidget.h>
 
 #include <dtk/ui/RowLayout.h>
 
@@ -14,8 +13,8 @@
 
 namespace toucan
 {
-    //! Timeline video clip item.
-    class VideoClipItem : public IItem
+    //! Timeline audio clip item.
+    class AudioClipItem : public IItem
     {
     protected:
         void _init(
@@ -27,10 +26,10 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~VideoClipItem();
+        virtual ~AudioClipItem();
 
         //! Create a new item.
-        static std::shared_ptr<VideoClipItem> create(
+        static std::shared_ptr<AudioClipItem> create(
             const std::shared_ptr<dtk::Context>&,
             const ItemData&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
@@ -55,11 +54,9 @@ namespace toucan
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> _clip;
         std::string _text;
         dtk::Color4F _color;
-        std::string _url;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<ItemLabel> _label;
-        std::shared_ptr<ThumbnailsWidget> _thumbnailsWidget;
         std::shared_ptr<TimeLayout> _markerLayout;
         std::vector<std::shared_ptr<MarkerItem> > _markerItems;
 

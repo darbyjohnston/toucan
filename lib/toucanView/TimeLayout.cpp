@@ -54,12 +54,11 @@ namespace toucan
         const dtk::Box2I& g = getGeometry();
         if (g.w() > 0)
         {
-            const double normalized = (value - g.min.x) /
-                static_cast<double>(_timeRange.duration().rescaled_to(1.0).value() * _scale);
+            const double n = (value - g.min.x) / static_cast<double>(g.w());
             out = OTIO_NS::RationalTime(
                 _timeRange.start_time() +
                 OTIO_NS::RationalTime(
-                    _timeRange.duration().value() * normalized,
+                    _timeRange.duration().value() * n,
                     _timeRange.duration().rate())).
                 round();
             out = dtk::clamp(
@@ -72,9 +71,14 @@ namespace toucan
 
     int ITimeWidget::timeToPos(const OTIO_NS::RationalTime& value) const
     {
+        int out = 0;
         const dtk::Box2I& g = getGeometry();
-        const OTIO_NS::RationalTime t = value - _timeRange.start_time();
-        return g.min.x + t.rescaled_to(1.0).value() * _scale;
+        if (_timeRange.duration().value() > 0.0)
+        {
+            const double n = (value.value() - _timeRange.start_time().value()) / _timeRange.duration().value();
+            out = g.min.x + g.w() * n;
+        }
+        return out;
     }
 
     void TimeLayout::_init(

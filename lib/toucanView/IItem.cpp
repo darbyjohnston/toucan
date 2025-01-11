@@ -11,8 +11,7 @@ namespace toucan
 {
     void IItem::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
-        const std::shared_ptr<File>& file,
+        const ItemData& data,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
         const OTIO_NS::TimeRange& timeRange,
         const std::string& objectName,
@@ -20,12 +19,12 @@ namespace toucan
     {
         ITimeWidget::_init(context, timeRange, objectName, parent);
 
-        _app = app;
-        _file = file;
+        _app = data.app;
+        _file = data.file;
         _object = object;
 
         _timeUnitsObserver = dtk::ValueObserver<TimeUnits>::create(
-            app->getTimeUnitsModel()->observeTimeUnits(),
+            data.app->getTimeUnitsModel()->observeTimeUnits(),
             [this](TimeUnits value)
             {
                 _timeUnits = value;

@@ -1,7 +1,7 @@
 set(HEADERS
     App.h
+    AudioClipItem.h
     BackgroundTool.h
-    ClipItem.h
     CompareMenu.h
     CompareTool.h
     DetailsTool.h
@@ -30,6 +30,7 @@ set(HEADERS
     SelectionModel.h
     StackItem.h
     ThumbnailGenerator.h
+    ThumbnailsWidget.h
     TimeLayout.h
     TimeMenu.h
     TimeUnitsModel.h
@@ -38,6 +39,7 @@ set(HEADERS
     TimelineWidget.h
     ToolBar.h
     TrackItem.h
+    VideoClipItem.h
     ViewMenu.h
     ViewModel.h
     ViewToolBar.h
@@ -48,8 +50,8 @@ set(HEADERS
 
 set(SOURCE
     App.cpp
+    AudioClipItem.cpp
     BackgroundTool.cpp
-    ClipItem.cpp
     CompareMenu.cpp
     CompareTool.cpp
     DetailsTool.cpp
@@ -77,8 +79,9 @@ set(SOURCE
     SelectMenu.cpp
     SelectionModel.cpp
     StackItem.cpp
-    TimeMenu.cpp
     ThumbnailGenerator.cpp
+    ThumbnailsWidget.cpp
+    TimeMenu.cpp
     TimeLayout.cpp
     TimeUnitsModel.cpp
     TimeWidgets.cpp
@@ -86,6 +89,7 @@ set(SOURCE
     TimelineWidget.cpp
     ToolBar.cpp
     TrackItem.cpp
+    VideoClipItem.cpp
     ViewMenu.cpp
     ViewModel.cpp
     ViewToolBar.cpp

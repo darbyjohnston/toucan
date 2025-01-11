@@ -9,8 +9,8 @@ namespace toucan
 {
     ImageEffectNode::ImageEffectNode(
         ImageEffectPlugin& plugin,
-        const std::string& name,
         const OTIO_NS::AnyDictionary& metaData,
+        const std::string& name,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
         IImageNode(name, inputs),
         _plugin(plugin),

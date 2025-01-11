@@ -7,6 +7,8 @@
 #include <toucanRender/ImageNode.h>
 #include <toucanRender/MemoryMap.h>
 
+#include <opentimelineio/mediaReference.h>
+
 #include <OpenImageIO/filesystem.h>
 
 #include <filesystem>
@@ -18,16 +20,20 @@ namespace toucan
     {
     public:
         IReadNode(
+            const OTIO_NS::MediaReference*,
             const std::string& name,
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~IReadNode() = 0;
+
+        const OTIO_NS::MediaReference* getRef() const;
 
         const OIIO::ImageSpec& getSpec() const;
 
         const OTIO_NS::TimeRange& getTimeRange() const;
 
     protected:
+        const OTIO_NS::MediaReference* _ref = nullptr;
         OIIO::ImageSpec _spec;
         OTIO_NS::TimeRange _timeRange;
     };
@@ -38,6 +44,7 @@ namespace toucan
     public:
         ImageReadNode(
             const std::filesystem::path&,
+            const OTIO_NS::MediaReference*,
             const MemoryReference& = {},
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
@@ -70,6 +77,7 @@ namespace toucan
             int frameStep,
             double rate,
             int frameZerPadding,
+            const OTIO_NS::MediaReference*,
             const MemoryReferences& = {},
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
@@ -100,6 +108,7 @@ namespace toucan
     public:
         MovieReadNode(
             const std::filesystem::path&,
+            const OTIO_NS::MediaReference*,
             const MemoryReference& = {},
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 

@@ -12,8 +12,7 @@ namespace toucan
 {
     void StackItem::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
-        const std::shared_ptr<File>& file,
+        const ItemData& data,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline ,
         const std::shared_ptr<IWidget>& parent)
@@ -30,8 +29,7 @@ namespace toucan
             timeRange.duration().round());
         IItem::_init(
             context,
-            app,
-            file,
+            data,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(stack),
             timeRange,
             "toucan::StackItem",
@@ -64,8 +62,7 @@ namespace toucan
                 }
                 auto markerItem = MarkerItem::create(
                     context,
-                    app,
-                    file,
+                    data,
                     marker,
                     markerTimeRange,
                     _markerLayout);
@@ -80,8 +77,7 @@ namespace toucan
             {
                 TrackItem::create(
                     context,
-                    app,
-                    file,
+                    data,
                     track,
                     timeline,
                     _timeLayout);
@@ -96,14 +92,13 @@ namespace toucan
 
     std::shared_ptr<StackItem> StackItem::create(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
-        const std::shared_ptr<File>& file,
+        const ItemData& data,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Stack>& stack,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>& timeline,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<StackItem>();
-        out->_init(context, app, file, stack, timeline, parent);
+        out->_init(context, data, stack, timeline, parent);
         return out;
     }
 

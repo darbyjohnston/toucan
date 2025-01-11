@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include <toucanView/ThumbnailGenerator.h>
 #include <toucanView/TimeLayout.h>
 #include <toucanView/TimeUnitsModel.h>
 
 #include <dtk/ui/IWidget.h>
 #include <dtk/ui/Menu.h>
+#include <dtk/core/LRUCache.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -16,14 +18,22 @@ namespace toucan
     class App;
     class File;
 
+    //! Timeline item data.
+    struct ItemData
+    {
+        std::shared_ptr<App> app;
+        std::shared_ptr<File> file;
+        std::shared_ptr<ThumbnailGenerator> thumbnailGenerator;
+        std::shared_ptr<dtk::LRUCache<std::string, std::shared_ptr<dtk::Image> > > thumbnailCache;
+    };
+
     //! Base class for timeline items.
     class IItem : public ITimeWidget
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&,
-            const std::shared_ptr<File>&,
+            const ItemData&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>&,
             const OTIO_NS::TimeRange&,
             const std::string& objectName,
