@@ -36,8 +36,8 @@ namespace toucan
     struct CompareOptions
     {
         CompareMode mode = CompareMode::A;
-        bool matchStartTime = true;
-        bool fitSize = true;
+        bool startTime = true;
+        bool resize = true;
 
         bool operator == (const CompareOptions&) const;
         bool operator != (const CompareOptions&) const;

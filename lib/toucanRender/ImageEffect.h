@@ -32,8 +32,8 @@ namespace toucan
     public:
         ImageEffectNode(
             ImageEffectPlugin&,
-            const std::string& name,
             const OTIO_NS::AnyDictionary& metaData,
+            const std::string& name,
             const std::vector<std::shared_ptr<IImageNode> >& = {});
 
         virtual ~ImageEffectNode();

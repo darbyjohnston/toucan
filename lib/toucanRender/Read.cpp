@@ -12,13 +12,20 @@
 namespace toucan
 {
     IReadNode::IReadNode(
+        const OTIO_NS::MediaReference* ref,
         const std::string& name,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IImageNode(name, inputs)
+        IImageNode(name, inputs),
+        _ref(ref)
     {}
 
     IReadNode::~IReadNode()
     {}
+
+    const OTIO_NS::MediaReference* IReadNode::getRef() const
+    {
+        return _ref;
+    }
 
     const OIIO::ImageSpec& IReadNode::getSpec() const
     {
@@ -32,9 +39,10 @@ namespace toucan
 
     ImageReadNode::ImageReadNode(
         const std::filesystem::path& path,
+        const OTIO_NS::MediaReference* ref,
         const MemoryReference& memoryReference,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IReadNode("ImageRead", inputs),
+        IReadNode(ref, "ImageRead", inputs),
         _path(path),
         _memoryReader(getMemoryReader(memoryReference))
     {
@@ -122,9 +130,10 @@ namespace toucan
         int frameStep,
         double rate,
         int frameZeroPadding,
+        const OTIO_NS::MediaReference* ref,
         const MemoryReferences& memoryReferences,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IReadNode("SequenceRead", inputs),
+        IReadNode(ref, "SequenceRead", inputs),
         _base(base),
         _namePrefix(namePrefix),
         _nameSuffix(nameSuffix),
@@ -246,9 +255,10 @@ namespace toucan
 
     MovieReadNode::MovieReadNode(
         const std::filesystem::path& path,
+        const OTIO_NS::MediaReference* ref,
         const MemoryReference& memoryReference,
         const std::vector<std::shared_ptr<IImageNode> >& inputs) :
-        IReadNode("MovieReadNode", inputs),
+        IReadNode(ref, "MovieReadNode", inputs),
         _path(path),
         _memoryReader(getMemoryReader(memoryReference))
     {

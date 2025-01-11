@@ -243,7 +243,7 @@ namespace toucan
         }
         else if (MovieReadNode::hasExtension(path.extension().string()))
         {
-            auto read = std::make_shared<MovieReadNode>(path);
+            auto read = std::make_shared<MovieReadNode>(path, nullptr);
             _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
             OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
             _timeline->tracks()->append_child(track);
@@ -261,7 +261,7 @@ namespace toucan
             const auto split = splitFileNameNumber(sequence.front().stem().string());
             if (split.second.empty())
             {
-                auto read = std::make_shared<ImageReadNode>(path);
+                auto read = std::make_shared<ImageReadNode>(path, nullptr);
                 _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
                 OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
                 _timeline->tracks()->append_child(track);
@@ -283,7 +283,7 @@ namespace toucan
                 const int step = 1;
                 const double rate = 24.0;
                 const int padding = getNumberPadding(split.second);
-                auto read = std::make_shared<SequenceReadNode>(base, prefix, suffix, start, 1, rate, padding);
+                auto read = std::make_shared<SequenceReadNode>(base, prefix, suffix, start, 1, rate, padding, nullptr);
                 _timeline = OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>(new OTIO_NS::Timeline);
                 OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track> track(new OTIO_NS::Track("Video"));
                 _timeline->tracks()->append_child(track);

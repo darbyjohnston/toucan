@@ -12,7 +12,7 @@ namespace toucan
     void readTest(const std::filesystem::path& path)
     {
         std::cout << "readTest" << std::endl;
-        auto read = std::make_shared<ImageReadNode>(path / "Letter_A.png");
+        auto read = std::make_shared<ImageReadNode>(path / "Letter_A.png", nullptr);
         auto buf = read->exec();
         const auto& spec = buf.spec();
         assert(spec.width > 0);

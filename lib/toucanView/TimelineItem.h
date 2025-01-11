@@ -5,9 +5,7 @@
 
 #include <toucanView/IItem.h>
 #include <toucanView/SelectionModel.h>
-#include <toucanView/ThumbnailGenerator.h>
 
-#include <dtk/core/LRUCache.h>
 #include <dtk/core/ObservableList.h>
 
 namespace toucan
@@ -20,8 +18,7 @@ namespace toucan
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&,
-            const std::shared_ptr<File>&,
+            const ItemData&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
@@ -30,8 +27,7 @@ namespace toucan
         //! Create a new item.
         static std::shared_ptr<TimelineItem> create(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&,
-            const std::shared_ptr<File>&,
+            const ItemData&,
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         //! Get the current time.
@@ -90,8 +86,8 @@ namespace toucan
         OTIO_NS::TimeRange _inOutRange;
         std::shared_ptr<SelectionModel> _selectionModel;
         std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
-        dtk::LRUCache<OTIO_NS::RationalTime, std::shared_ptr<dtk::Image> > _thumbnails;
         std::list<ThumbnailRequest> _thumbnailRequests;
+        std::shared_ptr<dtk::LRUCache<std::string, std::shared_ptr<dtk::Image> > > _thumbnailCache;
 
         struct SizeData
         {
@@ -100,7 +96,7 @@ namespace toucan
             int margin = 0;
             int border = 0;
             int handle = 0;
-            dtk::Size2I thumbnailSize;
+            int thumbnailHeight = 0;
             dtk::FontInfo fontInfo;
             dtk::FontMetrics fontMetrics;
             dtk::V2I scrollPos;

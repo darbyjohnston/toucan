@@ -19,12 +19,18 @@
 
 namespace toucan
 {
+    //! Get a thumbnail cache key.
+    std::string getThumbnailCacheKey(
+        const OTIO_NS::MediaReference*,
+        const OTIO_NS::RationalTime&,
+        int height);
+
     //! Thumbnail request.
     struct ThumbnailRequest
     {
         uint64_t id = 0;
-        int height = 0;
         OTIO_NS::RationalTime time;
+        int height = 0;
         std::future<std::shared_ptr<dtk::Image> > future;
     };
 
@@ -40,11 +46,22 @@ namespace toucan
 
         ~ThumbnailGenerator();
 
-        //! Get the aspect ratio.
+        //! Get the timeline aspect ratio.
         float getAspect() const;
 
-        //! Get a thumbnail.
+        //! Get a timeline thumbnail.
         ThumbnailRequest getThumbnail(
+            const OTIO_NS::RationalTime&,
+            int height);
+
+        //! Get a media aspect ratio.
+        std::future<float> getAspect(
+            const OTIO_NS::MediaReference*,
+            const OTIO_NS::RationalTime&);
+
+        //! Get a media thumbnail.
+        ThumbnailRequest getThumbnail(
+            const OTIO_NS::MediaReference*,
             const OTIO_NS::RationalTime&,
             int height);
 
@@ -55,6 +72,10 @@ namespace toucan
         void _run();
         void _cancel();
 
+        std::shared_ptr<IImageNode> _findNode(
+            const std::shared_ptr<IImageNode>&,
+            const OTIO_NS::MediaReference*);
+
         std::shared_ptr<dtk::LogSystem> _logSystem;
         std::filesystem::path _path;
         std::shared_ptr<TimelineWrapper> _timelineWrapper;
@@ -62,17 +83,26 @@ namespace toucan
         std::shared_ptr<ImageGraph> _graph;
         float _aspect = 1.F;
 
+        struct AspectRequest
+        {
+            const OTIO_NS::MediaReference* ref = nullptr;
+            OTIO_NS::RationalTime time;
+            std::promise<float> promise;
+        };
+
         struct Request
         {
             uint64_t id = 0;
-            int height = 0;
+            const OTIO_NS::MediaReference* ref = nullptr;
             OTIO_NS::RationalTime time;
+            int height = 0;
             std::promise<std::shared_ptr<dtk::Image> > promise;
         };
         uint64_t _requestId = 0;
 
         struct Mutex
         {
+            std::list<std::shared_ptr<AspectRequest> > aspectRequests;
             std::list<std::shared_ptr<Request> > requests;
             bool stopped = false;
             std::mutex mutex;
@@ -81,7 +111,6 @@ namespace toucan
 
         struct Thread
         {
-            std::map<std::pair<OTIO_NS::RationalTime, int>, std::shared_ptr<dtk::Image> > cache;
             std::condition_variable cv;
             std::thread thread;
             std::atomic<bool> running;

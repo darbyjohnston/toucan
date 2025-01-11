@@ -6,6 +6,7 @@
 #include <toucanView/IItem.h>
 #include <toucanView/ItemLabel.h>
 #include <toucanView/MarkerItem.h>
+#include <toucanView/ThumbnailsWidget.h>
 
 #include <dtk/ui/RowLayout.h>
 
@@ -13,27 +14,25 @@
 
 namespace toucan
 {
-    //! Timeline clip item.
-    class ClipItem : public IItem
+    //! Timeline video clip item.
+    class VideoClipItem : public IItem
     {
     protected:
         void _init(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&,
-            const std::shared_ptr<File>&,
+            const ItemData&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const dtk::Color4F&,
             const std::shared_ptr<IWidget>& parent);
 
     public:
-        virtual ~ClipItem();
+        virtual ~VideoClipItem();
 
         //! Create a new item.
-        static std::shared_ptr<ClipItem> create(
+        static std::shared_ptr<VideoClipItem> create(
             const std::shared_ptr<dtk::Context>&,
-            const std::shared_ptr<App>&,
-            const std::shared_ptr<File>&,
+            const ItemData&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip>&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&,
             const dtk::Color4F&,
@@ -56,9 +55,11 @@ namespace toucan
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> _clip;
         std::string _text;
         dtk::Color4F _color;
+        std::string _url;
 
         std::shared_ptr<dtk::VerticalLayout> _layout;
         std::shared_ptr<ItemLabel> _label;
+        std::shared_ptr<ThumbnailsWidget> _thumbnailsWidget;
         std::shared_ptr<TimeLayout> _markerLayout;
         std::vector<std::shared_ptr<MarkerItem> > _markerItems;
 

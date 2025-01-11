@@ -28,8 +28,8 @@ namespace toucan
     {
         return
             mode == other.mode &&
-            matchStartTime == other.matchStartTime &&
-            fitSize == other.fitSize;;
+            startTime == other.startTime &&
+            resize == other.resize;
     }
 
     bool CompareOptions::operator != (const CompareOptions& other) const
@@ -54,15 +54,15 @@ namespace toucan
                 std::stringstream ss(i->get<std::string>());
                 ss >> compareOptions.mode;
             }
-            i = json.find("MatchStartTime");
+            i = json.find("StartTime");
             if (i != json.end() && i->is_boolean())
             {
-                compareOptions.matchStartTime = i->get<bool>();
+                compareOptions.startTime = i->get<bool>();
             }
-            i = json.find("FitSize");
+            i = json.find("Resize");
             if (i != json.end() && i->is_boolean())
             {
-                compareOptions.fitSize = i->get<bool>();
+                compareOptions.resize = i->get<bool>();
             }
         }
         catch (const std::exception&)
@@ -87,8 +87,8 @@ namespace toucan
             ss << _compareOptions->get().mode;
             json["CompareMode"] = ss.str();
         }
-        json["MatchStartTime"] = _compareOptions->get().matchStartTime;
-        json["FitSize"] = _compareOptions->get().fitSize;
+        json["StartTime"] = _compareOptions->get().startTime;
+        json["Resize"] = _compareOptions->get().resize;
         _settings->set("FilesModel", json);
     }
 
@@ -309,7 +309,7 @@ namespace toucan
         {
             const OTIO_NS::TimeRange timeRange = bFile->getPlaybackModel()->getTimeRange();
             OTIO_NS::RationalTime tmp(value);
-            if (_compareOptions->get().matchStartTime)
+            if (_compareOptions->get().startTime)
             {
                 auto file = _current->get();
                 const OTIO_NS::RationalTime offset =

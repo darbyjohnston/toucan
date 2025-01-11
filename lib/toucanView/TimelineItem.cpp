@@ -13,16 +13,14 @@ namespace toucan
 {
     void TimelineItem::_init(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
-        const std::shared_ptr<File>& file,
+        const ItemData& data,
         const std::shared_ptr<IWidget>& parent)
     {
         IItem::_init(
             context,
-            app,
-            file,
+            data,
             nullptr,
-            file->getTimelineWrapper()->getTimeRange(),
+            data.file->getTimelineWrapper()->getTimeRange(),
             "toucan::TimelineItem",
             parent);
 
@@ -32,16 +30,15 @@ namespace toucan
             0,
             0 | static_cast<int>(dtk::KeyModifier::Shift) | static_cast<int>(dtk::commandKeyModifier));
 
-        _timeline = file->getTimeline();
-        _timeRange = file->getTimelineWrapper()->getTimeRange();
-        _selectionModel = file->getSelectionModel();
-        _thumbnails.setMax(100);
-        _thumbnailGenerator = file->getThumbnailGenerator();
+        _timeline = data.file->getTimeline();
+        _timeRange = data.file->getTimelineWrapper()->getTimeRange();
+        _selectionModel = data.file->getSelectionModel();
+        _thumbnailGenerator = data.thumbnailGenerator;
+        _thumbnailCache = data.thumbnailCache;
 
         StackItem::create(
             context,
-            app,
-            file,
+            data,
             _timeline->tracks(),
             _timeline,
             shared_from_this());
@@ -59,12 +56,11 @@ namespace toucan
 
     std::shared_ptr<TimelineItem> TimelineItem::create(
         const std::shared_ptr<dtk::Context>& context,
-        const std::shared_ptr<App>& app,
-        const std::shared_ptr<File>& file,
+        const ItemData& data,
         const std::shared_ptr<IWidget>& parent)
     {
         auto out = std::make_shared<TimelineItem>();
-        out->_init(context, app, file, parent);
+        out->_init(context, data, parent);
         return out;
     }
 
@@ -104,7 +100,7 @@ namespace toucan
             const dtk::Size2I& sizeHint = child->getSizeHint();
             child->setGeometry(dtk::Box2I(
                 g.min.x,
-                g.min.y + timeHeight + _size.thumbnailSize.h,
+                g.min.y + timeHeight + _size.thumbnailHeight,
                 sizeHint.w,
                 sizeHint.h));
         }
@@ -127,7 +123,7 @@ namespace toucan
                 i->future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
             {
                 const auto image = i->future.get();
-                _thumbnails.add(i->time, image);
+                _thumbnailCache->add(getThumbnailCacheKey(nullptr, i->time, _size.thumbnailHeight), image);
                 _setDrawUpdate();
                 i = _thumbnailRequests.erase(i);
             }
@@ -149,8 +145,7 @@ namespace toucan
             _size.margin = event.style->getSizeRole(dtk::SizeRole::MarginInside, event.displayScale);
             _size.border = event.style->getSizeRole(dtk::SizeRole::Border, event.displayScale);
             _size.handle = event.style->getSizeRole(dtk::SizeRole::Handle, event.displayScale);
-            _size.thumbnailSize.h = 2 * event.style->getSizeRole(dtk::SizeRole::SwatchLarge, event.displayScale);
-            _size.thumbnailSize.w = _size.thumbnailSize.h * _thumbnailGenerator->getAspect();
+            _size.thumbnailHeight = 2 * event.style->getSizeRole(dtk::SizeRole::SwatchLarge, event.displayScale);
             _size.fontInfo = event.style->getFontRole(dtk::FontRole::Mono, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             std::vector<uint64_t> ids;
@@ -160,7 +155,7 @@ namespace toucan
             }
             _thumbnailRequests.clear();
             _thumbnailGenerator->cancelThumbnails(ids);
-            _thumbnails.clear();
+            _thumbnailCache->clear();
         }
         int childSizeHint = 0;
         for (const auto& child : getChildren())
@@ -170,7 +165,7 @@ namespace toucan
         dtk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
             _size.fontMetrics.lineHeight + _size.margin * 2);
-        sizeHint.h += _size.thumbnailSize.h;
+        sizeHint.h += _size.thumbnailHeight;
         sizeHint.h += childSizeHint;
         _setSizeHint(sizeHint);
     }
@@ -180,15 +175,16 @@ namespace toucan
         IItem::drawEvent(drawRect, event);
 
         const dtk::Box2I& g = getGeometry();
+        const int thumbnailWidth = _size.thumbnailHeight * _thumbnailGenerator->getAspect();
         const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2;
-        for (int x = g.min.x; x < g.max.x && _size.thumbnailSize.w > 0; x += _size.thumbnailSize.w)
+        for (int x = g.min.x; x < g.max.x && thumbnailWidth > 0; x += thumbnailWidth)
         {
-            const dtk::Box2I g2(x, y, _size.thumbnailSize.w, _size.thumbnailSize.h);
+            const dtk::Box2I g2(x, y, thumbnailWidth, _size.thumbnailHeight);
             if (dtk::intersects(g2, drawRect))
             {
                 const OTIO_NS::RationalTime t = posToTime(x);
                 std::shared_ptr<dtk::Image> image;
-                if (_thumbnails.get(t, image))
+                if (_thumbnailCache->get(getThumbnailCacheKey(nullptr, t, _size.thumbnailHeight), image))
                 {
                     if (image)
                     {
@@ -204,12 +200,12 @@ namespace toucan
                         _thumbnailRequests.end(),
                         [this, t](const ThumbnailRequest& request)
                         {
-                            return t == request.time && _size.thumbnailSize.h == request.height;
+                            return t == request.time && _size.thumbnailHeight == request.height;
                         });
                     if (j == _thumbnailRequests.end())
                     {
                         _thumbnailRequests.push_back(
-                            _thumbnailGenerator->getThumbnail(t, _size.thumbnailSize.h));
+                            _thumbnailGenerator->getThumbnail(t, _size.thumbnailHeight));
                     }
                 }
             }
@@ -220,7 +216,7 @@ namespace toucan
         while (i != _thumbnailRequests.end())
         {
             const int x = timeToPos(i->time);
-            const dtk::Box2I g2(x, y, _size.thumbnailSize.w, _size.thumbnailSize.h);
+            const dtk::Box2I g2(x, y, thumbnailWidth, _size.thumbnailHeight);
             if (!dtk::intersects(g2, drawRect))
             {
                 cancel.push_back(i->id);

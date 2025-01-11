@@ -117,19 +117,19 @@ namespace toucan
         _modeComboBox->setTooltip("Set the comparison mode");
         _bottomLayout->setGridPos(_modeComboBox, 0, 1);
 
-        label = dtk::Label::create(context, "Match start time:", _bottomLayout);
+        label = dtk::Label::create(context, "Start time:", _bottomLayout);
         _bottomLayout->setGridPos(label, 1, 0);
-        _matchStartTimeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
-        _matchStartTimeCheckBox->setHStretch(dtk::Stretch::Expanding);
-        _matchStartTimeCheckBox->setTooltip("Adjust the B file start time to match the A file");
-        _bottomLayout->setGridPos(_matchStartTimeCheckBox, 1, 1);
+        _startTimeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
+        _startTimeCheckBox->setHStretch(dtk::Stretch::Expanding);
+        _startTimeCheckBox->setTooltip("Match the A and B start times");
+        _bottomLayout->setGridPos(_startTimeCheckBox, 1, 1);
 
-        label = dtk::Label::create(context, "Fit size:", _bottomLayout);
+        label = dtk::Label::create(context, "Resize:", _bottomLayout);
         _bottomLayout->setGridPos(label, 2, 0);
-        _fitSizeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
-        _fitSizeCheckBox->setHStretch(dtk::Stretch::Expanding);
-        _fitSizeCheckBox->setTooltip("Fit the B image size to match the A image");
-        _bottomLayout->setGridPos(_fitSizeCheckBox, 2, 1);
+        _resizeCheckBox = dtk::CheckBox::create(context, _bottomLayout);
+        _resizeCheckBox->setHStretch(dtk::Stretch::Expanding);
+        _resizeCheckBox->setTooltip("Resize the B image to match the A size");
+        _bottomLayout->setGridPos(_resizeCheckBox, 2, 1);
 
         _modeComboBox->setIndexCallback(
             [this](int value)
@@ -139,19 +139,19 @@ namespace toucan
                 _filesModel->setCompareOptions(options);
             });
 
-        _matchStartTimeCheckBox->setCheckedCallback(
+        _startTimeCheckBox->setCheckedCallback(
             [this](bool value)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
-                options.matchStartTime = value;
+                options.startTime = value;
                 _filesModel->setCompareOptions(options);
             });
 
-        _fitSizeCheckBox->setCheckedCallback(
+        _resizeCheckBox->setCheckedCallback(
             [this](bool value)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
-                options.fitSize = value;
+                options.resize = value;
                 _filesModel->setCompareOptions(options);
             });
 
@@ -185,8 +185,8 @@ namespace toucan
             [this](const CompareOptions& value)
             {
                 _modeComboBox->setCurrentIndex(static_cast<int>(value.mode));
-                _matchStartTimeCheckBox->setChecked(value.matchStartTime);
-                _fitSizeCheckBox->setChecked(value.fitSize);
+                _startTimeCheckBox->setChecked(value.startTime);
+                _resizeCheckBox->setChecked(value.resize);
             });
     }
 

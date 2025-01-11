@@ -3,10 +3,31 @@
 
 #include "ThumbnailGenerator.h"
 
+#include <toucanRender/Read.h>
+
 #include <OpenImageIO/imagebufalgo.h>
+
+#include <dtk/core/Format.h>
+#include <dtk/core/String.h>
+
+#include <sstream>
 
 namespace toucan
 {
+    std::string getThumbnailCacheKey(
+        const OTIO_NS::MediaReference* ref,
+        const OTIO_NS::RationalTime& time,
+        int height)
+    {
+        std::vector<std::string> s;
+        std::stringstream ss;
+        ss << ref;
+        s.push_back(ss.str());
+        s.push_back(dtk::Format("{0}@{1}").arg(time.value()).arg(time.rate()));
+        s.push_back(dtk::Format("{0}").arg(height));
+        return dtk::join(s, '_');
+    }
+
     ThumbnailGenerator::ThumbnailGenerator(
         const std::shared_ptr<dtk::Context>& context,
         const std::filesystem::path& path,
@@ -69,11 +90,20 @@ namespace toucan
         const OTIO_NS::RationalTime& time,
         int height)
     {
+        return getThumbnail(nullptr, time, height);
+    }
+
+    ThumbnailRequest ThumbnailGenerator::getThumbnail(
+        const OTIO_NS::MediaReference* ref,
+        const OTIO_NS::RationalTime& time,
+        int height)
+    {
         _requestId++;
         auto request = std::make_shared<Request>();
         request->id = _requestId;
-        request->height = height;
+        request->ref = ref;
         request->time = time;
+        request->height = height;
         ThumbnailRequest out;
         out.id = _requestId;
         out.height = height;
@@ -99,8 +129,37 @@ namespace toucan
         return out;
     }
 
+    std::future<float> ThumbnailGenerator::getAspect(
+        const OTIO_NS::MediaReference* ref,
+        const OTIO_NS::RationalTime& time)
+    {
+        auto request = std::make_shared<AspectRequest>();
+        request->ref = ref;
+        request->time = time;
+        auto out = request->promise.get_future();
+        bool valid = false;
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            if (!_mutex.stopped)
+            {
+                valid = true;
+                _mutex.aspectRequests.push_back(request);
+            }
+        }
+        if (valid)
+        {
+            _thread.cv.notify_one();
+        }
+        else
+        {
+            request->promise.set_value(0.F);
+        }
+        return out;
+    }
+
     void ThumbnailGenerator::cancelThumbnails(const std::vector<uint64_t>& ids)
     {
+        if (!ids.empty())
         {
             std::unique_lock<std::mutex> lock(_mutex.mutex);
             auto i = _mutex.requests.begin();
@@ -121,6 +180,7 @@ namespace toucan
 
     void ThumbnailGenerator::_run()
     {
+        std::shared_ptr<AspectRequest> aspectRequest;
         std::shared_ptr<Request> request;
         {
             std::unique_lock<std::mutex> lock(_mutex.mutex);
@@ -129,89 +189,37 @@ namespace toucan
                 std::chrono::milliseconds(5),
                 [this]
                 {
-                    return !_mutex.requests.empty();
+                    return
+                        !_mutex.aspectRequests.empty() ||
+                        !_mutex.requests.empty();
                 }))
             {
-                request = _mutex.requests.front();
-                _mutex.requests.pop_front();
+                if (!_mutex.aspectRequests.empty())
+                {
+                    aspectRequest = _mutex.aspectRequests.front();
+                    _mutex.aspectRequests.pop_front();
+                }
+                if (!_mutex.requests.empty())
+                {
+                    request = _mutex.requests.front();
+                    _mutex.requests.pop_front();
+                }
             }
         }
-        if (request)
+        if (aspectRequest)
         {
-            std::shared_ptr<dtk::Image> thumbnail;
-            auto i = _thread.cache.find(std::make_pair(request->time, request->height));
-            if (i != _thread.cache.end())
-            {
-                thumbnail = i->second;
-            }
-            else if (_graph)
+            float aspect = 0.F;
+            auto node = _graph->exec(_host, aspectRequest->time);
+            if (node = _findNode(node, aspectRequest->ref))
             {
                 try
                 {
-                    auto graph = _graph->exec(_host, request->time);
-                    const auto sourceBuf = graph->exec();
-                    const auto& sourceSpec = sourceBuf.spec();
-
-                    const dtk::Size2I thumbnailSize(request->height * _aspect, request->height);
-                    dtk::ImageInfo info;
-                    info.size = thumbnailSize;
-                    switch (sourceSpec.nchannels)
+                    node->setTime(aspectRequest->time - _timelineWrapper->getTimeRange().start_time());
+                    const OIIO::ImageBuf buf = node->exec();
+                    const OIIO::ImageSpec& spec = buf.spec();
+                    if (spec.height > 0)
                     {
-                    case 1:
-                        switch (sourceSpec.format.basetype)
-                        {
-                        case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::L_U8; break;
-                        case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::L_U16; break;
-                        case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::L_F16; break;
-                        case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::L_F32; break;
-                        }
-                        break;
-                    case 2:
-                        switch (sourceSpec.format.basetype)
-                        {
-                        case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::LA_U8; break;
-                        case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::LA_U16; break;
-                        case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::LA_F16; break;
-                        case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::LA_F32; break;
-                        }
-                        break;
-                    case 3:
-                        switch (sourceSpec.format.basetype)
-                        {
-                        case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::RGB_U8; break;
-                        case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::RGB_U16; break;
-                        case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::RGB_F16; break;
-                        case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::RGB_F32; break;
-                        }
-                        break;
-                    default:
-                        switch (sourceSpec.format.basetype)
-                        {
-                        case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::RGBA_U8; break;
-                        case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::RGBA_U16; break;
-                        case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::RGBA_F16; break;
-                        case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::RGBA_F32; break;
-                        }
-                        break;
-                    }
-                    info.layout.mirror.y = true;
-
-                    if (info.isValid())
-                    {
-                        thumbnail = dtk::Image::create(info);
-                        auto resizedBuf = OIIO::ImageBufAlgo::resize(
-                            sourceBuf,
-                            "",
-                            0.F,
-                            OIIO::ROI(
-                                0, info.size.w,
-                                0, info.size.h,
-                                0, 1,
-                                0, std::min(4, sourceSpec.nchannels)));
-                        memcpy(
-                            thumbnail->getData(),
-                            resizedBuf.localpixels(),
-                            thumbnail->getByteCount());
+                        aspect = spec.width / static_cast<float>(spec.height);
                     }
                 }
                 catch (const std::exception& e)
@@ -221,10 +229,103 @@ namespace toucan
                         e.what(),
                         dtk::LogType::Error);
                 }
-
-                _thread.cache[std::make_pair(request->time, request->height)] = thumbnail;
+            }
+            aspectRequest->promise.set_value(aspect);
+        }
+        if (request)
+        {
+            OIIO::ImageBuf buf;
+            try
+            {
+                auto node = _graph->exec(_host, request->time);
+                if (request->ref)
+                {
+                    node = _findNode(node, request->ref);
+                    if (node)
+                    {
+                        node->setTime(request->time - _timelineWrapper->getTimeRange().start_time());
+                    }
+                }
+                if (node)
+                {
+                    buf = node->exec();
+                }
+            }
+            catch (const std::exception& e)
+            {
+                _logSystem->print(
+                    "toucan::ThumbnailGenerator",
+                    e.what(),
+                    dtk::LogType::Error);
             }
 
+            std::shared_ptr<dtk::Image> thumbnail;
+            const auto& spec = buf.spec();
+            if (spec.width > 0 && spec.height > 0)
+            {
+                const float aspect = spec.width / static_cast<float>(spec.height);
+                const dtk::Size2I thumbnailSize(request->height * aspect, request->height);
+                dtk::ImageInfo info;
+                info.size = thumbnailSize;
+                switch (spec.nchannels)
+                {
+                case 1:
+                    switch (spec.format.basetype)
+                    {
+                    case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::L_U8; break;
+                    case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::L_U16; break;
+                    case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::L_F16; break;
+                    case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::L_F32; break;
+                    }
+                    break;
+                case 2:
+                    switch (spec.format.basetype)
+                    {
+                    case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::LA_U8; break;
+                    case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::LA_U16; break;
+                    case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::LA_F16; break;
+                    case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::LA_F32; break;
+                    }
+                    break;
+                case 3:
+                    switch (spec.format.basetype)
+                    {
+                    case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::RGB_U8; break;
+                    case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::RGB_U16; break;
+                    case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::RGB_F16; break;
+                    case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::RGB_F32; break;
+                    }
+                    break;
+                default:
+                    switch (spec.format.basetype)
+                    {
+                    case OIIO::TypeDesc::UINT8: info.type = dtk::ImageType::RGBA_U8; break;
+                    case OIIO::TypeDesc::UINT16: info.type = dtk::ImageType::RGBA_U16; break;
+                    case OIIO::TypeDesc::HALF: info.type = dtk::ImageType::RGBA_F16; break;
+                    case OIIO::TypeDesc::FLOAT: info.type = dtk::ImageType::RGBA_F32; break;
+                    }
+                    break;
+                }
+                info.layout.mirror.y = true;
+
+                if (info.isValid())
+                {
+                    thumbnail = dtk::Image::create(info);
+                    auto resizedBuf = OIIO::ImageBufAlgo::resize(
+                        buf,
+                        "",
+                        0.F,
+                        OIIO::ROI(
+                            0, info.size.w,
+                            0, info.size.h,
+                            0, 1,
+                            0, std::min(4, spec.nchannels)));
+                    memcpy(
+                        thumbnail->getData(),
+                        resizedBuf.localpixels(),
+                        thumbnail->getByteCount());
+                }
+            }
             request->promise.set_value(thumbnail);
         }
     }
@@ -240,5 +341,32 @@ namespace toucan
         {
             request->promise.set_value(nullptr);
         }
+    }
+
+    std::shared_ptr<IImageNode> ThumbnailGenerator::_findNode(
+        const std::shared_ptr<IImageNode>& node,
+        const OTIO_NS::MediaReference* ref)
+    {
+        std::shared_ptr<IImageNode> out;
+        if (node)
+        {
+            auto read = std::dynamic_pointer_cast<IReadNode>(node);
+            if (read && read->getRef() == ref)
+            {
+                out = node;
+            }
+            else
+            {
+                for (const auto& input : node->getInputs())
+                {
+                    out = _findNode(input, ref);
+                    if (out)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        return out;
     }
 }

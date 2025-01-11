@@ -124,7 +124,10 @@ namespace toucan
         int out = depth + 1;
         for (const auto& input : node->getInputs())
         {
-            out = std::max(out, _getDepth(input, out));
+            if (input)
+            {
+                out = std::max(out, _getDepth(input, out));
+            }
         }
         return out;
     }
@@ -134,14 +137,17 @@ namespace toucan
         const std::shared_ptr<IImageNode>& node,
         int depth)
     {
-        auto button = dtk::PushButton::create(context, node->getLabel(), _layouts[_depth - 1 - depth]);
-        _buttonGroup->addButton(button);
-        _buttons.push_back(button);
-        _nodeToButton[node] = button;
-        _buttonToNode[button] = node;
-        for (const auto& input : node->getInputs())
+        if (node)
         {
-            _createNodes(context, input, depth + 1);
+            auto button = dtk::PushButton::create(context, node->getLabel(), _layouts[_depth - 1 - depth]);
+            _buttonGroup->addButton(button);
+            _buttons.push_back(button);
+            _nodeToButton[node] = button;
+            _buttonToNode[button] = node;
+            for (const auto& input : node->getInputs())
+            {
+                _createNodes(context, input, depth + 1);
+            }
         }
     }
 

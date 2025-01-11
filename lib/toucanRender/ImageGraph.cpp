@@ -62,11 +62,11 @@ namespace toucan
                     std::shared_ptr<IReadNode> read;
                     if (MovieReadNode::hasExtension(path.extension().string()))
                     {
-                        read = std::make_shared<MovieReadNode>(path, mem);
+                        read = std::make_shared<MovieReadNode>(path, nullptr, mem);
                     }
                     else
                     {
-                        read = std::make_shared<ImageReadNode>(path, mem);
+                        read = std::make_shared<ImageReadNode>(path, nullptr, mem);
                     }
                     const auto& spec = read->getSpec();
                     if (spec.width > 0)
@@ -98,6 +98,7 @@ namespace toucan
                         sequenceRef->frame_step(),
                         sequenceRef->rate(),
                         sequenceRef->frame_zero_padding(),
+                        nullptr,
                         _timelineWrapper->getMemoryReferences());
                     const auto& spec = read->getSpec();
                     if (spec.width > 0)
@@ -158,7 +159,7 @@ namespace toucan
         OTIO_NS::AnyDictionary metaData;
         metaData["size"] = vecToAny(_imageSize);
         metaData["color"] = vecToAny(IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F));
-        std::shared_ptr<IImageNode> node = host->createNode("toucan:Fill", metaData);
+        std::shared_ptr<IImageNode> node = host->createNode(metaData, "toucan:Fill");
 
         // Loop over the tracks.
         auto stack = _timelineWrapper->getTimeline()->tracks();
@@ -272,13 +273,13 @@ namespace toucan
                         auto metaData = prevTransition->metadata();
                         metaData["value"] = value;
                         auto node = host->createNode(
-                            prevTransition->transition_type(),
-                            metaData);
+                            metaData,
+                            prevTransition->transition_type());
                         if (!node)
                         {
                             node = host->createNode(
-                                "toucan:Dissolve",
-                                metaData);
+                                metaData,
+                                "toucan:Dissolve");
                         }
                         if (node)
                         {
@@ -307,13 +308,13 @@ namespace toucan
                         auto metaData = nextTransition->metadata();
                         metaData["value"] = value;
                         auto node = host->createNode(
-                            nextTransition->transition_type(),
-                            metaData);
+                            metaData,
+                            nextTransition->transition_type());
                         if (!node)
                         {
                             node = host->createNode(
-                                "toucan:Dissolve",
-                                metaData);
+                                metaData,
+                                "toucan:Dissolve");
                         }
                         if (node)
                         {
@@ -355,11 +356,11 @@ namespace toucan
                         const MemoryReference mem = _timelineWrapper->getMemoryReference(externalRef->target_url());
                         if (MovieReadNode::hasExtension(path.extension().string()))
                         {
-                            read = std::make_shared<MovieReadNode>(path, mem);
+                            read = std::make_shared<MovieReadNode>(path, externalRef, mem);
                         }
                         else
                         {
-                            read = std::make_shared<ImageReadNode>(path, mem);
+                            read = std::make_shared<ImageReadNode>(path, externalRef, mem);
                         }
                     }
                     catch (const std::exception& e)
@@ -402,6 +403,7 @@ namespace toucan
                         sequenceRef->frame_step(),
                         sequenceRef->rate(),
                         sequenceRef->frame_zero_padding(),
+                        sequenceRef,
                         _timelineWrapper->getMemoryReferences());
                 }
                 catch (const std::exception& e)
@@ -419,14 +421,16 @@ namespace toucan
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
             {
-                out = host->createNode(generatorRef->generator_kind(), generatorRef->parameters());
+                out = host->createNode(
+                    generatorRef->parameters(),
+                    generatorRef->generator_kind());
             }
         }
         else if (auto gap = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Gap>(item))
         {
             OTIO_NS::AnyDictionary metaData;
             metaData["size"] = vecToAny(_imageSize);
-            out = host->createNode("toucan:Fill", metaData);
+            out = host->createNode(metaData, "toucan:Fill");
         }
 
         // Get the effects.
@@ -465,8 +469,8 @@ namespace toucan
             else
             {
                 if (auto imageEffect = host->createNode(
-                    effect->effect_name(),
                     effect->metadata(),
+                    effect->effect_name(),
                     { out }))
                 {
                     out = imageEffect;

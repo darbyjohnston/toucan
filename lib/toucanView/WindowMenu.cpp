@@ -138,6 +138,17 @@ namespace toucan
             });
         _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/1.0"]);
 
+        _actions["Window/DisplayScale/1.5"] = std::make_shared<dtk::Action>(
+            "1.5",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(1.5F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/1.5"]);
+
         _actions["Window/DisplayScale/2.0"] = std::make_shared<dtk::Action>(
             "2.0",
             [windowWeak](bool value)
@@ -148,6 +159,17 @@ namespace toucan
                 }
             });
         _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/2.0"]);
+
+        _actions["Window/DisplayScale/2.5"] = std::make_shared<dtk::Action>(
+            "2.5",
+            [windowWeak](bool value)
+            {
+                if (auto window = windowWeak.lock())
+                {
+                    window->setDisplayScale(2.5F);
+                }
+            });
+        _menus["Window/DisplayScale"]->addItem(_actions["Window/DisplayScale/2.5"]);
 
         _actions["Window/DisplayScale/3.0"] = std::make_shared<dtk::Action>(
             "3.0",
@@ -198,7 +220,9 @@ namespace toucan
             {
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/Auto"], 0.F == value);
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/1.0"], 1.F == value);
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/1.5"], 1.5F == value);
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/2.0"], 2.F == value);
+                _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/2.5"], 2.5F == value);
                 _menus["Window/DisplayScale"]->setItemChecked(_actions["Window/DisplayScale/3.0"], 3.F == value);
             });
 

@@ -60,10 +60,13 @@ namespace toucan
                         _sizeInit = true;
                     }
 
-                    _timelineItem = TimelineItem::create(
-                        getContext(),
-                        appWeak.lock(),
-                        file);
+                    ItemData data;
+                    data.app = appWeak.lock();
+                    data.file = file;
+                    data.thumbnailGenerator = file->getThumbnailGenerator();
+                    data.thumbnailCache = std::make_shared<dtk::LRUCache<std::string, std::shared_ptr<dtk::Image> > >();
+                    data.thumbnailCache->setMax(1000);
+                    _timelineItem = TimelineItem::create(getContext(), data);
                     _timelineItem->setScale(_scale);
                     _timelineItem->setCurrentTimeCallback(
                         [this](const OTIO_NS::RationalTime& value)
