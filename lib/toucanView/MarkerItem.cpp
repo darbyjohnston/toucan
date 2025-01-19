@@ -69,11 +69,11 @@ namespace toucan
             data,
             OTIO_NS::dynamic_retainer_cast<OTIO_NS::SerializableObjectWithMetadata>(marker),
             timeRange,
-            "toucan::ClipItem",
+            "toucan::MarkerItem",
             parent);
 
         _marker = marker;
-        _text = !marker->name().empty() ? marker->name() : "Clip";
+        _text = !marker->name().empty() ? marker->name() : "Marker";
         _color = getMarkerColor(marker->color());
 
         setTooltip(marker->schema_name() + ": " + _text);
