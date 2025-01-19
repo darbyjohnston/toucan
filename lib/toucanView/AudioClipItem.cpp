@@ -60,20 +60,22 @@ namespace toucan
             _markerLayout = TimeLayout::create(context, timeRange, _layout);
             for (const auto& marker : markers)
             {
-                OTIO_NS::TimeRange markerTimeRange = clip->transformed_time_range(
-                    marker->marked_range(),
-                    timeline->tracks());
+                const OTIO_NS::TimeRange trimmedRange = clip->trimmed_range();
+                OTIO_NS::TimeRange markerRange(
+                    marker->marked_range().start_time() + trimmedRange.start_time(),
+                    marker->marked_range().duration());
+                markerRange = clip->transformed_time_range(markerRange, timeline->tracks());
                 if (timeline->global_start_time().has_value())
                 {
-                    markerTimeRange = OTIO_NS::TimeRange(
-                        timeline->global_start_time().value() + markerTimeRange.start_time(),
-                        markerTimeRange.duration());
+                    markerRange = OTIO_NS::TimeRange(
+                        timeline->global_start_time().value() + markerRange.start_time(),
+                        markerRange.duration());
                 }
                 auto markerItem = MarkerItem::create(
                     context,
                     data,
                     marker,
-                    markerTimeRange,
+                    markerRange,
                     _markerLayout);
                 _markerItems.push_back(markerItem);
             }
