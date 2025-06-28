@@ -15,8 +15,7 @@ set(HEADERS
     TimelineAlgo.h
     TimelineWrapper.h
     Util.h)
-set(HEADERS_PRIVATE
-    ImageEffect_p.h)
+set(HEADERS_PRIVATE)
 set(SOURCE
     Comp.cpp
     FFmpeg.cpp
@@ -45,7 +44,12 @@ else()
 endif()
 
 add_library(toucanRender ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
-set(LIBS_PUBLIC dtk::dtkCore OTIO::opentimelineio OTIO::opentime OpenImageIO::OpenImageIO MINIZIP::minizip)
+set(LIBS_PUBLIC
+    feather-tk::feather-tk-core
+    OTIO::opentimelineio
+    OTIO::opentime
+    OpenImageIO::OpenImageIO
+    MINIZIP::minizip)
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
     list(APPEND LIBS_PUBLIC stdc++fs)
 endif()
