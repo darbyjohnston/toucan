@@ -9,7 +9,6 @@
 #include <feather-tk/core/Context.h>
 #include <feather-tk/core/LRUCache.h>
 
-#include <opentimelineio/mediaReference.h>
 #include <opentimelineio/track.h>
 #include <opentimelineio/transition.h>
 
@@ -18,8 +17,6 @@
 
 namespace toucan
 {
-    class IReadNode;
-
     //! Create image graphs from a timeline.
     class ImageGraph : public std::enable_shared_from_this<ImageGraph>
     {
@@ -43,23 +40,25 @@ namespace toucan
         //! Get an image graph for the given time.
         std::shared_ptr<IImageNode> exec(
             const std::shared_ptr<ImageEffectHost>&,
-            const OTIO_NS::RationalTime&);
+            const OTIO_NS::RationalTime&,
+            const OTIO_NS::Item* = nullptr);
 
     private:
         std::shared_ptr<IImageNode> _track(
-            const std::shared_ptr<ImageEffectHost>&,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>&);
 
         std::shared_ptr<IImageNode> _item(
-            const std::shared_ptr<ImageEffectHost>&,
-            const OTIO_NS::TimeRange& trimmedRangeInParent,
             const OTIO_NS::RationalTime&,
             const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>&);
 
+        OTIO_NS::RationalTime _timeWarps(
+            const OTIO_NS::RationalTime&,
+            const OTIO_NS::TimeRange&,
+            const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&);
+
         std::shared_ptr<IImageNode> _effects(
-            const std::shared_ptr<ImageEffectHost>&,
-            const OTIO_NS::TimeRange& trimmedRange,
+            const OTIO_NS::RationalTime&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&,
             const std::shared_ptr<IImageNode>&);
 
@@ -70,6 +69,11 @@ namespace toucan
         IMATH_NAMESPACE::V2i _imageSize = IMATH_NAMESPACE::V2i(0, 0);
         int _imageChannels = 0;
         std::string _imageDataType;
-        ftk::LRUCache<OTIO_NS::MediaReference*, std::shared_ptr<IReadNode> > _loadCache;
+        ftk::LRUCache<const OTIO_NS::MediaReference*, std::shared_ptr<IReadNode> > _readCache;
+
+        // Temporary variables available during execution.
+        std::shared_ptr<ImageEffectHost> _host;
+        const OTIO_NS::Item* _itemNode = nullptr;
+        std::shared_ptr<IImageNode> _outNode;
     };
 }

@@ -7,8 +7,6 @@
 #include <toucanRender/ImageNode.h>
 #include <toucanRender/MemoryMap.h>
 
-#include <opentimelineio/mediaReference.h>
-
 #include <lunasvg/lunasvg.h>
 
 #include <OpenImageIO/filesystem.h>
@@ -21,21 +19,15 @@ namespace toucan
     class IReadNode : public IImageNode
     {
     public:
-        IReadNode(
-            const OTIO_NS::MediaReference*,
-            const std::string& name,
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
+        IReadNode(const std::string& name);
 
         virtual ~IReadNode() = 0;
-
-        const OTIO_NS::MediaReference* getRef() const;
 
         const OIIO::ImageSpec& getSpec() const;
 
         const OTIO_NS::TimeRange& getTimeRange() const;
 
     protected:
-        const OTIO_NS::MediaReference* _ref = nullptr;
         OIIO::ImageSpec _spec;
         OTIO_NS::TimeRange _timeRange;
     };
@@ -46,9 +38,7 @@ namespace toucan
     public:
         ImageReadNode(
             const std::filesystem::path&,
-            const OTIO_NS::MediaReference*,
-            const MemoryReference & = {},
-            const std::vector<std::shared_ptr<IImageNode> > & = {});
+            const MemoryReference& = {});
 
         virtual ~ImageReadNode();
 
@@ -58,37 +48,10 @@ namespace toucan
 
         static std::vector<std::string> getExtensions();
 
-        static bool hasExtension(const std::string&);
-
     private:
         std::filesystem::path _path;
         std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
         std::unique_ptr<OIIO::ImageInput> _input;
-    };
-
-    //! SVG read node.
-    class SVGReadNode : public IReadNode
-    {
-    public:
-        SVGReadNode(
-            const std::filesystem::path&,
-            const OTIO_NS::MediaReference*,
-            const MemoryReference& = {},
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
-
-        virtual ~SVGReadNode();
-
-        std::string getLabel() const override;
-
-        OIIO::ImageBuf exec() override;
-
-        static std::vector<std::string> getExtensions();
-
-        static bool hasExtension(const std::string&);
-
-    private:
-        std::filesystem::path _path;
-        std::unique_ptr<lunasvg::Document> _svg;
     };
 
     //! Image sequence read node.
@@ -102,10 +65,8 @@ namespace toucan
             int startFrame,
             int frameStep,
             double rate,
-            int frameZerPadding,
-            const OTIO_NS::MediaReference*,
-            const MemoryReferences& = {},
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
+            int frameZeroPadding,
+            const MemoryReferences& = {});
 
         virtual ~SequenceReadNode();
 
@@ -114,8 +75,6 @@ namespace toucan
         OIIO::ImageBuf exec() override;
 
         static std::vector<std::string> getExtensions();
-
-        static bool hasExtension(const std::string&);
 
     private:
         std::string _base;
@@ -128,15 +87,34 @@ namespace toucan
         MemoryReferences _memoryReferences;
     };
 
+    //! SVG read node.
+    class SVGReadNode : public IReadNode
+    {
+    public:
+        SVGReadNode(
+            const std::filesystem::path&,
+            const MemoryReference& = {});
+
+        virtual ~SVGReadNode();
+
+        std::string getLabel() const override;
+
+        OIIO::ImageBuf exec() override;
+
+        static std::vector<std::string> getExtensions();
+
+    private:
+        std::filesystem::path _path;
+        std::unique_ptr<lunasvg::Document> _svg;
+    };
+
     //! Movie read node.
     class MovieReadNode : public IReadNode
     {
     public:
         MovieReadNode(
             const std::filesystem::path&,
-            const OTIO_NS::MediaReference*,
-            const MemoryReference& = {},
-            const std::vector<std::shared_ptr<IImageNode> >& = {});
+            const MemoryReference& = {});
 
         virtual ~MovieReadNode();
 
@@ -146,11 +124,30 @@ namespace toucan
 
         static std::vector<std::string> getExtensions();
 
-        static bool hasExtension(const std::string&);
-
     private:
         std::filesystem::path _path;
         std::shared_ptr<OIIO::Filesystem::IOMemReader> _memoryReader;
         std::unique_ptr<ffmpeg::Read> _ffRead;
     };
+
+    //! Create a read node.
+    std::shared_ptr<IReadNode> createReadNode(
+        const std::filesystem::path&,
+        const MemoryReference& = {});
+
+    //! Create a read node.
+    std::shared_ptr<IReadNode> createReadNode(
+        const std::string& base,
+        const std::string& namePrefix,
+        const std::string& nameSuffix,
+        int startFrame,
+        int frameStep,
+        double rate,
+        int frameZerPadding,
+        const MemoryReferences& = {});
+
+    //! Is the extension in the list?
+    bool hasExtension(
+        const std::string& extension,
+        const std::vector<std::string>& extensions);
 }

@@ -5,7 +5,6 @@
 
 #include "PlaybackModel.h"
 #include "SelectionModel.h"
-#include "ThumbnailGenerator.h"
 #include "ViewModel.h"
 
 #include <toucanRender/TimelineWrapper.h>
@@ -31,12 +30,6 @@ namespace toucan
         _viewModel = std::make_shared<ViewModel>(context);
 
         _selectionModel = std::make_shared<SelectionModel>();
-
-        _thumbnailGenerator = std::make_shared<ThumbnailGenerator>(
-            context,
-            _path.parent_path(),
-            _timelineWrapper,
-            _host);
 
         _currentImage = ftk::ObservableValue<std::shared_ptr<ftk::Image> >::create();
 
@@ -91,11 +84,6 @@ namespace toucan
     const std::shared_ptr<SelectionModel>& File::getSelectionModel() const
     {
         return _selectionModel;
-    }
-
-    const std::shared_ptr<ThumbnailGenerator>& File::getThumbnailGenerator() const
-    {
-        return _thumbnailGenerator;
     }
 
     const IMATH_NAMESPACE::V2i& File::getImageSize() const

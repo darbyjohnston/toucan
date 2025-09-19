@@ -200,7 +200,7 @@ namespace toucan
 
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
-        if (MovieReadNode::hasExtension(outputPath.extension().string()))
+        if (hasExtension(outputPath.extension().string(), MovieReadNode::getExtensions()))
         {
             ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::MJPEG;
             if (_cmdLine.videoCodec->hasValue())

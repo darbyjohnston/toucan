@@ -29,16 +29,9 @@ namespace toucan
     OIIO::ImageBuf CompNode::exec()
     {
         OIIO::ImageBuf buf;
-        OTIO_NS::RationalTime offsetTime = _time;
-        if (!_timeOffset.is_invalid_time())
-        {
-            offsetTime -= _timeOffset;
-        }
         if (_inputs.size() > 1 && _inputs[0] && _inputs[1])
         {
-            _inputs[0]->setTime(offsetTime);
             auto fgBuf = _inputs[0]->exec();
-            _inputs[1]->setTime(offsetTime);
             buf = _inputs[1]->exec();
             const auto fgSpec = fgBuf.spec();
             if (_premult &&
@@ -81,7 +74,6 @@ namespace toucan
         }
         else if (1 == _inputs.size() && _inputs[0])
         {
-            _inputs[0]->setTime(offsetTime);
             buf = _inputs[0]->exec();
             if (_premult)
             {

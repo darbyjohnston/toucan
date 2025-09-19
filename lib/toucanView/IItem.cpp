@@ -12,7 +12,7 @@ namespace toucan
     void IItem::_init(
         const std::shared_ptr<ftk::Context>& context,
         const ItemData& data,
-        const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& object,
+        const OTIO_NS::SerializableObjectWithMetadata* object,
         const OTIO_NS::TimeRange& timeRange,
         const std::string& objectName,
         const std::shared_ptr<IWidget>& parent)
@@ -35,14 +35,9 @@ namespace toucan
     IItem::~IItem()
     {}
 
-    const OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObjectWithMetadata>& IItem::getObject() const
+    const OTIO_NS::SerializableObjectWithMetadata* IItem::getObject() const
     {
         return _object;
-    }
-
-    const ftk::Box2I& IItem::getSelectionRect() const
-    {
-        return _selectionRect;
     }
 
     bool IItem::isSelected() const
@@ -56,12 +51,6 @@ namespace toucan
             return;
         _selected = value;
         _setDrawUpdate();
-    }
-
-    void IItem::setGeometry(const ftk::Box2I& value)
-    {
-        ITimeWidget::setGeometry(value);
-        _selectionRect = value;
     }
 
     void IItem::mousePressEvent(ftk::MouseClickEvent& event)
@@ -102,10 +91,7 @@ namespace toucan
             "Go To Start",
             [this]
             {
-                if (auto file = _file.lock())
-                {
-                    file->getPlaybackModel()->setCurrentTime(_timeRange.start_time());
-                }
+                _file->getPlaybackModel()->setCurrentTime(_timeRange.start_time());
             });
         menu->addAction(action);
 
@@ -117,10 +103,7 @@ namespace toucan
                 "Set In/Out Points",
                 [this]
                 {
-                    if (auto file = _file.lock())
-                    {
-                        file->getPlaybackModel()->setInOutRange(_timeRange);
-                    }
+                    _file->getPlaybackModel()->setInOutRange(_timeRange);
                 });
             menu->addAction(action);
         }
@@ -129,19 +112,12 @@ namespace toucan
             "Reset In/Out Points",
             [this]
             {
-                if (auto file = _file.lock())
-                {
-                    file->getPlaybackModel()->resetInOutPoints();
-                }
+                _file->getPlaybackModel()->resetInOutPoints();
             });
         menu->addAction(action);
-        bool enabled = true;
-        if (auto file = _file.lock())
-        {
-            enabled =
-                file->getPlaybackModel()->getInOutRange() !=
-                file->getPlaybackModel()->getTimeRange();
-        }
+        const bool enabled =
+            _file->getPlaybackModel()->getInOutRange() !=
+            _file->getPlaybackModel()->getTimeRange();
         menu->setEnabled(action, enabled);
     }
 }

@@ -25,6 +25,7 @@ jobs:
         echo "LD_LIBRARY_PATH=$PWD/install-Debug/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         sudo apt-get update
         sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb
+        cmake --version
 
     - name: Build
       run: sh toucan/sbuild-linux.sh Debug
@@ -53,9 +54,10 @@ jobs:
         echo "LD_LIBRARY_PATH=$PWD/install-Release/lib:$LD_LIBRARY_PATH" >> $GITHUB_ENV
         sudo apt-get update
         sudo apt-get install xorg-dev libglu1-mesa-dev mesa-common-dev mesa-utils xvfb
+        cmake --version
 
     - name: Build
-      run: sh toucan/sbuild-macos.sh
+      run: sh toucan/sbuild-linux.sh
 
     - name: Install
       run: cmake --build build-Release --config Release --target install
@@ -76,33 +78,6 @@ jobs:
     - name: Upload artifact URL
       run: echo 'Artifact URL ${{ steps.linux-package-artifact.outputs.artifact-url }}'
 
-  macos-13-build:
-    runs-on: macos-13
-
-    env:
-      FFMPEG_MINIMAL: ON
-
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        path: toucan
-        submodules: recursive
-
-    # \bug DYLD_LIBRARY_PATH is not being set here?
-    - name: Setup
-      run: |
-        echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
-        echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-
-    - name: Build
-      run: sh toucan/sbuild-macos.sh Debug
-
-    - name: Install
-      run: cmake --build build-Debug --config Debug --target install
-
-    - name: Tests
-      run: build-Debug/tests/toucan-test/toucan-test toucan/data
-
   macos-build:
     runs-on: macos-latest
 
@@ -120,6 +95,7 @@ jobs:
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
         echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        cmake --version
 
     - name: Build
       run: sh toucan/sbuild-macos.sh Debug
@@ -147,6 +123,7 @@ jobs:
       run: |
         echo "$PWD/install-Debug/bin" >> $GITHUB_PATH
         echo "DYLD_LIBRARY_PATH=$PWD/install-Debug/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+        cmake --version
 
     - name: Build
       run: bash toucan/sbuild-macos.sh
@@ -190,6 +167,7 @@ jobs:
         echo %CD%\install-Debug\bin>> %GITHUB_PATH%
         echo %CD%\install-Debug\lib>> %GITHUB_PATH%
         echo CTEST_OUTPUT_ON_FAILURE=1 >> %GITHUB_ENV%
+        cmake --version
 
     - name: Build
       shell: cmd
@@ -222,6 +200,7 @@ jobs:
       run: |
         echo %CD%\install-Debug\bin>> %GITHUB_PATH%
         echo %CD%\install-Debug\lib>> %GITHUB_PATH%
+        cmake --version
 
     - name: Build
       shell: cmd

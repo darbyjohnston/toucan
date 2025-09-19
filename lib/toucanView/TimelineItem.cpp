@@ -6,6 +6,7 @@
 #include "App.h"
 #include "FilesModel.h"
 #include "StackItem.h"
+#include "ThumbnailsWidget.h"
 #include "WindowModel.h"
 
 #include <feather-tk/ui/ScrollArea.h>
@@ -20,7 +21,7 @@ namespace toucan
         IItem::_init(
             context,
             data,
-            nullptr,
+            data.file->getTimelineWrapper()->getTimeline(),
             data.file->getTimelineWrapper()->getTimeRange(),
             "toucan::TimelineItem",
             parent);
@@ -34,30 +35,18 @@ namespace toucan
         _timeline = data.file->getTimeline();
         _timeRange = data.file->getTimelineWrapper()->getTimeRange();
         _selectionModel = data.file->getSelectionModel();
-        _thumbnailGenerator = data.thumbnailGenerator;
-        _thumbnailCache = data.thumbnailCache;
 
-        StackItem::create(
+        _stackItem = StackItem::create(
             context,
             data,
             _timeline->tracks(),
-            _timeline,
             shared_from_this());
 
         _selectionObserver = ftk::ListObserver<SelectionItem>::create(
             _selectionModel->observeSelection(),
             [this](const std::vector<SelectionItem>& selection)
             {
-                _select(shared_from_this(), selection);
-            });
-
-        _thumbnailsObserver = ftk::ValueObserver<bool>::create(
-            data.app->getWindowModel()->observeThumbnails(),
-            [this](bool value)
-            {
-                _thumbnails = value;
-                _setSizeUpdate();
-                _setDrawUpdate();
+                _select(_stackItem, selection);
             });
     }
 
@@ -108,44 +97,15 @@ namespace toucan
         for (const auto& child : getChildren())
         {
             const ftk::Size2I& sizeHint = child->getSizeHint();
-            int h = timeHeight;
-            if (_thumbnails)
-            {
-                h += _size.thumbnailHeight;
-            }
             child->setGeometry(ftk::Box2I(
                 g.min.x,
-                g.min.y + h,
+                g.min.y + timeHeight,
                 sizeHint.w,
                 sizeHint.h));
         }
         if (auto scrollArea = getParentT<ftk::ScrollArea>())
         {
             _size.scrollPos = scrollArea->getScrollPos();
-        }
-    }
-
-    void TimelineItem::tickEvent(
-        bool parentsVisible,
-        bool parentsEnabled,
-        const ftk::TickEvent& event)
-    {
-        IItem::tickEvent(parentsVisible, parentsEnabled, event);
-        auto i = _thumbnailRequests.begin();
-        while (i != _thumbnailRequests.end())
-        {
-            if (i->future.valid() &&
-                i->future.wait_for(std::chrono::seconds(0)) == std::future_status::ready)
-            {
-                const auto image = i->future.get();
-                _thumbnailCache->add(getThumbnailCacheKey(nullptr, i->time, _size.thumbnailHeight), image);
-                _setDrawUpdate();
-                i = _thumbnailRequests.erase(i);
-            }
-            else
-            {
-                ++i;
-            }
         }
     }
 
@@ -163,14 +123,6 @@ namespace toucan
             _size.thumbnailHeight = 2 * event.style->getSizeRole(ftk::SizeRole::SwatchLarge, event.displayScale);
             _size.fontInfo = event.style->getFontRole(ftk::FontRole::Mono, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
-            std::vector<uint64_t> ids;
-            for (const auto& request : _thumbnailRequests)
-            {
-                ids.push_back(request.id);
-            }
-            _thumbnailRequests.clear();
-            _thumbnailGenerator->cancelThumbnails(ids);
-            _thumbnailCache->clear();
         }
         int childSizeHint = 0;
         for (const auto& child : getChildren())
@@ -180,75 +132,8 @@ namespace toucan
         ftk::Size2I sizeHint(
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
             _size.fontMetrics.lineHeight + _size.margin * 2);
-        if (_thumbnails)
-        {
-            sizeHint.h += _size.thumbnailHeight;
-        }
         sizeHint.h += childSizeHint;
         _setSizeHint(sizeHint);
-    }
-
-    void TimelineItem::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
-    {
-        IItem::drawEvent(drawRect, event);
-
-        const ftk::Box2I& g = getGeometry();
-        const int thumbnailWidth = _size.thumbnailHeight * _thumbnailGenerator->getAspect();
-        const int y = g.min.y + _size.fontMetrics.lineHeight + _size.margin * 2;
-        if (_thumbnails)
-        {
-            for (int x = g.min.x; x < g.max.x && thumbnailWidth > 0; x += thumbnailWidth)
-            {
-                const ftk::Box2I g2(x, y, thumbnailWidth, _size.thumbnailHeight);
-                if (ftk::intersects(g2, drawRect))
-                {
-                    const OTIO_NS::RationalTime t = posToTime(x);
-                    std::shared_ptr<ftk::Image> image;
-                    if (_thumbnailCache->get(getThumbnailCacheKey(nullptr, t, _size.thumbnailHeight), image))
-                    {
-                        if (image)
-                        {
-                            event.render->drawImage(
-                                image,
-                                ftk::Box2I(x, y, image->getWidth(), image->getHeight()));
-                        }
-                    }
-                    else
-                    {
-                        const auto j = std::find_if(
-                            _thumbnailRequests.begin(),
-                            _thumbnailRequests.end(),
-                            [this, t](const ThumbnailRequest& request)
-                            {
-                                return t == request.time && _size.thumbnailHeight == request.height;
-                            });
-                        if (j == _thumbnailRequests.end())
-                        {
-                            _thumbnailRequests.push_back(
-                                _thumbnailGenerator->getThumbnail(t, _size.thumbnailHeight));
-                        }
-                    }
-                }
-            }
-        }
-
-        std::vector<uint64_t> cancel;
-        auto i = _thumbnailRequests.begin();
-        while (i != _thumbnailRequests.end())
-        {
-            const int x = timeToPos(i->time);
-            const ftk::Box2I g2(x, y, thumbnailWidth, _size.thumbnailHeight);
-            if (!ftk::intersects(g2, drawRect))
-            {
-                cancel.push_back(i->id);
-                i = _thumbnailRequests.erase(i);
-            }
-            else
-            {
-                ++i;
-            }
-        }
-        _thumbnailGenerator->cancelThumbnails(cancel);
     }
 
     void TimelineItem::drawOverlayEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
@@ -328,7 +213,7 @@ namespace toucan
                 static_cast<int>(ftk::commandKeyModifier) == event.modifiers))
         {
             std::shared_ptr<IItem> selection;
-            _select(shared_from_this(), event.pos, selection);
+            _select(_stackItem, event.pos, selection);
             SelectionItem item;
             if (selection)
             {
@@ -578,7 +463,7 @@ namespace toucan
     {
         if (auto iitem = std::dynamic_pointer_cast<IItem>(widget))
         {
-            if (ftk::contains(iitem->getSelectionRect(), pos))
+            if (ftk::contains(iitem->getGeometry(), pos))
             {
                 out = iitem;
             }
@@ -604,7 +489,7 @@ namespace toucan
                 selection.end(),
                 [object](const SelectionItem& item)
                 {
-                    return object.value == item.object.value;
+                    return object == item.object;
                 });
             iitem->setSelected(i != selection.end());
         }

@@ -46,6 +46,7 @@ namespace toucan
                     viewState.scale = _scale;
                     viewState.frameView = _frameView->get();
                     _file->getPlaybackModel()->setViewState(viewState);
+                    _thumbnailGenerator.reset();
                 }
                 _file = file;
                 if (file)
@@ -61,12 +62,19 @@ namespace toucan
                         _sizeInit = true;
                     }
 
+                    auto context = getContext();
+                    auto app = appWeak.lock();
+                    _thumbnailGenerator = std::make_shared<ThumbnailGenerator>(
+                        context,
+                        app->getHost(),
+                        file->getTimelineWrapper());
+
                     ItemData data;
-                    data.app = appWeak.lock();
+                    data.app = app;
                     data.file = file;
-                    data.thumbnailGenerator = file->getThumbnailGenerator();
+                    data.thumbnailGenerator = _thumbnailGenerator;
                     data.thumbnailCache = std::make_shared<ftk::LRUCache<std::string, std::shared_ptr<ftk::Image> > >();
-                    data.thumbnailCache->setMax(1000);
+                    data.thumbnailCache->setMax(200);
                     _timelineItem = TimelineItem::create(getContext(), data);
                     _timelineItem->setScale(_scale);
                     _timelineItem->setCurrentTimeCallback(
@@ -250,6 +258,7 @@ namespace toucan
     void TimelineWidget::mouseReleaseEvent(ftk::MouseClickEvent& event)
     {
         IWidget::mouseReleaseEvent(event);
+        event.accept = true;
     }
 
     void TimelineWidget::scrollEvent(ftk::ScrollEvent& event)

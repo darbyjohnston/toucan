@@ -48,30 +48,27 @@ namespace toucan
         _timelineWrapper(timelineWrapper),
         _timeRange(timelineWrapper->getTimeRange())
     {
-        _loadCache.setMax(10);
+        _readCache.setMax(20);
 
         // Get the image information from the first video clip.
         for (auto clip : getVideoClips(_timelineWrapper->getTimeline()))
         {
             if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
             {
+                std::shared_ptr<IReadNode> read;
                 try
                 {
-                    const std::filesystem::path path = _timelineWrapper->getMediaPath(externalRef->target_url());
-                    const MemoryReference mem = _timelineWrapper->getMemoryReference(externalRef->target_url());
-                    std::shared_ptr<IReadNode> read;
-                    if (MovieReadNode::hasExtension(path.extension().string()))
-                    {
-                        read = std::make_shared<MovieReadNode>(path, nullptr, mem);
-                    }
-                    else if (SVGReadNode::hasExtension(path.extension().string()))
-                    {
-                        read = std::make_shared<SVGReadNode>(path, nullptr, mem);
-                    }
-                    else
-                    {
-                        read = std::make_shared<ImageReadNode>(path, nullptr, mem);
-                    }
+                    read = _timelineWrapper->createReadNode(externalRef);
+                }
+                catch (const std::exception& e)
+                {
+                    _context.lock()->getSystem<ftk::LogSystem>()->print(
+                        logPrefix,
+                        e.what(),
+                        ftk::LogType::Error);
+                }
+                if (read)
+                {
                     const auto& spec = read->getSpec();
                     if (spec.width > 0)
                     {
@@ -81,29 +78,24 @@ namespace toucan
                         _imageDataType = toImageDataType(spec.format);
                         break;
                     }
-                }
-                catch (const std::exception& e)
-                {
-                    _context.lock()->getSystem<ftk::LogSystem>()->print(
-                        logPrefix,
-                        e.what(),
-                        ftk::LogType::Error);
                 }
             }
             else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
             {
+                std::shared_ptr<IReadNode> read;
                 try
                 {
-                    auto read = std::make_shared<SequenceReadNode>(
-                        _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
-                        sequenceRef->name_prefix(),
-                        sequenceRef->name_suffix(),
-                        sequenceRef->start_frame(),
-                        sequenceRef->frame_step(),
-                        sequenceRef->rate(),
-                        sequenceRef->frame_zero_padding(),
-                        nullptr,
-                        _timelineWrapper->getMemoryReferences());
+                    read = _timelineWrapper->createReadNode(sequenceRef);
+                }
+                catch (const std::exception& e)
+                {
+                    _context.lock()->getSystem<ftk::LogSystem>()->print(
+                        logPrefix,
+                        e.what(),
+                        ftk::LogType::Error);
+                }
+                if (read)
+                {
                     const auto& spec = read->getSpec();
                     if (spec.width > 0)
                     {
@@ -113,13 +105,6 @@ namespace toucan
                         _imageDataType = toImageDataType(spec.format);
                         break;
                     }
-                }
-                catch (const std::exception& e)
-                {
-                    _context.lock()->getSystem<ftk::LogSystem>()->print(
-                        logPrefix,
-                        e.what(),
-                        ftk::LogType::Error);
                 }
             }
             else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
@@ -132,6 +117,7 @@ namespace toucan
                     //! \bug Hard coded:
                     _imageChannels = 4;
                     _imageDataType = toImageDataType(OIIO::TypeDesc::UINT8);
+                    break;
                 }
             }
         }
@@ -157,31 +143,44 @@ namespace toucan
 
     std::shared_ptr<IImageNode> ImageGraph::exec(
         const std::shared_ptr<ImageEffectHost>& host,
-        const OTIO_NS::RationalTime& time)
+        const OTIO_NS::RationalTime& time,
+        const OTIO_NS::Item* itemNode)
     {
+        _host = host;
+        _itemNode = itemNode;
+
         // Set the background color.
         OTIO_NS::AnyDictionary metaData;
         metaData["size"] = vecToAny(_imageSize);
         metaData["color"] = vecToAny(IMATH_NAMESPACE::V4f(0.F, 0.F, 0.F, 1.F));
-        std::shared_ptr<IImageNode> node = host->createNode(metaData, "toucan:Fill");
+        auto node = host->createNode(metaData, "toucan:Fill");
+
+        // Apply time warps.
+        auto stack = _timelineWrapper->getTimeline()->tracks();
+        const auto& stackEffects = stack->effects();
+        OTIO_NS::RationalTime t = time - _timeRange.start_time();
+        t = _timeWarps(t, stack->available_range(), stackEffects);
 
         // Loop over the tracks.
-        auto stack = _timelineWrapper->getTimeline()->tracks();
         for (const auto& i : stack->children())
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
                 if (track->kind() == OTIO_NS::Track::Kind::video && !track->find_clips().empty())
                 {
-                    // Process this track.
-                    auto trackNode = _track(host, time - _timeRange.start_time(), track);
-
-                    // Get the track effects.
-                    const auto& effects = track->effects();
-                    if (trackNode && !effects.empty())
+                    // Apply time warps.
+                    const auto& trackEffects = track->effects();
+                    OTIO_NS::RationalTime t2 = t;
+                    if (!trackEffects.empty())
                     {
-                        trackNode = _effects(host, track->trimmed_range(), effects, trackNode);
+                        t2 = _timeWarps(t2, track->available_range(), trackEffects);
                     }
+
+                    // Process this track.
+                    auto trackNode = _track(t2, track);
+
+                    // Add the track effects.
+                    trackNode = _effects(t2, trackEffects, trackNode);
 
                     // Composite this track over the previous track.
                     std::vector<std::shared_ptr<IImageNode> > nodes;
@@ -200,27 +199,29 @@ namespace toucan
             }
         }
 
-        // Get the stack effects.
-        const auto& effects = stack->effects();
-        if (!effects.empty())
-        {
-            node = _effects(host, stack->trimmed_range(), effects, node);
-        }
+        // Add the stack effects.
+        node = _effects(t, stackEffects, node);
 
-        // Set the time.
-        node->setTime(time - _timeRange.start_time());
+        // Clean up.
+        _host.reset();
+        _itemNode = nullptr;
+        if (_outNode)
+        {
+            node = _outNode;
+        }
+        _outNode.reset();
 
         return node;
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_track(
-        const std::shared_ptr<ImageEffectHost>& host,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Track>& track)
     {
         std::shared_ptr<IImageNode> out;
 
-        // Find the items for the given time.
+        // Find the item for the given time. The previous and next items are
+        // also tracked for handling transitions.
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item> item;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> prev;
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable> prev2;
@@ -235,8 +236,6 @@ namespace toucan
                 if (trimmedRangeInParent.has_value() && trimmedRangeInParent.value().contains(time))
                 {
                     out = _item(
-                        host,
-                        trimmedRangeInParent.value(),
                         track->transformed_time(time, item),
                         item);
                     if (i > 0)
@@ -274,27 +273,24 @@ namespace toucan
                             (time - trimmedRangeInParent.value().start_time()).value() /
                             trimmedRangeInParent.value().duration().value();
 
+                        auto a = _item(
+                            track->transformed_time(time, prevItem),
+                            prevItem);
+
                         auto metaData = prevTransition->metadata();
                         metaData["value"] = value;
-                        auto node = host->createNode(
+                        auto node = _host->createNode(
                             metaData,
-                            prevTransition->transition_type());
+                            prevTransition->transition_type(),
+                            { a, out });
                         if (!node)
                         {
-                            node = host->createNode(
+                            node = _host->createNode(
                                 metaData,
-                                "toucan:Dissolve");
+                                "toucan:Dissolve",
+                                { a, out });
                         }
-                        if (node)
-                        {
-                            auto a = _item(
-                                host,
-                                prevItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, prevItem),
-                                prevItem);
-                            node->setInputs({ a, out });
-                            out = node;
-                        }
+                        out = node;
                     }
                 }
             }
@@ -309,27 +305,24 @@ namespace toucan
                             (time - trimmedRangeInParent.value().start_time()).value() /
                             trimmedRangeInParent.value().duration().value();
 
+                        auto b = _item(
+                            track->transformed_time(time, nextItem),
+                            nextItem);
+
                         auto metaData = nextTransition->metadata();
                         metaData["value"] = value;
-                        auto node = host->createNode(
+                        auto node = _host->createNode(
                             metaData,
-                            nextTransition->transition_type());
+                            nextTransition->transition_type(),
+                            { out, b });
                         if (!node)
                         {
-                            node = host->createNode(
+                            node = _host->createNode(
                                 metaData,
-                                "toucan:Dissolve");
+                                "toucan:Dissolve",
+                                { out, b });
                         }
-                        if (node)
-                        {
-                            auto b = _item(
-                                host,
-                                nextItem->trimmed_range_in_parent().value(),
-                                track->transformed_time(time, nextItem),
-                                nextItem);
-                            node->setInputs({ out, b });
-                            out = node;
-                        }
+                        out = node;
                     }
                 }
             }
@@ -339,37 +332,30 @@ namespace toucan
     }
 
     std::shared_ptr<IImageNode> ImageGraph::_item(
-        const std::shared_ptr<ImageEffectHost>& host,
-        const OTIO_NS::TimeRange& trimmedRangeInParent,
         const OTIO_NS::RationalTime& time,
         const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Item>& item)
     {
         std::shared_ptr<IImageNode> out;
 
+        OTIO_NS::RationalTime t = time;
+
+        // Apply time warps.
+        const auto& effects = item->effects();
+        t = _timeWarps(t, item->available_range(), effects);
+
+        // Get the media.
         if (auto clip = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Clip>(item))
         {
-            // Get the media reference.
-            if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
+            auto mediaRef = clip->media_reference();
+            if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(mediaRef))
             {
                 std::shared_ptr<IReadNode> read;
-                if (!_loadCache.get(externalRef, read))
+                if (!_readCache.get(externalRef, read))
                 {
                     try
                     {
-                        const std::filesystem::path path = _timelineWrapper->getMediaPath(externalRef->target_url());
-                        const MemoryReference mem = _timelineWrapper->getMemoryReference(externalRef->target_url());
-                        if (MovieReadNode::hasExtension(path.extension().string()))
-                        {
-                            read = std::make_shared<MovieReadNode>(path, externalRef, mem);
-                        }
-                        else if (SVGReadNode::hasExtension(path.extension().string()))
-                        {
-                            read = std::make_shared<SVGReadNode>(path, externalRef, mem);
-                        }
-                        else
-                        {
-                            read = std::make_shared<ImageReadNode>(path, externalRef, mem);
-                        }
+                        read = _timelineWrapper->createReadNode(externalRef);
+                        _readCache.add(externalRef, read);
                     }
                     catch (const std::exception& e)
                     {
@@ -378,58 +364,47 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
-                    _loadCache.add(externalRef, read);
                 }
                 if (read)
                 {
-                    OTIO_NS::RationalTime timeOffset = -item->trimmed_range().start_time();
-
-                    //! \bug Workaround for when the available range does not match
-                    //! the range in the media.
-                    const OTIO_NS::TimeRange& timeRange = read->getTimeRange();
-                    const auto availableOpt = externalRef->available_range();
-                    if (availableOpt.has_value() &&
-                        !availableOpt.value().start_time().strictly_equal(timeRange.start_time()))
+                    //! \bug Workaround for files that are missing timecode.
+                    if (clip->available_range().start_time() !=
+                        read->getTimeRange().start_time())
                     {
-                        timeOffset += availableOpt.value().start_time() - timeRange.start_time();
+                        t -= clip->available_range().start_time();
                     }
 
-                    read->setTimeOffset(timeOffset);
+                    read->setTime(t);
                 }
                 out = read;
             }
-            else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
+            else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(mediaRef))
             {
-                std::shared_ptr<SequenceReadNode> read;
-                try
+                std::shared_ptr<IReadNode> read;
+                if (!_readCache.get(sequenceRef, read))
                 {
-                    read = std::make_shared<SequenceReadNode>(
-                        _timelineWrapper->getMediaPath(sequenceRef->target_url_base()),
-                        sequenceRef->name_prefix(),
-                        sequenceRef->name_suffix(),
-                        sequenceRef->start_frame(),
-                        sequenceRef->frame_step(),
-                        sequenceRef->rate(),
-                        sequenceRef->frame_zero_padding(),
-                        sequenceRef,
-                        _timelineWrapper->getMemoryReferences());
-                }
-                catch (const std::exception& e)
-                {
-                    _context.lock()->getSystem<ftk::LogSystem>()->print(
-                        logPrefix,
-                        e.what(),
-                        ftk::LogType::Error);
+                    try
+                    {
+                        read = _timelineWrapper->createReadNode(sequenceRef);
+                        _readCache.add(sequenceRef, read);
+                    }
+                    catch (const std::exception& e)
+                    {
+                        _context.lock()->getSystem<ftk::LogSystem>()->print(
+                            logPrefix,
+                            e.what(),
+                            ftk::LogType::Error);
+                    }
                 }
                 if (read)
                 {
-                    read->setTimeOffset(-item->trimmed_range().start_time());
+                    read->setTime(t);
                 }
                 out = read;
             }
-            else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(clip->media_reference()))
+            else if (auto generatorRef = dynamic_cast<OTIO_NS::GeneratorReference*>(mediaRef))
             {
-                out = host->createNode(
+                out = _host->createNode(
                     generatorRef->parameters(),
                     generatorRef->generator_kind());
             }
@@ -438,51 +413,53 @@ namespace toucan
         {
             OTIO_NS::AnyDictionary metaData;
             metaData["size"] = vecToAny(_imageSize);
-            out = host->createNode(metaData, "toucan:Fill");
+            out = _host->createNode(metaData, "toucan:Fill");
         }
 
-        // Get the effects.
-        const auto& effects = item->effects();
-        if (out && !effects.empty())
-        {
-            out = _effects(host, item->trimmed_range(), effects, out);
-        }
+        // Add the effects.
+        out = _effects(t, effects, out);
 
-        // Set the time offset.
-        if (out)
+        if (item == _itemNode)
         {
-            out->setTimeOffset(out->getTimeOffset() + trimmedRangeInParent.start_time());
+            _outNode = out;
         }
 
         return out;
     }
 
+    OTIO_NS::RationalTime ImageGraph::_timeWarps(
+        const OTIO_NS::RationalTime& time,
+        const OTIO_NS::TimeRange& timeRange,
+        const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects)
+    {
+        OTIO_NS::RationalTime out = time;
+        for (const auto& effect : effects)
+        {
+            if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+            {
+                const double s = linearTimeWarp->time_scalar();
+                out = OTIO_NS::RationalTime(
+                    (out - timeRange.start_time()).value() * s,
+                    time.rate()).round();
+            }
+        }
+        return out;
+    }
+
     std::shared_ptr<IImageNode> ImageGraph::_effects(
-        const std::shared_ptr<ImageEffectHost>& host,
-        const OTIO_NS::TimeRange& trimmedRange,
+        const OTIO_NS::RationalTime& time,
         const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >& effects,
         const std::shared_ptr<IImageNode>& input)
     {
         std::shared_ptr<IImageNode> out = input;
         for (const auto& effect : effects)
         {
-            if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
+            if (auto imageEffect = _host->createNode(
+                effect->metadata(),
+                effect->effect_name(),
+                { out }))
             {
-                auto linearTimeWarpNode = std::make_shared<LinearTimeWarpNode>(
-                    static_cast<float>(linearTimeWarp->time_scalar()),
-                    trimmedRange,
-                    std::vector<std::shared_ptr<IImageNode> >{ out });
-                out = linearTimeWarpNode;
-            }
-            else
-            {
-                if (auto imageEffect = host->createNode(
-                    effect->metadata(),
-                    effect->effect_name(),
-                    { out }))
-                {
-                    out = imageEffect;
-                }
+                out = imageEffect;
             }
         }
         return out;

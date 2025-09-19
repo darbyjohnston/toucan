@@ -3,10 +3,14 @@
 
 #include "ThumbnailGenerator.h"
 
+#include <toucanRender/ImageEffectHost.h>
+#include <toucanRender/ImageGraph.h>
 #include <toucanRender/Read.h>
+#include <toucanRender/TimelineWrapper.h>
 
 #include <OpenImageIO/imagebufalgo.h>
 
+#include <feather-tk/core/Context.h>
 #include <feather-tk/core/Format.h>
 #include <feather-tk/core/String.h>
 
@@ -15,13 +19,13 @@
 namespace toucan
 {
     std::string getThumbnailCacheKey(
-        const OTIO_NS::MediaReference* ref,
+        const OTIO_NS::Item* item,
         const OTIO_NS::RationalTime& time,
         int height)
     {
         std::vector<std::string> s;
         std::stringstream ss;
-        ss << ref;
+        ss << item;
         s.push_back(ss.str());
         s.push_back(ftk::Format("{0}@{1}").arg(time.value()).arg(time.rate()));
         s.push_back(ftk::Format("{0}").arg(height));
@@ -30,36 +34,22 @@ namespace toucan
 
     ThumbnailGenerator::ThumbnailGenerator(
         const std::shared_ptr<ftk::Context>& context,
-        const std::filesystem::path& path,
-        const std::shared_ptr<TimelineWrapper>& timelineWrapper,
-        const std::shared_ptr<ImageEffectHost>& host) :
-        _path(path),
-        _timelineWrapper(timelineWrapper),
-        _host(host)
+        const std::shared_ptr<ImageEffectHost>& host,
+        const std::shared_ptr<TimelineWrapper>& timelineWrapper) :
+        _host(host),
+        _timelineWrapper(timelineWrapper)
     {
         _logSystem = context->getSystem<ftk::LogSystem>();
 
-        _graph = std::make_shared<ImageGraph>(context, _path, _timelineWrapper);
+        _graph = std::make_shared<ImageGraph>(
+            context,
+            timelineWrapper->getPath().parent_path(),
+            timelineWrapper);
 
         _thread.running = true;
         _thread.thread = std::thread(
             [this]
             {
-                try
-                {
-                    const IMATH_NAMESPACE::V2i& imageSize = _graph->getImageSize();
-                    _aspect = imageSize.y > 0 ?
-                        (imageSize.x / static_cast<float>(imageSize.y)) :
-                        0.F;
-                }
-                catch (const std::exception& e)
-                {
-                    _logSystem->print(
-                        "toucan::ThumbnailGenerator",
-                        e.what(),
-                        ftk::LogType::Error);
-                }
-
                 while (_thread.running)
                 {
                     _run();
@@ -81,27 +71,43 @@ namespace toucan
         }
     }
 
-    float ThumbnailGenerator::getAspect() const
+    std::future<float> ThumbnailGenerator::getAspect(
+        const OTIO_NS::Item* item,
+        const OTIO_NS::RationalTime& time)
     {
-        return _aspect;
+        auto request = std::make_shared<AspectRequest>();
+        request->item = item;
+        request->time = time;
+        auto out = request->promise.get_future();
+        bool valid = false;
+        {
+            std::unique_lock<std::mutex> lock(_mutex.mutex);
+            if (!_mutex.stopped)
+            {
+                valid = true;
+                _mutex.aspectRequests.push_back(request);
+            }
+        }
+        if (valid)
+        {
+            _thread.cv.notify_one();
+        }
+        else
+        {
+            request->promise.set_value(0.F);
+        }
+        return out;
     }
 
     ThumbnailRequest ThumbnailGenerator::getThumbnail(
-        const OTIO_NS::RationalTime& time,
-        int height)
-    {
-        return getThumbnail(nullptr, time, height);
-    }
-
-    ThumbnailRequest ThumbnailGenerator::getThumbnail(
-        const OTIO_NS::MediaReference* ref,
+        const OTIO_NS::Item* item,
         const OTIO_NS::RationalTime& time,
         int height)
     {
         _requestId++;
         auto request = std::make_shared<Request>();
         request->id = _requestId;
-        request->ref = ref;
+        request->item = item;
         request->time = time;
         request->height = height;
         ThumbnailRequest out;
@@ -125,34 +131,6 @@ namespace toucan
         else
         {
             request->promise.set_value(nullptr);
-        }
-        return out;
-    }
-
-    std::future<float> ThumbnailGenerator::getAspect(
-        const OTIO_NS::MediaReference* ref,
-        const OTIO_NS::RationalTime& time)
-    {
-        auto request = std::make_shared<AspectRequest>();
-        request->ref = ref;
-        request->time = time;
-        auto out = request->promise.get_future();
-        bool valid = false;
-        {
-            std::unique_lock<std::mutex> lock(_mutex.mutex);
-            if (!_mutex.stopped)
-            {
-                valid = true;
-                _mutex.aspectRequests.push_back(request);
-            }
-        }
-        if (valid)
-        {
-            _thread.cv.notify_one();
-        }
-        else
-        {
-            request->promise.set_value(0.F);
         }
         return out;
     }
@@ -208,26 +186,14 @@ namespace toucan
         }
         if (aspectRequest)
         {
-            float aspect = 0.F;
-            auto node = _graph->exec(_host, aspectRequest->time);
-            if (node = _findNode(node, aspectRequest->ref))
+            float aspect = 1.F;
+            if (auto node = _graph->exec(_host, aspectRequest->time, aspectRequest->item))
             {
-                try
+                OIIO::ImageBuf buf = node->exec();
+                const auto& spec = buf.spec();
+                if (spec.width > 0 && spec.height > 0)
                 {
-                    node->setTime(aspectRequest->time - _timelineWrapper->getTimeRange().start_time());
-                    const OIIO::ImageBuf buf = node->exec();
-                    const OIIO::ImageSpec& spec = buf.spec();
-                    if (spec.height > 0)
-                    {
-                        aspect = spec.width / static_cast<float>(spec.height);
-                    }
-                }
-                catch (const std::exception& e)
-                {
-                    _logSystem->print(
-                        "toucan::ThumbnailGenerator",
-                        e.what(),
-                        ftk::LogType::Error);
+                    aspect = spec.width / static_cast<float>(spec.height);
                 }
             }
             aspectRequest->promise.set_value(aspect);
@@ -235,28 +201,9 @@ namespace toucan
         if (request)
         {
             OIIO::ImageBuf buf;
-            try
+            if (auto node = _graph->exec(_host, request->time, request->item))
             {
-                auto node = _graph->exec(_host, request->time);
-                if (request->ref)
-                {
-                    node = _findNode(node, request->ref);
-                    if (node)
-                    {
-                        node->setTime(request->time - _timelineWrapper->getTimeRange().start_time());
-                    }
-                }
-                if (node)
-                {
-                    buf = node->exec();
-                }
-            }
-            catch (const std::exception& e)
-            {
-                _logSystem->print(
-                    "toucan::ThumbnailGenerator",
-                    e.what(),
-                    ftk::LogType::Error);
+                buf = node->exec();
             }
 
             std::shared_ptr<ftk::Image> thumbnail;
@@ -341,32 +288,5 @@ namespace toucan
         {
             request->promise.set_value(nullptr);
         }
-    }
-
-    std::shared_ptr<IImageNode> ThumbnailGenerator::_findNode(
-        const std::shared_ptr<IImageNode>& node,
-        const OTIO_NS::MediaReference* ref)
-    {
-        std::shared_ptr<IImageNode> out;
-        if (node)
-        {
-            auto read = std::dynamic_pointer_cast<IReadNode>(node);
-            if (read && read->getRef() == ref)
-            {
-                out = node;
-            }
-            else
-            {
-                for (const auto& input : node->getInputs())
-                {
-                    out = _findNode(input, ref);
-                    if (out)
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-        return out;
     }
 }
