@@ -11,9 +11,9 @@
 
 #include <toucanRender/TimelineAlgo.h>
 
-#include <ftk/Ui/Action.h>
-#include <ftk/Ui/FileBrowser.h>
-#include <ftk/Ui/RecentFilesModel.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/FileBrowser.h>
+#include <ftk/UI/RecentFilesModel.h>
 #include <ftk/Core/Format.h>
 
 namespace toucan

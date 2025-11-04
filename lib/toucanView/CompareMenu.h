@@ -5,7 +5,7 @@
 
 #include <toucanView/FilesModel.h>
 
-#include <ftk/Ui/Menu.h>
+#include <ftk/UI/Menu.h>
 
 #include <map>
 

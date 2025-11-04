@@ -29,8 +29,8 @@ namespace toucan
         if (value == _name)
             return;
         _name = value;
-        _setSizeUpdate();
-        _setDrawUpdate();
+        setSizeUpdate();
+        setDrawUpdate();
     }
 
     void ItemLabel::setDuration(const std::string& value)
@@ -38,8 +38,8 @@ namespace toucan
         if (value == _duration)
             return;
         _duration = value;
-        _setSizeUpdate();
-        _setDrawUpdate();
+        setSizeUpdate();
+        setDrawUpdate();
     }
 
     void ItemLabel::setMarginRole(ftk::SizeRole value)
@@ -47,8 +47,8 @@ namespace toucan
         if (value == _marginRole)
             return;
         _marginRole = value;
-        _setSizeUpdate();
-        _setDrawUpdate();
+        setSizeUpdate();
+        setDrawUpdate();
     }
 
     void ItemLabel::setGeometry(const ftk::Box2I& value)

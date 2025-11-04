@@ -7,7 +7,7 @@
 #include "FilesModel.h"
 #include "SelectionModel.h"
 
-#include <ftk/Ui/Action.h>
+#include <ftk/UI/Action.h>
 
 namespace toucan
 {

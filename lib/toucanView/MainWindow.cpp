@@ -19,9 +19,9 @@
 #include "TimelineWidget.h"
 #include "ToolBar.h"
 
-#include <ftk/Ui/DialogSystem.h>
-#include <ftk/Ui/MessageDialog.h>
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/MessageDialog.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/Core/String.h>
 
 #include <nlohmann/json.hpp>

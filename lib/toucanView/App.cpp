@@ -11,10 +11,10 @@
 
 #include <toucanRender/Util.h>
 
-#include <ftk/Ui/DialogSystem.h>
-#include <ftk/Ui/FileBrowser.h>
-#include <ftk/Ui/MessageDialog.h>
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/FileBrowser.h>
+#include <ftk/UI/MessageDialog.h>
+#include <ftk/UI/Settings.h>
 
 #include <ftk/Core/CmdLine.h>
 

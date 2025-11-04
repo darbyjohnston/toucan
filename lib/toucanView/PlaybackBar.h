@@ -6,9 +6,9 @@
 #include <toucanView/TimeUnitsModel.h>
 #include <toucanView/TimeWidgets.h>
 
-#include <ftk/Ui/ComboBox.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/ToolButton.h>
+#include <ftk/UI/ComboBox.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ToolButton.h>
 
 namespace toucan
 {

@@ -5,9 +5,9 @@
 
 #include <toucanView/WindowModel.h>
 
-#include <ftk/Ui/Action.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/ToolButton.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/ObservableList.h>
 
 namespace toucan

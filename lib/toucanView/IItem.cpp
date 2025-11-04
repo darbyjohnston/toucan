@@ -50,7 +50,7 @@ namespace toucan
         if (value == _selected)
             return;
         _selected = value;
-        _setDrawUpdate();
+        setDrawUpdate();
     }
 
     void IItem::mousePressEvent(ftk::MouseClickEvent& event)

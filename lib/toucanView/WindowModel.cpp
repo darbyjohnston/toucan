@@ -3,7 +3,7 @@
 
 #include "WindowModel.h"
 
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
 #include <ftk/Core/String.h>
 

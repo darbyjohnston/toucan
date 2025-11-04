@@ -3,7 +3,7 @@
 
 #include "TimeUnitsModel.h"
 
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/Core/Error.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>

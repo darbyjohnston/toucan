@@ -5,7 +5,7 @@
 
 #include "App.h"
 
-#include <ftk/Ui/Action.h>
+#include <ftk/UI/Action.h>
 
 namespace toucan
 {

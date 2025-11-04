@@ -6,8 +6,8 @@
 #include <toucanView/File.h>
 #include <toucanView/PlaybackModel.h>
 
-#include <ftk/Ui/RecentFilesModel.h>
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/RecentFilesModel.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/ObservableValue.h>

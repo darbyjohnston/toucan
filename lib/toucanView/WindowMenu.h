@@ -5,7 +5,7 @@
 
 #include <toucanView/WindowModel.h>
 
-#include <ftk/Ui/Menu.h>
+#include <ftk/UI/Menu.h>
 #include <ftk/Core/ObservableList.h>
 #include <ftk/Core/ObservableMap.h>
 

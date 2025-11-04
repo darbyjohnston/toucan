@@ -7,7 +7,7 @@
 #include <toucanRender/TimelineWrapper.h>
 #include <toucanRender/Util.h>
 
-#include <ftk/Ui/DrawUtil.h>
+#include <ftk/UI/DrawUtil.h>
 
 namespace toucan
 {
@@ -79,7 +79,7 @@ namespace toucan
                 const std::string cacheKey = getThumbnailCacheKey(_item, i->time, _size.thumbnailHeight);
                 const auto image = i->future.get();
                 _thumbnailCache->add(cacheKey, image);
-                _setDrawUpdate();
+                setDrawUpdate();
                 i = _thumbnailRequests.erase(i);
             }
             else

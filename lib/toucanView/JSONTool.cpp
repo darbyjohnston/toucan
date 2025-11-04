@@ -6,9 +6,9 @@
 #include "App.h"
 #include "FilesModel.h"
 
-#include <ftk/Ui/Divider.h>
-#include <ftk/Ui/Spacer.h>
-#include <ftk/Ui/ToolButton.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/Spacer.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 

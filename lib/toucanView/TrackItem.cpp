@@ -8,7 +8,7 @@
 #include "GapItem.h"
 #include "VideoClipItem.h"
 
-#include <ftk/Ui/DrawUtil.h>
+#include <ftk/UI/DrawUtil.h>
 #include <ftk/Core/RenderUtil.h>
 
 namespace toucan

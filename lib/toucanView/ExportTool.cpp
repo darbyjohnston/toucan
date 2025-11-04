@@ -9,10 +9,10 @@
 
 #include <toucanRender/Util.h>
 
-#include <ftk/Ui/DialogSystem.h>
-#include <ftk/Ui/GridLayout.h>
-#include <ftk/Ui/Settings.h>
-#include <ftk/Ui/Window.h>
+#include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/Settings.h>
+#include <ftk/UI/Window.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Format.h>
 

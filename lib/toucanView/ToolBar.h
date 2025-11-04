@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <ftk/Ui/Action.h>
-#include <ftk/Ui/RowLayout.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/RowLayout.h>
 
 namespace toucan
 {

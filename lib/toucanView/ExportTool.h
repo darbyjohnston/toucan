@@ -8,19 +8,19 @@
 #include <toucanRender/FFmpegWrite.h>
 #include <toucanRender/ImageGraph.h>
 
-#include <ftk/Ui/ComboBox.h>
-#include <ftk/Ui/Divider.h>
-#include <ftk/Ui/FileEdit.h>
-#include <ftk/Ui/IntEdit.h>
-#include <ftk/Ui/Label.h>
-#include <ftk/Ui/LineEdit.h>
-#include <ftk/Ui/ProgressDialog.h>
-#include <ftk/Ui/PushButton.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/ScrollWidget.h>
-#include <ftk/Ui/Settings.h>
-#include <ftk/Ui/TabWidget.h>
-#include <ftk/Ui/ToolButton.h>
+#include <ftk/UI/ComboBox.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/FileEdit.h>
+#include <ftk/UI/IntEdit.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/LineEdit.h>
+#include <ftk/UI/ProgressDialog.h>
+#include <ftk/UI/PushButton.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/Settings.h>
+#include <ftk/UI/TabWidget.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/Timer.h>
 
 namespace toucan

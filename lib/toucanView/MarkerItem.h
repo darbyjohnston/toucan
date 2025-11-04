@@ -6,7 +6,7 @@
 #include <toucanView/IItem.h>
 #include <toucanView/ItemLabel.h>
 
-#include <ftk/Ui/RowLayout.h>
+#include <ftk/UI/RowLayout.h>
 
 #include <opentimelineio/marker.h>
 

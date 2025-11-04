@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ftk/Ui/IWidget.h>
+#include <ftk/UI/IWidget.h>
 
 namespace toucan
 {

@@ -7,8 +7,8 @@
 #include "FilesModel.h"
 #include "PlaybackModel.h"
 
-#include <ftk/Ui/Divider.h>
-#include <ftk/Ui/Spacer.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/Spacer.h>
 #include <ftk/Core/Format.h>
 #include <ftk/Core/String.h>
 

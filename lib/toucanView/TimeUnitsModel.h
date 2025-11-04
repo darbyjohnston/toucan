@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ftk/Ui/Settings.h>
+#include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/ObservableValue.h>
 

@@ -9,7 +9,7 @@
 #include "TrackItem.h"
 #include "WindowModel.h"
 
-#include <ftk/Ui/DrawUtil.h>
+#include <ftk/UI/DrawUtil.h>
 #include <ftk/Core/RenderUtil.h>
 
 namespace toucan

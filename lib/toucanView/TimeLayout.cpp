@@ -11,7 +11,7 @@ namespace toucan
         const std::string& objectName,
         const std::shared_ptr<ftk::IWidget>& parent)
     {
-        ftk::IWidget::_init(context, objectName, parent);
+        ftk::IMouseWidget::_init(context, objectName, parent);
         _timeRange = timeRange;
     }
 
@@ -40,7 +40,7 @@ namespace toucan
                 item->setScale(value);
             }
         }
-        _setSizeUpdate();
+        setSizeUpdate();
     }
 
     int ITimeWidget::getMinWidth() const

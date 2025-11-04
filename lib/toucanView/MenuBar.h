@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <ftk/Ui/MenuBar.h>
+#include <ftk/UI/MenuBar.h>
 
 namespace toucan
 {

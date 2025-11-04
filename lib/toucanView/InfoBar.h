@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include <ftk/Ui/Action.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/Label.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Label.h>
 
 #include <ftk/Core/ObservableList.h>
 

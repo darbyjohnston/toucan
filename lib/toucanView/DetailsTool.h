@@ -9,15 +9,15 @@
 
 #include <toucanRender/ImageGraph.h>
 
-#include <ftk/Ui/Bellows.h>
-#include <ftk/Ui/ButtonGroup.h>
-#include <ftk/Ui/GridLayout.h>
-#include <ftk/Ui/Label.h>
-#include <ftk/Ui/PushButton.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/ScrollWidget.h>
-#include <ftk/Ui/SearchBox.h>
-#include <ftk/Ui/ToolButton.h>
+#include <ftk/UI/Bellows.h>
+#include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/PushButton.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/SearchBox.h>
+#include <ftk/UI/ToolButton.h>
 #include <ftk/Core/ObservableList.h>
 
 #include <utility>

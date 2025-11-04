@@ -5,7 +5,7 @@
 
 #include <toucanView/PlaybackModel.h>
 
-#include <ftk/Ui/Menu.h>
+#include <ftk/UI/Menu.h>
 
 #include <map>
 

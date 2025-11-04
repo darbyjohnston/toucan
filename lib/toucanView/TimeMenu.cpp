@@ -7,7 +7,7 @@
 #include "FilesModel.h"
 #include "PlaybackModel.h"
 
-#include <ftk/Ui/Action.h>
+#include <ftk/UI/Action.h>
 
 namespace toucan
 {

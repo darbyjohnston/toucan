@@ -6,7 +6,7 @@
 #include <toucanView/FilesModel.h>
 #include <toucanView/ViewModel.h>
 
-#include <ftk/Ui/IWidget.h>
+#include <ftk/UI/IMouseWidget.h>
 
 #include <ftk/Core/Image.h>
 
@@ -17,7 +17,7 @@ namespace toucan
     class ViewModel;
 
     //! Viewport widget.
-    class Viewport : public ftk::IWidget
+    class Viewport : public ftk::IMouseWidget
     {
     protected:
         void _init(

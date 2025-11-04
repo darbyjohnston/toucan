@@ -5,8 +5,8 @@
 
 #include <toucanView/PlaybackModel.h>
 
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/Label.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Label.h>
 
 namespace toucan
 {

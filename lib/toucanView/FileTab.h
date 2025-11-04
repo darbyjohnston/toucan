@@ -5,7 +5,7 @@
 
 #include <toucanView/ViewModel.h>
 
-#include <ftk/Ui/IWidget.h>
+#include <ftk/UI/IWidget.h>
 
 namespace toucan
 {

@@ -5,11 +5,11 @@
 
 #include <toucanView/WindowModel.h>
 
-#include <ftk/Ui/Divider.h>
-#include <ftk/Ui/RowLayout.h>
-#include <ftk/Ui/Splitter.h>
-#include <ftk/Ui/TabWidget.h>
-#include <ftk/Ui/Window.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/Splitter.h>
+#include <ftk/UI/TabWidget.h>
+#include <ftk/UI/Window.h>
 #include <ftk/Core/ObservableList.h>
 
 namespace toucan
