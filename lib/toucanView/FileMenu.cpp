@@ -10,10 +10,10 @@
 
 #include <toucanRender/Read.h>
 
-#include <feather-tk/ui/Action.h>
-#include <feather-tk/ui/FileBrowser.h>
-#include <feather-tk/ui/RecentFilesModel.h>
-#include <feather-tk/core/Format.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/FileBrowser.h>
+#include <ftk/UI/RecentFilesModel.h>
+#include <ftk/Core/Format.h>
 
 namespace toucan
 {

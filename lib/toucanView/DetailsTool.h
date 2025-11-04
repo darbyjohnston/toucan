@@ -9,16 +9,16 @@
 
 #include <toucanRender/ImageGraph.h>
 
-#include <feather-tk/ui/Bellows.h>
-#include <feather-tk/ui/ButtonGroup.h>
-#include <feather-tk/ui/GridLayout.h>
-#include <feather-tk/ui/Label.h>
-#include <feather-tk/ui/PushButton.h>
-#include <feather-tk/ui/RowLayout.h>
-#include <feather-tk/ui/ScrollWidget.h>
-#include <feather-tk/ui/SearchBox.h>
-#include <feather-tk/ui/ToolButton.h>
-#include <feather-tk/core/ObservableList.h>
+#include <ftk/UI/Bellows.h>
+#include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/PushButton.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/SearchBox.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/ObservableList.h>
 
 #include <utility>
 

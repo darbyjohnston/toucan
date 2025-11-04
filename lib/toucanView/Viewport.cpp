@@ -8,7 +8,7 @@
 #include "App.h"
 #include "ViewModel.h"
 
-#include <feather-tk/ui/DrawUtil.h>
+#include <ftk/UI/DrawUtil.h>
 
 namespace toucan
 {
@@ -18,7 +18,7 @@ namespace toucan
         const std::shared_ptr<File>& file,
         const std::shared_ptr<ftk::IWidget>& parent)
     {
-        IWidget::_init(context, "toucan::Viewport", parent);
+        IMouseWidget::_init(context, "toucan::Viewport", parent);
 
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(true, 0, 0);
@@ -35,7 +35,7 @@ namespace toucan
             [this](const std::shared_ptr<ftk::Image>& value)
             {
                 _image = value;
-                _setDrawUpdate();
+                setDrawUpdate();
             });
 
         _bObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
@@ -52,7 +52,7 @@ namespace toucan
                         [this](const std::shared_ptr<ftk::Image>& value)
                         {
                             _bImage = value;
-                            _setDrawUpdate();
+                            setDrawUpdate();
                         });
                 }
                 else
@@ -60,7 +60,7 @@ namespace toucan
                     _bImageSize = ftk::Size2I();
                     _bImage.reset();
                     _bImageObserver.reset();
-                    _setDrawUpdate();
+                    setDrawUpdate();
                 }
             });
 
@@ -69,7 +69,7 @@ namespace toucan
             [this](const CompareOptions& value)
             {
                 _compareOptions = value;
-                _setDrawUpdate();
+                setDrawUpdate();
             });
 
         _zoomInObserver = ftk::ValueObserver<bool>::create(
@@ -114,7 +114,7 @@ namespace toucan
             [this](const ViewOptions& value)
             {
                 _options = value;
-                _setDrawUpdate();
+                setDrawUpdate();
             });
 
         _globalOptionsObserver = ftk::ValueObserver<GlobalViewOptions>::create(
@@ -122,7 +122,7 @@ namespace toucan
             [this](const GlobalViewOptions& value)
             {
                 _globalOptions = value;
-                _setDrawUpdate();
+                setDrawUpdate();
             });
     }
 
@@ -167,7 +167,7 @@ namespace toucan
         changed |= _viewZoom->setIfChanged(zoom);
         if (changed)
         {
-            _setDrawUpdate();
+            setDrawUpdate();
         }
     }
 
@@ -217,14 +217,12 @@ namespace toucan
         if (_frameView->setIfChanged(value))
         {
             _viewModel->setFrameView(value);
-            _setDrawUpdate();
+            setDrawUpdate();
         }
     }
 
     void Viewport::drawEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
     {
-        IWidget::drawEvent(drawRect, event);
-
         // Draw the background.
         const ftk::Box2I& g = getGeometry();
         switch (_globalOptions.background)
@@ -247,10 +245,10 @@ namespace toucan
         {
             _frameUpdate();
         }
-        ftk::M44F vm;
-        vm = vm * ftk::translate(ftk::V3F(g.min.x, g.min.y, 0.F));
-        vm = vm * ftk::translate(ftk::V3F(_viewPos->get().x, _viewPos->get().y, 0.F));
-        vm = vm * ftk::scale(ftk::V3F(_viewZoom->get(), _viewZoom->get(), 1.F));
+        const ftk::M44F vm =
+            ftk::translate(ftk::V3F(g.min.x, g.min.y, 0.F)) *
+            ftk::translate(ftk::V3F(_viewPos->get().x, _viewPos->get().y, 0.F)) *
+            ftk::scale(ftk::V3F(_viewZoom->get(), _viewZoom->get(), 1.F));
         const auto m = event.render->getTransform();
         event.render->setTransform(m * vm);
 
@@ -320,18 +318,18 @@ namespace toucan
                 mesh.t.push_back(ftk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 0.F : 1.F));
                 ftk::Triangle2 triangle;
                 triangle.v[0].v = 1;
-                triangle.v[1].v = 2;
-                triangle.v[2].v = 3;
+                triangle.v[1].v = 3;
+                triangle.v[2].v = 2;
                 triangle.v[0].t = 1;
-                triangle.v[1].t = 2;
-                triangle.v[2].t = 3;
+                triangle.v[1].t = 3;
+                triangle.v[2].t = 2;
                 mesh.triangles.push_back(triangle);
                 triangle.v[0].v = 3;
-                triangle.v[1].v = 4;
-                triangle.v[2].v = 1;
+                triangle.v[1].v = 1;
+                triangle.v[2].v = 4;
                 triangle.v[0].t = 3;
-                triangle.v[1].t = 4;
-                triangle.v[2].t = 1;
+                triangle.v[1].t = 1;
+                triangle.v[2].t = 4;
                 mesh.triangles.push_back(triangle);
                 event.render->drawImage(
                     _image,
@@ -357,18 +355,18 @@ namespace toucan
                 mesh.t.push_back(ftk::V2F(_options.flop ? .5F : .5F, _options.flip ? 0.F : 1.F));
                 ftk::Triangle2 triangle;
                 triangle.v[0].v = 1;
-                triangle.v[1].v = 2;
-                triangle.v[2].v = 3;
+                triangle.v[1].v = 3;
+                triangle.v[2].v = 2;
                 triangle.v[0].t = 1;
-                triangle.v[1].t = 2;
-                triangle.v[2].t = 3;
+                triangle.v[1].t = 3;
+                triangle.v[2].t = 2;
                 mesh.triangles.push_back(triangle);
                 triangle.v[0].v = 3;
-                triangle.v[1].v = 4;
-                triangle.v[2].v = 1;
+                triangle.v[1].v = 1;
+                triangle.v[2].v = 4;
                 triangle.v[0].t = 3;
-                triangle.v[1].t = 4;
-                triangle.v[2].t = 1;
+                triangle.v[1].t = 1;
+                triangle.v[2].t = 4;
                 mesh.triangles.push_back(triangle);
                 event.render->drawImage(
                     _bImage,
@@ -477,7 +475,7 @@ namespace toucan
 
     void Viewport::mouseMoveEvent(ftk::MouseMoveEvent& event)
     {
-        IWidget::mouseMoveEvent(event);
+        IMouseWidget::mouseMoveEvent(event);
         if (_isMousePressed())
         {
             event.accept = true;
@@ -485,13 +483,13 @@ namespace toucan
             _viewPos->setIfChanged(ftk::V2I(
                 _viewMousePress.x + (event.pos.x - mousePressPos.x),
                 _viewMousePress.y + (event.pos.y - mousePressPos.y)));
-            _setDrawUpdate();
+            setDrawUpdate();
         }
     }
 
     void Viewport::mousePressEvent(ftk::MouseClickEvent& event)
     {
-        IWidget::mousePressEvent(event);
+        IMouseWidget::mousePressEvent(event);
         if (1 == event.button && 0 == event.modifiers)
         {
             event.accept = true;
@@ -502,13 +500,13 @@ namespace toucan
 
     void Viewport::mouseReleaseEvent(ftk::MouseClickEvent& event)
     {
-        IWidget::mouseReleaseEvent(event);
+        IMouseWidget::mouseReleaseEvent(event);
         event.accept = true;
     }
 
     void Viewport::scrollEvent(ftk::ScrollEvent& event)
     {
-        IWidget::scrollEvent(event);
+        IMouseWidget::scrollEvent(event);
         if (0 == event.modifiers)
         {
             event.accept = true;
@@ -558,18 +556,18 @@ namespace toucan
         mesh.t.push_back(ftk::V2F(_options.flop ? 1.F : 0.F, _options.flip ? 0.F : 1.F));
         ftk::Triangle2 triangle;
         triangle.v[0].v = 1;
-        triangle.v[1].v = 2;
-        triangle.v[2].v = 3;
+        triangle.v[1].v = 3;
+        triangle.v[2].v = 2;
         triangle.v[0].t = 1;
-        triangle.v[1].t = 2;
-        triangle.v[2].t = 3;
+        triangle.v[1].t = 3;
+        triangle.v[2].t = 2;
         mesh.triangles.push_back(triangle);
         triangle.v[0].v = 3;
-        triangle.v[1].v = 4;
-        triangle.v[2].v = 1;
+        triangle.v[1].v = 1;
+        triangle.v[2].v = 4;
         triangle.v[0].t = 3;
-        triangle.v[1].t = 4;
-        triangle.v[2].t = 1;
+        triangle.v[1].t = 1;
+        triangle.v[2].t = 4;
         mesh.triangles.push_back(triangle);
         return mesh;
     }

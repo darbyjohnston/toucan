@@ -6,11 +6,11 @@
 #include <toucanView/PlaybackModel.h>
 #include <toucanView/TimeUnitsModel.h>
 
-#include <feather-tk/ui/ButtonGroup.h>
-#include <feather-tk/ui/IncButtons.h>
-#include <feather-tk/ui/Label.h>
-#include <feather-tk/ui/LineEdit.h>
-#include <feather-tk/ui/RowLayout.h>
+#include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/IncButtons.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/LineEdit.h>
+#include <ftk/UI/RowLayout.h>
 
 #include <opentimelineio/anyVector.h>
 

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include <feather-tk/ui/App.h>
-#include <feather-tk/ui/Settings.h>
+#include <ftk/UI/App.h>
+#include <ftk/UI/Settings.h>
 
 #include <filesystem>
 

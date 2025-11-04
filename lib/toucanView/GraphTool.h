@@ -7,10 +7,10 @@
 
 #include <toucanRender/ImageGraph.h>
 
-#include <feather-tk/ui/ButtonGroup.h>
-#include <feather-tk/ui/PushButton.h>
-#include <feather-tk/ui/RowLayout.h>
-#include <feather-tk/ui/ScrollWidget.h>
+#include <ftk/UI/ButtonGroup.h>
+#include <ftk/UI/PushButton.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
 
 namespace toucan
 {

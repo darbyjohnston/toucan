@@ -9,12 +9,12 @@
 
 #include <toucanRender/Util.h>
 
-#include <feather-tk/ui/DialogSystem.h>
-#include <feather-tk/ui/GridLayout.h>
-#include <feather-tk/ui/Settings.h>
-#include <feather-tk/ui/Window.h>
-#include <feather-tk/core/Context.h>
-#include <feather-tk/core/Format.h>
+#include <ftk/UI/DialogSystem.h>
+#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/Settings.h>
+#include <ftk/UI/Window.h>
+#include <ftk/Core/Context.h>
+#include <ftk/Core/Format.h>
 
 #include <OpenImageIO/imagebufalgo.h>
 

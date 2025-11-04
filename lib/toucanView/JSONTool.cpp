@@ -6,11 +6,11 @@
 #include "App.h"
 #include "FilesModel.h"
 
-#include <feather-tk/ui/Divider.h>
-#include <feather-tk/ui/Spacer.h>
-#include <feather-tk/ui/ToolButton.h>
-#include <feather-tk/core/Format.h>
-#include <feather-tk/core/String.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/Spacer.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/Format.h>
+#include <ftk/Core/String.h>
 
 namespace toucan
 {

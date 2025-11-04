@@ -8,20 +8,20 @@
 #include <toucanRender/FFmpegWrite.h>
 #include <toucanRender/ImageGraph.h>
 
-#include <feather-tk/ui/ComboBox.h>
-#include <feather-tk/ui/Divider.h>
-#include <feather-tk/ui/FileEdit.h>
-#include <feather-tk/ui/IntEdit.h>
-#include <feather-tk/ui/Label.h>
-#include <feather-tk/ui/LineEdit.h>
-#include <feather-tk/ui/ProgressDialog.h>
-#include <feather-tk/ui/PushButton.h>
-#include <feather-tk/ui/RowLayout.h>
-#include <feather-tk/ui/ScrollWidget.h>
-#include <feather-tk/ui/Settings.h>
-#include <feather-tk/ui/TabWidget.h>
-#include <feather-tk/ui/ToolButton.h>
-#include <feather-tk/core/Timer.h>
+#include <ftk/UI/ComboBox.h>
+#include <ftk/UI/Divider.h>
+#include <ftk/UI/FileEdit.h>
+#include <ftk/UI/IntEdit.h>
+#include <ftk/UI/Label.h>
+#include <ftk/UI/LineEdit.h>
+#include <ftk/UI/ProgressDialog.h>
+#include <ftk/UI/PushButton.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/Settings.h>
+#include <ftk/UI/TabWidget.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/Timer.h>
 
 namespace toucan
 {

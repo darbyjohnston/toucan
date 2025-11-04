@@ -20,7 +20,7 @@ namespace toucan
         const std::shared_ptr<App>& app,
         const std::shared_ptr<IWidget>& parent)
     {
-        IWidget::_init(context, "toucan::TimelineWidget", parent);
+        IMouseWidget::_init(context, "toucan::TimelineWidget", parent);
 
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(
@@ -118,8 +118,8 @@ namespace toucan
                     _currentTimeObserver.reset();
                 }
 
-                _setSizeUpdate();
-                _setDrawUpdate();
+                setSizeUpdate();
+                setDrawUpdate();
             });
     }
 
@@ -182,14 +182,14 @@ namespace toucan
         {
             _timelineItem->setScale(_scale);
         }
-        _setSizeUpdate();
-        _setDrawUpdate();
+        setSizeUpdate();
+        setDrawUpdate();
     }
 
     void TimelineWidget::setGeometry(const ftk::Box2I& value)
     {
         const ftk::Box2I viewportPrev = _scrollWidget->getViewport();
-        IWidget::setGeometry(value);
+        IMouseWidget::setGeometry(value);
         _scrollWidget->setGeometry(value);
         const bool changed = _scrollWidget->getViewport() != viewportPrev;
         if (_sizeInit)
@@ -218,13 +218,12 @@ namespace toucan
 
     void TimelineWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
     {
-        IWidget::sizeHintEvent(event);
         _setSizeHint(_scrollWidget->getSizeHint());
     }
 
     void TimelineWidget::mouseMoveEvent(ftk::MouseMoveEvent& event)
     {
-        IWidget::mouseMoveEvent(event);
+        IMouseWidget::mouseMoveEvent(event);
         switch (_mouse.mode)
         {
         case MouseMode::Scroll:
@@ -240,7 +239,7 @@ namespace toucan
 
     void TimelineWidget::mousePressEvent(ftk::MouseClickEvent& event)
     {
-        IWidget::mousePressEvent(event);
+        IMouseWidget::mousePressEvent(event);
         if (1 == event.button &&
             static_cast<int>(ftk::KeyModifier::Alt) == event.modifiers)
         {
@@ -257,13 +256,13 @@ namespace toucan
 
     void TimelineWidget::mouseReleaseEvent(ftk::MouseClickEvent& event)
     {
-        IWidget::mouseReleaseEvent(event);
+        IMouseWidget::mouseReleaseEvent(event);
         event.accept = true;
     }
 
     void TimelineWidget::scrollEvent(ftk::ScrollEvent& event)
     {
-        IWidget::scrollEvent(event);
+        IMouseWidget::scrollEvent(event);
         event.accept = true;
         if (event.value.y > 0)
         {

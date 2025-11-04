@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include <feather-tk/ui/Action.h>
-#include <feather-tk/ui/RowLayout.h>
-#include <feather-tk/ui/ToolButton.h>
-#include <feather-tk/core/ObservableList.h>
+#include <ftk/UI/Action.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/ObservableList.h>
 
 namespace toucan
 {

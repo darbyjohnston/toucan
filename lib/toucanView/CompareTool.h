@@ -6,13 +6,13 @@
 #include <toucanView/FilesModel.h>
 #include <toucanView/IToolWidget.h>
 
-#include <feather-tk/ui/CheckBox.h>
-#include <feather-tk/ui/ComboBox.h>
-#include <feather-tk/ui/GridLayout.h>
-#include <feather-tk/ui/RowLayout.h>
-#include <feather-tk/ui/ScrollWidget.h>
-#include <feather-tk/ui/ToolButton.h>
-#include <feather-tk/core/ObservableList.h>
+#include <ftk/UI/CheckBox.h>
+#include <ftk/UI/ComboBox.h>
+#include <ftk/UI/GridLayout.h>
+#include <ftk/UI/RowLayout.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/UI/ToolButton.h>
+#include <ftk/Core/ObservableList.h>
 
 namespace toucan
 {

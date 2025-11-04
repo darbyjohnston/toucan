@@ -9,7 +9,7 @@
 #include "ThumbnailsWidget.h"
 #include "WindowModel.h"
 
-#include <feather-tk/ui/ScrollArea.h>
+#include <ftk/UI/ScrollArea.h>
 
 namespace toucan
 {
@@ -73,7 +73,7 @@ namespace toucan
         if (value == _currentTime)
             return;
         _currentTime = value;
-        _setDrawUpdate();
+        setDrawUpdate();
     }
 
     void TimelineItem::setCurrentTimeCallback(const std::function<void(const OTIO_NS::RationalTime&)>& value)
@@ -86,7 +86,7 @@ namespace toucan
         if (value == _inOutRange)
             return;
         _inOutRange = value;
-        _setDrawUpdate();
+        setDrawUpdate();
     }
 
     void TimelineItem::setGeometry(const ftk::Box2I& value)
@@ -200,7 +200,7 @@ namespace toucan
             {
                 _currentTimeCallback(_currentTime);
             }
-            _setDrawUpdate();
+            setDrawUpdate();
         }
     }
 
@@ -257,7 +257,7 @@ namespace toucan
                 {
                     _currentTimeCallback(_currentTime);
                 }
-                _setDrawUpdate();
+                setDrawUpdate();
             }
         }
     }
@@ -274,8 +274,8 @@ namespace toucan
 
     void TimelineItem::_timeUnitsUpdate()
     {
-        _setSizeUpdate();
-        _setDrawUpdate();
+        setSizeUpdate();
+        setDrawUpdate();
     }
 
     ftk::Size2I TimelineItem::_getLabelMaxSize(

@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include <feather-tk/ui/IWidget.h>
+#include <ftk/UI/IMouseWidget.h>
 
 #include <opentimelineio/version.h>
 
 namespace toucan
 {
     //! Base class for widgets in a time layout.
-    class ITimeWidget : public ftk::IWidget
+    class ITimeWidget : public ftk::IMouseWidget
     {
     protected:
         void _init(

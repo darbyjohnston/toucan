@@ -6,8 +6,9 @@
 #include <toucanView/PlaybackModel.h>
 #include <toucanView/TimeUnitsModel.h>
 
-#include <feather-tk/ui/ScrollWidget.h>
-#include <feather-tk/core/ObservableList.h>
+#include <ftk/UI/IMouseWidget.h>
+#include <ftk/UI/ScrollWidget.h>
+#include <ftk/Core/ObservableList.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -19,7 +20,7 @@ namespace toucan
     class ThumbnailGenerator;
 
     //! Timeline widget.
-    class TimelineWidget : public ftk::IWidget
+    class TimelineWidget : public ftk::IMouseWidget
     {
     protected:
         void _init(
