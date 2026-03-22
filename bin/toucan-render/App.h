@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <toucanRender/AudioGraph.h>
 #include <toucanRender/ImageEffectHost.h>
 #include <toucanRender/ImageGraph.h>
 #include <toucanRender/TimelineWrapper.h>
@@ -31,18 +32,18 @@ namespace toucan
 
     public:
         ~App();
-        
+
         static std::shared_ptr<App> create(
             const std::shared_ptr<ftk::Context>&,
             std::vector<std::string>&);
 
         void run();
-    
+
     private:
         void _writeRawFrame(const OIIO::ImageBuf&);
         void _writeY4mHeader();
         void _writeY4mFrame(const OIIO::ImageBuf&);
-        
+
         struct CmdLine
         {
             std::shared_ptr<ftk::CmdLineArg<std::string> > input;
@@ -57,11 +58,18 @@ namespace toucan
             std::shared_ptr<ftk::CmdLineOption<std::string> > raw;
             std::shared_ptr<ftk::CmdLineOption<std::string> > y4m;
             std::shared_ptr<ftk::CmdLineFlag> verbose;
+
+            std::shared_ptr<ftk::CmdLineOption<std::string> > audioCodec;
+            std::shared_ptr<ftk::CmdLineOption<int> > audioSampleRate;
+            std::shared_ptr<ftk::CmdLineOption<int> > audioChannelCount;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > audioFile;
+            std::shared_ptr<ftk::CmdLineFlag> noAudio;
         };
         CmdLine _cmdLine;
 
         std::shared_ptr<TimelineWrapper> _timelineWrapper;
         std::shared_ptr<ImageGraph> _graph;
+        std::shared_ptr<AudioGraph> _audioGraph;
         std::shared_ptr<ImageEffectHost> _host;
 
         AVFrame* _avFrame = nullptr;
@@ -71,4 +79,3 @@ namespace toucan
         SwsContext* _swsContext = nullptr;
     };
 }
-

@@ -1,6 +1,10 @@
 set(HEADERS
+    AudioBuffer.h
+    AudioGraph.h
     Comp.h
     FFmpeg.h
+    FFmpegAudioRead.h
+    FFmpegAudioWrite.h
     FFmpegRead.h
     FFmpegWrite.h
     ImageEffect.h
@@ -17,8 +21,11 @@ set(HEADERS
     Util.h)
 set(HEADERS_PRIVATE)
 set(SOURCE
+    AudioGraph.cpp
     Comp.cpp
     FFmpeg.cpp
+    FFmpegAudioRead.cpp
+    FFmpegAudioWrite.cpp
     FFmpegRead.cpp
     FFmpegWrite.cpp
     ImageEffect.cpp
@@ -44,6 +51,10 @@ else()
 endif()
 
 add_library(toucanRender ${HEADERS} ${HEADERS_PRIVATE} ${SOURCE})
+find_library(SWRESAMPLE_LIBRARY swresample PATHS ${CMAKE_INSTALL_PREFIX}/lib NO_DEFAULT_PATH)
+if(NOT SWRESAMPLE_LIBRARY)
+    find_library(SWRESAMPLE_LIBRARY swresample)
+endif()
 set(LIBS_PUBLIC
     toucanResource
     ftk::ftkCore
@@ -52,6 +63,9 @@ set(LIBS_PUBLIC
     lunasvg::lunasvg
     OpenImageIO::OpenImageIO
     MINIZIP::minizip-ng)
+if(SWRESAMPLE_LIBRARY)
+    list(APPEND LIBS_PUBLIC ${SWRESAMPLE_LIBRARY})
+endif()
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
     list(APPEND LIBS_PUBLIC stdc++fs)
 endif()

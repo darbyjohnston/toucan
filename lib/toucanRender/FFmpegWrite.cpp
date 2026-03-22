@@ -14,6 +14,7 @@ extern "C"
 {
 #include <libavutil/imgutils.h>
 #include <libavutil/opt.h>
+#include <libavutil/channel_layout.h>
 }
 
 namespace toucan
@@ -24,10 +25,15 @@ namespace toucan
             const std::filesystem::path& path,
             const OIIO::ImageSpec& spec,
             const OTIO_NS::TimeRange& timeRange,
-            VideoCodec videoCodec) :
+            VideoCodec videoCodec,
+            int audioSampleRate,
+            int audioChannelCount,
+            AudioCodec audioCodec) :
             _path(path),
             _spec(spec),
-            _timeRange(timeRange)
+            _timeRange(timeRange),
+            _audioSampleRate(audioSampleRate),
+            _audioChannelCount(audioChannelCount)
         {
             av_log_set_level(AV_LOG_QUIET);
             //av_log_set_level(AV_LOG_VERBOSE);
@@ -93,6 +99,105 @@ namespace toucan
             _avVideoStream->time_base = { rational.second, rational.first };
             _avVideoStream->avg_frame_rate = { rational.first, rational.second };
 
+            if (audioSampleRate > 0 && audioChannelCount > 0)
+            {
+                AVCodecID audioCodecId = getAudioCodecId(audioCodec);
+                const AVCodec* audioAvCodec = avcodec_find_encoder(audioCodecId);
+                if (!audioAvCodec)
+                {
+                    throw std::runtime_error("Cannot find audio encoder");
+                }
+                _avAudioCodecContext = avcodec_alloc_context3(audioAvCodec);
+                if (!_avAudioCodecContext)
+                {
+                    throw std::runtime_error("Cannot allocate audio context");
+                }
+                _avAudioStream = avformat_new_stream(_avFormatContext, audioAvCodec);
+                if (!_avAudioStream)
+                {
+                    throw std::runtime_error("Cannot allocate audio stream");
+                }
+
+                _avAudioCodecContext->codec_id = audioAvCodec->id;
+                _avAudioCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
+                _avAudioCodecContext->sample_rate = audioSampleRate;
+                av_channel_layout_default(&_avAudioCodecContext->ch_layout, audioChannelCount);
+                _avAudioCodecContext->sample_fmt = audioAvCodec->sample_fmts ?
+                    audioAvCodec->sample_fmts[0] : getAudioSampleFormat(audioCodec);
+                _avAudioCodecContext->time_base = { 1, audioSampleRate };
+                if (_avFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
+                {
+                    _avAudioCodecContext->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+                }
+
+                r = avcodec_open2(_avAudioCodecContext, audioAvCodec, NULL);
+                if (r < 0)
+                {
+                    throw std::runtime_error(getErrorLabel(r));
+                }
+
+                r = avcodec_parameters_from_context(_avAudioStream->codecpar, _avAudioCodecContext);
+                if (r < 0)
+                {
+                    throw std::runtime_error(getErrorLabel(r));
+                }
+
+                _avAudioStream->time_base = { 1, audioSampleRate };
+
+                _audioFrameSize = _avAudioCodecContext->frame_size;
+                if (_audioFrameSize <= 0)
+                {
+                    _audioFrameSize = 1024;
+                }
+
+                _avAudioPacket = av_packet_alloc();
+                if (!_avAudioPacket)
+                {
+                    throw std::runtime_error("Cannot allocate audio packet");
+                }
+
+                _avAudioFrame = av_frame_alloc();
+                if (!_avAudioFrame)
+                {
+                    throw std::runtime_error("Cannot allocate audio frame");
+                }
+                _avAudioFrame->format = _avAudioCodecContext->sample_fmt;
+                _avAudioFrame->ch_layout = _avAudioCodecContext->ch_layout;
+                _avAudioFrame->sample_rate = audioSampleRate;
+                _avAudioFrame->nb_samples = _audioFrameSize;
+                r = av_frame_get_buffer(_avAudioFrame, 0);
+                if (r < 0)
+                {
+                    throw std::runtime_error(getErrorLabel(r));
+                }
+
+                if (_avAudioCodecContext->sample_fmt != AV_SAMPLE_FMT_FLT)
+                {
+                    AVChannelLayout inLayout;
+                    av_channel_layout_default(&inLayout, audioChannelCount);
+
+                    r = swr_alloc_set_opts2(
+                        &_swrContext,
+                        &_avAudioCodecContext->ch_layout,
+                        _avAudioCodecContext->sample_fmt,
+                        audioSampleRate,
+                        &inLayout,
+                        AV_SAMPLE_FMT_FLT,
+                        audioSampleRate,
+                        0,
+                        nullptr);
+                    if (r < 0 || !_swrContext)
+                    {
+                        throw std::runtime_error("Cannot allocate resampler context");
+                    }
+                    r = swr_init(_swrContext);
+                    if (r < 0)
+                    {
+                        throw std::runtime_error("Cannot initialize resampler");
+                    }
+                }
+            }
+
             //av_dump_format(_avFormatContext, 0, _path.string().c_str(), 1);
 
             r = avio_open(&_avFormatContext->pb, _path.string().c_str(), AVIO_FLAG_WRITE);
@@ -141,7 +246,28 @@ namespace toucan
             if (_opened)
             {
                 _encodeVideo(nullptr);
+                if (_avAudioCodecContext)
+                {
+                    _flushAudioFifo();
+                    _encodeAudio(nullptr);
+                }
                 av_write_trailer(_avFormatContext);
+            }
+            if (_swrContext)
+            {
+                swr_free(&_swrContext);
+            }
+            if (_avAudioFrame)
+            {
+                av_frame_free(&_avAudioFrame);
+            }
+            if (_avAudioPacket)
+            {
+                av_packet_free(&_avAudioPacket);
+            }
+            if (_avAudioCodecContext)
+            {
+                avcodec_free_context(&_avAudioCodecContext);
             }
             if (_swsContext)
             {
@@ -299,6 +425,44 @@ namespace toucan
             _encodeVideo(_avFrame);
         }
 
+        void Write::writeAudio(const AudioBuffer& buffer)
+        {
+            if (!_avAudioCodecContext) return;
+
+            _audioFifo.insert(_audioFifo.end(), buffer.data.begin(), buffer.data.end());
+
+            while (static_cast<int>(_audioFifo.size()) / _audioChannelCount >= _audioFrameSize)
+            {
+                av_frame_make_writable(_avAudioFrame);
+                _avAudioFrame->nb_samples = _audioFrameSize;
+
+                if (_swrContext)
+                {
+                    const uint8_t* inBuf = reinterpret_cast<const uint8_t*>(_audioFifo.data());
+                    swr_convert(
+                        _swrContext,
+                        _avAudioFrame->extended_data,
+                        _audioFrameSize,
+                        &inBuf,
+                        _audioFrameSize);
+                }
+                else
+                {
+                    memcpy(
+                        _avAudioFrame->data[0],
+                        _audioFifo.data(),
+                        _audioFrameSize * _audioChannelCount * sizeof(float));
+                }
+
+                _audioFifo.erase(_audioFifo.begin(),
+                    _audioFifo.begin() + _audioFrameSize * _audioChannelCount);
+
+                _avAudioFrame->pts = _audioPts;
+                _audioPts += _audioFrameSize;
+                _encodeAudio(_avAudioFrame);
+            }
+        }
+
         void Write::_encodeVideo(AVFrame* frame)
         {
             int r = avcodec_send_frame(_avCodecContext, frame);
@@ -325,6 +489,70 @@ namespace toucan
                 }
                 av_packet_unref(_avPacket);
             }
+        }
+
+        void Write::_encodeAudio(AVFrame* frame)
+        {
+            int r = avcodec_send_frame(_avAudioCodecContext, frame);
+            if (r < 0)
+            {
+                throw std::runtime_error(getErrorLabel(r));
+            }
+
+            while (r >= 0)
+            {
+                r = avcodec_receive_packet(_avAudioCodecContext, _avAudioPacket);
+                if (r == AVERROR(EAGAIN) || r == AVERROR_EOF)
+                {
+                    return;
+                }
+                else if (r < 0)
+                {
+                    throw std::runtime_error(getErrorLabel(r));
+                }
+                _avAudioPacket->stream_index = _avAudioStream->index;
+                r = av_interleaved_write_frame(_avFormatContext, _avAudioPacket);
+                if (r < 0)
+                {
+                    throw std::runtime_error(getErrorLabel(r));
+                }
+                av_packet_unref(_avAudioPacket);
+            }
+        }
+
+        void Write::_flushAudioFifo()
+        {
+            if (_audioFifo.empty()) return;
+
+            const int remainingSamples = static_cast<int>(_audioFifo.size()) / _audioChannelCount;
+            if (remainingSamples <= 0) return;
+
+            av_frame_make_writable(_avAudioFrame);
+            _avAudioFrame->nb_samples = remainingSamples;
+
+            if (_swrContext)
+            {
+                const uint8_t* inBuf = reinterpret_cast<const uint8_t*>(_audioFifo.data());
+                swr_convert(
+                    _swrContext,
+                    _avAudioFrame->extended_data,
+                    remainingSamples,
+                    &inBuf,
+                    remainingSamples);
+            }
+            else
+            {
+                memcpy(
+                    _avAudioFrame->data[0],
+                    _audioFifo.data(),
+                    remainingSamples * _audioChannelCount * sizeof(float));
+            }
+
+            _audioFifo.clear();
+
+            _avAudioFrame->pts = _audioPts;
+            _audioPts += remainingSamples;
+            _encodeAudio(_avAudioFrame);
         }
     }
 }

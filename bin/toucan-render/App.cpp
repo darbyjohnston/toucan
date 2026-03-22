@@ -3,6 +3,7 @@
 
 #include "App.h"
 
+#include <toucanRender/FFmpegAudioWrite.h>
 #include <toucanRender/FFmpegWrite.h>
 #include <toucanRender/Read.h>
 #include <toucanRender/Util.h>
@@ -17,6 +18,7 @@ extern "C"
 
 } // extern "C"
 
+#include <cmath>
 #include <stdio.h>
 
 namespace toucan
@@ -42,7 +44,7 @@ namespace toucan
             { "444p16", OIIO::ImageSpec(0, 0, 3, OIIO::TypeDesc::BASETYPE::UINT16) }
         };
     }
-    
+
     void App::_init(
         const std::shared_ptr<ftk::Context>& context,
         std::vector<std::string>& argv)
@@ -98,6 +100,29 @@ namespace toucan
             std::vector<std::string>{ "-v" },
             "Print verbose output.");
 
+        _cmdLine.audioCodec = ftk::CmdLineOption<std::string>::create(
+            std::vector<std::string>{ "-acodec" },
+            "Set the audio codec.",
+            "",
+            "pcm_s16le",
+            ftk::join(ffmpeg::getAudioCodecStrings(), ", "));
+        _cmdLine.audioSampleRate = ftk::CmdLineOption<int>::create(
+            std::vector<std::string>{ "-arate" },
+            "Set the audio sample rate.",
+            "",
+            48000);
+        _cmdLine.audioChannelCount = ftk::CmdLineOption<int>::create(
+            std::vector<std::string>{ "-achannels" },
+            "Set the audio channel count.",
+            "",
+            2);
+        _cmdLine.audioFile = ftk::CmdLineOption<std::string>::create(
+            std::vector<std::string>{ "-afile" },
+            "Write audio to a separate file.");
+        _cmdLine.noAudio = ftk::CmdLineFlag::create(
+            std::vector<std::string>{ "-no_audio" },
+            "Disable audio output.");
+
         IApp::_init(
             context,
             argv,
@@ -112,7 +137,12 @@ namespace toucan
                 _cmdLine.printSize,
                 _cmdLine.raw,
                 _cmdLine.y4m,
-                _cmdLine.verbose
+                _cmdLine.verbose,
+                _cmdLine.audioCodec,
+                _cmdLine.audioSampleRate,
+                _cmdLine.audioChannelCount,
+                _cmdLine.audioFile,
+                _cmdLine.noAudio
             });
 
         if (_cmdLine.output->hasValue() && _cmdLine.output->getValue() == "-")
@@ -123,7 +153,7 @@ namespace toucan
 
     App::App()
     {}
-        
+
     App::~App()
     {
         if (_swsContext)
@@ -148,7 +178,7 @@ namespace toucan
         out->_init(context, argv);
         return out;
     }
-    
+
     void App::run()
     {
         const std::filesystem::path parentPath = std::filesystem::path(getExeName()).parent_path();
@@ -165,7 +195,7 @@ namespace toucan
         const OTIO_NS::TimeRange& timeRange = _timelineWrapper->getTimeRange();
         const OTIO_NS::RationalTime timeInc(1.0, timeRange.duration().rate());
         const int frames = timeRange.duration().value();
-        
+
         // Create the image graph.
         _graph = std::make_shared<ImageGraph>(
             _context,
@@ -195,8 +225,34 @@ namespace toucan
             return;
         }
 
+        // Audio settings.
+        const int audioSampleRate = _cmdLine.audioSampleRate->hasValue() ?
+            _cmdLine.audioSampleRate->getValue() : 48000;
+        const int audioChannelCount = _cmdLine.audioChannelCount->hasValue() ?
+            _cmdLine.audioChannelCount->getValue() : 2;
+
+        // Create the audio graph.
+        if (!_cmdLine.noAudio->found())
+        {
+            _audioGraph = std::make_shared<AudioGraph>(
+                _context,
+                inputPath.parent_path(),
+                _timelineWrapper,
+                audioSampleRate,
+                audioChannelCount);
+        }
+
         // Create the image host.
         _host = std::make_shared<ImageEffectHost>(_context, getOpenFXPluginPaths(getExeName()));
+
+        // Audio codec.
+        ffmpeg::AudioCodec audioCodec = ffmpeg::AudioCodec::PCM_S16LE;
+        if (_cmdLine.audioCodec->hasValue())
+        {
+            ffmpeg::fromString(_cmdLine.audioCodec->getValue(), audioCodec);
+        }
+
+        const bool includeAudio = _audioGraph && _audioGraph->hasAudio();
 
         // Open the movie file.
         std::shared_ptr<ffmpeg::Write> ffWrite;
@@ -211,8 +267,25 @@ namespace toucan
                 outputPath,
                 OIIO::ImageSpec(imageSize.x, imageSize.y, 3),
                 timeRange,
-                videoCodec);
+                videoCodec,
+                includeAudio ? audioSampleRate : 0,
+                includeAudio ? audioChannelCount : 0,
+                audioCodec);
         }
+
+        // Open the separate audio file.
+        std::shared_ptr<ffmpeg::AudioWrite> audioFileWrite;
+        if (_cmdLine.audioFile->hasValue() && includeAudio)
+        {
+            audioFileWrite = std::make_shared<ffmpeg::AudioWrite>(
+                std::filesystem::path(_cmdLine.audioFile->getValue()),
+                audioSampleRate,
+                audioChannelCount,
+                audioCodec);
+        }
+
+        const int samplesPerFrame = static_cast<int>(
+            std::round(static_cast<double>(audioSampleRate) / timeRange.duration().rate()));
 
         // Render the timeline frames.
         if (_cmdLine.y4m->hasValue())
@@ -259,6 +332,21 @@ namespace toucan
                 else if (_cmdLine.y4m->hasValue())
                 {
                     _writeY4mFrame(buf);
+                }
+            }
+
+            // Render and write audio for this frame.
+            if (includeAudio)
+            {
+                const AudioBuffer audioBuf = _audioGraph->exec(time, samplesPerFrame);
+
+                if (ffWrite)
+                {
+                    ffWrite->writeAudio(audioBuf);
+                }
+                if (audioFileWrite)
+                {
+                    audioFileWrite->writeAudio(audioBuf);
                 }
             }
         }
@@ -484,4 +572,3 @@ namespace toucan
         }
     }
 }
-

@@ -71,6 +71,49 @@ namespace toucan
                 AV_PROFILE_UNKNOWN,
                 AV_PROFILE_AV1_MAIN
             };
+
+            std::vector<std::pair<int, std::string> > _getAudioCodecs()
+            {
+                std::vector<std::pair<int, std::string> > out;
+                const AVCodec* avCodec = nullptr;
+                void* avCodecIterate = nullptr;
+                while ((avCodec = av_codec_iterate(&avCodecIterate)))
+                {
+                    if (av_codec_is_encoder(avCodec) &&
+                        AVMEDIA_TYPE_AUDIO == avcodec_get_type(avCodec->id))
+                    {
+                        out.push_back({ avCodec->id, avCodec->name });
+                    }
+                }
+                return out;
+            }
+
+            const std::vector<std::string> audioCodecStrings =
+            {
+                "pcm_s16le",
+                "pcm_s24le",
+                "pcm_f32le",
+                "flac",
+                "aac"
+            };
+
+            const std::vector<AVCodecID> audioCodecIds =
+            {
+                AV_CODEC_ID_PCM_S16LE,
+                AV_CODEC_ID_PCM_S24LE,
+                AV_CODEC_ID_PCM_F32LE,
+                AV_CODEC_ID_FLAC,
+                AV_CODEC_ID_AAC
+            };
+
+            const std::vector<AVSampleFormat> audioSampleFormats =
+            {
+                AV_SAMPLE_FMT_S16,
+                AV_SAMPLE_FMT_S32,
+                AV_SAMPLE_FMT_FLT,
+                AV_SAMPLE_FMT_S32,
+                AV_SAMPLE_FMT_FLTP
+            };
         }
 
         std::vector<VideoCodec> getVideoCodecs()
@@ -120,6 +163,55 @@ namespace toucan
         int getVideoCodecProfile(VideoCodec value)
         {
             return videoCodecProfiles[static_cast<size_t>(value)];
+        }
+
+        std::vector<AudioCodec> getAudioCodecs()
+        {
+            std::vector<AudioCodec> out;
+            for (const auto& i : _getAudioCodecs())
+            {
+                for (size_t j = 0; j < audioCodecIds.size(); ++j)
+                {
+                    if (i.first == audioCodecIds[j])
+                    {
+                        out.push_back(static_cast<AudioCodec>(j));
+                    }
+                }
+            }
+            return out;
+        }
+
+        std::vector<std::string> getAudioCodecStrings()
+        {
+            std::vector<std::string> out;
+            for (const auto& i : getAudioCodecs())
+            {
+                out.push_back(toString(i));
+            }
+            return out;
+        }
+
+        std::string toString(AudioCodec value)
+        {
+            return audioCodecStrings[static_cast<size_t>(value)];
+        }
+
+        void fromString(const std::string& s, AudioCodec& value)
+        {
+            const auto i = std::find(audioCodecStrings.begin(), audioCodecStrings.end(), s);
+            value = i != audioCodecStrings.end() ?
+                static_cast<AudioCodec>(i - audioCodecStrings.begin()) :
+                AudioCodec::First;
+        }
+
+        AVCodecID getAudioCodecId(AudioCodec value)
+        {
+            return audioCodecIds[static_cast<size_t>(value)];
+        }
+
+        AVSampleFormat getAudioSampleFormat(AudioCodec value)
+        {
+            return audioSampleFormats[static_cast<size_t>(value)];
         }
 
         std::string getErrorLabel(int r)

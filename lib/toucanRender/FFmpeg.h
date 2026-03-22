@@ -11,6 +11,7 @@ extern "C"
 #include <libavcodec/avcodec.h>
 #include <libavutil/log.h>
 #include <libavutil/rational.h>
+#include <libavutil/samplefmt.h>
 }
 
 namespace toucan
@@ -51,6 +52,37 @@ namespace toucan
 
         //! Get a video codec profile.
         int getVideoCodecProfile(VideoCodec);
+
+        //! Audio codecs.
+        enum class AudioCodec
+        {
+            PCM_S16LE,
+            PCM_S24LE,
+            PCM_F32LE,
+            FLAC,
+            AAC,
+
+            Count,
+            First = PCM_S16LE
+        };
+
+        //! Get a list of audio codecs.
+        std::vector<AudioCodec> getAudioCodecs();
+
+        //! Get a list of audio codec strings.
+        std::vector<std::string> getAudioCodecStrings();
+
+        //! Convert an audio codec to a string.
+        std::string toString(AudioCodec);
+
+        //! Convert a string to an audio codec.
+        void fromString(const std::string&, AudioCodec&);
+
+        //! Get an audio codec ID.
+        AVCodecID getAudioCodecId(AudioCodec);
+
+        //! Get an audio sample format.
+        AVSampleFormat getAudioSampleFormat(AudioCodec);
 
         //! FFmpeg log callback.
         void log(void*, int level, const char* fmt, va_list vl);

@@ -10,4 +10,8 @@ namespace toucan
     //! Get the video clips in a timeline.
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> >
         getVideoClips(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
+
+    //! Get the audio clips in a timeline.
+    std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Clip> >
+        getAudioClips(const OTIO_NS::SerializableObject::Retainer<OTIO_NS::Timeline>&);
 }
