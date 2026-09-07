@@ -128,6 +128,9 @@ namespace toucan
         _scrollLayout->setSpacingRole(ftk::SizeRole::None);
         _scrollWidget->setWidget(_scrollLayout);
 
+        _nothingLabel = ftk::Label::create(context, "Nothing selected", _scrollLayout);
+        _nothingLabel->setMarginRole(ftk::SizeRole::Margin);
+
         ftk::Divider::create(context, ftk::Orientation::Vertical, _layout);
 
         _bottomLayout = ftk::HorizontalLayout::create(context, _layout);
@@ -202,6 +205,7 @@ namespace toucan
                             }
                             _openButton->setEnabled(!_widgets.empty());
                             _closeButton->setEnabled(!_widgets.empty());
+                            _nothingLabel->setVisible(_widgets.empty());
                         });
                 }
                 else
@@ -213,6 +217,7 @@ namespace toucan
                     _widgets.clear();
                     _openButton->setEnabled(false);
                     _closeButton->setEnabled(false);
+                    _nothingLabel->setVisible(true);
                     _selectionObserver.reset();
                 }
             });

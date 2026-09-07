@@ -86,6 +86,7 @@ namespace toucan
         std::shared_ptr<ftk::VerticalLayout> _layout;
         std::shared_ptr<ftk::ScrollWidget> _scrollWidget;
         std::shared_ptr<ftk::VerticalLayout> _scrollLayout;
+        std::shared_ptr<ftk::Label> _nothingLabel;
         std::vector<std::shared_ptr<JSONWidget> > _widgets;
         std::shared_ptr<ftk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<ftk::SearchBox> _searchBox;
