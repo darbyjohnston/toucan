@@ -16,10 +16,9 @@ target_link_libraries(toucanResource)
 set_target_properties(toucanResource PROPERTIES FOLDER lib)
 set_target_properties(toucanResource PROPERTIES PUBLIC_HEADER "${HEADERS}")
 
-if(BUILD_SHARED_LIBS)
-    install(
-        TARGETS toucanResource
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib
-        RUNTIME DESTINATION bin)
-endif()
+install(
+    TARGETS toucanResource
+    EXPORT toucanRenderTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin)
