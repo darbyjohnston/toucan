@@ -92,7 +92,7 @@ namespace toucan
 
         _textUpdate();
 
-        _thumbnailsObserver = ftk::ValueObserver<bool>::create(
+        _thumbnailsObserver = ftk::Observer<bool>::create(
             data.app->getWindowModel()->observeThumbnails(),
             [this](bool value)
             {
@@ -148,7 +148,11 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
         }
-        _setSizeHint(_layout->getSizeHint());
+    }
+
+    ftk::Size2I StackItem::getSizeHint() const
+    {
+        return _layout->getSizeHint();
     }
 
     void StackItem::drawEvent(

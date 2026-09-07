@@ -21,11 +21,11 @@ int main(int argc, char** argv)
     {
         auto context = ftk::Context::create();
         auto app = App::create(context, args);
-        if (0 == app->getExit())
+        if (!app->hasCmdLineHelp())
         {
             app->run();
         }
-        out = app->getExit();
+        out = 0;
     }
     catch (const std::exception& e)
     {

@@ -38,6 +38,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
@@ -58,6 +59,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            ftk::Size2I sizeHint;
             int margin = 0;
             int border = 0;
         };

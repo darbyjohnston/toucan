@@ -78,10 +78,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void CompareWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I CompareWidget::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void CompareTool::_init(
@@ -164,7 +163,7 @@ namespace toucan
                 _indexUpdate();
             });
 
-        _fileIndexObserver = ftk::ValueObserver<int>::create(
+        _fileIndexObserver = ftk::Observer<int>::create(
             _filesModel->observeCurrentIndex(),
             [this](int value)
             {
@@ -172,7 +171,7 @@ namespace toucan
                 _indexUpdate();
             });
 
-        _bIndexObserver = ftk::ValueObserver<int>::create(
+        _bIndexObserver = ftk::Observer<int>::create(
             _filesModel->observeBIndex(),
             [this](int value)
             {
@@ -180,7 +179,7 @@ namespace toucan
                 _indexUpdate();
             });
         
-        _compareOptionsObserver = ftk::ValueObserver<CompareOptions>::create(
+        _compareOptionsObserver = ftk::Observer<CompareOptions>::create(
             _filesModel->observeCompareOptions(),
             [this](const CompareOptions& value)
             {
@@ -209,10 +208,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void CompareTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I CompareTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void CompareTool::_widgetUpdate()

@@ -33,6 +33,7 @@ namespace toucan
         void setMarginRole(ftk::SizeRole);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void clipEvent(const ftk::Box2I&, bool) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
@@ -46,6 +47,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            ftk::Size2I sizeHint;
             int margin = 0;
             int margin2 = 0;
             ftk::FontInfo fontInfo;

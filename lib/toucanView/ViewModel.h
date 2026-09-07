@@ -5,7 +5,7 @@
 
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 #include <ftk/Core/RenderOptions.h>
 
 #include <opentimelineio/timeline.h>
@@ -41,19 +41,19 @@ namespace toucan
         void zoomReset();
 
         //! Observe the zoom in.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeZoomIn() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeZoomIn() const;
 
         //! Observe the zoom out.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeZoomOut() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeZoomOut() const;
 
         //! Observe the zoom reset.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeZoomReset() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeZoomReset() const;
 
         //! Get whether frame view is enabled.
         bool getFrameView() const;
 
         //! Observe whether frame view is enabled.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeFrameView() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeFrameView() const;
 
         //! Set whether frame view is enabled.
         void setFrameView(bool);
@@ -62,17 +62,17 @@ namespace toucan
         const ViewOptions& getOptions() const;
 
         //! Observe the view options.
-        std::shared_ptr<ftk::IObservableValue<ViewOptions> > observeOptions() const;
+        std::shared_ptr<ftk::IObservable<ViewOptions> > observeOptions() const;
 
         //! Set the view options.
         void setOptions(const ViewOptions&);
 
     private:
-        std::shared_ptr<ftk::ObservableValue<bool> > _zoomIn;
-        std::shared_ptr<ftk::ObservableValue<bool> > _zoomOut;
-        std::shared_ptr<ftk::ObservableValue<bool> > _zoomReset;
-        std::shared_ptr<ftk::ObservableValue<bool> > _frameView;
-        std::shared_ptr<ftk::ObservableValue<ViewOptions> > _options;
+        std::shared_ptr<ftk::Observable<bool> > _zoomIn;
+        std::shared_ptr<ftk::Observable<bool> > _zoomOut;
+        std::shared_ptr<ftk::Observable<bool> > _zoomReset;
+        std::shared_ptr<ftk::Observable<bool> > _frameView;
+        std::shared_ptr<ftk::Observable<ViewOptions> > _options;
     };
 
     //! View background options.
@@ -84,7 +84,7 @@ namespace toucan
         Count,
         First = Solid
     };
-    FTK_ENUM(ViewBackground);
+    FTK_ENUM(, ViewBackground);
 
     //! Global view options.
     struct GlobalViewOptions
@@ -114,13 +114,13 @@ namespace toucan
         const GlobalViewOptions& getOptions() const;
 
         //! Observe the view options.
-        std::shared_ptr<ftk::IObservableValue<GlobalViewOptions> > observeOptions() const;
+        std::shared_ptr<ftk::IObservable<GlobalViewOptions> > observeOptions() const;
 
         //! Set the view options.
         void setOptions(const GlobalViewOptions&);
 
     private:
         std::shared_ptr<ftk::Settings> _settings;
-        std::shared_ptr<ftk::ObservableValue<GlobalViewOptions> > _options;
+        std::shared_ptr<ftk::Observable<GlobalViewOptions> > _options;
     };
 }

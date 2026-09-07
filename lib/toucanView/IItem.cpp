@@ -23,7 +23,7 @@ namespace toucan
         _file = data.file;
         _object = object;
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             data.app->getTimeUnitsModel()->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -56,8 +56,8 @@ namespace toucan
     void IItem::mousePressEvent(ftk::MouseClickEvent& event)
     {
         ITimeWidget::mousePressEvent(event);
-        if ((3 == event.button && 0 == event.modifiers) ||
-            (1 == event.button && static_cast<int>(ftk::KeyModifier::Super) == event.modifiers))
+        if ((ftk::MouseButton::Right == event.button && 0 == event.modifiers) ||
+            (ftk::MouseButton::Left == event.button && static_cast<int>(ftk::KeyModifier::Super) == event.modifiers))
         {
             event.accept = true;
             _menu = ftk::Menu::create(getContext());

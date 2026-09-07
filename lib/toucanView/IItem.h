@@ -66,6 +66,6 @@ namespace toucan
         std::shared_ptr<ftk::Menu> _menu;
 
     private:
-        std::shared_ptr<ftk::ValueObserver<TimeUnits> > _timeUnitsObserver;
+        std::shared_ptr<ftk::Observer<TimeUnits> > _timeUnitsObserver;
     };
 }

@@ -20,8 +20,7 @@ namespace toucan
 
         _actions["Select/All"] = ftk::Action::create(
             "All",
-            ftk::Key::A,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::A, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -72,9 +71,7 @@ namespace toucan
 
         _actions["Select/None"] = ftk::Action::create(
             "None",
-            ftk::Key::A,
-            static_cast<int>(ftk::KeyModifier::Shift) |
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::A, ftk::KeyModifier::Shift, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -86,8 +83,7 @@ namespace toucan
 
         _actions["Select/Invert"] = ftk::Action::create(
             "Invert",
-            ftk::Key::I,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::I, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -97,7 +93,7 @@ namespace toucan
             });
         addAction(_actions["Select/Invert"]);
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {

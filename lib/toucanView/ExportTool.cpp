@@ -46,7 +46,7 @@ namespace toucan
         _timer = ftk::Timer::create(context);
         _timer->setRepeating(true);
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -60,10 +60,10 @@ namespace toucan
     ExportWidget::~ExportWidget()
     {
         nlohmann::json json;
-        json["Dir"] = _dirEdit->getPath().string();
+        json["Dir"] = _dirEdit->getPath().get();
         json["SizeChoice"] = _sizeComboBox->getCurrentIndex();
         json["CustomSize"] = { _widthEdit->getValue(), _heightEdit->getValue() };
-        json["CurrentTab"] = _tabWidget->getCurrentTab();
+        json["CurrentTab"] = _tabWidget->getCurrent();
         json["ImageBaseName"] = _imageBaseNameEdit->getText();
         json["ImagePadding"] = _imagePaddingEdit->getValue();
         json["ImageExtension"] = _imageExtensionEdit->getText();
@@ -91,10 +91,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void ExportWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I ExportWidget::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void ExportWidget::_initSettings(
@@ -180,7 +179,7 @@ namespace toucan
         auto label = ftk::Label::create(context, "Directory:", gridLayout);
         gridLayout->setGridPos(label, 0, 0);
         _dirEdit = ftk::FileEdit::create(context, gridLayout);
-        _dirEdit->setPath(settingsValues.dir);
+        _dirEdit->setPath(ftk::Path(settingsValues.dir));
         _dirEdit->setHStretch(ftk::Stretch::Expanding);
         gridLayout->setGridPos(_dirEdit, 0, 1);
 
@@ -300,7 +299,7 @@ namespace toucan
         auto vLayout = ftk::VerticalLayout::create(context);
         vLayout->setMarginRole(ftk::SizeRole::Margin);
         _tabWidget->addTab("Movie", vLayout);
-        _tabWidget->setCurrentTab(settingsValues.currentTab);
+        _tabWidget->setCurrent(settingsValues.currentTab);
 
         auto gridLayout = ftk::GridLayout::create(context, vLayout);
 
@@ -392,7 +391,7 @@ namespace toucan
                 _timeRange = _file->getPlaybackModel()->getInOutRange();
                 const std::string baseName = _movieBaseNameEdit->getText();
                 const std::string extension = _movieExtensionEdit->getText();
-                const std::filesystem::path path = _dirEdit->getPath() / (baseName + extension);
+                const std::filesystem::path path = std::filesystem::path(_dirEdit->getPath().get()) / (baseName + extension);
                 ffmpeg::VideoCodec videoCodec = ffmpeg::VideoCodec::First;
                 ffmpeg::fromString(_movieCodecs[_movieCodecComboBox->getCurrentIndex()], videoCodec);
                 _ffWrite = std::make_shared<ffmpeg::Write>(
@@ -457,7 +456,7 @@ namespace toucan
                 else
                 {
                     const std::string fileName = getSequenceFrame(
-                        _dirEdit->getPath().string(),
+                        _dirEdit->getPath().get(),
                         _imageBaseNameEdit->getText(),
                         _time.to_frames(),
                         _imagePaddingEdit->getValue(),
@@ -507,7 +506,7 @@ namespace toucan
         _heightEdit->setVisible(index != 0);
 
         _imageFilenameLabel->setText(getSequenceFrame(
-            _dirEdit->getPath().string(),
+            _dirEdit->getPath().get(),
             _imageBaseNameEdit->getText(),
             0,
             _imagePaddingEdit->getValue(),
@@ -551,9 +550,8 @@ namespace toucan
         _scrollWidget->setGeometry(value);
     }
 
-    void ExportTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I ExportTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_scrollWidget->getSizeHint());
+        return _scrollWidget->getSizeHint();
     }
 }

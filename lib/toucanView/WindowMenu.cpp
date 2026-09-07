@@ -30,8 +30,7 @@ namespace toucan
         _actions["Window/FullScreen"] = ftk::Action::create(
             "Full Screen",
             "WindowFullScreen",
-            ftk::Key::U,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::U, ftk::commandKeyModifier),
             [windowWeak](bool value)
             {
                 if (auto window = windowWeak.lock())
@@ -118,55 +117,55 @@ namespace toucan
 
         _actions["Window/DisplayScale/1.0"] = ftk::Action::create(
             "1.0",
-            [windowWeak](bool value)
+            [appWeak](bool value)
             {
-                if (auto window = windowWeak.lock())
+                if (auto app = appWeak.lock())
                 {
-                    window->setDisplayScale(1.F);
+                    app->setDisplayScale(1.F);
                 }
             });
         _menus["Window/DisplayScale"]->addAction(_actions["Window/DisplayScale/1.0"]);
 
         _actions["Window/DisplayScale/1.5"] = ftk::Action::create(
             "1.5",
-            [windowWeak](bool value)
+            [appWeak](bool value)
             {
-                if (auto window = windowWeak.lock())
+                if (auto app = appWeak.lock())
                 {
-                    window->setDisplayScale(1.5F);
+                    app->setDisplayScale(1.5F);
                 }
             });
         _menus["Window/DisplayScale"]->addAction(_actions["Window/DisplayScale/1.5"]);
 
         _actions["Window/DisplayScale/2.0"] = ftk::Action::create(
             "2.0",
-            [windowWeak](bool value)
+            [appWeak](bool value)
             {
-                if (auto window = windowWeak.lock())
+                if (auto app = appWeak.lock())
                 {
-                    window->setDisplayScale(2.F);
+                    app->setDisplayScale(2.F);
                 }
             });
         _menus["Window/DisplayScale"]->addAction(_actions["Window/DisplayScale/2.0"]);
 
         _actions["Window/DisplayScale/2.5"] = ftk::Action::create(
             "2.5",
-            [windowWeak](bool value)
+            [appWeak](bool value)
             {
-                if (auto window = windowWeak.lock())
+                if (auto app = appWeak.lock())
                 {
-                    window->setDisplayScale(2.5F);
+                    app->setDisplayScale(2.5F);
                 }
             });
         _menus["Window/DisplayScale"]->addAction(_actions["Window/DisplayScale/2.5"]);
 
         _actions["Window/DisplayScale/3.0"] = ftk::Action::create(
             "3.0",
-            [windowWeak](bool value)
+            [appWeak](bool value)
             {
-                if (auto window = windowWeak.lock())
+                if (auto app = appWeak.lock())
                 {
-                    window->setDisplayScale(3.F);
+                    app->setDisplayScale(3.F);
                 }
             });
         _menus["Window/DisplayScale"]->addAction(_actions["Window/DisplayScale/3.0"]);
@@ -193,7 +192,7 @@ namespace toucan
             });
         addAction(_actions["Window/Tooltips"]);
 
-        _fullScreenObserver = ftk::ValueObserver<bool>::create(
+        _fullScreenObserver = ftk::Observer<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
             {
@@ -214,7 +213,7 @@ namespace toucan
                 setChecked(_actions["Window/InfoBar"], i->second);
             });
 
-        _displayScaleObserver = ftk::ValueObserver<float>::create(
+        _displayScaleObserver = ftk::Observer<float>::create(
             window->observeDisplayScale(),
             [this](float value)
             {
@@ -225,14 +224,14 @@ namespace toucan
                 _menus["Window/DisplayScale"]->setChecked(_actions["Window/DisplayScale/3.0"], 3.F == value);
             });
 
-        _thumbnailsObserver = ftk::ValueObserver<bool>::create(
+        _thumbnailsObserver = ftk::Observer<bool>::create(
             app->getWindowModel()->observeThumbnails(),
             [this](bool value)
             {
                 setChecked(_actions["Window/Thumbnails"], value);
             });
 
-        _tooltipsObserver = ftk::ValueObserver<bool>::create(
+        _tooltipsObserver = ftk::Observer<bool>::create(
             app->getWindowModel()->observeTooltips(),
             [this](bool value)
             {

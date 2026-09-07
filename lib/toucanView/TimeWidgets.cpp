@@ -82,10 +82,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void FrameButtons::sizeHintEvent(const ftk::SizeHintEvent& value)
+    ftk::Size2I FrameButtons::getSizeHint() const
     {
-        IWidget::sizeHintEvent(value);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void PlaybackButtons::_init(
@@ -160,10 +159,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void PlaybackButtons::sizeHintEvent(const ftk::SizeHintEvent& value)
+    ftk::Size2I PlaybackButtons::getSizeHint() const
     {
-        IWidget::sizeHintEvent(value);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void PlaybackButtons::_playbackUpdate()
@@ -182,14 +180,14 @@ namespace toucan
         _layout->setSpacingRole(ftk::SizeRole::SpacingTool);
 
         _lineEdit = ftk::LineEdit::create(context, _layout);
-        _lineEdit->setFontRole(ftk::FontRole::Mono);
+        _lineEdit->setFont(ftk::FontType::Mono);
         _lineEdit->setFormat("00:00:00:00");
 
         _incButtons = ftk::IncButtons::create(context, _layout);
 
         _timeUpdate();
 
-        _lineEdit->setTextCallback(
+        _lineEdit->setCallback(
             [this](const std::string& text)
             {
                 if (_callback)
@@ -209,7 +207,7 @@ namespace toucan
                 _timeDec();
             });
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             timeUnitsModel->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -259,10 +257,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void TimeEdit::sizeHintEvent(const ftk::SizeHintEvent& value)
+    ftk::Size2I TimeEdit::getSizeHint() const
     {
-        IWidget::sizeHintEvent(value);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void TimeEdit::keyPressEvent(ftk::KeyEvent& event)
@@ -338,12 +335,12 @@ namespace toucan
         IWidget::_init(context, "toucan::TimeLabel", parent);
 
         _label = ftk::Label::create(context, shared_from_this());
-        _label->setFontRole(ftk::FontRole::Mono);
+        _label->setFont(ftk::FontType::Mono);
         _label->setMarginRole(ftk::SizeRole::MarginInside);
 
         _timeUpdate();
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             timeUnitsModel->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -384,10 +381,9 @@ namespace toucan
         _label->setGeometry(value);
     }
 
-    void TimeLabel::sizeHintEvent(const ftk::SizeHintEvent& value)
+    ftk::Size2I TimeLabel::getSizeHint() const
     {
-        IWidget::sizeHintEvent(value);
-        _setSizeHint(_label->getSizeHint());
+        return _label->getSizeHint();
     }
 
     void TimeLabel::_timeUpdate()

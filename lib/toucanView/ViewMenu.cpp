@@ -18,8 +18,7 @@ namespace toucan
         _actions["View/ZoomIn"] = ftk::Action::create(
             "Zoom In",
             "ViewZoomIn",
-            ftk::Key::Equals,
-            0,
+            ftk::KeyShortcut(ftk::Key::Equals),
             [this]
             {
                 if (_file)
@@ -33,8 +32,7 @@ namespace toucan
         _actions["View/ZoomOut"] = ftk::Action::create(
             "Zoom Out",
             "ViewZoomOut",
-            ftk::Key::Minus,
-            0,
+            ftk::KeyShortcut(ftk::Key::Minus),
             [this]
             {
                 if (_file)
@@ -48,8 +46,7 @@ namespace toucan
         _actions["View/ZoomReset"] = ftk::Action::create(
             "Zoom Reset",
             "ViewZoomReset",
-            ftk::Key::_0,
-            0,
+            ftk::KeyShortcut(ftk::Key::_0),
             [this]
             {
                 if (_file)
@@ -65,8 +62,7 @@ namespace toucan
         _actions["View/Frame"] = ftk::Action::create(
             "Frame View",
             "ViewFrame",
-            ftk::Key::Backspace,
-            0,
+            ftk::KeyShortcut(ftk::Key::Backspace),
             [this](bool value)
             {
                 if (_file)
@@ -81,8 +77,7 @@ namespace toucan
 
         _actions["View/Flip"] = ftk::Action::create(
             "Flip Vertical",
-            ftk::Key::V,
-            0,
+            ftk::KeyShortcut(ftk::Key::V),
             [this](bool value)
             {
                 if (_file)
@@ -96,8 +91,7 @@ namespace toucan
 
         _actions["View/Flop"] = ftk::Action::create(
             "Flop Horizontal",
-            ftk::Key::H,
-            0,
+            ftk::KeyShortcut(ftk::Key::H),
             [this](bool value)
             {
                 if (_file)
@@ -113,8 +107,7 @@ namespace toucan
 
         _actions["View/Red"] = ftk::Action::create(
             "Red",
-            ftk::Key::R,
-            0,
+            ftk::KeyShortcut(ftk::Key::R),
             [this](bool value)
             {
                 if (_file)
@@ -128,8 +121,7 @@ namespace toucan
 
         _actions["View/Green"] = ftk::Action::create(
             "Green",
-            ftk::Key::G,
-            0,
+            ftk::KeyShortcut(ftk::Key::G),
             [this](bool value)
             {
                 if (_file)
@@ -143,8 +135,7 @@ namespace toucan
 
         _actions["View/Blue"] = ftk::Action::create(
             "Blue",
-            ftk::Key::B,
-            0,
+            ftk::KeyShortcut(ftk::Key::B),
             [this](bool value)
             {
                 if (_file)
@@ -158,8 +149,7 @@ namespace toucan
 
         _actions["View/Alpha"] = ftk::Action::create(
             "Alpha",
-            ftk::Key::A,
-            0,
+            ftk::KeyShortcut(ftk::Key::A),
             [this](bool value)
             {
                 if (_file)
@@ -176,8 +166,7 @@ namespace toucan
         std::weak_ptr<App> appWeak(app);
         _actions["View/HUD"] = ftk::Action::create(
             "HUD",
-            ftk::Key::H,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::H, ftk::commandKeyModifier),
             [appWeak](bool value)
             {
                 if (auto app = appWeak.lock())
@@ -190,7 +179,7 @@ namespace toucan
         _actions["View/HUD"]->setTooltip("Toggle the HUD (Heads Up Display)");
         addAction(_actions["View/HUD"]);
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -198,7 +187,7 @@ namespace toucan
                 _menuUpdate();
             });
 
-        _globalOptionsObserver = ftk::ValueObserver<GlobalViewOptions>::create(
+        _globalOptionsObserver = ftk::Observer<GlobalViewOptions>::create(
             app->getGlobalViewModel()->observeOptions(),
             [this](const GlobalViewOptions& value)
             {
@@ -229,14 +218,14 @@ namespace toucan
         const bool file = _file.get();
         if (file)
         {
-            _frameViewObserver = ftk::ValueObserver<bool>::create(
+            _frameViewObserver = ftk::Observer<bool>::create(
                 _file->getViewModel()->observeFrameView(),
                 [this](bool value)
                 {
                     setChecked(_actions["View/Frame"], value);
                 });
 
-            _optionsObserver = ftk::ValueObserver<ViewOptions>::create(
+            _optionsObserver = ftk::Observer<ViewOptions>::create(
                 _file->getViewModel()->observeOptions(),
                 [this](const ViewOptions& value)
                 {

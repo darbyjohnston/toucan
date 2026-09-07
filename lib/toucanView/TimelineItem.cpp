@@ -29,7 +29,7 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(
             true,
-            0,
+            ftk::MouseButton::Left,
             0 | static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier));
 
         _timeline = data.file->getTimeline();
@@ -121,7 +121,7 @@ namespace toucan
             _size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
             _size.handle = event.style->getSizeRole(ftk::SizeRole::Handle, event.displayScale);
             _size.thumbnailHeight = 2 * event.style->getSizeRole(ftk::SizeRole::SwatchLarge, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(ftk::FontRole::Mono, event.displayScale);
+            _size.fontInfo = event.style->getFont(ftk::FontType::Mono, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
         }
         int childSizeHint = 0;
@@ -133,7 +133,12 @@ namespace toucan
             _timeRange.duration().rescaled_to(1.0).value() * _scale,
             _size.fontMetrics.lineHeight + _size.margin * 2);
         sizeHint.h += childSizeHint;
-        _setSizeHint(sizeHint);
+        _size.sizeHint = sizeHint;
+    }
+
+    ftk::Size2I TimelineItem::getSizeHint() const
+    {
+        return _size.sizeHint;
     }
 
     void TimelineItem::drawOverlayEvent(const ftk::Box2I& drawRect, const ftk::DrawEvent& event)
@@ -207,7 +212,7 @@ namespace toucan
     void TimelineItem::mousePressEvent(ftk::MouseClickEvent& event)
     {
         IItem::mousePressEvent(event);
-        if (1 == event.button &&
+        if (ftk::MouseButton::Left == event.button &&
             (0 == event.modifiers ||
                 static_cast<int>(ftk::KeyModifier::Shift) == event.modifiers ||
                 static_cast<int>(ftk::commandKeyModifier) == event.modifiers))

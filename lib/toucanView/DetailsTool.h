@@ -55,7 +55,7 @@ namespace toucan
         void setSearch(const std::string&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         void _textUpdate();
@@ -74,7 +74,7 @@ namespace toucan
         std::shared_ptr<ftk::ToolButton> _inOutButton;
         std::vector<std::pair<std::shared_ptr<ftk::Label>, std::shared_ptr<ftk::Label> > > _labels;
 
-        std::shared_ptr<ftk::ValueObserver<TimeUnits> > _timeUnitsObserver;
+        std::shared_ptr<ftk::Observer<TimeUnits> > _timeUnitsObserver;
     };
 
     //! Details tool.
@@ -96,19 +96,20 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         std::shared_ptr<ftk::VerticalLayout> _layout;
         std::shared_ptr<ftk::ScrollWidget> _scrollWidget;
         std::shared_ptr<ftk::VerticalLayout> _scrollLayout;
+        std::shared_ptr<ftk::Label> _nothingLabel;
         std::vector<std::shared_ptr<DetailsWidget> > _widgets;
         std::shared_ptr<ftk::HorizontalLayout> _bottomLayout;
         std::shared_ptr<ftk::SearchBox> _searchBox;
         std::shared_ptr<ftk::ToolButton> _openButton;
         std::shared_ptr<ftk::ToolButton> _closeButton;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<ftk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }

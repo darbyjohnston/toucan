@@ -30,13 +30,13 @@ namespace toucan
             const std::shared_ptr<ftk::Context>&,
             std::vector<std::string>&);
         
-        void run() override;
+        void run();
     
     private:
         struct CmdLine
         {
-            std::shared_ptr<ftk::CmdLineValueArg<std::string> > input;
-            std::shared_ptr<ftk::CmdLineValueArg<std::string> > output;
+            std::shared_ptr<ftk::CmdLineArg<std::string> > input;
+            std::shared_ptr<ftk::CmdLineArg<std::string> > output;
         };
         CmdLine _cmdLine;
 

@@ -35,6 +35,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
@@ -74,9 +75,9 @@ namespace toucan
         };
         SizeData _size;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<IImageNode> > > _rootNodeObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<IImageNode> > > _currentNodeObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<IImageNode> > > _rootNodeObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<IImageNode> > > _currentNodeObserver;
     };
 
     //! Image graph tool.
@@ -98,7 +99,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         std::shared_ptr<ftk::ScrollWidget> _scrollWidget;

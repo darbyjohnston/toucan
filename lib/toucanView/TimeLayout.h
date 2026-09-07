@@ -65,7 +65,11 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
+
+    private:
+        ftk::Size2I _sizeHint;
     };
 
     //! Time stack layout.
@@ -87,6 +91,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
 
     private:
@@ -94,6 +99,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            ftk::Size2I sizeHint;
             int spacing = 0;
         };
         SizeData _size;

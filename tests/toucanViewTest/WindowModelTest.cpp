@@ -26,7 +26,7 @@ namespace toucan
                         components = value;
                     });
 
-                tooltipsObserver = ftk::ValueObserver<bool>::create(
+                tooltipsObserver = ftk::Observer<bool>::create(
                     model->observeTooltips(),
                     [this](bool value)
                     {
@@ -39,7 +39,7 @@ namespace toucan
             bool tooltips = false;
 
             std::shared_ptr<ftk::MapObserver<WindowComponent, bool> > componentsObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > tooltipsObserver;
+            std::shared_ptr<ftk::Observer<bool> > tooltipsObserver;
         };
     }
 

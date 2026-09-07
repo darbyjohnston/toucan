@@ -39,14 +39,14 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         std::shared_ptr<ftk::HorizontalLayout> _layout;
         std::map<std::string, std::shared_ptr<ftk::ToolButton> > _buttons;
 
-        std::shared_ptr<ftk::ValueObserver<bool> > _frameViewObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<ftk::Observer<bool> > _frameViewObserver;
+        std::shared_ptr<ftk::Observer<bool> > _fullScreenObserver;
         std::shared_ptr<ftk::MapObserver<WindowComponent, bool> > _componentObserver;
     };
 }

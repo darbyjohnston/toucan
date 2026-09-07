@@ -23,7 +23,7 @@ namespace toucan
         _label = ftk::Label::create(context, _layout);
         _label->setMarginRole(ftk::SizeRole::MarginInside);
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -76,9 +76,8 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void InfoBar::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I InfoBar::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 }

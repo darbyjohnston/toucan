@@ -36,7 +36,7 @@ namespace toucan
             const std::shared_ptr<ftk::Context>&,
             std::vector<std::string>&);
 
-        void run() override;
+        void run();
     
     private:
         void _writeRawFrame(const OIIO::ImageBuf&);
@@ -45,18 +45,18 @@ namespace toucan
         
         struct CmdLine
         {
-            std::shared_ptr<ftk::CmdLineValueArg<std::string> > input;
-            std::shared_ptr<ftk::CmdLineValueArg<std::string> > output;
+            std::shared_ptr<ftk::CmdLineArg<std::string> > input;
+            std::shared_ptr<ftk::CmdLineArg<std::string> > output;
             bool outputRaw = false;
 
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > videoCodec;
-            std::shared_ptr<ftk::CmdLineFlagOption> printStart;
-            std::shared_ptr<ftk::CmdLineFlagOption> printDuration;
-            std::shared_ptr<ftk::CmdLineFlagOption> printRate;
-            std::shared_ptr<ftk::CmdLineFlagOption> printSize;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > raw;
-            std::shared_ptr<ftk::CmdLineValueOption<std::string> > y4m;
-            std::shared_ptr<ftk::CmdLineFlagOption> verbose;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > videoCodec;
+            std::shared_ptr<ftk::CmdLineFlag> printStart;
+            std::shared_ptr<ftk::CmdLineFlag> printDuration;
+            std::shared_ptr<ftk::CmdLineFlag> printRate;
+            std::shared_ptr<ftk::CmdLineFlag> printSize;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > raw;
+            std::shared_ptr<ftk::CmdLineOption<std::string> > y4m;
+            std::shared_ptr<ftk::CmdLineFlag> verbose;
         };
         CmdLine _cmdLine;
 

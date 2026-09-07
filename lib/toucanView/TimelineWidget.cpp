@@ -25,17 +25,17 @@ namespace toucan
         _setMouseHoverEnabled(true);
         _setMousePressEnabled(
             true,
-            0,
+            ftk::MouseButton::Left,
             static_cast<int>(ftk::KeyModifier::Alt));
 
-        _frameView = ftk::ObservableValue<bool>::create(true);
+        _frameView = ftk::Observable<bool>::create(true);
 
         _scrollWidget = ftk::ScrollWidget::create(context, ftk::ScrollType::Both, shared_from_this());
         _scrollWidget->setScrollEventsEnabled(false);
         _scrollWidget->setBorder(false);
 
         auto appWeak = std::weak_ptr<App>(app);
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this, appWeak](const std::shared_ptr<File>& file)
             {
@@ -87,7 +87,7 @@ namespace toucan
                         });
                     _scrollWidget->setWidget(_timelineItem);
 
-                    _currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+                    _currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                         file->getPlaybackModel()->observeCurrentTime(),
                         [this](const OTIO_NS::RationalTime& value)
                         {
@@ -99,7 +99,7 @@ namespace toucan
                             _scrollUpdate();
                         });
 
-                    _inOutRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                    _inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                         file->getPlaybackModel()->observeInOutRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {
@@ -156,7 +156,7 @@ namespace toucan
         return _frameView->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > TimelineWidget::observeFrameView() const
+    std::shared_ptr<ftk::IObservable<bool> > TimelineWidget::observeFrameView() const
     {
         return _frameView;
     }
@@ -188,10 +188,10 @@ namespace toucan
 
     void TimelineWidget::setGeometry(const ftk::Box2I& value)
     {
-        const ftk::Box2I viewportPrev = _scrollWidget->getViewport();
+        const ftk::Box2I viewportPrev = _scrollWidget->getScrollInfo().viewport;
         IMouseWidget::setGeometry(value);
         _scrollWidget->setGeometry(value);
-        const bool changed = _scrollWidget->getViewport() != viewportPrev;
+        const bool changed = _scrollWidget->getScrollInfo().viewport != viewportPrev;
         if (_sizeInit)
         {
             _sizeInit = false;
@@ -209,16 +209,16 @@ namespace toucan
         }
         else if (_timelineItem &&
             _timelineItem->getSizeHint().w <
-            _scrollWidget->getViewport().w())
+            _scrollWidget->getScrollInfo().viewport.w())
         {
             setFrameView(true);
             frameView();
         }
     }
 
-    void TimelineWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I TimelineWidget::getSizeHint() const
     {
-        _setSizeHint(_scrollWidget->getSizeHint());
+        return _scrollWidget->getSizeHint();
     }
 
     void TimelineWidget::mouseMoveEvent(ftk::MouseMoveEvent& event)
@@ -240,7 +240,7 @@ namespace toucan
     void TimelineWidget::mousePressEvent(ftk::MouseClickEvent& event)
     {
         IMouseWidget::mousePressEvent(event);
-        if (1 == event.button &&
+        if (ftk::MouseButton::Left == event.button &&
             static_cast<int>(ftk::KeyModifier::Alt) == event.modifiers)
         {
             event.accept = true;
@@ -337,7 +337,7 @@ namespace toucan
         const double duration = _timeRange.duration().rescaled_to(1.0).value();
         if (duration > 0.0)
         {
-            const ftk::Box2I scrollViewport = _scrollWidget->getViewport();
+            const ftk::Box2I scrollViewport = _scrollWidget->getScrollInfo().viewport;
             out = scrollViewport.w() / duration;
         }
         return out;
@@ -346,7 +346,7 @@ namespace toucan
     double TimelineWidget::_getTimelineScaleMax() const
     {
         double out = 1.0;
-        const ftk::Box2I scrollViewport = _scrollWidget->getViewport();
+        const ftk::Box2I scrollViewport = _scrollWidget->getScrollInfo().viewport;
         const double duration = _timeRange.duration().rescaled_to(1.0).value();
         if (duration < 1.0)
         {
@@ -368,7 +368,7 @@ namespace toucan
             MouseMode::None == _mouse.mode)
         {
             const int pos = _timelineItem->timeToPos(_currentTime);
-            const ftk::Box2I vp = _scrollWidget->getViewport();
+            const ftk::Box2I vp = _scrollWidget->getScrollInfo().viewport;
             const int margin = vp.w() * marginPercentage;
             if (pos < (vp.min.x + margin) || pos >(vp.max.x - margin))
             {

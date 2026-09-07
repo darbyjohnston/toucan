@@ -39,7 +39,7 @@ namespace toucan
         const std::string& name,
         const ftk::Size2I& size)
     {
-        ftk::Window::_init(context, name, size);
+        ftk::Window::_init(context, app, name, size);
 
         _app = app;
         _settings = app->getSettings();
@@ -57,7 +57,10 @@ namespace toucan
         }
         catch (const std::exception&)
         {}
-        setDisplayScale(displayScale);
+        if (displayScale > 0.F)
+        {
+            setDisplayScale(displayScale);
+        }
 
         auto iconSystem = context->getSystem<ftk::IconSystem>();
         iconSystem->add("toucan_64", toucan_resource::toucan_64);
@@ -88,7 +91,7 @@ namespace toucan
         _hSplitter->setSplit({ .75F });
 
         _tabWidget = ftk::TabWidget::create(context, _hSplitter);
-        _tabWidget->setTabsClosable(true);
+        _tabWidget->setClosable(true);
         _tabWidget->setVStretch(ftk::Stretch::Expanding);
 
         _toolWidget = ftk::TabWidget::create(context, _hSplitter);
@@ -119,7 +122,7 @@ namespace toucan
         _infoBar = InfoBar::create(context, app, _layout);
 
         std::weak_ptr<App> appWeak(app);
-        _tabWidget->setCurrentTabCallback(
+        _tabWidget->setCallback(
             [appWeak](int index)
             {
                 if (auto app = appWeak.lock())
@@ -127,7 +130,7 @@ namespace toucan
                     app->getFilesModel()->setCurrentIndex(index);
                 }
             });
-        _tabWidget->setTabCloseCallback(
+        _tabWidget->setCloseCallback(
             [appWeak](int index)
             {
                 if (auto app = appWeak.lock())
@@ -143,7 +146,7 @@ namespace toucan
                 _files = files;
             });
 
-        _addObserver = ftk::ValueObserver<int>::create(
+        _addObserver = ftk::Observer<int>::create(
             app->getFilesModel()->observeAdd(),
             [this, appWeak](int index)
             {
@@ -161,7 +164,7 @@ namespace toucan
                 }
             });
 
-        _removeObserver = ftk::ValueObserver<int>::create(
+        _removeObserver = ftk::Observer<int>::create(
             app->getFilesModel()->observeRemove(),
             [this, appWeak](int index)
             {
@@ -177,11 +180,11 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<int>::create(
+        _fileObserver = ftk::Observer<int>::create(
             app->getFilesModel()->observeCurrentIndex(),
             [this](int index)
             {
-                _tabWidget->setCurrentTab(index);
+                _tabWidget->setCurrent(index);
             });
 
         _componentsObserver = ftk::MapObserver<WindowComponent, bool>::create(
@@ -203,7 +206,7 @@ namespace toucan
                 _infoBar->setVisible(i->second);
             });
 
-        _tooltipsObserver = ftk::ValueObserver<bool>::create(
+        _tooltipsObserver = ftk::Observer<bool>::create(
             app->getWindowModel()->observeTooltips(),
             [this](bool value)
             {
@@ -235,10 +238,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void MainWindow::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I MainWindow::getSizeHint() const
     {
-        ftk::Window::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void MainWindow::keyPressEvent(ftk::KeyEvent& event)
@@ -251,31 +253,33 @@ namespace toucan
         event.accept = true;
     }
 
-    void MainWindow::_drop(const std::vector<std::string>& value)
+    void MainWindow::dropEvent(ftk::DragDropEvent& event)
     {
-        if (auto context = getContext())
+        ftk::Window::dropEvent(event);
+        auto data = std::dynamic_pointer_cast<ftk::DragDropTextData>(event.data);
+        auto context = getContext();
+        auto app = _app.lock();
+        if (data && context && app)
         {
-            if (auto app = _app.lock())
+            event.accept = true;
+            std::vector<std::string> errors;
+            for (const auto& i : data->getText())
             {
-                std::vector<std::string> errors;
-                for (const auto& i : value)
+                try
                 {
-                    try
-                    {
-                        app->getFilesModel()->open(i);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        errors.push_back(e.what());
-                    }
+                    app->getFilesModel()->open(i);
                 }
-                if (!errors.empty())
+                catch (const std::exception& e)
                 {
-                    context->getSystem<ftk::DialogSystem>()->message(
-                        "ERROR",
-                        ftk::join(errors, '\n'),
-                        getWindow());
+                    errors.push_back(e.what());
                 }
+            }
+            if (!errors.empty())
+            {
+                context->getSystem<ftk::DialogSystem>()->message(
+                    "ERROR",
+                    ftk::join(errors, '\n'),
+                    getWindow());
             }
         }
     }

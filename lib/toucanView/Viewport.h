@@ -43,10 +43,10 @@ namespace toucan
         float getViewZoom() const;
 
         //! Observe the view position.
-        std::shared_ptr<ftk::IObservableValue<ftk::V2I> > observeViewPos() const;
+        std::shared_ptr<ftk::IObservable<ftk::V2I> > observeViewPos() const;
 
         //! Observe the view zoom.
-        std::shared_ptr<ftk::IObservableValue<float> > observeViewZoom() const;
+        std::shared_ptr<ftk::IObservable<float> > observeViewZoom() const;
 
         //! Set the view position and zoom.
         void setViewPosZoom(const ftk::V2I&, float);
@@ -70,7 +70,7 @@ namespace toucan
         bool getFrameView() const;
 
         //! Observe whether frame view is enabled.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeFrameView() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeFrameView() const;
 
         //! Set whether frame view is enabled.
         void setFrameView(bool);
@@ -93,23 +93,23 @@ namespace toucan
         ftk::Size2I _bImageSize;
         std::shared_ptr<ftk::Image> _bImage;
         CompareOptions _compareOptions;
-        std::shared_ptr<ftk::ObservableValue<ftk::V2I> > _viewPos;
-        std::shared_ptr<ftk::ObservableValue<float> > _viewZoom;
-        std::shared_ptr<ftk::ObservableValue<bool> > _frameView;
+        std::shared_ptr<ftk::Observable<ftk::V2I> > _viewPos;
+        std::shared_ptr<ftk::Observable<float> > _viewZoom;
+        std::shared_ptr<ftk::Observable<bool> > _frameView;
         ViewOptions _options;
         GlobalViewOptions _globalOptions;
         ftk::V2I _viewMousePress;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<ftk::Image> > > _imageObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _bObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<ftk::Image> > > _bImageObserver;
-        std::shared_ptr<ftk::ValueObserver<CompareOptions> > _compareOptionsObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _zoomInObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _zoomOutObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _zoomResetObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _frameObserver;
-        std::shared_ptr<ftk::ValueObserver<ViewOptions> > _optionsObserver;
-        std::shared_ptr<ftk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<ftk::Image> > > _imageObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _bObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<ftk::Image> > > _bImageObserver;
+        std::shared_ptr<ftk::Observer<CompareOptions> > _compareOptionsObserver;
+        std::shared_ptr<ftk::Observer<bool> > _zoomInObserver;
+        std::shared_ptr<ftk::Observer<bool> > _zoomOutObserver;
+        std::shared_ptr<ftk::Observer<bool> > _zoomResetObserver;
+        std::shared_ptr<ftk::Observer<bool> > _frameObserver;
+        std::shared_ptr<ftk::Observer<ViewOptions> > _optionsObserver;
+        std::shared_ptr<ftk::Observer<GlobalViewOptions> > _globalOptionsObserver;
     };
 }
 

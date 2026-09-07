@@ -32,8 +32,7 @@ namespace toucan
         _actions["File/Open"] = ftk::Action::create(
             "Open",
             "FileOpen",
-            ftk::Key::O,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::O, ftk::commandKeyModifier),
             [this, appWeak, windowWeak]
             {
                 auto context = getContext();
@@ -55,16 +54,18 @@ namespace toucan
                 extensions.push_back(".otio");
                 extensions.push_back(".otiod");
                 extensions.push_back(".otioz");
-                fileBrowserSystem->getModel()->setExtensions(extensions);
 
                 fileBrowserSystem->setRecentFilesModel(_filesModel->getRecentFilesModel());
 
+                ftk::FileBrowserOpenOptions options;
+                options.extensions = extensions;
                 fileBrowserSystem->open(
                     windowWeak.lock(),
-                    [appWeak](const std::filesystem::path& path)
+                    [appWeak](const ftk::Path& path)
                     {
-                        appWeak.lock()->open(path);
-                    });
+                        appWeak.lock()->open(path.get());
+                    },
+                    options);
             });
         _actions["File/Open"]->setTooltip("Open a file");
         addAction(_actions["File/Open"]);
@@ -72,8 +73,7 @@ namespace toucan
         _actions["File/Close"] = ftk::Action::create(
             "Close",
             "FileClose",
-            ftk::Key::E,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::E, ftk::commandKeyModifier),
             [this] { _filesModel->close(); });
         _actions["File/Close"]->setTooltip("Close the current file");
         addAction(_actions["File/Close"]);
@@ -81,8 +81,7 @@ namespace toucan
         _actions["File/CloseAll"] = ftk::Action::create(
             "Close All",
             "FileCloseAll",
-            ftk::Key::E,
-            static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::E, ftk::KeyModifier::Shift, ftk::commandKeyModifier),
             [this] { _filesModel->closeAll(); });
         _actions["File/CloseAll"]->setTooltip("Close all files");
         addAction(_actions["File/CloseAll"]);
@@ -97,16 +96,14 @@ namespace toucan
 
         _actions["File/Next"] = ftk::Action::create(
             "Next",
-            ftk::Key::PageDown,
-            0,
+            ftk::KeyShortcut(ftk::Key::PageDown),
             [this] { _filesModel->next(); });
         _actions["File/Next"]->setTooltip("Switch to the next file");
         addAction(_actions["File/Next"]);
 
         _actions["File/Prev"] = ftk::Action::create(
             "Previous",
-            ftk::Key::PageUp,
-            0,
+            ftk::KeyShortcut(ftk::Key::PageUp),
             [this] { _filesModel->prev(); });
         _actions["File/Prev"]->setTooltip("Switch to the previous file");
         addAction(_actions["File/Prev"]);
@@ -115,8 +112,7 @@ namespace toucan
 
         _actions["File/Exit"] = ftk::Action::create(
             "Exit",
-            ftk::Key::Q,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::Q, ftk::commandKeyModifier),
             [appWeak]
             {
                 if (auto app = appWeak.lock())
@@ -146,7 +142,7 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             _filesModel->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -154,7 +150,7 @@ namespace toucan
                 _menuUpdate();
             });
 
-        _fileIndexObserver = ftk::ValueObserver<int>::create(
+        _fileIndexObserver = ftk::Observer<int>::create(
             _filesModel->observeCurrentIndex(),
             [this](int index)
             {
@@ -164,9 +160,9 @@ namespace toucan
                 }
             });
 
-        _recentFilesObserver = ftk::ListObserver<std::filesystem::path>::create(
+        _recentFilesObserver = ftk::ListObserver<ftk::Path>::create(
             _filesModel->getRecentFilesModel()->observeRecent(),
-            [this, appWeak](const std::vector<std::filesystem::path>& files)
+            [this, appWeak](const std::vector<ftk::Path>& files)
             {
                 _menus["RecentFiles"]->clear();
                 _recentFilesActions.clear();
@@ -174,10 +170,10 @@ namespace toucan
                 {
                     auto file = *i;
                     auto action = ftk::Action::create(
-                        file.string(),
+                        file.get(),
                         [this, appWeak, file]
                         {
-                            appWeak.lock()->open(file);
+                            appWeak.lock()->open(file.get());
                             close();
                         });
                     _menus["RecentFiles"]->addAction(action);

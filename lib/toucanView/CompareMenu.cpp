@@ -24,8 +24,7 @@ namespace toucan
 
         _actions["Compare/A"] = ftk::Action::create(
             "A",
-            ftk::Key::A,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::A, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -36,8 +35,7 @@ namespace toucan
 
         _actions["Compare/B"] = ftk::Action::create(
             "B",
-            ftk::Key::B,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::B, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -48,8 +46,7 @@ namespace toucan
 
         _actions["Compare/Split"] = ftk::Action::create(
             "Split",
-            ftk::Key::S,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::S, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -60,8 +57,7 @@ namespace toucan
 
         _actions["Compare/Overlay"] = ftk::Action::create(
             "Overlay",
-            ftk::Key::E,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::E, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -72,8 +68,7 @@ namespace toucan
 
         _actions["Compare/Horizontal"] = ftk::Action::create(
             "Horizontal",
-            ftk::Key::H,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::H, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -84,8 +79,7 @@ namespace toucan
 
         _actions["Compare/Vertical"] = ftk::Action::create(
             "Vertical",
-            ftk::Key::V,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::V, ftk::KeyModifier::Shift),
             [this](bool)
             {
                 CompareOptions options = _filesModel->getCompareOptions();
@@ -94,7 +88,7 @@ namespace toucan
             });
         addAction(_actions["Compare/Vertical"]);
 
-        _modeObserver = ftk::ValueObserver<CompareOptions>::create(
+        _modeObserver = ftk::Observer<CompareOptions>::create(
             app->getFilesModel()->observeCompareOptions(),
             [this](const CompareOptions& value)
             {
@@ -126,7 +120,7 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -134,7 +128,7 @@ namespace toucan
                 _menuUpdate();
             });
 
-        _bIndexObserver = ftk::ValueObserver<int>::create(
+        _bIndexObserver = ftk::Observer<int>::create(
             _filesModel->observeBIndex(),
             [this](int index)
             {

@@ -67,8 +67,8 @@ namespace toucan
         }
 
         _components = ftk::ObservableMap<WindowComponent, bool>::create(components);
-        _thumbnails = ftk::ObservableValue<bool>::create(thumbnails);
-        _tooltips = ftk::ObservableValue<bool>::create(tooltips);
+        _thumbnails = ftk::Observable<bool>::create(thumbnails);
+        _tooltips = ftk::Observable<bool>::create(tooltips);
     }
 
     WindowModel::~WindowModel()
@@ -118,7 +118,7 @@ namespace toucan
         return _thumbnails->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > WindowModel::observeThumbnails() const
+    std::shared_ptr<ftk::IObservable<bool> > WindowModel::observeThumbnails() const
     {
         return _thumbnails;
     }
@@ -133,7 +133,7 @@ namespace toucan
         return _tooltips->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > WindowModel::observeTooltips() const
+    std::shared_ptr<ftk::IObservable<bool> > WindowModel::observeTooltips() const
     {
         return _tooltips;
     }

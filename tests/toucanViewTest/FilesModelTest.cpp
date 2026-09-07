@@ -28,49 +28,49 @@ namespace toucan
                         files = value;
                     });
 
-                addObserver = ftk::ValueObserver<int>::create(
+                addObserver = ftk::Observer<int>::create(
                     model->observeAdd(),
                     [this](int value)
                     {
                         add = value;
                     });
 
-                removeObserver = ftk::ValueObserver<int>::create(
+                removeObserver = ftk::Observer<int>::create(
                     model->observeRemove(),
                     [this](int value)
                     {
                         remove = value;
                     });
 
-                currentObserver = ftk::ValueObserver<std::shared_ptr<File>>::create(
+                currentObserver = ftk::Observer<std::shared_ptr<File>>::create(
                     model->observeCurrent(),
                     [this](const std::shared_ptr<File>& value)
                     {
                         current = value;
                     });
 
-                currentIndexObserver = ftk::ValueObserver<int>::create(
+                currentIndexObserver = ftk::Observer<int>::create(
                     model->observeCurrentIndex(),
                     [this](int value)
                     {
                         currentIndex = value;
                     });
 
-                bFileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+                bFileObserver = ftk::Observer<std::shared_ptr<File> >::create(
                     model->observeBFile(),
                     [this](const std::shared_ptr<File>& value)
                     {
                         bFile = value;
                     });
 
-                bIndexObserver = ftk::ValueObserver<int>::create(
+                bIndexObserver = ftk::Observer<int>::create(
                     model->observeBIndex(),
                     [this](int value)
                     {
                         bIndex = value;
                     });
 
-                compareOptionsObserver = ftk::ValueObserver<CompareOptions>::create(
+                compareOptionsObserver = ftk::Observer<CompareOptions>::create(
                     model->observeCompareOptions(),
                     [this](const CompareOptions& value)
                     {
@@ -89,13 +89,13 @@ namespace toucan
             CompareOptions compareOptions;
 
             std::shared_ptr<ftk::ListObserver<std::shared_ptr<File> > > filesObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > addObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > removeObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > currentObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > currentIndexObserver;
-            std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > bFileObserver;
-            std::shared_ptr<ftk::ValueObserver<int> > bIndexObserver;
-            std::shared_ptr<ftk::ValueObserver<CompareOptions> > compareOptionsObserver;
+            std::shared_ptr<ftk::Observer<int> > addObserver;
+            std::shared_ptr<ftk::Observer<int> > removeObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > currentObserver;
+            std::shared_ptr<ftk::Observer<int> > currentIndexObserver;
+            std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > bFileObserver;
+            std::shared_ptr<ftk::Observer<int> > bIndexObserver;
+            std::shared_ptr<ftk::Observer<CompareOptions> > compareOptionsObserver;
         };
     }
 

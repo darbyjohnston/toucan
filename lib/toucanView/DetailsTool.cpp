@@ -71,7 +71,7 @@ namespace toucan
                 });
         }
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             app->getTimeUnitsModel()->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -115,10 +115,9 @@ namespace toucan
         _bellows->setGeometry(value);
     }
 
-    void DetailsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I DetailsWidget::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_bellows->isVisible(false) ? _bellows->getSizeHint() : ftk::Size2I());
+        return _bellows->isVisible(false) ? _bellows->getSizeHint() : ftk::Size2I();
     }
 
     void DetailsWidget::_textUpdate()
@@ -234,6 +233,9 @@ namespace toucan
         _scrollLayout->setSpacingRole(ftk::SizeRole::None);
         _scrollWidget->setWidget(_scrollLayout);
 
+        _nothingLabel = ftk::Label::create(context, "Nothing selected", _scrollLayout);
+        _nothingLabel->setMarginRole(ftk::SizeRole::Margin);
+
         ftk::Divider::create(context, ftk::Orientation::Vertical, _layout);
 
         _bottomLayout = ftk::HorizontalLayout::create(context, _layout);
@@ -280,7 +282,7 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -310,6 +312,7 @@ namespace toucan
                             }
                             _openButton->setEnabled(!_widgets.empty());
                             _closeButton->setEnabled(!_widgets.empty());
+                            _nothingLabel->setVisible(_widgets.empty());
                         });
                 }
                 else
@@ -321,6 +324,7 @@ namespace toucan
                     _widgets.clear();
                     _openButton->setEnabled(false);
                     _closeButton->setEnabled(false);
+                    _nothingLabel->setVisible(true);
                     _selectionObserver.reset();
                 }
             });
@@ -345,9 +349,8 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void DetailsTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I DetailsTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 }
