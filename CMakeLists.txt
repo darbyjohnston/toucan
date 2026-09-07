@@ -58,7 +58,7 @@ set(TOUCAN_PLUGINS
 enable_testing()
 
 find_package(ZLIB)
-find_package(minizip)
+find_package(minizip-ng)
 find_package(Imath)
 find_package(PNG)
 find_package(JPEG)

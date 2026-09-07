@@ -1,5 +1,5 @@
 add_library(toucanPlugin Plugin.h Util.h Plugin.cpp Util.cpp)
-set(LIBS_PUBLIC OpenImageIO::OpenImageIO MINIZIP::minizip)
+set(LIBS_PUBLIC OpenImageIO::OpenImageIO MINIZIP::minizip-ng)
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
     list(APPEND LIBS_PUBLIC stdc++fs)
 endif()
