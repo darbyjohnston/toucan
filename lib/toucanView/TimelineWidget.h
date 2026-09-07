@@ -47,7 +47,7 @@ namespace toucan
         bool hasFrameView() const;
 
         //! Observe whether frame view is enabled.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeFrameView() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeFrameView() const;
 
         //! Set whether frame view is enabled.
         void setFrameView(bool);
@@ -56,7 +56,7 @@ namespace toucan
         void frameView();
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
         void mouseMoveEvent(ftk::MouseMoveEvent&) override;
         void mousePressEvent(ftk::MouseClickEvent&) override;
         void mouseReleaseEvent(ftk::MouseClickEvent&) override;
@@ -81,7 +81,7 @@ namespace toucan
         OTIO_NS::RationalTime _currentTime;
         OTIO_NS::TimeRange _inOutRange;
         double _scale = 100.0;
-        std::shared_ptr<ftk::ObservableValue<bool> > _frameView;
+        std::shared_ptr<ftk::Observable<bool> > _frameView;
         bool _sizeInit = true;
         std::optional<TimelineViewState> _viewState;
         std::shared_ptr<ThumbnailGenerator> _thumbnailGenerator;
@@ -102,8 +102,8 @@ namespace toucan
         };
         MouseData _mouse;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > _inOutRangeObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > _inOutRangeObserver;
     };
 }

@@ -43,7 +43,7 @@ namespace toucan
         void setBCallback(const std::function<void(bool)>&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         bool _current = false;
@@ -73,7 +73,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         void _widgetUpdate();
@@ -94,9 +94,9 @@ namespace toucan
         std::shared_ptr<ftk::CheckBox> _resizeCheckBox;
 
         std::shared_ptr<ftk::ListObserver<std::shared_ptr<File> > > _filesObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _fileIndexObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _bIndexObserver;
-        std::shared_ptr<ftk::ValueObserver<CompareOptions> > _compareOptionsObserver;
+        std::shared_ptr<ftk::Observer<int> > _fileIndexObserver;
+        std::shared_ptr<ftk::Observer<int> > _bIndexObserver;
+        std::shared_ptr<ftk::Observer<CompareOptions> > _compareOptionsObserver;
     };
 }
 

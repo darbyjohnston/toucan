@@ -21,28 +21,28 @@ namespace toucan
             {
                 model = std::make_shared<PlaybackModel>(context);
 
-                timeRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                timeRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                     model->observeTimeRange(),
                     [this](const OTIO_NS::TimeRange& value)
                     {
                         timeRange = value;
                     });
 
-                currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+                currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                     model->observeCurrentTime(),
                     [this](const OTIO_NS::RationalTime& value)
                     {
                         currentTime = value;
                     });
 
-                inOutRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                     model->observeInOutRange(),
                     [this](const OTIO_NS::TimeRange& value)
                     {
                         inOutRange = value;
                     });
 
-                playbackObserver = ftk::ValueObserver<Playback>::create(
+                playbackObserver = ftk::Observer<Playback>::create(
                     model->observePlayback(),
                     [this](Playback value)
                     {
@@ -56,10 +56,10 @@ namespace toucan
             OTIO_NS::TimeRange inOutRange;
             Playback playback = Playback::Stop;
 
-            std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > timeRangeObserver;
-            std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > currentTimeObserver;
-            std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > inOutRangeObserver;
-            std::shared_ptr<ftk::ValueObserver<Playback> > playbackObserver;
+            std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > timeRangeObserver;
+            std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > currentTimeObserver;
+            std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > inOutRangeObserver;
+            std::shared_ptr<ftk::Observer<Playback> > playbackObserver;
         };
     }
 

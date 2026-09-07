@@ -45,8 +45,8 @@ namespace toucan
         std::shared_ptr<ftk::VerticalLayout> _layout;
         std::map<std::string, std::shared_ptr<ftk::Label> > _labels;
 
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > _timeRangeObserver;
     };
 }
 

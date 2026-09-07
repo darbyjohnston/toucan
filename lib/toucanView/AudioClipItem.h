@@ -39,6 +39,7 @@ namespace toucan
 
         void setGeometry(const ftk::Box2I&) override;
         ftk::Box2I getChildrenClipRect() const override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 

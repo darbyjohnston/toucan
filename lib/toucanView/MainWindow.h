@@ -45,12 +45,11 @@ namespace toucan
             const ftk::Size2I&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
         void keyPressEvent(ftk::KeyEvent&) override;
         void keyReleaseEvent(ftk::KeyEvent&) override;
 
-    protected:
-        void _drop(const std::vector<std::string>&) override;
+        void dropEvent(ftk::DragDropEvent&) override;
 
     private:
         std::weak_ptr<App> _app;
@@ -74,11 +73,11 @@ namespace toucan
         std::shared_ptr<InfoBar> _infoBar;
 
         std::shared_ptr<ftk::ListObserver<std::shared_ptr<File> > > _filesObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _addObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _removeObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _fileObserver;
+        std::shared_ptr<ftk::Observer<int> > _addObserver;
+        std::shared_ptr<ftk::Observer<int> > _removeObserver;
+        std::shared_ptr<ftk::Observer<int> > _fileObserver;
         std::shared_ptr<ftk::MapObserver<WindowComponent, bool> > _componentsObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _tooltipsObserver;
+        std::shared_ptr<ftk::Observer<bool> > _tooltipsObserver;
     };
 }
 

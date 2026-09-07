@@ -136,7 +136,12 @@ namespace toucan
             }
         }
         sizeHint.w = _timeRange.duration().rescaled_to(1.0).value() * _scale;
-        _setSizeHint(sizeHint);
+        _sizeHint = sizeHint;
+    }
+
+    ftk::Size2I TimeLayout::getSizeHint() const
+    {
+        return _sizeHint;
     }
 
     void TimeStackLayout::_init(
@@ -204,6 +209,11 @@ namespace toucan
             sizeHint.h += (children.size() - 1) * _size.spacing;
         }
         sizeHint.w = _timeRange.duration().rescaled_to(1.0).value() * _scale;
-        _setSizeHint(sizeHint);
+        _size.sizeHint = sizeHint;
+    }
+
+    ftk::Size2I TimeStackLayout::getSizeHint() const
+    {
+        return _size.sizeHint;
     }
 }

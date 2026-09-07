@@ -41,11 +41,11 @@ namespace toucan
         std::map<std::string, std::shared_ptr<ftk::Menu> > _menus;
         std::map<std::string, std::shared_ptr<ftk::Action> > _actions;
 
-        std::shared_ptr<ftk::ValueObserver<bool> > _fullScreenObserver;
+        std::shared_ptr<ftk::Observer<bool> > _fullScreenObserver;
         std::shared_ptr<ftk::MapObserver<WindowComponent, bool> > _componentsObserver;
-        std::shared_ptr<ftk::ValueObserver<float> > _displayScaleObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _thumbnailsObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _tooltipsObserver;
+        std::shared_ptr<ftk::Observer<float> > _displayScaleObserver;
+        std::shared_ptr<ftk::Observer<bool> > _thumbnailsObserver;
+        std::shared_ptr<ftk::Observer<bool> > _tooltipsObserver;
     };
 }
 

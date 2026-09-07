@@ -10,7 +10,7 @@
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/ObservableList.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace toucan
 {
@@ -30,7 +30,7 @@ namespace toucan
         Count,
         First = A
     };
-    FTK_ENUM(CompareMode);
+    FTK_ENUM(, CompareMode);
 
     //! Compare options.
     struct CompareOptions
@@ -70,16 +70,16 @@ namespace toucan
         std::shared_ptr<ftk::IObservableList<std::shared_ptr<File> > > observeFiles() const;
 
         //! Observe when a file is added.
-        std::shared_ptr<ftk::IObservableValue<int> > observeAdd() const;
+        std::shared_ptr<ftk::IObservable<int> > observeAdd() const;
 
         //! Observe when a file is removed.
-        std::shared_ptr<ftk::IObservableValue<int> > observeRemove() const;
+        std::shared_ptr<ftk::IObservable<int> > observeRemove() const;
 
         //! Observe the current file.
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<File> > > observeCurrent() const;
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<File> > > observeCurrent() const;
 
         //! Observe the current file index.
-        std::shared_ptr<ftk::IObservableValue<int> > observeCurrentIndex() const;
+        std::shared_ptr<ftk::IObservable<int> > observeCurrentIndex() const;
 
         //! Set the current file index.
         void setCurrentIndex(int);
@@ -94,13 +94,13 @@ namespace toucan
         const std::shared_ptr<File>& getBFile() const;
 
         //! Observe the B file.
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<File> > > observeBFile() const;
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<File> > > observeBFile() const;
 
         //! Get the B file index.
         int getBIndex() const;
 
         //! Observe the B file index.
-        std::shared_ptr<ftk::IObservableValue<int> > observeBIndex() const;
+        std::shared_ptr<ftk::IObservable<int> > observeBIndex() const;
 
         //! Set the B file index.
         void setBIndex(int);
@@ -109,7 +109,7 @@ namespace toucan
         const CompareOptions& getCompareOptions() const;
 
         //! Observe the compare options.
-        std::shared_ptr<ftk::IObservableValue<CompareOptions> > observeCompareOptions() const;
+        std::shared_ptr<ftk::IObservable<CompareOptions> > observeCompareOptions() const;
 
         //! Set the compare options.
         void setCompareOptions(const CompareOptions&);
@@ -127,16 +127,16 @@ namespace toucan
         std::shared_ptr<ftk::Settings> _settings;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<ftk::ObservableList<std::shared_ptr<File> > > _files;
-        std::shared_ptr<ftk::ObservableValue<int> > _add;
-        std::shared_ptr<ftk::ObservableValue<int> > _remove;
-        std::shared_ptr<ftk::ObservableValue<std::shared_ptr<File> > > _current;
-        std::shared_ptr<ftk::ObservableValue<int> > _currentIndex;
-        std::shared_ptr<ftk::ObservableValue<std::shared_ptr<File> > > _bFile;
-        std::shared_ptr<ftk::ObservableValue<int> > _bIndex;
-        std::shared_ptr<ftk::ObservableValue<CompareOptions> > _compareOptions;
+        std::shared_ptr<ftk::Observable<int> > _add;
+        std::shared_ptr<ftk::Observable<int> > _remove;
+        std::shared_ptr<ftk::Observable<std::shared_ptr<File> > > _current;
+        std::shared_ptr<ftk::Observable<int> > _currentIndex;
+        std::shared_ptr<ftk::Observable<std::shared_ptr<File> > > _bFile;
+        std::shared_ptr<ftk::Observable<int> > _bIndex;
+        std::shared_ptr<ftk::Observable<CompareOptions> > _compareOptions;
         std::shared_ptr<ftk::RecentFilesModel> _recentFilesModel;
 
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > _currentTimeObserver;
     };
 }
 

@@ -6,7 +6,7 @@
 #include <ftk/UI/Settings.h>
 #include <ftk/Core/Context.h>
 #include <ftk/Core/ObservableMap.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace toucan
 {
@@ -21,7 +21,7 @@ namespace toucan
         Count,
         First = ToolBar
     };
-    FTK_ENUM(WindowComponent);
+    FTK_ENUM(, WindowComponent);
 
     //! Window model.
     class WindowModel : public std::enable_shared_from_this<WindowModel>
@@ -52,7 +52,7 @@ namespace toucan
         bool getThumbnails() const;
 
         //! Observe whether thumbnails are enabled.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeThumbnails() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeThumbnails() const;
 
         //! Set whether thumbnails are enabled.
         void setThumbnails(bool);
@@ -61,7 +61,7 @@ namespace toucan
         bool getTooltips() const;
 
         //! Observe whether tooltips are enabled.
-        std::shared_ptr<ftk::IObservableValue<bool> > observeTooltips() const;
+        std::shared_ptr<ftk::IObservable<bool> > observeTooltips() const;
 
         //! Set whether tooltips are enabled.
         void setTooltips(bool);
@@ -69,7 +69,7 @@ namespace toucan
     private:
         std::shared_ptr<ftk::Settings> _settings;
         std::shared_ptr<ftk::ObservableMap<WindowComponent, bool> > _components;
-        std::shared_ptr<ftk::ObservableValue<bool> > _thumbnails;
-        std::shared_ptr<ftk::ObservableValue<bool> > _tooltips;
+        std::shared_ptr<ftk::Observable<bool> > _thumbnails;
+        std::shared_ptr<ftk::Observable<bool> > _tooltips;
     };
 }

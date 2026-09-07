@@ -47,10 +47,10 @@ namespace toucan
         const std::shared_ptr<ftk::Context>& context,
         std::vector<std::string>& argv)
     {
-        _cmdLine.input = ftk::CmdLineValueArg<std::string>::create(
+        _cmdLine.input = ftk::CmdLineArg<std::string>::create(
             "input",
             "Input .otio file.");
-        _cmdLine.output = ftk::CmdLineValueArg<std::string>::create(
+        _cmdLine.output = ftk::CmdLineArg<std::string>::create(
             "output",
             "Output image or movie file. Use a dash ('-') to write raw frames or y4m to stdout.");
 
@@ -64,37 +64,37 @@ namespace toucan
         {
             y4mList.push_back(spec.first);
         }
-        _cmdLine.videoCodec = ftk::CmdLineValueOption<std::string>::create(
+        _cmdLine.videoCodec = ftk::CmdLineOption<std::string>::create(
             std::vector<std::string>{ "-vcodec" },
             "Set the video codec.",
             "",
             "MJPEG",
             ftk::join(ffmpeg::getVideoCodecStrings(), ", "));
-        _cmdLine.printStart = ftk::CmdLineFlagOption::create(
+        _cmdLine.printStart = ftk::CmdLineFlag::create(
             std::vector<std::string>{ "-print_start" },
             "Print the timeline start time and exit.");
-        _cmdLine.printDuration = ftk::CmdLineFlagOption::create(
+        _cmdLine.printDuration = ftk::CmdLineFlag::create(
             std::vector<std::string>{ "-print_duration" },
             "Print the timeline duration and exit.");
-        _cmdLine.printRate = ftk::CmdLineFlagOption::create(
+        _cmdLine.printRate = ftk::CmdLineFlag::create(
             std::vector<std::string>{ "-print_rate" },
             "Print the timeline frame rate and exit.");
-        _cmdLine.printSize = ftk::CmdLineFlagOption::create(
+        _cmdLine.printSize = ftk::CmdLineFlag::create(
             std::vector<std::string>{ "-print_size" },
             "Print the timeline image size.");
-        _cmdLine.raw = ftk::CmdLineValueOption<std::string>::create(
+        _cmdLine.raw = ftk::CmdLineOption<std::string>::create(
             std::vector<std::string>{ "-raw" },
             "Raw pixel format to send to stdout.",
             "",
             std::optional<std::string>(),
             ftk::join(rawList, ", "));
-        _cmdLine.y4m = ftk::CmdLineValueOption<std::string>::create(
+        _cmdLine.y4m = ftk::CmdLineOption<std::string>::create(
             std::vector<std::string>{ "-y4m" },
             "y4m format to send to stdout.",
             "",
             std::optional<std::string>(),
             ftk::join(y4mList, ", "));
-        _cmdLine.verbose = ftk::CmdLineFlagOption::create(
+        _cmdLine.verbose = ftk::CmdLineFlag::create(
             std::vector<std::string>{ "-v" },
             "Print verbose output.");
 

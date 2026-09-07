@@ -47,9 +47,9 @@ namespace toucan
 
         std::map<std::string, std::shared_ptr<ftk::Action> > _actions;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > _timeRangeObserver;
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::TimeRange> > _inOutRangeObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > _timeRangeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::TimeRange> > _inOutRangeObserver;
         std::shared_ptr<ftk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }

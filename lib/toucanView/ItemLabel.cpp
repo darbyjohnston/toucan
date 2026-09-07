@@ -66,7 +66,7 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.margin = event.style->getSizeRole(_marginRole, event.displayScale);
             _size.margin2 = event.style->getSizeRole(ftk::SizeRole::MarginInside, event.displayScale);
-            _size.fontInfo = event.style->getFontRole(ftk::FontRole::Label, event.displayScale);
+            _size.fontInfo = event.style->getFont(ftk::FontType::Regular, event.displayScale);
             _size.fontMetrics = event.fontSystem->getMetrics(_size.fontInfo);
             _size.nameSize = event.fontSystem->getSize(_name, _size.fontInfo);
             _size.durationSize = event.fontSystem->getSize(_duration, _size.fontInfo);
@@ -79,7 +79,12 @@ namespace toucan
             _size.durationSize.w + _size.margin2 * 2 +
             _size.margin * 2;
         sizeHint.h = std::max(_size.nameSize.h, _size.durationSize.h) + _size.margin * 2;
-        _setSizeHint(sizeHint);
+        _size.sizeHint = sizeHint;
+    }
+
+    ftk::Size2I ItemLabel::getSizeHint() const
+    {
+        return _size.sizeHint;
     }
 
     void ItemLabel::clipEvent(const ftk::Box2I& clipRect, bool clipped)

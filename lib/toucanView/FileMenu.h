@@ -4,8 +4,10 @@
 #pragma once
 
 #include <ftk/UI/Menu.h>
+
+#include <ftk/Core/Path.h>
 #include <ftk/Core/ObservableList.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 #include <filesystem>
 #include <map>
@@ -52,9 +54,9 @@ namespace toucan
         std::vector<std::shared_ptr<ftk::Action> > _recentFilesActions;
 
         std::shared_ptr<ftk::ListObserver<std::shared_ptr<File> > > _filesObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _fileIndexObserver;
-        std::shared_ptr<ftk::ListObserver<std::filesystem::path> > _recentFilesObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<int> > _fileIndexObserver;
+        std::shared_ptr<ftk::ListObserver<ftk::Path> > _recentFilesObserver;
     };
 }
 

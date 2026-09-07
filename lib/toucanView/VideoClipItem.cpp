@@ -88,7 +88,7 @@ namespace toucan
 
         _textUpdate();
 
-        _thumbnailsObserver = ftk::ValueObserver<bool>::create(
+        _thumbnailsObserver = ftk::Observer<bool>::create(
             data.app->getWindowModel()->observeThumbnails(),
             [this](bool value)
             {
@@ -142,8 +142,11 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
         }
-        ftk::Size2I sizeHint = _layout->getSizeHint();
-        _setSizeHint(sizeHint);
+    }
+
+    ftk::Size2I VideoClipItem::getSizeHint() const
+    {
+        return _layout->getSizeHint();
     }
     
     void VideoClipItem::drawEvent(

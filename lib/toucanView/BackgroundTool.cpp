@@ -97,7 +97,7 @@ namespace toucan
                 }
             });
 
-        _optionsObserver = ftk::ValueObserver<GlobalViewOptions>::create(
+        _optionsObserver = ftk::Observer<GlobalViewOptions>::create(
             _model->observeOptions(),
             [this](const GlobalViewOptions& value)
             {
@@ -125,10 +125,9 @@ namespace toucan
         _scrollWidget->setGeometry(value);
     }
 
-    void BackgroundTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I BackgroundTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_scrollWidget->getSizeHint());
+        return _scrollWidget->getSizeHint();
     }
 
     void BackgroundTool::_widgetUpdate()

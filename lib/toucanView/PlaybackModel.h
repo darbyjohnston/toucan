@@ -5,7 +5,7 @@
 
 #include <opentimelineio/timeline.h>
 
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 #include <ftk/Core/Timer.h>
 #include <ftk/Core/Vector.h>
 
@@ -64,7 +64,7 @@ namespace toucan
         const OTIO_NS::TimeRange& getTimeRange() const;
 
         //! Observe the time range.
-        std::shared_ptr<ftk::IObservableValue<OTIO_NS::TimeRange> > observeTimeRange() const;
+        std::shared_ptr<ftk::IObservable<OTIO_NS::TimeRange> > observeTimeRange() const;
 
         //! Set the time range.
         void setTimeRange(const OTIO_NS::TimeRange&);
@@ -73,7 +73,7 @@ namespace toucan
         const OTIO_NS::RationalTime& getCurrentTime() const;
 
         //! Observe the current time.
-        std::shared_ptr<ftk::IObservableValue<OTIO_NS::RationalTime> > observeCurrentTime() const;
+        std::shared_ptr<ftk::IObservable<OTIO_NS::RationalTime> > observeCurrentTime() const;
 
         //! Set the current time.
         void setCurrentTime(
@@ -89,7 +89,7 @@ namespace toucan
         const OTIO_NS::TimeRange& getInOutRange() const;
 
         //! Observe the in/out range.
-        std::shared_ptr<ftk::IObservableValue<OTIO_NS::TimeRange> > observeInOutRange() const;
+        std::shared_ptr<ftk::IObservable<OTIO_NS::TimeRange> > observeInOutRange() const;
 
         //! Set the in/out range.
         void setInOutRange(const OTIO_NS::TimeRange&);
@@ -113,7 +113,7 @@ namespace toucan
         Playback getPlayback() const;
 
         //! Observe the playback.
-        std::shared_ptr<ftk::IObservableValue<Playback> > observePlayback() const;
+        std::shared_ptr<ftk::IObservable<Playback> > observePlayback() const;
 
         //! Set the playback.
         void setPlayback(Playback);
@@ -130,10 +130,10 @@ namespace toucan
     private:
         void _timeUpdate();
 
-        std::shared_ptr<ftk::ObservableValue<OTIO_NS::TimeRange> > _timeRange;
-        std::shared_ptr<ftk::ObservableValue<OTIO_NS::RationalTime> > _currentTime;
-        std::shared_ptr<ftk::ObservableValue<OTIO_NS::TimeRange> > _inOutRange;
-        std::shared_ptr<ftk::ObservableValue<Playback> > _playback;
+        std::shared_ptr<ftk::Observable<OTIO_NS::TimeRange> > _timeRange;
+        std::shared_ptr<ftk::Observable<OTIO_NS::RationalTime> > _currentTime;
+        std::shared_ptr<ftk::Observable<OTIO_NS::TimeRange> > _inOutRange;
+        std::shared_ptr<ftk::Observable<Playback> > _playback;
         Playback _playbackPrev = Playback::Forward;
         std::optional<TimelineViewState> _viewState;
         std::shared_ptr<ftk::Timer> _timer;

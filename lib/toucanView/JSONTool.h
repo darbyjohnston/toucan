@@ -45,7 +45,7 @@ namespace toucan
         void setSearch(const std::string&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         void _textUpdate();
@@ -78,7 +78,7 @@ namespace toucan
             const std::shared_ptr<IWidget>& parent = nullptr);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         std::shared_ptr<File> _file;
@@ -92,7 +92,7 @@ namespace toucan
         std::shared_ptr<ftk::ToolButton> _openButton;
         std::shared_ptr<ftk::ToolButton> _closeButton;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
         std::shared_ptr<ftk::ListObserver<SelectionItem> > _selectionObserver;
     };
 }

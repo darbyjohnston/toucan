@@ -36,7 +36,7 @@ namespace toucan
         void setCallback(const std::function<void(TimeAction)>&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         std::function<void(TimeAction)> _callback;
@@ -67,7 +67,7 @@ namespace toucan
         void setCallback(const std::function<void(Playback)>&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         void _playbackUpdate();
@@ -106,7 +106,7 @@ namespace toucan
         void setCallback(const std::function<void(const OTIO_NS::RationalTime&)>&);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
         void keyPressEvent(ftk::KeyEvent&) override;
         void keyReleaseEvent(ftk::KeyEvent&) override;
 
@@ -124,7 +124,7 @@ namespace toucan
         std::shared_ptr<ftk::IncButtons> _incButtons;
         std::function<void(const OTIO_NS::RationalTime&)> _callback;
 
-        std::shared_ptr<ftk::ValueObserver<TimeUnits> > _timeUnitsObserver;
+        std::shared_ptr<ftk::Observer<TimeUnits> > _timeUnitsObserver;
     };
 
     //! Time label.
@@ -152,7 +152,7 @@ namespace toucan
         void setMarginRole(ftk::SizeRole);
 
         void setGeometry(const ftk::Box2I&) override;
-        void sizeHintEvent(const ftk::SizeHintEvent&) override;
+        ftk::Size2I getSizeHint() const override;
 
     private:
         void _timeUpdate();
@@ -162,7 +162,7 @@ namespace toucan
 
         std::shared_ptr<ftk::Label> _label;
 
-        std::shared_ptr<ftk::ValueObserver<TimeUnits> > _timeUnitsObserver;
+        std::shared_ptr<ftk::Observer<TimeUnits> > _timeUnitsObserver;
     };
 }
 

@@ -65,10 +65,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void FileToolBar::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I FileToolBar::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void FileToolBar::_widgetUpdate()

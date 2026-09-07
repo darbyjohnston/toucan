@@ -37,7 +37,7 @@ namespace toucan
         button = ftk::ToolButton::create(context, i->second, hLayout);
         _buttons["Window/Playback"] = button;
 
-        _fullScreenObserver = ftk::ValueObserver<bool>::create(
+        _fullScreenObserver = ftk::Observer<bool>::create(
             window->observeFullScreen(),
             [this](bool value)
             {
@@ -76,9 +76,8 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void WindowToolBar::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I WindowToolBar::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 }

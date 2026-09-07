@@ -22,7 +22,7 @@ namespace toucan
 
         _hudWidget = HUDWidget::create(context, app, file, shared_from_this());
 
-        _viewOptionsObserver = ftk::ValueObserver<GlobalViewOptions>::create(
+        _viewOptionsObserver = ftk::Observer<GlobalViewOptions>::create(
             app->getGlobalViewModel()->observeOptions(),
             [this](const GlobalViewOptions& value)
             {
@@ -51,9 +51,8 @@ namespace toucan
         _hudWidget->setGeometry(value);
     }
 
-    void FileTab::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I FileTab::getSizeHint() const
     {
-        ftk::IWidget::sizeHintEvent(event);
-        _setSizeHint(_viewport->getSizeHint());
+        return _viewport->getSizeHint();
     }
 }

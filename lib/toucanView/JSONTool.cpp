@@ -37,12 +37,12 @@ namespace toucan
 
         _lineNumbersLabel = ftk::Label::create(context, hLayout);
         _lineNumbersLabel->setBackgroundRole(ftk::ColorRole::Base);
-        _lineNumbersLabel->setFontRole(ftk::FontRole::Mono);
+        _lineNumbersLabel->setFont(ftk::FontType::Mono);
         _lineNumbersLabel->setMarginRole(ftk::SizeRole::MarginSmall);
         _lineNumbersLabel->setHStretch(ftk::Stretch::Fixed);
 
         _textLabel = ftk::Label::create(context, hLayout);
-        _textLabel->setFontRole(ftk::FontRole::Mono);
+        _textLabel->setFont(ftk::FontType::Mono);
         _textLabel->setMarginRole(ftk::SizeRole::MarginSmall);
         _textLabel->setHStretch(ftk::Stretch::Expanding);
 
@@ -81,10 +81,9 @@ namespace toucan
         _bellows->setGeometry(value);
     }
 
-    void JSONWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I JSONWidget::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_bellows->getSizeHint());
+        return _bellows->getSizeHint();
     }
 
     void JSONWidget::_textUpdate()
@@ -175,7 +174,7 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -238,9 +237,8 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void JSONTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I JSONTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 }

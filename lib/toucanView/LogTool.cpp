@@ -32,7 +32,7 @@ namespace toucan
 
         _label = ftk::Label::create(context);
         _label->setVAlign(ftk::VAlign::Top);
-        _label->setFontRole(ftk::FontRole::Mono);
+        _label->setFont(ftk::FontType::Mono);
         _label->setMarginRole(ftk::SizeRole::MarginSmall);
         _scrollWidget->setWidget(_label);
 
@@ -71,7 +71,7 @@ namespace toucan
             {
                 for (const auto& item : items)
                 {
-                    for (const auto& line : ftk::split(ftk::toString(item), '\n'))
+                    for (const auto& line : ftk::split(ftk::getLabel(item), '\n'))
                     {
                         _text.push_back(line);
                     }
@@ -99,10 +99,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void LogTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I LogTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void LogTool::_textUpdate()

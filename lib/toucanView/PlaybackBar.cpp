@@ -75,14 +75,14 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
                 if (file)
                 {
-                    _timeRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                    _timeRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                         file->getPlaybackModel()->observeTimeRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {
@@ -90,7 +90,7 @@ namespace toucan
                             _timeRangeUpdate();
                         });
 
-                    _currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+                    _currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                         file->getPlaybackModel()->observeCurrentTime(),
                         [this](const OTIO_NS::RationalTime& value)
                         {
@@ -98,7 +98,7 @@ namespace toucan
                             _currentTimeUpdate();
                         });
 
-                    _playbackObserver = ftk::ValueObserver<Playback>::create(
+                    _playbackObserver = ftk::Observer<Playback>::create(
                         file->getPlaybackModel()->observePlayback(),
                         [this](Playback value)
                         {
@@ -127,7 +127,7 @@ namespace toucan
                 _durationLabel->setEnabled(file.get());
             });
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             app->getTimeUnitsModel()->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -154,10 +154,9 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void PlaybackBar::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I PlaybackBar::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 
     void PlaybackBar::_timelineUpdate()

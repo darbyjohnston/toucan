@@ -47,7 +47,7 @@ namespace toucan
     {
         CompareOptions compareOptions;
         size_t recentMax = 10;
-        std::vector<std::filesystem::path> recent;
+        std::vector<ftk::Path> recent;
         if (_settings)
         {
             try
@@ -57,8 +57,7 @@ namespace toucan
                 auto i = json.find("CompareMode");
                 if (i != json.end() && i->is_string())
                 {
-                    std::stringstream ss(i->get<std::string>());
-                    ss >> compareOptions.mode;
+                    from_string(i->get<std::string>(), compareOptions.mode);
                 }
                 i = json.find("StartTime");
                 if (i != json.end() && i->is_boolean())
@@ -82,7 +81,7 @@ namespace toucan
                     {
                         if (j->is_string())
                         {
-                            recent.push_back(std::filesystem::u8path(j->get<std::string>()));
+                            recent.push_back(ftk::Path(j->get<std::string>()));
                         }
                     }
                 }
@@ -92,13 +91,13 @@ namespace toucan
         }
 
         _files = ftk::ObservableList< std::shared_ptr<File> >::create();
-        _add = ftk::ObservableValue<int>::create(-1);
-        _remove = ftk::ObservableValue<int>::create(-1);
-        _current = ftk::ObservableValue< std::shared_ptr<File> >::create(nullptr);
-        _currentIndex = ftk::ObservableValue<int>::create(-1);
-        _bFile = ftk::ObservableValue<std::shared_ptr<File> >::create();
-        _bIndex = ftk::ObservableValue<int>::create(-1);
-        _compareOptions = ftk::ObservableValue<CompareOptions>::create(compareOptions);
+        _add = ftk::Observable<int>::create(-1);
+        _remove = ftk::Observable<int>::create(-1);
+        _current = ftk::Observable< std::shared_ptr<File> >::create(nullptr);
+        _currentIndex = ftk::Observable<int>::create(-1);
+        _bFile = ftk::Observable<std::shared_ptr<File> >::create();
+        _bIndex = ftk::Observable<int>::create(-1);
+        _compareOptions = ftk::Observable<CompareOptions>::create(compareOptions);
         _recentFilesModel = ftk::RecentFilesModel::create(context);
         _recentFilesModel->setRecentMax(recentMax);
         _recentFilesModel->setRecent(recent);
@@ -120,7 +119,7 @@ namespace toucan
             nlohmann::json json2;
             for (const auto& path : _recentFilesModel->getRecent())
             {
-                json2.push_back(path.u8string());
+                json2.push_back(path.get());
             }
             json["Recent"] = json2;
             _settings->set("/FilesModel", json);
@@ -142,7 +141,7 @@ namespace toucan
             _current->setIfChanged(files[index]);
             _currentIndex->setIfChanged(index);
 
-            _recentFilesModel->addRecent(path);
+            _recentFilesModel->addRecent(ftk::Path(path.u8string()));
 
             _fileUpdate();
         }
@@ -203,22 +202,22 @@ namespace toucan
         return _files;
     }
 
-    std::shared_ptr<ftk::IObservableValue<int> > FilesModel::observeAdd() const
+    std::shared_ptr<ftk::IObservable<int> > FilesModel::observeAdd() const
     {
         return _add;
     }
 
-    std::shared_ptr<ftk::IObservableValue<int> > FilesModel::observeRemove() const
+    std::shared_ptr<ftk::IObservable<int> > FilesModel::observeRemove() const
     {
         return _remove;
     }
 
-    std::shared_ptr<ftk::IObservableValue<std::shared_ptr<File> > > FilesModel::observeCurrent() const
+    std::shared_ptr<ftk::IObservable<std::shared_ptr<File> > > FilesModel::observeCurrent() const
     {
         return _current;
     }
 
-    std::shared_ptr<ftk::IObservableValue<int> > FilesModel::observeCurrentIndex() const
+    std::shared_ptr<ftk::IObservable<int> > FilesModel::observeCurrentIndex() const
     {
         return _currentIndex;
     }
@@ -265,7 +264,7 @@ namespace toucan
         return _bFile->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<std::shared_ptr<File> > > FilesModel::observeBFile() const
+    std::shared_ptr<ftk::IObservable<std::shared_ptr<File> > > FilesModel::observeBFile() const
     {
         return _bFile;
     }
@@ -275,7 +274,7 @@ namespace toucan
         return _bIndex->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<int> > FilesModel::observeBIndex() const
+    std::shared_ptr<ftk::IObservable<int> > FilesModel::observeBIndex() const
     {
         return _bIndex;
     }
@@ -305,7 +304,7 @@ namespace toucan
         return _compareOptions->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<CompareOptions> > FilesModel::observeCompareOptions() const
+    std::shared_ptr<ftk::IObservable<CompareOptions> > FilesModel::observeCompareOptions() const
     {
         return _compareOptions;
     }
@@ -361,7 +360,7 @@ namespace toucan
     {
         if (auto file = _current->get())
         {
-            _currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+            _currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
                 file->getPlaybackModel()->observeCurrentTime(),
                 [this](const OTIO_NS::RationalTime& value)
                 {

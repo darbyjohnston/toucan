@@ -14,8 +14,8 @@ FTK_MAIN()
         auto context = ftk::Context::create();
         auto args = ftk::convert(argc, argv);
         auto app = toucan::App::create(context, args);
-        if (app->getExit() != 0)
-            return app->getExit();
+        if (app->hasCmdLineHelp())
+            return 0;
         app->run();
     }
     catch (const std::exception& e)

@@ -46,6 +46,7 @@ namespace toucan
             bool parentsVisible,
             bool parentsEnabled,
             const ftk::TickEvent&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void clipEvent(const ftk::Box2I&, bool clipped) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
@@ -65,6 +66,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            ftk::Size2I sizeHint;
             int thumbnailHeight = 0;
         };
         SizeData _size;

@@ -15,10 +15,10 @@ namespace toucan
         const std::shared_ptr<ftk::Context>& context,
         std::vector<std::string>& argv)
     {
-        _cmdLine.input = ftk::CmdLineValueArg<std::string>::create(
+        _cmdLine.input = ftk::CmdLineArg<std::string>::create(
             "input",
             "Input .otio file.");
-        _cmdLine.output = ftk::CmdLineValueArg<std::string>::create(
+        _cmdLine.output = ftk::CmdLineArg<std::string>::create(
             "output",
             "Output image file.");
 

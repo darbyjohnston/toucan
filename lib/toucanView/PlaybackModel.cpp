@@ -11,10 +11,10 @@ namespace toucan
 {
     PlaybackModel::PlaybackModel(const std::shared_ptr<ftk::Context>& context)
     {
-        _timeRange = ftk::ObservableValue<OTIO_NS::TimeRange>::create();
-        _currentTime = ftk::ObservableValue<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
-        _inOutRange = ftk::ObservableValue<OTIO_NS::TimeRange>::create();
-        _playback = ftk::ObservableValue<Playback>::create(Playback::Stop);
+        _timeRange = ftk::Observable<OTIO_NS::TimeRange>::create();
+        _currentTime = ftk::Observable<OTIO_NS::RationalTime>::create(OTIO_NS::RationalTime(-1.0, -1.0));
+        _inOutRange = ftk::Observable<OTIO_NS::TimeRange>::create();
+        _playback = ftk::Observable<Playback>::create(Playback::Stop);
         _timer = ftk::Timer::create(context);
         _timer->setRepeating(true);
     }
@@ -27,7 +27,7 @@ namespace toucan
         return _timeRange->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<OTIO_NS::TimeRange> > PlaybackModel::observeTimeRange() const
+    std::shared_ptr<ftk::IObservable<OTIO_NS::TimeRange> > PlaybackModel::observeTimeRange() const
     {
         return _timeRange;
     }
@@ -46,7 +46,7 @@ namespace toucan
         return _currentTime->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<OTIO_NS::RationalTime> > PlaybackModel::observeCurrentTime() const
+    std::shared_ptr<ftk::IObservable<OTIO_NS::RationalTime> > PlaybackModel::observeCurrentTime() const
     {
         return _currentTime;
     }
@@ -252,7 +252,7 @@ namespace toucan
         return _inOutRange->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<OTIO_NS::TimeRange> > PlaybackModel::observeInOutRange() const
+    std::shared_ptr<ftk::IObservable<OTIO_NS::TimeRange> > PlaybackModel::observeInOutRange() const
     {
         return _inOutRange;
     }
@@ -317,7 +317,7 @@ namespace toucan
         return _playback->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<Playback> > PlaybackModel::observePlayback() const
+    std::shared_ptr<ftk::IObservable<Playback> > PlaybackModel::observePlayback() const
     {
         return _playback;
     }

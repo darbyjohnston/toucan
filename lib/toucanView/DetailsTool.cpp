@@ -71,7 +71,7 @@ namespace toucan
                 });
         }
 
-        _timeUnitsObserver = ftk::ValueObserver<TimeUnits>::create(
+        _timeUnitsObserver = ftk::Observer<TimeUnits>::create(
             app->getTimeUnitsModel()->observeTimeUnits(),
             [this](TimeUnits value)
             {
@@ -115,10 +115,9 @@ namespace toucan
         _bellows->setGeometry(value);
     }
 
-    void DetailsWidget::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I DetailsWidget::getSizeHint() const
     {
-        IWidget::sizeHintEvent(event);
-        _setSizeHint(_bellows->isVisible(false) ? _bellows->getSizeHint() : ftk::Size2I());
+        return _bellows->isVisible(false) ? _bellows->getSizeHint() : ftk::Size2I();
     }
 
     void DetailsWidget::_textUpdate()
@@ -280,7 +279,7 @@ namespace toucan
                 }
             });
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
@@ -345,9 +344,8 @@ namespace toucan
         _layout->setGeometry(value);
     }
 
-    void DetailsTool::sizeHintEvent(const ftk::SizeHintEvent& event)
+    ftk::Size2I DetailsTool::getSizeHint() const
     {
-        IToolWidget::sizeHintEvent(event);
-        _setSizeHint(_layout->getSizeHint());
+        return _layout->getSizeHint();
     }
 }

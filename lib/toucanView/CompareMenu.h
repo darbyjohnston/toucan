@@ -45,8 +45,8 @@ namespace toucan
         std::vector<std::shared_ptr<ftk::Action> > _bFileActions;
 
         std::shared_ptr<ftk::ListObserver<std::shared_ptr<File> > > _filesObserver;
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<int> > _bIndexObserver;
-        std::shared_ptr<ftk::ValueObserver<CompareOptions> > _modeObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<int> > _bIndexObserver;
+        std::shared_ptr<ftk::Observer<CompareOptions> > _modeObserver;
     };
 }

@@ -32,7 +32,7 @@ namespace toucan
             context,
             file->getPath().filename().string(),
             hLayout);
-        _labels["Path"]->setFontRole(ftk::FontRole::Mono);
+        _labels["Path"]->setFont(ftk::FontType::Mono);
         _labels["Path"]->setMarginRole(ftk::SizeRole::MarginInside);
         _labels["Path"]->setBackgroundRole(ftk::ColorRole::Overlay);
 
@@ -48,7 +48,7 @@ namespace toucan
             arg(file->getImageChannels()).
             arg(file->getImageDataType()),
             hLayout);
-        _labels["Image"]->setFontRole(ftk::FontRole::Mono);
+        _labels["Image"]->setFont(ftk::FontType::Mono);
         _labels["Image"]->setMarginRole(ftk::SizeRole::MarginInside);
         _labels["Image"]->setBackgroundRole(ftk::ColorRole::Overlay);
 
@@ -62,11 +62,11 @@ namespace toucan
         spacer->setHStretch(ftk::Stretch::Expanding);
 
         _labels["Time"] = ftk::Label::create(context, hLayout);
-        _labels["Time"]->setFontRole(ftk::FontRole::Mono);
+        _labels["Time"]->setFont(ftk::FontType::Mono);
         _labels["Time"]->setMarginRole(ftk::SizeRole::MarginInside);
         _labels["Time"]->setBackgroundRole(ftk::ColorRole::Overlay);
 
-        _currentTimeObserver = ftk::ValueObserver<OTIO_NS::RationalTime>::create(
+        _currentTimeObserver = ftk::Observer<OTIO_NS::RationalTime>::create(
             file->getPlaybackModel()->observeCurrentTime(),
             [this](const OTIO_NS::RationalTime& value)
             {
@@ -74,7 +74,7 @@ namespace toucan
                 _widgetUpdate();
             });
 
-        _timeRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+        _timeRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
             file->getPlaybackModel()->observeTimeRange(),
             [this](const OTIO_NS::TimeRange& value)
             {

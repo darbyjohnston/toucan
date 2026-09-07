@@ -123,8 +123,13 @@ namespace toucan
         }
         ftk::Size2I sizeHint = _label->getSizeHint();
         sizeHint.h += _size.border * 2;
-        _setSizeHint(sizeHint);
+        _size.sizeHint = sizeHint;
         _minWidth = sizeHint.h;
+    }
+
+    ftk::Size2I MarkerItem::getSizeHint() const
+    {
+        return _size.sizeHint;
     }
 
     void MarkerItem::drawEvent(

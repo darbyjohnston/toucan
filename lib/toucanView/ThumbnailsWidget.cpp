@@ -106,7 +106,12 @@ namespace toucan
             _thumbnailRequests.clear();
             _thumbnailGenerator->cancelThumbnails(ids);
         }
-        _setSizeHint(ftk::Size2I(0, _size.thumbnailHeight));
+        _size.sizeHint = ftk::Size2I(0, _size.thumbnailHeight);
+    }
+
+    ftk::Size2I ThumbnailsWidget::getSizeHint() const
+    {
+        return _size.sizeHint;
     }
 
     void ThumbnailsWidget::clipEvent(const ftk::Box2I& clipRect, bool clipped)

@@ -27,11 +27,11 @@ namespace toucan
 
     ViewModel::ViewModel(const std::shared_ptr<ftk::Context>& context)
     {
-        _zoomIn = ftk::ObservableValue<bool>::create(false);
-        _zoomOut = ftk::ObservableValue<bool>::create(false);
-        _zoomReset = ftk::ObservableValue<bool>::create(false);
-        _frameView = ftk::ObservableValue<bool>::create(true);
-        _options = ftk::ObservableValue<ViewOptions>::create();
+        _zoomIn = ftk::Observable<bool>::create(false);
+        _zoomOut = ftk::Observable<bool>::create(false);
+        _zoomReset = ftk::Observable<bool>::create(false);
+        _frameView = ftk::Observable<bool>::create(true);
+        _options = ftk::Observable<ViewOptions>::create();
     }
 
     ViewModel::~ViewModel()
@@ -52,17 +52,17 @@ namespace toucan
         _zoomReset->setAlways(true);
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > ViewModel::observeZoomIn() const
+    std::shared_ptr<ftk::IObservable<bool> > ViewModel::observeZoomIn() const
     {
         return _zoomIn;
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > ViewModel::observeZoomOut() const
+    std::shared_ptr<ftk::IObservable<bool> > ViewModel::observeZoomOut() const
     {
         return _zoomOut;
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > ViewModel::observeZoomReset() const
+    std::shared_ptr<ftk::IObservable<bool> > ViewModel::observeZoomReset() const
     {
         return _zoomReset;
     }
@@ -72,7 +72,7 @@ namespace toucan
         return _frameView->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<bool> > ViewModel::observeFrameView() const
+    std::shared_ptr<ftk::IObservable<bool> > ViewModel::observeFrameView() const
     {
         return _frameView;
     }
@@ -87,7 +87,7 @@ namespace toucan
         return _options->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<ViewOptions> > ViewModel::observeOptions() const
+    std::shared_ptr<ftk::IObservable<ViewOptions> > ViewModel::observeOptions() const
     {
         return _options;
     }
@@ -136,8 +136,7 @@ namespace toucan
             i = json.find("Background");
             if (i != json.end() && i->is_string())
             {
-                std::stringstream ss(i->get<std::string>());
-                ss >> options.background;
+                from_string(i->get<std::string>(), options.background);
             }
             i = json.find("SolidColor");
             if (i != json.end() && i->is_array() && 4 == i->size())
@@ -175,7 +174,7 @@ namespace toucan
         catch (const std::exception&)
         {}
 
-        _options = ftk::ObservableValue<GlobalViewOptions>::create(options);
+        _options = ftk::Observable<GlobalViewOptions>::create(options);
     }
 
     GlobalViewModel::~GlobalViewModel()
@@ -217,7 +216,7 @@ namespace toucan
         return _options->get();
     }
 
-    std::shared_ptr<ftk::IObservableValue<GlobalViewOptions> > GlobalViewModel::observeOptions() const
+    std::shared_ptr<ftk::IObservable<GlobalViewOptions> > GlobalViewModel::observeOptions() const
     {
         return _options;
     }

@@ -33,9 +33,6 @@ namespace toucan
             const std::shared_ptr<ftk::Context>&,
             std::vector<std::string>&);
 
-        //! Get the settings.
-        const std::shared_ptr<ftk::Settings>& getSettings() const;
-
         //! Get the time units model.
         const std::shared_ptr<TimeUnitsModel>& getTimeUnitsModel() const;
 
@@ -55,8 +52,7 @@ namespace toucan
         void open(const std::filesystem::path&);
 
     private:
-        std::shared_ptr<ftk::CmdLineValueArg<std::string> > _input;
-        std::shared_ptr<ftk::Settings> _settings;
+        std::shared_ptr<ftk::CmdLineArg<std::string> > _input;
         std::shared_ptr<TimeUnitsModel> _timeUnitsModel;
         std::shared_ptr<ImageEffectHost> _host;
         std::shared_ptr<FilesModel> _filesModel;

@@ -43,6 +43,7 @@ namespace toucan
         void setInOutRange(const OTIO_NS::TimeRange&);
 
         void setGeometry(const ftk::Box2I&) override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void drawOverlayEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
         void mouseMoveEvent(ftk::MouseMoveEvent&) override;
@@ -86,6 +87,7 @@ namespace toucan
         {
             bool init = true;
             float displayScale = 0.F;
+            ftk::Size2I sizeHint;
             int margin = 0;
             int border = 0;
             int handle = 0;

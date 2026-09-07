@@ -19,28 +19,28 @@ namespace toucan
             {
                 model = std::make_shared<ViewModel>(context);
 
-                zoomInObserver = ftk::ValueObserver<bool>::create(
+                zoomInObserver = ftk::Observer<bool>::create(
                     model->observeZoomIn(),
                     [this](bool value)
                     {
                         zoomIn = value;
                     });
 
-                zoomOutObserver = ftk::ValueObserver<bool>::create(
+                zoomOutObserver = ftk::Observer<bool>::create(
                     model->observeZoomOut(),
                     [this](bool value)
                     {
                         zoomOut = value;
                     });
 
-                zoomResetObserver = ftk::ValueObserver<bool>::create(
+                zoomResetObserver = ftk::Observer<bool>::create(
                     model->observeZoomReset(),
                     [this](bool value)
                     {
                         zoomReset = value;
                     });
 
-                frameViewObserver = ftk::ValueObserver<bool>::create(
+                frameViewObserver = ftk::Observer<bool>::create(
                     model->observeFrameView(),
                     [this](bool value)
                     {
@@ -54,10 +54,10 @@ namespace toucan
             bool zoomReset = false;
             bool frameView = false;
 
-            std::shared_ptr<ftk::ValueObserver<bool> > zoomInObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > zoomOutObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > zoomResetObserver;
-            std::shared_ptr<ftk::ValueObserver<bool> > frameViewObserver;
+            std::shared_ptr<ftk::Observer<bool> > zoomInObserver;
+            std::shared_ptr<ftk::Observer<bool> > zoomOutObserver;
+            std::shared_ptr<ftk::Observer<bool> > zoomResetObserver;
+            std::shared_ptr<ftk::Observer<bool> > frameViewObserver;
         };
     }
 

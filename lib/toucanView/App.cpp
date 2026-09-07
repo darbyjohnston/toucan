@@ -26,7 +26,7 @@ namespace toucan
         const std::shared_ptr<ftk::Context>& context,
         std::vector<std::string>& argv)
     {
-        _input = ftk::CmdLineValueArg<std::string>::create(
+        _input = ftk::CmdLineArg<std::string>::create(
             "input",
             "Input timeline.",
             true);
@@ -36,27 +36,26 @@ namespace toucan
             argv,
             "toucan-view",
             "Toucan viewer",
-            { _input });
+            { _input },
+            {},
+            ftk::AppFiles{ "toucan", "toucan-view" });
 
-        _settings = ftk::Settings::create(context, ftk::getSettingsPath("toucan", "toucan-view.settings"));
-
-        _timeUnitsModel = std::make_shared<TimeUnitsModel>(context, _settings);
+        _timeUnitsModel = std::make_shared<TimeUnitsModel>(context, getSettings());
 
         _host = std::make_shared<ImageEffectHost>(context, getOpenFXPluginPaths(getExeName()));
 
         auto fileBrowserSystem = context->getSystem<ftk::FileBrowserSystem>();
         fileBrowserSystem->setNativeFileDialog(false);
 
-        _filesModel = std::make_shared<FilesModel>(context, _settings, _host);
-        _globalViewModel = std::make_shared<GlobalViewModel>(context, _settings);
-        _windowModel = std::make_shared<WindowModel>(context, _settings);
+        _filesModel = std::make_shared<FilesModel>(context, getSettings(), _host);
+        _globalViewModel = std::make_shared<GlobalViewModel>(context, getSettings());
+        _windowModel = std::make_shared<WindowModel>(context, getSettings());
 
         _window = MainWindow::create(
             context,
             std::dynamic_pointer_cast<App>(shared_from_this()),
             "toucan-view",
             ftk::Size2I(1920, 1080));
-        addWindow(_window);
         _window->show();
 
         if (_input->hasValue())
@@ -75,11 +74,6 @@ namespace toucan
         auto out = std::shared_ptr<App>(new App);
         out->_init(context, argv);
         return out;
-    }
-
-    const std::shared_ptr<ftk::Settings>& App::getSettings() const
-    {
-        return _settings;
     }
 
     const std::shared_ptr<TimeUnitsModel>& App::getTimeUnitsModel() const

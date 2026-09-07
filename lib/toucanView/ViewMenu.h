@@ -6,7 +6,7 @@
 #include <toucanView/ViewModel.h>
 
 #include <ftk/UI/Menu.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 namespace toucan
 {
@@ -41,10 +41,10 @@ namespace toucan
 
         std::map<std::string, std::shared_ptr<ftk::Action> > _actions;
 
-        std::shared_ptr<ftk::ValueObserver<std::shared_ptr<File> > > _fileObserver;
-        std::shared_ptr<ftk::ValueObserver<bool> > _frameViewObserver;
-        std::shared_ptr<ftk::ValueObserver<ViewOptions> > _optionsObserver;
-        std::shared_ptr<ftk::ValueObserver<GlobalViewOptions> > _globalOptionsObserver;
+        std::shared_ptr<ftk::Observer<std::shared_ptr<File> > > _fileObserver;
+        std::shared_ptr<ftk::Observer<bool> > _frameViewObserver;
+        std::shared_ptr<ftk::Observer<ViewOptions> > _optionsObserver;
+        std::shared_ptr<ftk::Observer<GlobalViewOptions> > _globalOptionsObserver;
     };
 }
 

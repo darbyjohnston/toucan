@@ -21,8 +21,7 @@ namespace toucan
         _actions["Time/FrameStart"] = ftk::Action::create(
             "Start Frame",
             "FrameStart",
-            ftk::Key::Up,
-            0,
+            ftk::KeyShortcut(ftk::Key::Up),
             [this]
             {
                 if (_file)
@@ -37,8 +36,7 @@ namespace toucan
         _actions["Time/FramePrev"] = ftk::Action::create(
             "Previous Frame",
             "FramePrev",
-            ftk::Key::Left,
-            0,
+            ftk::KeyShortcut(ftk::Key::Left),
             [this]
             {
                 if (_file)
@@ -52,8 +50,7 @@ namespace toucan
 
         _actions["Time/FramePrevX10"] = ftk::Action::create(
             "Previous Frame X10",
-            ftk::Key::Left,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::Left, ftk::KeyModifier::Shift),
             [this]
             {
                 if (_file)
@@ -67,8 +64,7 @@ namespace toucan
 
         _actions["Time/FramePrevX100"] = ftk::Action::create(
             "Previous Frame X100",
-            ftk::Key::Left,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::Left, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -83,8 +79,7 @@ namespace toucan
         _actions["Time/FrameNext"] = ftk::Action::create(
             "Next Frame",
             "FrameNext",
-            ftk::Key::Right,
-            0,
+            ftk::KeyShortcut(ftk::Key::Right),
             [this]
             {
                 if (_file)
@@ -98,8 +93,7 @@ namespace toucan
 
         _actions["Time/FrameNextX10"] = ftk::Action::create(
             "Next Frame X10",
-            ftk::Key::Right,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::Right, ftk::KeyModifier::Shift),
             [this]
             {
                 if (_file)
@@ -113,8 +107,7 @@ namespace toucan
 
         _actions["Time/FrameNextX100"] = ftk::Action::create(
             "Next Frame X100",
-            ftk::Key::Right,
-            static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::Right, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -129,8 +122,7 @@ namespace toucan
         _actions["Time/FrameEnd"] = ftk::Action::create(
             "End Frame",
             "FrameEnd",
-            ftk::Key::Down,
-            0,
+            ftk::KeyShortcut(ftk::Key::Down),
             [this]
             {
                 if (_file)
@@ -146,8 +138,7 @@ namespace toucan
 
         _actions["Time/ClipNext"] = ftk::Action::create(
             "Next Clip",
-            ftk::Key::Right,
-            static_cast<int>(ftk::KeyModifier::Alt),
+            ftk::KeyShortcut(ftk::Key::Right, ftk::KeyModifier::Alt),
             [this]
             {
                 if (_file)
@@ -161,8 +152,7 @@ namespace toucan
 
         _actions["Time/ClipPrev"] = ftk::Action::create(
             "Previous Clip",
-            ftk::Key::Left,
-            static_cast<int>(ftk::KeyModifier::Alt),
+            ftk::KeyShortcut(ftk::Key::Left, ftk::KeyModifier::Alt),
             [this]
             {
                 if (_file)
@@ -178,8 +168,7 @@ namespace toucan
 
         _actions["Time/InPointSet"] = ftk::Action::create(
             "Set In Point",
-            ftk::Key::I,
-            0,
+            ftk::KeyShortcut(ftk::Key::I),
             [this]
             {
                 if (_file)
@@ -192,8 +181,7 @@ namespace toucan
 
         _actions["Time/InPointReset"] = ftk::Action::create(
             "Reset In Point",
-            ftk::Key::I,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::I, ftk::KeyModifier::Shift),
             [this]
             {
                 if (_file)
@@ -205,8 +193,7 @@ namespace toucan
 
         _actions["Time/OutPointSet"] = ftk::Action::create(
             "Set Out Point",
-            ftk::Key::O,
-            0,
+            ftk::KeyShortcut(ftk::Key::O),
             [this]
             {
                 if (_file)
@@ -219,8 +206,7 @@ namespace toucan
 
         _actions["Time/OutPointReset"] = ftk::Action::create(
             "Reset Out Point",
-            ftk::Key::O,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::O, ftk::KeyModifier::Shift),
             [this]
             {
                 if (_file)
@@ -232,8 +218,7 @@ namespace toucan
 
         _actions["Time/InOutPointReset"] = ftk::Action::create(
             "Reset In/Out Points",
-            ftk::Key::P,
-            static_cast<int>(ftk::KeyModifier::Shift),
+            ftk::KeyShortcut(ftk::Key::P, ftk::KeyModifier::Shift),
             [this]
             {
                 if (_file)
@@ -245,8 +230,7 @@ namespace toucan
 
         _actions["Time/InOutPointSelection"] = ftk::Action::create(
             "Set In/Out Points To Selection",
-            ftk::Key::P,
-            static_cast<int>(ftk::KeyModifier::Shift) | static_cast<int>(ftk::commandKeyModifier),
+            ftk::KeyShortcut(ftk::Key::P, ftk::KeyModifier::Shift, ftk::commandKeyModifier),
             [this]
             {
                 if (_file)
@@ -270,21 +254,21 @@ namespace toucan
             });
         addAction(_actions["Time/InOutPointSelection"]);
 
-        _fileObserver = ftk::ValueObserver<std::shared_ptr<File> >::create(
+        _fileObserver = ftk::Observer<std::shared_ptr<File> >::create(
             app->getFilesModel()->observeCurrent(),
             [this](const std::shared_ptr<File>& file)
             {
                 _file = file;
                 if (_file)
                 {
-                    _timeRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                    _timeRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                         _file->getPlaybackModel()->observeTimeRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {
                             _timeRange = value;
                             _menuUpdate();
                         });
-                    _inOutRangeObserver = ftk::ValueObserver<OTIO_NS::TimeRange>::create(
+                    _inOutRangeObserver = ftk::Observer<OTIO_NS::TimeRange>::create(
                         _file->getPlaybackModel()->observeInOutRange(),
                         [this](const OTIO_NS::TimeRange& value)
                         {

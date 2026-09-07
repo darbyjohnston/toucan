@@ -9,7 +9,7 @@
 
 #include <ftk/Core/Context.h>
 #include <ftk/Core/Image.h>
-#include <ftk/Core/ObservableValue.h>
+#include <ftk/Core/Observable.h>
 
 #include <filesystem>
 
@@ -58,13 +58,13 @@ namespace toucan
         const std::string& getImageDataType() const;
 
         //! Observe the current image.
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<ftk::Image> > > observeCurrentImage() const;
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<ftk::Image> > > observeCurrentImage() const;
 
         //! Observe the root node.
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<IImageNode> > > observeRootNode() const;
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<IImageNode> > > observeRootNode() const;
 
         //! Observe the current node.
-        std::shared_ptr<ftk::IObservableValue<std::shared_ptr<IImageNode> > > observeCurrentNode() const;
+        std::shared_ptr<ftk::IObservable<std::shared_ptr<IImageNode> > > observeCurrentNode() const;
 
         //! Set the current node.
         void setCurrentNode(const std::shared_ptr<IImageNode>&);
@@ -78,14 +78,14 @@ namespace toucan
         std::shared_ptr<PlaybackModel> _playbackModel;
         std::shared_ptr<ViewModel> _viewModel;
         std::shared_ptr<SelectionModel> _selectionModel;
-        std::shared_ptr<ftk::ObservableValue<std::shared_ptr<ftk::Image> > > _currentImage;
+        std::shared_ptr<ftk::Observable<std::shared_ptr<ftk::Image> > > _currentImage;
         OTIO_NS::RationalTime _currentTime;
 
         std::shared_ptr<ImageGraph> _graph;
-        std::shared_ptr<ftk::ObservableValue<std::shared_ptr<IImageNode> > > _rootNode;
-        std::shared_ptr<ftk::ObservableValue<std::shared_ptr<IImageNode> > > _currentNode;
+        std::shared_ptr<ftk::Observable<std::shared_ptr<IImageNode> > > _rootNode;
+        std::shared_ptr<ftk::Observable<std::shared_ptr<IImageNode> > > _currentNode;
         OIIO::ImageBuf _imageBuf;
 
-        std::shared_ptr<ftk::ValueObserver<OTIO_NS::RationalTime> > _currentTimeObserver;
+        std::shared_ptr<ftk::Observer<OTIO_NS::RationalTime> > _currentTimeObserver;
     };
 }

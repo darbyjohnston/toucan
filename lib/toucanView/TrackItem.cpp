@@ -157,7 +157,11 @@ namespace toucan
             _size.displayScale = event.displayScale;
             _size.border = event.style->getSizeRole(ftk::SizeRole::Border, event.displayScale);
         }
-        _setSizeHint(_layout->getSizeHint());
+    }
+
+    ftk::Size2I TrackItem::getSizeHint() const
+    {
+        return _layout->getSizeHint();
     }
 
     void TrackItem::drawEvent(

@@ -40,6 +40,7 @@ namespace toucan
 
         void setGeometry(const ftk::Box2I&) override;
         ftk::Box2I getChildrenClipRect() const override;
+        ftk::Size2I getSizeHint() const override;
         void sizeHintEvent(const ftk::SizeHintEvent&) override;
         void drawEvent(const ftk::Box2I&, const ftk::DrawEvent&) override;
 
@@ -61,7 +62,7 @@ namespace toucan
         std::shared_ptr<TimeLayout> _markerLayout;
         std::vector<std::shared_ptr<MarkerItem> > _markerItems;
 
-        std::shared_ptr<ftk::ValueObserver<bool> > _thumbnailsObserver;
+        std::shared_ptr<ftk::Observer<bool> > _thumbnailsObserver;
 
         struct SizeData
         {
