@@ -122,8 +122,22 @@ namespace toucan
                 _avAudioCodecContext->codec_type = AVMEDIA_TYPE_AUDIO;
                 _avAudioCodecContext->sample_rate = audioSampleRate;
                 av_channel_layout_default(&_avAudioCodecContext->ch_layout, audioChannelCount);
-                _avAudioCodecContext->sample_fmt = audioAvCodec->sample_fmts ?
-                    audioAvCodec->sample_fmts[0] : getAudioSampleFormat(audioCodec);
+_avAudioCodecContext->sample_fmt = getAudioSampleFormat(audioCodec);
+                const void* sampleFormats = nullptr;
+                avcodec_get_supported_config(
+                    nullptr,
+                    audioAvCodec,
+                    AV_CODEC_CONFIG_SAMPLE_FORMAT,
+                    0,
+                    &sampleFormats,
+                    nullptr);
+                if (const auto* formats = static_cast<const AVSampleFormat*>(sampleFormats))
+                {
+                    if (formats[0] != AV_SAMPLE_FMT_NONE)
+                    {
+                        _avAudioCodecContext->sample_fmt = formats[0];
+                    }
+                }
                 _avAudioCodecContext->time_base = { 1, audioSampleRate };
                 if (_avFormatContext->oformat->flags & AVFMT_GLOBALHEADER)
                 {
