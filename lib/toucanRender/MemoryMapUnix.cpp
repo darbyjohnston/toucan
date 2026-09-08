@@ -32,11 +32,14 @@ namespace toucan
         _p->size = std::filesystem::file_size(path);
 
         _p->mmap = mmap(0, _p->size, PROT_READ, MAP_SHARED, _p->f, 0);
-        madvise(_p->mmap, _p->size, MADV_SEQUENTIAL | MADV_SEQUENTIAL);
         if (_p->mmap == (void*)-1)
         {
+            // No destructor runs for a constructor that throws.
+            close(_p->f);
+            _p->f = -1;
             throw std::runtime_error("Cannot memory-map file: " + path.string());
         }
+        madvise(_p->mmap, _p->size, MADV_SEQUENTIAL);
     }
 
     MemoryMap::~MemoryMap()
