@@ -188,8 +188,8 @@ OfxStatus BoxPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos1[2] = { 0, 0 };
-    int64_t pos2[2] = { 0, 0 };
+    int pos1[2] = { 0, 0 };
+    int pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     int fill = 0;
     _paramSuite->paramGetValue(_param(handle, "pos1"), &pos1[0], &pos1[1]);
@@ -282,8 +282,8 @@ OfxStatus LinePlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos1[2] = { 0, 0 };
-    int64_t pos2[2] = { 0, 0 };
+    int pos1[2] = { 0, 0 };
+    int pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     int skipFirstPoint = 0;
     _paramSuite->paramGetValue(_param(handle, "pos1"), &pos1[0], &pos1[1]);
@@ -379,9 +379,9 @@ OfxStatus TextPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos[2] = { 0, 0 };
+    int pos[2] = { 0, 0 };
     std::string text;
-    int64_t fontSize = 16;
+    int fontSize = 16;
     std::string fontName;
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     _paramSuite->paramGetValue(_param(handle, "pos"), &pos[0], &pos[1]);

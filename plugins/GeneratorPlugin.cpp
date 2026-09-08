@@ -171,7 +171,7 @@ OfxStatus CheckersPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t checkerSize[2] = { 0, 0 };
+    int checkerSize[2] = { 0, 0 };
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
     _paramSuite->paramGetValue(_param(handle, "checkerSize"), &checkerSize[0], &checkerSize[1]);
@@ -335,7 +335,7 @@ OfxStatus GradientPlugin::_render(
 {
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
-    bool vertical = false;
+    int vertical = 0;
     _paramSuite->paramGetValue(_param(handle, "color1"), &color1[0], &color1[1], &color1[2], &color1[3]);
     _paramSuite->paramGetValue(_param(handle, "color2"), &color2[0], &color2[1], &color2[2], &color2[3]);
     _paramSuite->paramGetValue(_param(handle, "vertical"), &vertical);
@@ -454,7 +454,7 @@ OfxStatus NoisePlugin::_render(
     double a = 0.0;
     double b = 0.0;
     int mono = 0;
-    int64_t seed = 0;
+    int seed = 0;
     _paramSuite->paramGetValue(_param(handle, "type"), &type);
     _paramSuite->paramGetValue(_param(handle, "a"), &a);
     _paramSuite->paramGetValue(_param(handle, "b"), &b);

@@ -177,8 +177,8 @@ OfxStatus CropPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos[2] = { 0, 0 };
-    int64_t size[2] = { 0, 0 };
+    int pos[2] = { 0, 0 };
+    int size[2] = { 0, 0 };
     _paramSuite->paramGetValue(_param(handle, "pos"), &pos[0], &pos[1]);
     _paramSuite->paramGetValue(_param(handle, "size"), &size[0], &size[1]);
 
@@ -339,7 +339,7 @@ OfxStatus ResizePlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t size[2] = { 0, 0 };
+    int size[2] = { 0, 0 };
     std::string filterName;
     double filterWidth = 0.0;
     _paramSuite->paramGetValue(_param(handle, "size"), &size[0], &size[1]);
