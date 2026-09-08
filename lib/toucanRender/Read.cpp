@@ -268,18 +268,18 @@ namespace toucan
         auto bitmap = _svg->renderToBitmap(w, h, 0x00000000);
         if (!bitmap.isNull())
         {
+            // lunasvg renders premultiplied, and the comp premultiplies what
+            // it is given, so the bitmap is unpremultiplied here rather than
+            // having its edges darkened twice. The conversion also puts the
+            // channels in RGBA order.
+            bitmap.convertToRGBA();
             out = OIIO::ImageBuf(_spec);
             for (int y = 0; y < h; ++y)
             {
-                uint8_t* imageP = reinterpret_cast<uint8_t*>(out.localpixels()) + y * w * 4;
-                const uint8_t* bitmapP = bitmap.data() + y * w * 4;
-                for (int x = 0; x < w; ++x, imageP += 4, bitmapP += 4)
-                {
-                    imageP[0] = bitmapP[2];
-                    imageP[1] = bitmapP[1];
-                    imageP[2] = bitmapP[0];
-                    imageP[3] = bitmapP[3];
-                }
+                memcpy(
+                    reinterpret_cast<uint8_t*>(out.localpixels()) + y * w * 4,
+                    bitmap.data() + y * bitmap.stride(),
+                    w * 4);
             }
         }
 
