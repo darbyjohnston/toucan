@@ -3,6 +3,8 @@
 
 #include "PlaybackModel.h"
 
+#include <cmath>
+
 #include <toucanRender/TimelineAlgo.h>
 
 #include <opentimelineio/clip.h>
@@ -336,8 +338,13 @@ namespace toucan
             case Playback::Forward:
             case Playback::Reverse:
                 setCurrentTime(_currentTime->get());
+                // The frame follows the clock rather than the ticks: each
+                // tick asks how many frames have elapsed since the last one
+                // it advanced, so tick latency does not accumulate and the
+                // rate does not depend on how often the application ticks.
+                _playbackStart = std::chrono::steady_clock::now();
                 _timer->start(
-                    std::chrono::microseconds(static_cast<int>(1000 / _currentTime->get().rate())),
+                    std::chrono::milliseconds(1),
                     [this]
                     {
                         _timeUpdate();
@@ -368,17 +375,25 @@ namespace toucan
 
     void PlaybackModel::_timeUpdate()
     {
+        const double rate = _currentTime->get().rate();
+        const auto now = std::chrono::steady_clock::now();
+        const double elapsed = std::chrono::duration<double>(now - _playbackStart).count();
+        const int frames = static_cast<int>(elapsed * rate);
+        if (frames <= 0 || rate <= 0.0)
+        {
+            return;
+        }
+        // Move the start on by whole frames so the remainder carries over.
+        _playbackStart += std::chrono::microseconds(
+            static_cast<int64_t>(std::llround(frames / rate * 1000000.0)));
+        const OTIO_NS::RationalTime step(frames, rate);
         switch (_playback->get())
         {
         case Playback::Forward:
-            setCurrentTime(
-                _currentTime->get() + OTIO_NS::RationalTime(1.0, _currentTime->get().rate()),
-                CurrentTime::Loop);
+            setCurrentTime(_currentTime->get() + step, CurrentTime::Loop);
             break;
         case Playback::Reverse:
-            setCurrentTime(
-                _currentTime->get() - OTIO_NS::RationalTime(1.0, _currentTime->get().rate()),
-                CurrentTime::Loop);
+            setCurrentTime(_currentTime->get() - step, CurrentTime::Loop);
             break;
         default: break;
         }

@@ -7,6 +7,8 @@
 
 #include <ftk/Core/Observable.h>
 #include <ftk/Core/Timer.h>
+
+#include <chrono>
 #include <ftk/Core/Vector.h>
 
 #include <optional>
@@ -137,5 +139,6 @@ namespace toucan
         Playback _playbackPrev = Playback::Forward;
         std::optional<TimelineViewState> _viewState;
         std::shared_ptr<ftk::Timer> _timer;
+        std::chrono::steady_clock::time_point _playbackStart;
     };
 }
