@@ -18,42 +18,80 @@ namespace toucan
         _handle{ &plugin, _instance.get() },
         _metaData(metaData)
     {
-        // Set default values.
+        // Set default values. They are stored the way OTIO metadata arrives,
+        // a scalar or an AnyVector, so both take the same path in the host.
         for (const auto& param : _plugin.paramDefs)
         {
+            auto& out = _instance->params[param.first];
+            const auto type = _plugin.paramTypes.find(param.first);
+            if (type != _plugin.paramTypes.end())
+            {
+                out.type = type->second;
+            }
+            int count = 0;
+            param.second.getDimension(kOfxParamPropDefault, &count);
             auto props = param.second.getStringProperties();
-            auto i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-            if (i != props.end())
+            if (std::find(props.begin(), props.end(), kOfxParamPropDefault) != props.end())
             {
                 char* s = nullptr;
                 param.second.getString(kOfxParamPropDefault, 0, &s);
                 if (s)
                 {
-                    _instance->params[param.first] = std::string(s);
+                    out.value = std::string(s);
                 }
+                continue;
             }
             props = param.second.getDoubleProperties();
-            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-            if (i != props.end())
+            if (std::find(props.begin(), props.end(), kOfxParamPropDefault) != props.end())
             {
-                double d = 0.0;
-                param.second.getDouble(kOfxParamPropDefault, 0, &d);
-                _instance->params[param.first] = d;
+                std::vector<double> d(count, 0.0);
+                param.second.getDoubleN(kOfxParamPropDefault, count, d.data());
+                if (1 == count)
+                {
+                    out.value = d[0];
+                }
+                else
+                {
+                    OTIO_NS::AnyVector v;
+                    for (double i : d)
+                    {
+                        v.push_back(i);
+                    }
+                    out.value = v;
+                }
+                continue;
             }
             props = param.second.getIntProperties();
-            i = std::find(props.begin(), props.end(), kOfxParamPropDefault);
-            if (i != props.end())
+            if (std::find(props.begin(), props.end(), kOfxParamPropDefault) != props.end())
             {
-                int i = 0;
-                param.second.getInt(kOfxParamPropDefault, 0, &i);
-                _instance->params[param.first] = i;
+                std::vector<int> n(count, 0);
+                param.second.getIntN(kOfxParamPropDefault, count, n.data());
+                if (1 == count)
+                {
+                    out.value = static_cast<int64_t>(n[0]);
+                }
+                else
+                {
+                    OTIO_NS::AnyVector v;
+                    for (int i : n)
+                    {
+                        v.push_back(static_cast<int64_t>(i));
+                    }
+                    out.value = v;
+                }
             }
         }
 
         // Set values.
         for (const auto& i : metaData)
         {
-            _instance->params[i.first] = i.second;
+            auto& out = _instance->params[i.first];
+            const auto type = _plugin.paramTypes.find(i.first);
+            if (type != _plugin.paramTypes.end())
+            {
+                out.type = type->second;
+            }
+            out.value = i.second;
         }
 
         // Create the plugin instance.
