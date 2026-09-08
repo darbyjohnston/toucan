@@ -319,7 +319,10 @@ namespace toucan
                             outputStartFrame + time.to_frames(),
                             outputNumberPadding,
                             outputPath.extension().string());
-                        buf.write(fileName);
+                        if (!buf.write(fileName))
+                        {
+                            throw std::runtime_error(buf.geterror());
+                        }
                     }
                 }
                 else if (_cmdLine.raw->hasValue())
