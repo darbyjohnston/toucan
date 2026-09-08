@@ -372,7 +372,8 @@ namespace toucan
         rawSpec.width = spec.width;
         rawSpec.height = spec.height;
         OIIO::ImageBuf tmp;
-        if (spec.format != rawSpec.format)
+        if (spec.format != rawSpec.format ||
+            spec.nchannels != rawSpec.nchannels)
         {
             spec = rawSpec;
             tmp = OIIO::ImageBuf(spec);
