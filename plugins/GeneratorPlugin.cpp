@@ -77,17 +77,6 @@ OfxStatus GeneratorPlugin::_describeInContextAction(OfxImageEffectHandle handle,
     return kOfxStatOK;
 }
 
-OfxStatus GeneratorPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    Plugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus GeneratorPlugin::_renderAction(
     OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
@@ -176,31 +165,18 @@ OfxStatus CheckersPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus CheckersPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    GeneratorPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "checkerSize", &_checkerSizeParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color1", &_color1Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color2", &_color2Param[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus CheckersPlugin::_render(
     OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t checkerSize[2] = { 0, 0 };
+    int checkerSize[2] = { 0, 0 };
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _paramSuite->paramGetValue(_checkerSizeParam[handle], &checkerSize[0], &checkerSize[1]);
-    _paramSuite->paramGetValue(_color1Param[handle], &color1[0], &color1[1], &color1[2], &color1[3]);
-    _paramSuite->paramGetValue(_color2Param[handle], &color2[0], &color2[1], &color2[2], &color2[3]);
+    _paramSuite->paramGetValue(_param(handle, "checkerSize"), &checkerSize[0], &checkerSize[1]);
+    _paramSuite->paramGetValue(_param(handle, "color1"), &color1[0], &color1[1], &color1[2], &color1[3]);
+    _paramSuite->paramGetValue(_param(handle, "color2"), &color2[0], &color2[1], &color2[2], &color2[3]);
 
     OIIO::ImageBufAlgo::checker(
         outputBuf,
@@ -269,17 +245,6 @@ OfxStatus FillPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus FillPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    GeneratorPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus FillPlugin::_render(
     OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
@@ -288,7 +253,7 @@ OfxStatus FillPlugin::_render(
 {
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     _paramSuite->paramGetValue(
-        _colorParam[handle],
+        _param(handle, "color"),
         &color[0],
         &color[1],
         &color[2],
@@ -362,19 +327,6 @@ OfxStatus GradientPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus GradientPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    GeneratorPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "color1", &_color1Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color2", &_color2Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "vertical", &_verticalParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus GradientPlugin::_render(
     OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
@@ -383,10 +335,10 @@ OfxStatus GradientPlugin::_render(
 {
     double color1[4] = { 0.0, 0.0, 0.0, 0.0 };
     double color2[4] = { 0.0, 0.0, 0.0, 0.0 };
-    bool vertical = false;
-    _paramSuite->paramGetValue(_color1Param[handle], &color1[0], &color1[1], &color1[2], &color1[3]);
-    _paramSuite->paramGetValue(_color2Param[handle], &color2[0], &color2[1], &color2[2], &color2[3]);
-    _paramSuite->paramGetValue(_verticalParam[handle], &vertical);
+    int vertical = 0;
+    _paramSuite->paramGetValue(_param(handle, "color1"), &color1[0], &color1[1], &color1[2], &color1[3]);
+    _paramSuite->paramGetValue(_param(handle, "color2"), &color2[0], &color2[1], &color2[2], &color2[3]);
+    _paramSuite->paramGetValue(_param(handle, "vertical"), &vertical);
 
     if (vertical)
     {
@@ -492,19 +444,6 @@ OfxStatus NoisePlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus NoisePlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    GeneratorPlugin::_createInstance(handle);
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "type", &_typeParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "a", &_aParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "b", &_bParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "mono", &_monoParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "seed", &_seedParam[handle], nullptr);
-    return kOfxStatOK;
-}
-
 OfxStatus NoisePlugin::_render(
     OfxImageEffectHandle handle,
     OIIO::ImageBuf& outputBuf,
@@ -515,12 +454,12 @@ OfxStatus NoisePlugin::_render(
     double a = 0.0;
     double b = 0.0;
     int mono = 0;
-    int64_t seed = 0;
-    _paramSuite->paramGetValue(_typeParam[handle], &type);
-    _paramSuite->paramGetValue(_aParam[handle], &a);
-    _paramSuite->paramGetValue(_bParam[handle], &b);
-    _paramSuite->paramGetValue(_monoParam[handle], &mono);
-    _paramSuite->paramGetValue(_seedParam[handle], &seed);
+    int seed = 0;
+    _paramSuite->paramGetValue(_param(handle, "type"), &type);
+    _paramSuite->paramGetValue(_param(handle, "a"), &a);
+    _paramSuite->paramGetValue(_param(handle, "b"), &b);
+    _paramSuite->paramGetValue(_param(handle, "mono"), &mono);
+    _paramSuite->paramGetValue(_param(handle, "seed"), &seed);
 
     OIIO::ImageBufAlgo::noise(
         outputBuf,

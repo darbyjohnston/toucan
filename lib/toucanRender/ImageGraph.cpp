@@ -355,7 +355,6 @@ namespace toucan
                     try
                     {
                         read = _timelineWrapper->createReadNode(externalRef);
-                        _readCache.add(externalRef, read);
                     }
                     catch (const std::exception& e)
                     {
@@ -364,6 +363,9 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
+                    // Cached either way: media that did not open is not
+                    // opened, and logged, again on every frame.
+                    _readCache.add(externalRef, read);
                 }
                 if (read)
                 {
@@ -386,7 +388,6 @@ namespace toucan
                     try
                     {
                         read = _timelineWrapper->createReadNode(sequenceRef);
-                        _readCache.add(sequenceRef, read);
                     }
                     catch (const std::exception& e)
                     {
@@ -395,6 +396,9 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
+                    // Cached either way: media that did not open is not
+                    // opened, and logged, again on every frame.
+                    _readCache.add(sequenceRef, read);
                 }
                 if (read)
                 {
@@ -437,9 +441,13 @@ namespace toucan
         {
             if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
             {
+                // Scaled about the range start, which is then put back: a
+                // sequence that starts at frame 1001 warps within itself
+                // rather than towards frame 0.
                 const double s = linearTimeWarp->time_scalar();
+                const OTIO_NS::RationalTime start = timeRange.start_time().rescaled_to(time.rate());
                 out = OTIO_NS::RationalTime(
-                    (out - timeRange.start_time()).value() * s,
+                    start.value() + (out - start).value() * s,
                     time.rate()).round();
             }
         }

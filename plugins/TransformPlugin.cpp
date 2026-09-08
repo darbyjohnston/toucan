@@ -170,18 +170,6 @@ OfxStatus CropPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus CropPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    TransformPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "pos", &_posParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus CropPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -189,10 +177,10 @@ OfxStatus CropPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos[2] = { 0, 0 };
-    int64_t size[2] = { 0, 0 };
-    _paramSuite->paramGetValue(_posParam[handle], &pos[0], &pos[1]);
-    _paramSuite->paramGetValue(_sizeParam[handle], &size[0], &size[1]);
+    int pos[2] = { 0, 0 };
+    int size[2] = { 0, 0 };
+    _paramSuite->paramGetValue(_param(handle, "pos"), &pos[0], &pos[1]);
+    _paramSuite->paramGetValue(_param(handle, "size"), &size[0], &size[1]);
 
     const auto crop = OIIO::ImageBufAlgo::cut(
         sourceBuf,
@@ -344,19 +332,6 @@ OfxStatus ResizePlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus ResizePlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    TransformPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "size", &_sizeParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "filter_name", &_filterNameParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "filter_width", &_filterWidthParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus ResizePlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -364,12 +339,12 @@ OfxStatus ResizePlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t size[2] = { 0, 0 };
+    int size[2] = { 0, 0 };
     std::string filterName;
     double filterWidth = 0.0;
-    _paramSuite->paramGetValue(_sizeParam[handle], &size[0], &size[1]);
-    _paramSuite->paramGetValue(_filterNameParam[handle], &filterName);
-    _paramSuite->paramGetValue(_filterWidthParam[handle], &filterWidth);
+    _paramSuite->paramGetValue(_param(handle, "size"), &size[0], &size[1]);
+    _paramSuite->paramGetValue(_param(handle, "filter_name"), &filterName);
+    _paramSuite->paramGetValue(_param(handle, "filter_width"), &filterWidth);
 
     OIIO::ImageBufAlgo::resize(
         outputBuf,
@@ -432,19 +407,6 @@ OfxStatus RotatePlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus RotatePlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    TransformPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "angle", &_angleParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "filter_name", &_filterNameParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "filter_width", &_filterWidthParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus RotatePlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -455,9 +417,9 @@ OfxStatus RotatePlugin::_render(
     double angle = 0.0;
     std::string filterName;
     double filterWidth = 0.0;
-    _paramSuite->paramGetValue(_angleParam[handle], &angle);
-    _paramSuite->paramGetValue(_filterNameParam[handle], &filterName);
-    _paramSuite->paramGetValue(_filterWidthParam[handle], &filterWidth);
+    _paramSuite->paramGetValue(_param(handle, "angle"), &angle);
+    _paramSuite->paramGetValue(_param(handle, "filter_name"), &filterName);
+    _paramSuite->paramGetValue(_param(handle, "filter_width"), &filterWidth);
 
     OIIO::ImageBufAlgo::rotate(
         outputBuf,

@@ -163,17 +163,29 @@ namespace toucan
             _remove->setAlways(index);
             _files->setIfChanged(files);
 
-            int current = std::min(_currentIndex->get(), static_cast<int>(files.size()) - 1);
+            // The files after the closed one move down by one, and the
+            // current and B files go with them.
+            int current = _currentIndex->get();
+            if (index < current)
+            {
+                --current;
+            }
+            current = std::min(current, static_cast<int>(files.size()) - 1);
             _current->setAlways(
                 (current >= 0 && current < files.size()) ?
                 files[current] :
                 nullptr);
             _currentIndex->setAlways(current);
 
-            if (_bIndex->get() == index)
+            const int bIndex = _bIndex->get();
+            if (bIndex == index)
             {
                 _bIndex->setIfChanged(-1);
                 _bFile->setIfChanged(_getBFile());
+            }
+            else if (index < bIndex)
+            {
+                _bIndex->setIfChanged(bIndex - 1);
             }
         }
         _fileUpdate();

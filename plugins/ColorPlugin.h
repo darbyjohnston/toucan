@@ -52,7 +52,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -62,12 +61,6 @@ protected:
 
 private:
     static ColorConvertPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _fromSpaceParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _toSpaceParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _premultParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _contextKeyParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _contextValueParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _colorConfigParam;
     std::map<std::string, std::shared_ptr<OIIO::ColorConfig> > _colorConfigs;
 };
 

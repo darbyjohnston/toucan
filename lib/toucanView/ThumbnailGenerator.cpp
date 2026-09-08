@@ -279,10 +279,18 @@ namespace toucan
 
     void ThumbnailGenerator::_cancel()
     {
+        // Both kinds of request are answered, so no future is left holding
+        // a broken promise for the widget to trip over.
+        std::list<std::shared_ptr<AspectRequest> > aspectRequests;
         std::list<std::shared_ptr<Request> > requests;
         {
             std::unique_lock<std::mutex> lock(_mutex.mutex);
+            aspectRequests = std::move(_mutex.aspectRequests);
             requests = std::move(_mutex.requests);
+        }
+        for (auto& request : aspectRequests)
+        {
+            request->promise.set_value(1.F);
         }
         for (auto& request : requests)
         {

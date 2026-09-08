@@ -13,6 +13,7 @@
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/imageSequenceReference.h>
 
+#include <mz.h>
 #include <mz_zip.h>
 #include <mz_strm.h>
 #include <mz_zip_rw.h>
@@ -176,34 +177,58 @@ namespace toucan
                 throw std::runtime_error(errorStatus.full_description);
             }
 
+            // Where an entry's data sits in the map. The central directory
+            // gives the local header's position; the local header itself
+            // says how long it is, and its extra field need not match the
+            // central one (zip64 writers differ), so it is asked rather than
+            // assumed.
+            auto memoryReference = [this, &zip](const std::string& url)
+            {
+                const auto split = splitURLProtocol(url);
+                int32_t r = mz_zip_reader_locate_entry(zip.handle, split.second.c_str(), 0);
+                if (r != MZ_OK)
+                {
+                    throw std::runtime_error("Cannot locate: " + split.second);
+                }
+                mz_zip_file* info = nullptr;
+                r = mz_zip_reader_entry_get_info(zip.handle, &info);
+                if (r != MZ_OK)
+                {
+                    throw std::runtime_error("Cannot get info: " + split.second);
+                }
+                if (info->compression_method != MZ_COMPRESS_METHOD_STORE)
+                {
+                    throw std::runtime_error("Media is not uncompressed: " + split.second);
+                }
+                r = mz_zip_reader_entry_open(zip.handle);
+                if (r != MZ_OK)
+                {
+                    throw std::runtime_error("Cannot open: " + split.second);
+                }
+                void* zipHandle = nullptr;
+                mz_zip_reader_get_zip_handle(zip.handle, &zipHandle);
+                mz_zip_file* local = nullptr;
+                r = mz_zip_entry_get_local_info(zipHandle, &local);
+                const size_t headerSize = MZ_OK == r ?
+                    30 + local->filename_size + local->extrafield_size :
+                    0;
+                mz_zip_reader_entry_close(zip.handle);
+                if (r != MZ_OK)
+                {
+                    throw std::runtime_error("Cannot get local info: " + split.second);
+                }
+                return MemoryReference(
+                    reinterpret_cast<const uint8_t*>(_memoryMap->getData()) + info->disk_offset + headerSize,
+                    info->uncompressed_size);
+            };
+
             // Create memory references for the media files in the ZIP.
             for (const auto& clip : _timeline->find_clips())
             {
                 if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(clip->media_reference()))
                 {
                     const std::string url = externalRef->target_url();
-                    auto split = splitURLProtocol(url);
-                    r = mz_zip_reader_locate_entry(zip.handle, split.second.c_str(), 0);
-                    if (r != 0)
-                    {
-                        throw std::runtime_error("Cannot locate: " + split.second);
-                    }
-                    r = mz_zip_reader_entry_get_info(zip.handle, &zipInfo);
-                    if (r != 0)
-                    {
-                        throw std::runtime_error("Cannot get info: " + split.second);
-                    }
-                    if (zipInfo->compression_method != 0)
-                    {
-                        throw std::runtime_error("Media is not uncompressed: " + split.second);
-                    }
-                    const size_t headerSize =
-                        30 +
-                        zipInfo->filename_size +
-                        zipInfo->extrafield_size;
-                    _memoryReferences[url] = MemoryReference(
-                        reinterpret_cast<const uint8_t*>(_memoryMap->getData()) + headerSize + zipInfo->disk_offset,
-                        zipInfo->uncompressed_size);
+                    _memoryReferences[url] = memoryReference(url);
                 }
                 else if (auto sequenceRef = dynamic_cast<OTIO_NS::ImageSequenceReference*>(clip->media_reference()))
                 {
@@ -218,28 +243,7 @@ namespace toucan
                             frame,
                             sequenceRef->frame_zero_padding(),
                             sequenceRef->name_suffix());
-                        const auto split = splitURLProtocol(url);
-                        r = mz_zip_reader_locate_entry(zip.handle, split.second.c_str(), 0);
-                        if (r != 0)
-                        {
-                            throw std::runtime_error("Cannot locate: " + split.second);
-                        }
-                        r = mz_zip_reader_entry_get_info(zip.handle, &zipInfo);
-                        if (r != 0)
-                        {
-                            throw std::runtime_error("Cannot get info: " + split.second);
-                        }
-                        if (zipInfo->compression_method != 0)
-                        {
-                            throw std::runtime_error("Media is not uncompressed: " + split.second);
-                        }
-                        const size_t headerSize =
-                            30 +
-                            zipInfo->filename_size +
-                            zipInfo->extrafield_size;
-                        _memoryReferences[url] = MemoryReference(
-                            reinterpret_cast<const uint8_t*>(_memoryMap->getData()) + headerSize + zipInfo->disk_offset,
-                            zipInfo->uncompressed_size);
+                        _memoryReferences[url] = memoryReference(url);
                     }
                 }
             }
@@ -264,6 +268,10 @@ namespace toucan
             hasExtension(extension, SequenceReadNode::getExtensions()))
         {
             const auto sequence = getSequence(path);
+            if (sequence.empty())
+            {
+                throw std::runtime_error("Cannot find: " + path.string());
+            }
             const auto split = splitFileNameNumber(sequence.front().stem().string());
             if (split.second.empty())
             {

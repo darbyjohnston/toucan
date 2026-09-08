@@ -100,17 +100,6 @@ OfxStatus TransitionPlugin::_describeInContextAction(OfxImageEffectHandle handle
     return kOfxStatOK;
 }
 
-OfxStatus TransitionPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    Plugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus TransitionPlugin::_renderAction(
     OfxImageEffectHandle handle,
     OfxPropertySetHandle inArgs,
@@ -122,7 +111,7 @@ OfxStatus TransitionPlugin::_renderAction(
     _propSuite->propGetIntN(inArgs, kOfxImageEffectPropRenderWindow, 4, &renderWindow.x1);
 
     double value = 0.0;
-    _paramSuite->paramGetValue(_valueParam[handle], &value);
+    _paramSuite->paramGetValue(_param(handle, "value"), &value);
 
     OfxImageClipHandle sourceFromClip = nullptr;
     OfxImageClipHandle sourceToClip = nullptr;

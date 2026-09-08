@@ -319,7 +319,10 @@ namespace toucan
                             outputStartFrame + time.to_frames(),
                             outputNumberPadding,
                             outputPath.extension().string());
-                        buf.write(fileName);
+                        if (!buf.write(fileName))
+                        {
+                            throw std::runtime_error(buf.geterror());
+                        }
                     }
                 }
                 else if (_cmdLine.raw->hasValue())
@@ -372,7 +375,8 @@ namespace toucan
         rawSpec.width = spec.width;
         rawSpec.height = spec.height;
         OIIO::ImageBuf tmp;
-        if (spec.format != rawSpec.format)
+        if (spec.format != rawSpec.format ||
+            spec.nchannels != rawSpec.nchannels)
         {
             spec = rawSpec;
             tmp = OIIO::ImageBuf(spec);

@@ -37,6 +37,8 @@ namespace toucan
             void writeAudio(const AudioBuffer&);
 
         private:
+            void _free();
+
             void _encodeAudio(AVFrame*);
             void _flushFifo();
 

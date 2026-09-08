@@ -25,14 +25,12 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,
         OfxPropertySetHandle outArgs) override;
 
 private:
-    std::map<OfxImageEffectHandle, OfxParamHandle> _sizeParam;
 };
 
 class CheckersPlugin : public GeneratorPlugin
@@ -54,7 +52,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         OIIO::ImageBuf&,
@@ -63,9 +60,6 @@ protected:
 
 private:
     static CheckersPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _checkerSizeParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _color1Param;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _color2Param;
 };
 
 class FillPlugin : public GeneratorPlugin
@@ -87,7 +81,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         OIIO::ImageBuf&,
@@ -96,7 +89,6 @@ protected:
 
 private:
     static FillPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _colorParam;
 };
 
 class GradientPlugin : public GeneratorPlugin
@@ -118,7 +110,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         OIIO::ImageBuf&,
@@ -127,9 +118,6 @@ protected:
 
 private:
     static GradientPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _color1Param;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _color2Param;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _verticalParam;
 };
 
 class NoisePlugin : public GeneratorPlugin
@@ -151,7 +139,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         OIIO::ImageBuf&,
@@ -160,9 +147,4 @@ protected:
 
 private:
     static NoisePlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _typeParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _aParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _bParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _monoParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _seedParam;
 };

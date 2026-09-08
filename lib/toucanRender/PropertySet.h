@@ -63,7 +63,6 @@ namespace toucan
     private:
         std::map<std::string, std::vector<void*> > _p;
         std::map<std::string, std::vector<std::string> > _s;
-        mutable std::vector<std::vector<char> > _buf;
         std::map<std::string, std::vector<double> > _d;
         std::map<std::string, std::vector<int> > _i;
     };

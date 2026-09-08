@@ -49,13 +49,20 @@ namespace toucan
         _p->mmap = CreateFileMapping(_p->h, 0, PAGE_READONLY, 0, 0, 0);
         if (!_p->mmap)
         {
+            // No destructor runs for a constructor that throws.
+            CloseHandle(_p->h);
+            _p->h = INVALID_HANDLE_VALUE;
             throw std::runtime_error("Cannot memory-map file: " + path.string());
         }
 
         _p->data = reinterpret_cast<const void*> (
             MapViewOfFile(_p->mmap, FILE_MAP_READ, 0, 0, 0));
-        if (!_p->mmap)
+        if (!_p->data)
         {
+            CloseHandle(_p->mmap);
+            _p->mmap = nullptr;
+            CloseHandle(_p->h);
+            _p->h = INVALID_HANDLE_VALUE;
             throw std::runtime_error("Cannot map view of file: " + path.string());
         }
     }

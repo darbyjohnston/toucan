@@ -51,7 +51,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -61,8 +60,6 @@ protected:
 
 private:
     static CropPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _posParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _sizeParam;
 };
 
 class FlipPlugin : public TransformPlugin
@@ -138,7 +135,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -148,9 +144,6 @@ protected:
 
 private:
     static ResizePlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _sizeParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _filterNameParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _filterWidthParam;
 };
 
 class RotatePlugin : public TransformPlugin
@@ -172,7 +165,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -182,7 +174,4 @@ protected:
 
 private:
     static RotatePlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _angleParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _filterNameParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _filterWidthParam;
 };

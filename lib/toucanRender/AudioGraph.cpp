@@ -183,23 +183,11 @@ namespace toucan
                 {
                     if (auto prevItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(prev2))
                     {
-                        const double value =
-                            (time - trimmedRangeInParent.value().start_time()).value() /
-                            trimmedRangeInParent.value().duration().value();
-
                         AudioBuffer a = _item(
                             track->transformed_time(time, prevItem),
                             sampleCount,
                             prevItem);
-
-                        if (a.isValid() && out.isValid())
-                        {
-                            for (size_t j = 0; j < out.data.size() && j < a.data.size(); ++j)
-                            {
-                                out.data[j] = a.data[j] * static_cast<float>(1.0 - value) +
-                                    out.data[j] * static_cast<float>(value);
-                            }
-                        }
+                        _crossfade(a, out, time, trimmedRangeInParent.value(), out);
                     }
                 }
             }
@@ -210,29 +198,49 @@ namespace toucan
                 {
                     if (auto nextItem = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Item>(next2))
                     {
-                        const double value =
-                            (time - trimmedRangeInParent.value().start_time()).value() /
-                            trimmedRangeInParent.value().duration().value();
-
                         AudioBuffer b = _item(
                             track->transformed_time(time, nextItem),
                             sampleCount,
                             nextItem);
-
-                        if (b.isValid() && out.isValid())
-                        {
-                            for (size_t j = 0; j < out.data.size() && j < b.data.size(); ++j)
-                            {
-                                out.data[j] = out.data[j] * static_cast<float>(1.0 - value) +
-                                    b.data[j] * static_cast<float>(value);
-                            }
-                        }
+                        _crossfade(out, b, time, trimmedRangeInParent.value(), out);
                     }
                 }
             }
         }
 
         return out;
+    }
+
+    void AudioGraph::_crossfade(
+        const AudioBuffer& from,
+        const AudioBuffer& to,
+        const OTIO_NS::RationalTime& time,
+        const OTIO_NS::TimeRange& range,
+        AudioBuffer& out)
+    {
+        if (!from.isValid() || !to.isValid() || !out.isValid())
+        {
+            return;
+        }
+        // The mix moves across the frame rather than stepping at each
+        // frame boundary: one gain at the frame's start, another at its end,
+        // and a line between them for the samples.
+        const double duration = range.duration().value();
+        const double v0 = std::clamp(
+            (time - range.start_time()).value() / duration, 0.0, 1.0);
+        const double v1 = std::clamp(
+            (time + OTIO_NS::RationalTime(1.0, time.rate()) - range.start_time()).value() / duration,
+            0.0,
+            1.0);
+        const size_t count = std::min({ out.data.size(), from.data.size(), to.data.size() });
+        const int channels = std::max(1, out.channelCount);
+        const int samples = std::max<int>(1, out.sampleCount);
+        for (size_t j = 0; j < count; ++j)
+        {
+            const double v = v0 + (v1 - v0) * (static_cast<double>(j / channels) / samples);
+            out.data[j] = from.data[j] * static_cast<float>(1.0 - v) +
+                to.data[j] * static_cast<float>(v);
+        }
     }
 
     AudioBuffer AudioGraph::_item(
@@ -265,7 +273,6 @@ namespace toucan
                             _timelineWrapper->getMediaPath(externalRef->target_url());
                         audioRead = std::make_shared<ffmpeg::AudioRead>(
                             mediaPath, _sampleRate, _channelCount);
-                        _audioReadCache.add(externalRef, audioRead);
                     }
                     catch (const std::exception& e)
                     {
@@ -274,6 +281,9 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
+                    // Cached either way: media that did not open is not
+                    // opened, and logged, again on every frame.
+                    _audioReadCache.add(externalRef, audioRead);
                 }
                 if (audioRead && audioRead->hasAudio())
                 {
@@ -306,9 +316,12 @@ namespace toucan
         {
             if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
             {
+                // Scaled about the range start, which is then put back, as
+                // the image graph does.
                 const double s = linearTimeWarp->time_scalar();
+                const OTIO_NS::RationalTime start = timeRange.start_time().rescaled_to(time.rate());
                 out = OTIO_NS::RationalTime(
-                    (out - timeRange.start_time()).value() * s,
+                    start.value() + (out - start).value() * s,
                     time.rate()).round();
             }
         }

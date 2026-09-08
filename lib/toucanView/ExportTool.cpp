@@ -461,7 +461,10 @@ namespace toucan
                         _time.to_frames(),
                         _imagePaddingEdit->getValue(),
                         _imageExtensionEdit->getText());
-                    buf.write(fileName);
+                    if (!buf.write(fileName))
+                    {
+                        throw std::runtime_error(buf.geterror());
+                    }
                 }
             }
             catch (const std::exception& e)

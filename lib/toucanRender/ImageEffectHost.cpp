@@ -196,6 +196,7 @@ namespace toucan
                 plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, i, &context);
                 if (context)
                 {
+                    plugin.contexts.push_back(context);
                     PropertySet propSet;
                     propSet.setString(kOfxImageEffectPropContext, 0, context);
                     {
@@ -267,53 +268,111 @@ namespace toucan
     {
         ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
         auto i = handle->instance->params.find(name);
-        if (i != handle->instance->params.end())
+        if (i == handle->instance->params.end())
         {
-            *paramHandle = (OfxParamHandle)&handle->instance->params[name];
+            *paramHandle = nullptr;
+            return kOfxStatErrUnknown;
         }
+        *paramHandle = (OfxParamHandle)&i->second;
         return kOfxStatOK;
+    }
+
+    namespace
+    {
+        // A number however the JSON or the default happened to store it.
+        bool toDouble(const std::any& a, double& out)
+        {
+            if (a.type() == typeid(double)) out = std::any_cast<double>(a);
+            else if (a.type() == typeid(float)) out = std::any_cast<float>(a);
+            else if (a.type() == typeid(int64_t)) out = std::any_cast<int64_t>(a);
+            else if (a.type() == typeid(int)) out = std::any_cast<int>(a);
+            else if (a.type() == typeid(bool)) out = std::any_cast<bool>(a) ? 1.0 : 0.0;
+            else return false;
+            return true;
+        }
+
+        std::vector<double> toDoubles(const std::any& a)
+        {
+            std::vector<double> out;
+            double d = 0.0;
+            if (toDouble(a, d))
+            {
+                out.push_back(d);
+            }
+            else if (a.type() == typeid(OTIO_NS::AnyVector))
+            {
+                for (const auto& i : std::any_cast<const OTIO_NS::AnyVector&>(a))
+                {
+                    out.push_back(toDouble(i, d) ? d : 0.0);
+                }
+            }
+            return out;
+        }
+
+        // How many values a parameter type carries, and whether the plugin
+        // reads them as doubles or ints (the OpenFX types are fixed; the
+        // toucan plugins read strings as std::string).
+        struct ParamShape
+        {
+            int count = 0;
+            enum { Double, Int, String } kind = Double;
+        };
+
+        ParamShape getParamShape(const std::string& type)
+        {
+            ParamShape out;
+            if (kOfxParamTypeDouble == type) { out.count = 1; }
+            else if (kOfxParamTypeDouble2D == type) { out.count = 2; }
+            else if (kOfxParamTypeDouble3D == type) { out.count = 3; }
+            else if (kOfxParamTypeRGB == type) { out.count = 3; }
+            else if (kOfxParamTypeRGBA == type) { out.count = 4; }
+            else if (kOfxParamTypeInteger == type) { out.count = 1; out.kind = ParamShape::Int; }
+            else if (kOfxParamTypeInteger2D == type) { out.count = 2; out.kind = ParamShape::Int; }
+            else if (kOfxParamTypeInteger3D == type) { out.count = 3; out.kind = ParamShape::Int; }
+            else if (kOfxParamTypeBoolean == type) { out.count = 1; out.kind = ParamShape::Int; }
+            else if (kOfxParamTypeChoice == type) { out.count = 1; out.kind = ParamShape::Int; }
+            else if (kOfxParamTypeString == type) { out.count = 1; out.kind = ParamShape::String; }
+            return out;
+        }
     }
 
     OfxStatus ImageEffectHost::_paramGetValue(OfxParamHandle handle, ...)
     {
+        // The plugin passes pointers of the declared type, so the value is
+        // written by that type whatever the JSON or the default stored.
+        const ImageEffectParam* param = (const ImageEffectParam*)handle;
+        if (!param)
+        {
+            return kOfxStatErrBadHandle;
+        }
+        const ParamShape shape = getParamShape(param->type);
+        if (0 == shape.count)
+        {
+            return kOfxStatErrUnsupported;
+        }
         va_list args;
         va_start(args, handle);
-        std::any* a = (std::any*)handle;
-        if (a->type() == typeid(bool))
+        if (ParamShape::String == shape.kind)
         {
-            const bool value = std::any_cast<bool>(*a);
-            *va_arg(args, bool*) = value;
-        }
-        else if (a->type() == typeid(int64_t))
-        {
-            const int value = std::any_cast<int64_t>(*a);
-            *va_arg(args, int64_t*) = value;
-        }
-        else if (a->type() == typeid(double))
-        {
-            const double value = std::any_cast<double>(*a);
-            *va_arg(args, double*) = value;
-        }
-        else if (a->type() == typeid(std::string))
-        {
-            const std::string value = std::any_cast<std::string>(*a);
-            *va_arg(args, std::string*) = value;
-        }
-        else if (a->type() == typeid(OTIO_NS::AnyVector))
-        {
-            const OTIO_NS::AnyVector value = std::any_cast<OTIO_NS::AnyVector>(*a);
-            if (!value.empty() && value[0].type() == typeid(double))
+            std::string* out = va_arg(args, std::string*);
+            if (param->value.type() == typeid(std::string))
             {
-                for (size_t i = 0; i < value.size(); ++i)
-                {
-                    *va_arg(args, double*) = std::any_cast<double>(value[i]);
-                }
+                *out = std::any_cast<const std::string&>(param->value);
             }
-            else if (!value.empty() && value[0].type() == typeid(int64_t))
+        }
+        else
+        {
+            const std::vector<double> values = toDoubles(param->value);
+            for (int i = 0; i < shape.count; ++i)
             {
-                for (size_t i = 0; i < value.size(); ++i)
+                const double value = i < values.size() ? values[i] : 0.0;
+                if (ParamShape::Int == shape.kind)
                 {
-                    *va_arg(args, int64_t*) = std::any_cast<int64_t>(value[i]);
+                    *va_arg(args, int*) = static_cast<int>(value);
+                }
+                else
+                {
+                    *va_arg(args, double*) = value;
                 }
             }
         }
@@ -334,7 +393,12 @@ namespace toucan
         *clip = (OfxImageClipHandle)&handle->instance->images[name];
         if (propHandle)
         {
-            *propHandle = (OfxPropertySetHandle)&handle->plugin->clipPropSets[name];
+            // A find, not operator[]: the plugin's clip sets are shared by
+            // every instance, and instances render on more than one thread.
+            const auto i = handle->plugin->clipPropSets.find(name);
+            *propHandle = i != handle->plugin->clipPropSets.end() ?
+                (OfxPropertySetHandle)&i->second :
+                nullptr;
         }
         return kOfxStatOK;
     }

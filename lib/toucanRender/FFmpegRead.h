@@ -39,6 +39,8 @@ namespace toucan
             OIIO::ImageBuf getImage(const OTIO_NS::RationalTime&);
 
         private:
+            void _free();
+
             void _seek(const OTIO_NS::RationalTime&);
             OIIO::ImageBuf _read();
 

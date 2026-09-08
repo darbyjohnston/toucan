@@ -122,7 +122,10 @@ namespace toucan
         }
 
         // Write the image.
-        filmstripBuf.write(outputPath.string());
+        if (!filmstripBuf.write(outputPath.string()))
+        {
+            throw std::runtime_error(filmstripBuf.geterror());
+        }
     }
 }
 

@@ -103,6 +103,15 @@ OfxStatus Plugin::_createInstance(OfxImageEffectHandle)
     return kOfxStatOK;
 }
 
+OfxParamHandle Plugin::_param(OfxImageEffectHandle handle, const char* name) const
+{
+    OfxParamSetHandle paramSet = nullptr;
+    _effectSuite->getParamSet(handle, &paramSet);
+    OfxParamHandle out = nullptr;
+    _paramSuite->paramGetHandle(paramSet, name, &out, nullptr);
+    return out;
+}
+
 OfxStatus Plugin::_destroyInstance(OfxImageEffectHandle)
 {
     return kOfxStatOK;

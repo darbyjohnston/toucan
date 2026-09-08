@@ -52,6 +52,13 @@ namespace toucan
             const OTIO_NS::TimeRange&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&);
 
+        void _crossfade(
+            const AudioBuffer& from,
+            const AudioBuffer& to,
+            const OTIO_NS::RationalTime&,
+            const OTIO_NS::TimeRange&,
+            AudioBuffer& out);
+
         void _applyEffects(
             AudioBuffer&,
             const std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> >&);

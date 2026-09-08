@@ -26,14 +26,12 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,
         OfxPropertySetHandle outArgs) override;
 
 protected:
-    std::map<OfxImageEffectHandle, OfxParamHandle> _valueParam;
 };
 
 class DissolvePlugin : public TransitionPlugin

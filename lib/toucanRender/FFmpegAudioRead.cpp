@@ -48,151 +48,167 @@ namespace toucan
             _outputSampleRate(outputSampleRate),
             _outputChannelCount(outputChannelCount)
         {
-            av_log_set_level(AV_LOG_QUIET);
-
-            if (memoryReference.isValid())
+            // The members are raw handles, and a constructor that throws
+            // runs no destructor, so what was made before the failure is
+            // freed here.
+            try
             {
-                _avFormatContext = avformat_alloc_context();
-                if (!_avFormatContext)
+                av_log_set_level(AV_LOG_QUIET);
+
+                if (memoryReference.isValid())
                 {
-                    throw std::runtime_error("Cannot allocate format context");
+                    _avFormatContext = avformat_alloc_context();
+                    if (!_avFormatContext)
+                    {
+                        throw std::runtime_error("Cannot allocate format context");
+                    }
+
+                    _avIOBufferData = AVIOBufferData(
+                        reinterpret_cast<const uint8_t*>(memoryReference.getData()),
+                        memoryReference.getSize());
+                    _avIOContextBuffer = static_cast<uint8_t*>(av_malloc(avIOContextBufferSize));
+                    _avIOContext = avio_alloc_context(
+                        _avIOContextBuffer,
+                        avIOContextBufferSize,
+                        0,
+                        &_avIOBufferData,
+                        &_avIOBufferRead,
+                        nullptr,
+                        &_avIOBufferSeek);
+                    if (!_avIOContext)
+                    {
+                        throw std::runtime_error("Cannot allocate I/O context");
+                    }
+
+                    _avFormatContext->pb = _avIOContext;
                 }
 
-                _avIOBufferData = AVIOBufferData(
-                    reinterpret_cast<const uint8_t*>(memoryReference.getData()),
-                    memoryReference.getSize());
-                _avIOContextBuffer = static_cast<uint8_t*>(av_malloc(avIOContextBufferSize));
-                _avIOContext = avio_alloc_context(
-                    _avIOContextBuffer,
-                    avIOContextBufferSize,
-                    0,
-                    &_avIOBufferData,
-                    &_avIOBufferRead,
+                const std::string fileName = path.string();
+                int r = avformat_open_input(
+                    &_avFormatContext,
+                    !_avFormatContext ? fileName.c_str() : nullptr,
                     nullptr,
-                    &_avIOBufferSeek);
-                if (!_avIOContext)
+                    nullptr);
+                if (r < 0 || !_avFormatContext)
                 {
-                    throw std::runtime_error("Cannot allocate I/O context");
+                    throw std::runtime_error("Cannot open file");
                 }
 
-                _avFormatContext->pb = _avIOContext;
-            }
-
-            const std::string fileName = path.string();
-            int r = avformat_open_input(
-                &_avFormatContext,
-                !_avFormatContext ? fileName.c_str() : nullptr,
-                nullptr,
-                nullptr);
-            if (r < 0 || !_avFormatContext)
-            {
-                throw std::runtime_error("Cannot open file");
-            }
-
-            r = avformat_find_stream_info(_avFormatContext, nullptr);
-            if (r < 0)
-            {
-                throw std::runtime_error("Cannot find stream info");
-            }
-
-            for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
-            {
-                if (AVMEDIA_TYPE_AUDIO == _avFormatContext->streams[i]->codecpar->codec_type &&
-                    AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
+                r = avformat_find_stream_info(_avFormatContext, nullptr);
+                if (r < 0)
                 {
-                    _avStream = i;
-                    break;
+                    throw std::runtime_error("Cannot find stream info");
                 }
-            }
-            if (-1 == _avStream)
-            {
+
                 for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
                 {
-                    if (AVMEDIA_TYPE_AUDIO == _avFormatContext->streams[i]->codecpar->codec_type)
+                    if (AVMEDIA_TYPE_AUDIO == _avFormatContext->streams[i]->codecpar->codec_type &&
+                        AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
                     {
                         _avStream = i;
                         break;
                     }
                 }
+                if (-1 == _avStream)
+                {
+                    for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
+                    {
+                        if (AVMEDIA_TYPE_AUDIO == _avFormatContext->streams[i]->codecpar->codec_type)
+                        {
+                            _avStream = i;
+                            break;
+                        }
+                    }
+                }
+
+                if (_avStream != -1)
+                {
+                    auto avAudioStream = _avFormatContext->streams[_avStream];
+                    auto avAudioCodecParameters = avAudioStream->codecpar;
+                    auto avAudioCodec = avcodec_find_decoder(avAudioCodecParameters->codec_id);
+                    if (!avAudioCodec)
+                    {
+                        throw std::runtime_error("No audio codec found");
+                    }
+                    _avCodecParameters = avcodec_parameters_alloc();
+                    if (!_avCodecParameters)
+                    {
+                        throw std::runtime_error("Cannot allocate parameters");
+                    }
+                    avcodec_parameters_copy(_avCodecParameters, avAudioCodecParameters);
+                    _avCodecContext = avcodec_alloc_context3(avAudioCodec);
+                    if (!_avCodecContext)
+                    {
+                        throw std::runtime_error("Cannot allocate context");
+                    }
+                    avcodec_parameters_to_context(_avCodecContext, _avCodecParameters);
+                    _avCodecContext->thread_count = 0;
+                    _avCodecContext->thread_type = FF_THREAD_FRAME;
+                    r = avcodec_open2(_avCodecContext, avAudioCodec, 0);
+                    if (r < 0)
+                    {
+                        throw std::runtime_error("Cannot open audio stream");
+                    }
+
+                    _avFrame = av_frame_alloc();
+                    if (!_avFrame)
+                    {
+                        throw std::runtime_error("Cannot allocate frame");
+                    }
+
+                    AVChannelLayout outLayout;
+                    av_channel_layout_default(&outLayout, _outputChannelCount);
+
+                    r = swr_alloc_set_opts2(
+                        &_swrContext,
+                        &outLayout,
+                        AV_SAMPLE_FMT_FLT,
+                        _outputSampleRate,
+                        &_avCodecParameters->ch_layout,
+                        static_cast<AVSampleFormat>(_avCodecParameters->format),
+                        _avCodecParameters->sample_rate,
+                        0,
+                        nullptr);
+                    if (r < 0 || !_swrContext)
+                    {
+                        throw std::runtime_error("Cannot allocate resampler context");
+                    }
+                    r = swr_init(_swrContext);
+                    if (r < 0)
+                    {
+                        throw std::runtime_error("Cannot initialize resampler");
+                    }
+
+                    double duration = 0.0;
+                    if (avAudioStream->duration != AV_NOPTS_VALUE)
+                    {
+                        duration = av_q2d(avAudioStream->time_base) * avAudioStream->duration;
+                    }
+                    else if (_avFormatContext->duration != AV_NOPTS_VALUE)
+                    {
+                        duration = static_cast<double>(_avFormatContext->duration) / AV_TIME_BASE;
+                    }
+
+                    const double rate = _avCodecParameters->sample_rate;
+                    const int64_t totalSamples = static_cast<int64_t>(std::round(duration * rate));
+                    _timeRange = OTIO_NS::TimeRange(
+                        OTIO_NS::RationalTime(0.0, rate),
+                        OTIO_NS::RationalTime(totalSamples, rate));
+                }
             }
-
-            if (_avStream != -1)
+            catch (...)
             {
-                auto avAudioStream = _avFormatContext->streams[_avStream];
-                auto avAudioCodecParameters = avAudioStream->codecpar;
-                auto avAudioCodec = avcodec_find_decoder(avAudioCodecParameters->codec_id);
-                if (!avAudioCodec)
-                {
-                    throw std::runtime_error("No audio codec found");
-                }
-                _avCodecParameters = avcodec_parameters_alloc();
-                if (!_avCodecParameters)
-                {
-                    throw std::runtime_error("Cannot allocate parameters");
-                }
-                avcodec_parameters_copy(_avCodecParameters, avAudioCodecParameters);
-                _avCodecContext = avcodec_alloc_context3(avAudioCodec);
-                if (!_avCodecContext)
-                {
-                    throw std::runtime_error("Cannot allocate context");
-                }
-                avcodec_parameters_to_context(_avCodecContext, _avCodecParameters);
-                _avCodecContext->thread_count = 0;
-                _avCodecContext->thread_type = FF_THREAD_FRAME;
-                r = avcodec_open2(_avCodecContext, avAudioCodec, 0);
-                if (r < 0)
-                {
-                    throw std::runtime_error("Cannot open audio stream");
-                }
-
-                _avFrame = av_frame_alloc();
-                if (!_avFrame)
-                {
-                    throw std::runtime_error("Cannot allocate frame");
-                }
-
-                AVChannelLayout outLayout;
-                av_channel_layout_default(&outLayout, _outputChannelCount);
-
-                r = swr_alloc_set_opts2(
-                    &_swrContext,
-                    &outLayout,
-                    AV_SAMPLE_FMT_FLT,
-                    _outputSampleRate,
-                    &_avCodecParameters->ch_layout,
-                    static_cast<AVSampleFormat>(_avCodecParameters->format),
-                    _avCodecParameters->sample_rate,
-                    0,
-                    nullptr);
-                if (r < 0 || !_swrContext)
-                {
-                    throw std::runtime_error("Cannot allocate resampler context");
-                }
-                r = swr_init(_swrContext);
-                if (r < 0)
-                {
-                    throw std::runtime_error("Cannot initialize resampler");
-                }
-
-                double duration = 0.0;
-                if (avAudioStream->duration != AV_NOPTS_VALUE)
-                {
-                    duration = av_q2d(avAudioStream->time_base) * avAudioStream->duration;
-                }
-                else if (_avFormatContext->duration != AV_NOPTS_VALUE)
-                {
-                    duration = static_cast<double>(_avFormatContext->duration) / AV_TIME_BASE;
-                }
-
-                const double rate = _avCodecParameters->sample_rate;
-                const int64_t totalSamples = static_cast<int64_t>(std::round(duration * rate));
-                _timeRange = OTIO_NS::TimeRange(
-                    OTIO_NS::RationalTime(0.0, rate),
-                    OTIO_NS::RationalTime(totalSamples, rate));
+                _free();
+                throw;
             }
         }
 
         AudioRead::~AudioRead()
+        {
+            _free();
+        }
+
+        void AudioRead::_free()
         {
             if (_swrContext)
             {
@@ -212,6 +228,7 @@ namespace toucan
             }
             if (_avIOContext)
             {
+                av_freep(&_avIOContext->buffer);
                 avio_context_free(&_avIOContext);
             }
             if (_avFormatContext)
@@ -454,6 +471,22 @@ namespace toucan
                     }
                     else if (AVERROR_EOF == decoding)
                     {
+                        // When the rates differ the resampler holds a tail
+                        // of its own, given up only when asked with no input.
+                        int drained = 0;
+                        do
+                        {
+                            std::vector<float> converted(1024 * _outputChannelCount);
+                            uint8_t* outBuf = reinterpret_cast<uint8_t*>(converted.data());
+                            drained = swr_convert(_swrContext, &outBuf, 1024, nullptr, 0);
+                            if (drained > 0)
+                            {
+                                output.insert(
+                                    output.end(),
+                                    converted.begin(),
+                                    converted.begin() + drained * _outputChannelCount);
+                            }
+                        } while (drained > 0);
                         break;
                     }
                     else if (decoding < 0)

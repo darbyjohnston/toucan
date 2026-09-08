@@ -19,15 +19,26 @@ namespace toucan
         std::shared_ptr<Plugin> plugin;
         OfxPlugin* ofxPlugin = nullptr;
         PropertySet propSet;
+        std::vector<std::string> contexts;
         std::map<std::string, PropertySet> clipPropSets;
         std::map<std::string, std::string> paramTypes;
         std::map<std::string, PropertySet> paramDefs;
     };
 
+    //! Image effect parameter: the declared OpenFX type, and the value as
+    //! the default or the OTIO metadata gave it. The host converts between
+    //! the two when the plugin asks, so JSON that says 1 where the plugin
+    //! declared a double still reads as 1.0.
+    struct ImageEffectParam
+    {
+        std::string type;
+        std::any value;
+    };
+
     //! Image effect instance.
     struct ImageEffectInstance
     {
-        std::map<std::string, std::any> params;
+        std::map<std::string, ImageEffectParam> params;
         std::map<std::string, PropertySet> images;
     };
 

@@ -181,22 +181,6 @@ OfxStatus ColorConvertPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus ColorConvertPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    ColorPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "fromspace", &_fromSpaceParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "tospace", &_toSpaceParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "premult", &_premultParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "context_key", &_contextKeyParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "context_value", &_contextValueParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color_config", &_colorConfigParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus ColorConvertPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -210,12 +194,12 @@ OfxStatus ColorConvertPlugin::_render(
     std::string contextKey;
     std::string contextValue;
     std::string colorConfigValue;
-    _paramSuite->paramGetValue(_fromSpaceParam[handle], &fromSpace);
-    _paramSuite->paramGetValue(_toSpaceParam[handle], &toSpace);
-    _paramSuite->paramGetValue(_premultParam[handle], &premult);
-    _paramSuite->paramGetValue(_contextKeyParam[handle], &contextKey);
-    _paramSuite->paramGetValue(_contextValueParam[handle], &contextValue);
-    _paramSuite->paramGetValue(_colorConfigParam[handle], &colorConfigValue);
+    _paramSuite->paramGetValue(_param(handle, "fromspace"), &fromSpace);
+    _paramSuite->paramGetValue(_param(handle, "tospace"), &toSpace);
+    _paramSuite->paramGetValue(_param(handle, "premult"), &premult);
+    _paramSuite->paramGetValue(_param(handle, "context_key"), &contextKey);
+    _paramSuite->paramGetValue(_param(handle, "context_value"), &contextValue);
+    _paramSuite->paramGetValue(_param(handle, "color_config"), &colorConfigValue);
 
     const std::string colorConfigPath(colorConfigValue);
     std::shared_ptr<OIIO::ColorConfig> colorConfig;

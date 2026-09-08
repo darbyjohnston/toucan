@@ -29,6 +29,12 @@ protected:
         OfxPropertySetHandle);
     virtual OfxStatus _createInstance(OfxImageEffectHandle);
     virtual OfxStatus _destroyInstance(OfxImageEffectHandle);
+
+    //! Get a parameter of an instance. Looked up on each use rather than
+    //! kept from create-instance time: the plugin object is one per
+    //! library and its instances render on more than one thread, so it
+    //! holds nothing per instance.
+    OfxParamHandle _param(OfxImageEffectHandle, const char* name) const;
     virtual OfxStatus _renderAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle inArgs,

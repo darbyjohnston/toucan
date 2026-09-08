@@ -181,20 +181,6 @@ OfxStatus BoxPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus BoxPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    DrawPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "pos1", &_pos1Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "pos2", &_pos2Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "fill", &_fillParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus BoxPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -202,14 +188,14 @@ OfxStatus BoxPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos1[2] = { 0, 0 };
-    int64_t pos2[2] = { 0, 0 };
+    int pos1[2] = { 0, 0 };
+    int pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     int fill = 0;
-    _paramSuite->paramGetValue(_pos1Param[handle], &pos1[0], &pos1[1]);
-    _paramSuite->paramGetValue(_pos2Param[handle], &pos2[0], &pos2[1]);
-    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
-    _paramSuite->paramGetValue(_fillParam[handle], &fill);
+    _paramSuite->paramGetValue(_param(handle, "pos1"), &pos1[0], &pos1[1]);
+    _paramSuite->paramGetValue(_param(handle, "pos2"), &pos2[0], &pos2[1]);
+    _paramSuite->paramGetValue(_param(handle, "color"), &color[0], &color[1], &color[2], &color[3]);
+    _paramSuite->paramGetValue(_param(handle, "fill"), &fill);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_box(
@@ -289,20 +275,6 @@ OfxStatus LinePlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus LinePlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    DrawPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "pos1", &_pos1Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "pos2", &_pos2Param[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "skip_first_point", &_skipFirstPointParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus LinePlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -310,14 +282,14 @@ OfxStatus LinePlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos1[2] = { 0, 0 };
-    int64_t pos2[2] = { 0, 0 };
+    int pos1[2] = { 0, 0 };
+    int pos2[2] = { 0, 0 };
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
     int skipFirstPoint = 0;
-    _paramSuite->paramGetValue(_pos1Param[handle], &pos1[0], &pos1[1]);
-    _paramSuite->paramGetValue(_pos2Param[handle], &pos2[0], &pos2[1]);
-    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
-    _paramSuite->paramGetValue(_skipFirstPointParam[handle], &skipFirstPoint);
+    _paramSuite->paramGetValue(_param(handle, "pos1"), &pos1[0], &pos1[1]);
+    _paramSuite->paramGetValue(_param(handle, "pos2"), &pos2[0], &pos2[1]);
+    _paramSuite->paramGetValue(_param(handle, "color"), &color[0], &color[1], &color[2], &color[3]);
+    _paramSuite->paramGetValue(_param(handle, "skip_first_point"), &skipFirstPoint);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_line(
@@ -400,21 +372,6 @@ OfxStatus TextPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus TextPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    DrawPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "pos", &_posParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "text", &_textParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "font_size", &_fontSizeParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "font_name", &_fontNameParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "color", &_colorParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus TextPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -422,16 +379,16 @@ OfxStatus TextPlugin::_render(
     const OfxRectI& renderWindow,
     OfxPropertySetHandle inArgs)
 {
-    int64_t pos[2] = { 0, 0 };
+    int pos[2] = { 0, 0 };
     std::string text;
-    int64_t fontSize = 16;
+    int fontSize = 16;
     std::string fontName;
     double color[4] = { 0.0, 0.0, 0.0, 0.0 };
-    _paramSuite->paramGetValue(_posParam[handle], &pos[0], &pos[1]);
-    _paramSuite->paramGetValue(_textParam[handle], &text);
-    _paramSuite->paramGetValue(_fontSizeParam[handle], &fontSize);
-    _paramSuite->paramGetValue(_fontNameParam[handle], &fontName);
-    _paramSuite->paramGetValue(_colorParam[handle], &color[0], &color[1], &color[2], &color[3]);
+    _paramSuite->paramGetValue(_param(handle, "pos"), &pos[0], &pos[1]);
+    _paramSuite->paramGetValue(_param(handle, "text"), &text);
+    _paramSuite->paramGetValue(_param(handle, "font_size"), &fontSize);
+    _paramSuite->paramGetValue(_param(handle, "font_name"), &fontName);
+    _paramSuite->paramGetValue(_param(handle, "color"), &color[0], &color[1], &color[2], &color[3]);
 
     OIIO::ImageBufAlgo::copy(outputBuf, sourceBuf);
     OIIO::ImageBufAlgo::render_text(

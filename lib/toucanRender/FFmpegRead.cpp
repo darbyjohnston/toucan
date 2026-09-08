@@ -45,356 +45,372 @@ namespace toucan
             _path(path),
             _memoryReference(memoryReference)
         {
-            av_log_set_level(AV_LOG_QUIET);
-            //av_log_set_level(AV_LOG_VERBOSE);
-            //av_log_set_callback(log);
-
-            if (memoryReference.isValid())
+            // The members are raw handles, and a constructor that throws
+            // runs no destructor, so what was made before the failure is
+            // freed here.
+            try
             {
-                _avFormatContext = avformat_alloc_context();
-                if (!_avFormatContext)
+                av_log_set_level(AV_LOG_QUIET);
+                //av_log_set_level(AV_LOG_VERBOSE);
+                //av_log_set_callback(log);
+
+                if (memoryReference.isValid())
                 {
-                    throw std::runtime_error("Cannot allocate format context");
+                    _avFormatContext = avformat_alloc_context();
+                    if (!_avFormatContext)
+                    {
+                        throw std::runtime_error("Cannot allocate format context");
+                    }
+
+                    _avIOBufferData = AVIOBufferData(
+                        reinterpret_cast<const uint8_t*>(memoryReference.getData()),
+                        memoryReference.getSize());
+                    _avIOContextBuffer = static_cast<uint8_t*>(av_malloc(avIOContextBufferSize));
+                    _avIOContext = avio_alloc_context(
+                        _avIOContextBuffer,
+                        avIOContextBufferSize,
+                        0,
+                        &_avIOBufferData,
+                        &_avIOBufferRead,
+                        nullptr,
+                        &_avIOBufferSeek);
+                    if (!_avIOContext)
+                    {
+                        throw std::runtime_error("Cannot allocate I/O context");
+                    }
+
+                    _avFormatContext->pb = _avIOContext;
                 }
 
-                _avIOBufferData = AVIOBufferData(
-                    reinterpret_cast<const uint8_t*>(memoryReference.getData()),
-                    memoryReference.getSize());
-                _avIOContextBuffer = static_cast<uint8_t*>(av_malloc(avIOContextBufferSize));
-                _avIOContext = avio_alloc_context(
-                    _avIOContextBuffer,
-                    avIOContextBufferSize,
-                    0,
-                    &_avIOBufferData,
-                    &_avIOBufferRead,
+                const std::string fileName = path.string();
+                int r = avformat_open_input(
+                    &_avFormatContext,
+                    !_avFormatContext ? fileName.c_str() : nullptr,
                     nullptr,
-                    &_avIOBufferSeek);
-                if (!_avIOContext)
+                    nullptr);
+                if (r < 0 || !_avFormatContext)
                 {
-                    throw std::runtime_error("Cannot allocate I/O context");
+                    throw std::runtime_error("Cannot open file");
                 }
 
-                _avFormatContext->pb = _avIOContext;
-            }
-
-            const std::string fileName = path.string();
-            int r = avformat_open_input(
-                &_avFormatContext,
-                !_avFormatContext ? fileName.c_str() : nullptr,
-                nullptr,
-                nullptr);
-            if (r < 0 || !_avFormatContext)
-            {
-                throw std::runtime_error("Cannot open file");
-            }
-
-            r = avformat_find_stream_info(_avFormatContext, nullptr);
-            if (r < 0)
-            {
-                throw std::runtime_error("Cannot find stream info");
-            }
-            for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
-            {
-                //av_dump_format(_avFormatContext, 0, fileName.c_str(), 0);
-                if (AVMEDIA_TYPE_VIDEO == _avFormatContext->streams[i]->codecpar->codec_type &&
-                    AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
+                r = avformat_find_stream_info(_avFormatContext, nullptr);
+                if (r < 0)
                 {
-                    _avStream = i;
-                    break;
+                    throw std::runtime_error("Cannot find stream info");
                 }
-            }
-            if (-1 == _avStream)
-            {
                 for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
                 {
-                    if (AVMEDIA_TYPE_VIDEO == _avFormatContext->streams[i]->codecpar->codec_type)
+                    //av_dump_format(_avFormatContext, 0, fileName.c_str(), 0);
+                    if (AVMEDIA_TYPE_VIDEO == _avFormatContext->streams[i]->codecpar->codec_type &&
+                        AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
                     {
                         _avStream = i;
                         break;
                     }
                 }
-            }
-
-            int dataStream = -1;
-            for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
-            {
-                if (AVMEDIA_TYPE_DATA == _avFormatContext->streams[i]->codecpar->codec_type &&
-                    AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
+                if (-1 == _avStream)
                 {
-                    dataStream = i;
-                    break;
+                    for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
+                    {
+                        if (AVMEDIA_TYPE_VIDEO == _avFormatContext->streams[i]->codecpar->codec_type)
+                        {
+                            _avStream = i;
+                            break;
+                        }
+                    }
                 }
-            }
-            if (-1 == dataStream)
-            {
+
+                int dataStream = -1;
                 for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
                 {
-                    if (AVMEDIA_TYPE_DATA == _avFormatContext->streams[i]->codecpar->codec_type)
+                    if (AVMEDIA_TYPE_DATA == _avFormatContext->streams[i]->codecpar->codec_type &&
+                        AV_DISPOSITION_DEFAULT == _avFormatContext->streams[i]->disposition)
                     {
                         dataStream = i;
                         break;
                     }
                 }
-            }
-            std::string timecode;
-            if (dataStream != -1)
-            {
-                AVDictionaryEntry* tag = nullptr;
-                while ((tag = av_dict_get(
-                    _avFormatContext->streams[dataStream]->metadata,
-                    "",
-                    tag,
-                    AV_DICT_IGNORE_SUFFIX)))
+                if (-1 == dataStream)
                 {
-                    if ("timecode" == ftk::toLower(tag->key))
+                    for (unsigned int i = 0; i < _avFormatContext->nb_streams; ++i)
                     {
-                        timecode = tag->value;
+                        if (AVMEDIA_TYPE_DATA == _avFormatContext->streams[i]->codecpar->codec_type)
+                        {
+                            dataStream = i;
+                            break;
+                        }
+                    }
+                }
+                std::string timecode;
+                if (dataStream != -1)
+                {
+                    AVDictionaryEntry* tag = nullptr;
+                    while ((tag = av_dict_get(
+                        _avFormatContext->streams[dataStream]->metadata,
+                        "",
+                        tag,
+                        AV_DICT_IGNORE_SUFFIX)))
+                    {
+                        if ("timecode" == ftk::toLower(tag->key))
+                        {
+                            timecode = tag->value;
+                            break;
+                        }
+                    }
+                }
+
+                if (_avStream != -1)
+                {
+                    //av_dump_format(_avFormatContext, _avStream, fileName.c_str(), 0);
+
+                    auto avVideoStream = _avFormatContext->streams[_avStream];
+                    auto avVideoCodecParameters = avVideoStream->codecpar;
+                    auto avVideoCodec = avcodec_find_decoder(avVideoCodecParameters->codec_id);
+                    if (!avVideoCodec)
+                    {
+                        throw std::runtime_error("No video codec found");
+                    }
+                    _avCodecParameters[_avStream] = avcodec_parameters_alloc();
+                    if (!_avCodecParameters[_avStream])
+                    {
+                        throw std::runtime_error("Cannot allocate parameters");
+                    }
+                    avcodec_parameters_copy(_avCodecParameters[_avStream], avVideoCodecParameters);
+                    _avCodecContext[_avStream] = avcodec_alloc_context3(avVideoCodec);
+                    if (!_avCodecParameters[_avStream])
+                    {
+                        throw std::runtime_error("Cannot allocate context");
+                    }
+                    avcodec_parameters_to_context(_avCodecContext[_avStream], _avCodecParameters[_avStream]);
+                    _avCodecContext[_avStream]->thread_count = 0;
+                    _avCodecContext[_avStream]->thread_type = FF_THREAD_FRAME;
+                    r = avcodec_open2(_avCodecContext[_avStream], avVideoCodec, 0);
+                    if (r < 0)
+                    {
+                        throw std::runtime_error("Cannot open stream");
+                    }
+
+                    int width = _avCodecParameters[_avStream]->width;
+                    int height = _avCodecParameters[_avStream]->height;
+                    double pixelAspectRatio = 1.0;
+                    if (_avCodecParameters[_avStream]->sample_aspect_ratio.den > 0 &&
+                        _avCodecParameters[_avStream]->sample_aspect_ratio.num > 0)
+                    {
+                        pixelAspectRatio = av_q2d(_avCodecParameters[_avStream]->sample_aspect_ratio);
+                    }
+
+                    _avInputPixelFormat = static_cast<AVPixelFormat>(_avCodecParameters[_avStream]->format);
+                    int nchannels = 0;
+                    OIIO::TypeDesc format = OIIO::TypeDesc::UNKNOWN;
+                    switch (_avInputPixelFormat)
+                    {
+                    case AV_PIX_FMT_RGB24:
+                        _avOutputPixelFormat = _avInputPixelFormat;
+                        nchannels = 3;
+                        format = OIIO::TypeUInt8;
+                        break;
+                    case AV_PIX_FMT_GRAY8:
+                        _avOutputPixelFormat = _avInputPixelFormat;
+                        nchannels = 1;
+                        format = OIIO::TypeUInt8;
+                        break;
+                    case AV_PIX_FMT_RGBA:
+                        _avOutputPixelFormat = _avInputPixelFormat;
+                        nchannels = 4;
+                        format = OIIO::TypeUInt8;
+                        break;
+                    case AV_PIX_FMT_YUV420P:
+                    case AV_PIX_FMT_YUV422P:
+                    case AV_PIX_FMT_YUV444P:
+                        _avOutputPixelFormat = AV_PIX_FMT_RGB24;
+                        nchannels = 3;
+                        format = OIIO::TypeUInt8;
+                        break;
+                    case AV_PIX_FMT_YUV420P10BE:
+                    case AV_PIX_FMT_YUV420P10LE:
+                    case AV_PIX_FMT_YUV420P12BE:
+                    case AV_PIX_FMT_YUV420P12LE:
+                    case AV_PIX_FMT_YUV420P16BE:
+                    case AV_PIX_FMT_YUV420P16LE:
+                    case AV_PIX_FMT_YUV422P10BE:
+                    case AV_PIX_FMT_YUV422P10LE:
+                    case AV_PIX_FMT_YUV422P12BE:
+                    case AV_PIX_FMT_YUV422P12LE:
+                    case AV_PIX_FMT_YUV422P16BE:
+                    case AV_PIX_FMT_YUV422P16LE:
+                    case AV_PIX_FMT_YUV444P10BE:
+                    case AV_PIX_FMT_YUV444P10LE:
+                    case AV_PIX_FMT_YUV444P12BE:
+                    case AV_PIX_FMT_YUV444P12LE:
+                    case AV_PIX_FMT_YUV444P16BE:
+                    case AV_PIX_FMT_YUV444P16LE:
+                        _avOutputPixelFormat = AV_PIX_FMT_RGB48;
+                        nchannels = 3;
+                        format = OIIO::TypeUInt16;
+                        break;
+                    case AV_PIX_FMT_YUVA420P:
+                    case AV_PIX_FMT_YUVA422P:
+                    case AV_PIX_FMT_YUVA444P:
+                        _avOutputPixelFormat = AV_PIX_FMT_RGBA;
+                        nchannels = 4;
+                        format = OIIO::TypeUInt8;
+                        break;
+                    case AV_PIX_FMT_YUVA444P10BE:
+                    case AV_PIX_FMT_YUVA444P10LE:
+                    case AV_PIX_FMT_YUVA444P12BE:
+                    case AV_PIX_FMT_YUVA444P12LE:
+                    case AV_PIX_FMT_YUVA444P16BE:
+                    case AV_PIX_FMT_YUVA444P16LE:
+                        _avOutputPixelFormat = AV_PIX_FMT_RGBA64;
+                        nchannels = 4;
+                        format = OIIO::TypeUInt16;
+                        break;
+                    default:
+                        _avOutputPixelFormat = AV_PIX_FMT_RGB24;
+                        nchannels = 3;
+                        format = OIIO::TypeUInt8;
                         break;
                     }
+                    _spec = OIIO::ImageSpec(width, height, nchannels, format);
+
+                    _avSpeed = av_guess_frame_rate(_avFormatContext, avVideoStream, nullptr);
+                    const double speed = av_q2d(_avSpeed);
+
+                    std::size_t frameCount = 0;
+                    if (avVideoStream->nb_frames > 0)
+                    {
+                        frameCount = avVideoStream->nb_frames;
+                    }
+                    else if (avVideoStream->duration != AV_NOPTS_VALUE)
+                    {
+                        frameCount = av_rescale_q(
+                            avVideoStream->duration,
+                            avVideoStream->time_base,
+                            swap(avVideoStream->r_frame_rate));
+                    }
+                    else if (_avFormatContext->duration != AV_NOPTS_VALUE)
+                    {
+                        frameCount = av_rescale_q(
+                            _avFormatContext->duration,
+                            av_get_time_base_q(),
+                            swap(avVideoStream->r_frame_rate));
+                    }
+
+                    AVDictionaryEntry* tag = nullptr;
+                    while ((tag = av_dict_get(_avFormatContext->metadata, "", tag, AV_DICT_IGNORE_SUFFIX)))
+                    {
+                        const std::string key(tag->key);
+                        const std::string value(tag->value);
+                        if ("timecode" == ftk::toLower(key))
+                        {
+                            timecode = value;
+                        }
+                    }
+
+                    OTIO_NS::RationalTime startTime(0.0, speed);
+                    if (!timecode.empty())
+                    {
+                        opentime::ErrorStatus errorStatus;
+                        const OTIO_NS::RationalTime time = OTIO_NS::RationalTime::from_timecode(
+                            timecode,
+                            speed,
+                            &errorStatus);
+                        if (!opentime::is_error(errorStatus))
+                        {
+                            startTime = time.floor();
+                        }
+                    }
+                    _timeRange = OTIO_NS::TimeRange(
+                        startTime,
+                        OTIO_NS::RationalTime(frameCount, speed));
+                    _currentTime = startTime;
+
+                    _avFrame = av_frame_alloc();
+                    if (!_avFrame)
+                    {
+                        throw std::runtime_error("Cannot allocate frame");
+                    }
+                    _avFrame2 = av_frame_alloc();
+                    if (!_avFrame2)
+                    {
+                        throw std::runtime_error("Cannot allocate frame");
+                    }
+                    //! \bug These fields need to be filled out for
+                    //! sws_scale_frame()?
+                    _avFrame2->format = _avOutputPixelFormat;
+                    _avFrame2->width = width;
+                    _avFrame2->height = height;
+                    _avFrame2->buf[0] = av_buffer_alloc(_spec.image_bytes());
+
+                    _swsContext = sws_alloc_context();
+                    if (!_swsContext)
+                    {
+                        throw std::runtime_error("Cannot allocate context");
+                    }
+                    av_opt_set_defaults(_swsContext);
+                    int r = av_opt_set_int(_swsContext, "srcw", _avCodecParameters[_avStream]->width, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "srch", _avCodecParameters[_avStream]->height, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "src_format", _avInputPixelFormat, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "dstw", _avCodecParameters[_avStream]->width, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "dsth", _avCodecParameters[_avStream]->height, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "dst_format", _avOutputPixelFormat, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "sws_flags", SWS_FAST_BILINEAR, AV_OPT_SEARCH_CHILDREN);
+                    r = av_opt_set_int(_swsContext, "threads", 0, AV_OPT_SEARCH_CHILDREN);
+                    r = sws_init_context(_swsContext, nullptr, nullptr);
+                    if (r < 0)
+                    {
+                        throw std::runtime_error("Cannot initialize sws context");
+                    }
+
+                    const int* inTable = nullptr;
+                    int        inFull = 0;
+                    const int* outTable = nullptr;
+                    int        outFull = 0;
+                    int        brightness = 0;
+                    int        contrast = 0;
+                    int        saturation = 0;
+                    r = sws_getColorspaceDetails(
+                        _swsContext,
+                        (int**)&inTable,
+                        &inFull,
+                        (int**)&outTable,
+                        &outFull,
+                        &brightness,
+                        &contrast,
+                        &saturation);
+
+                    AVColorSpace colorSpace = _avCodecParameters[_avStream]->color_space;
+                    if (AVCOL_SPC_UNSPECIFIED == colorSpace)
+                    {
+                        colorSpace = AVCOL_SPC_BT709;
+                    }
+                    inFull = 1;
+                    outFull = 1;
+
+                    r = sws_setColorspaceDetails(
+                        _swsContext,
+                        sws_getCoefficients(colorSpace),
+                        inFull,
+                        sws_getCoefficients(AVCOL_SPC_BT709),
+                        outFull,
+                        brightness,
+                        contrast,
+                        saturation);
                 }
             }
-
-            if (_avStream != -1)
+            catch (...)
             {
-                //av_dump_format(_avFormatContext, _avStream, fileName.c_str(), 0);
-
-                auto avVideoStream = _avFormatContext->streams[_avStream];
-                auto avVideoCodecParameters = avVideoStream->codecpar;
-                auto avVideoCodec = avcodec_find_decoder(avVideoCodecParameters->codec_id);
-                if (!avVideoCodec)
-                {
-                    throw std::runtime_error("No video codec found");
-                }
-                _avCodecParameters[_avStream] = avcodec_parameters_alloc();
-                if (!_avCodecParameters[_avStream])
-                {
-                    throw std::runtime_error("Cannot allocate parameters");
-                }
-                avcodec_parameters_copy(_avCodecParameters[_avStream], avVideoCodecParameters);
-                _avCodecContext[_avStream] = avcodec_alloc_context3(avVideoCodec);
-                if (!_avCodecParameters[_avStream])
-                {
-                    throw std::runtime_error("Cannot allocate context");
-                }
-                avcodec_parameters_to_context(_avCodecContext[_avStream], _avCodecParameters[_avStream]);
-                _avCodecContext[_avStream]->thread_count = 0;
-                _avCodecContext[_avStream]->thread_type = FF_THREAD_FRAME;
-                r = avcodec_open2(_avCodecContext[_avStream], avVideoCodec, 0);
-                if (r < 0)
-                {
-                    throw std::runtime_error("Cannot open stream");
-                }
-
-                int width = _avCodecParameters[_avStream]->width;
-                int height = _avCodecParameters[_avStream]->height;
-                double pixelAspectRatio = 1.0;
-                if (_avCodecParameters[_avStream]->sample_aspect_ratio.den > 0 &&
-                    _avCodecParameters[_avStream]->sample_aspect_ratio.num > 0)
-                {
-                    pixelAspectRatio = av_q2d(_avCodecParameters[_avStream]->sample_aspect_ratio);
-                }
-
-                _avInputPixelFormat = static_cast<AVPixelFormat>(_avCodecParameters[_avStream]->format);
-                int nchannels = 0;
-                OIIO::TypeDesc format = OIIO::TypeDesc::UNKNOWN;
-                switch (_avInputPixelFormat)
-                {
-                case AV_PIX_FMT_RGB24:
-                    _avOutputPixelFormat = _avInputPixelFormat;
-                    nchannels = 3;
-                    format = OIIO::TypeUInt8;
-                    break;
-                case AV_PIX_FMT_GRAY8:
-                    _avOutputPixelFormat = _avInputPixelFormat;
-                    nchannels = 1;
-                    format = OIIO::TypeUInt8;
-                    break;
-                case AV_PIX_FMT_RGBA:
-                    _avOutputPixelFormat = _avInputPixelFormat;
-                    nchannels = 4;
-                    format = OIIO::TypeUInt8;
-                    break;
-                case AV_PIX_FMT_YUV420P:
-                case AV_PIX_FMT_YUV422P:
-                case AV_PIX_FMT_YUV444P:
-                    _avOutputPixelFormat = AV_PIX_FMT_RGB24;
-                    nchannels = 3;
-                    format = OIIO::TypeUInt8;
-                    break;
-                case AV_PIX_FMT_YUV420P10BE:
-                case AV_PIX_FMT_YUV420P10LE:
-                case AV_PIX_FMT_YUV420P12BE:
-                case AV_PIX_FMT_YUV420P12LE:
-                case AV_PIX_FMT_YUV420P16BE:
-                case AV_PIX_FMT_YUV420P16LE:
-                case AV_PIX_FMT_YUV422P10BE:
-                case AV_PIX_FMT_YUV422P10LE:
-                case AV_PIX_FMT_YUV422P12BE:
-                case AV_PIX_FMT_YUV422P12LE:
-                case AV_PIX_FMT_YUV422P16BE:
-                case AV_PIX_FMT_YUV422P16LE:
-                case AV_PIX_FMT_YUV444P10BE:
-                case AV_PIX_FMT_YUV444P10LE:
-                case AV_PIX_FMT_YUV444P12BE:
-                case AV_PIX_FMT_YUV444P12LE:
-                case AV_PIX_FMT_YUV444P16BE:
-                case AV_PIX_FMT_YUV444P16LE:
-                    _avOutputPixelFormat = AV_PIX_FMT_RGB48;
-                    nchannels = 3;
-                    format = OIIO::TypeUInt16;
-                    break;
-                case AV_PIX_FMT_YUVA420P:
-                case AV_PIX_FMT_YUVA422P:
-                case AV_PIX_FMT_YUVA444P:
-                    _avOutputPixelFormat = AV_PIX_FMT_RGBA;
-                    nchannels = 4;
-                    format = OIIO::TypeUInt8;
-                    break;
-                case AV_PIX_FMT_YUVA444P10BE:
-                case AV_PIX_FMT_YUVA444P10LE:
-                case AV_PIX_FMT_YUVA444P12BE:
-                case AV_PIX_FMT_YUVA444P12LE:
-                case AV_PIX_FMT_YUVA444P16BE:
-                case AV_PIX_FMT_YUVA444P16LE:
-                    _avOutputPixelFormat = AV_PIX_FMT_RGBA64;
-                    nchannels = 4;
-                    format = OIIO::TypeUInt16;
-                    break;
-                default:
-                    _avOutputPixelFormat = AV_PIX_FMT_RGB24;
-                    nchannels = 3;
-                    format = OIIO::TypeUInt8;
-                    break;
-                }
-                _spec = OIIO::ImageSpec(width, height, nchannels, format);
-
-                _avSpeed = av_guess_frame_rate(_avFormatContext, avVideoStream, nullptr);
-                const double speed = av_q2d(_avSpeed);
-
-                std::size_t frameCount = 0;
-                if (avVideoStream->nb_frames > 0)
-                {
-                    frameCount = avVideoStream->nb_frames;
-                }
-                else if (avVideoStream->duration != AV_NOPTS_VALUE)
-                {
-                    frameCount = av_rescale_q(
-                        avVideoStream->duration,
-                        avVideoStream->time_base,
-                        swap(avVideoStream->r_frame_rate));
-                }
-                else if (_avFormatContext->duration != AV_NOPTS_VALUE)
-                {
-                    frameCount = av_rescale_q(
-                        _avFormatContext->duration,
-                        av_get_time_base_q(),
-                        swap(avVideoStream->r_frame_rate));
-                }
-
-                AVDictionaryEntry* tag = nullptr;
-                while ((tag = av_dict_get(_avFormatContext->metadata, "", tag, AV_DICT_IGNORE_SUFFIX)))
-                {
-                    const std::string key(tag->key);
-                    const std::string value(tag->value);
-                    if ("timecode" == ftk::toLower(key))
-                    {
-                        timecode = value;
-                    }
-                }
-
-                OTIO_NS::RationalTime startTime(0.0, speed);
-                if (!timecode.empty())
-                {
-                    opentime::ErrorStatus errorStatus;
-                    const OTIO_NS::RationalTime time = OTIO_NS::RationalTime::from_timecode(
-                        timecode,
-                        speed,
-                        &errorStatus);
-                    if (!opentime::is_error(errorStatus))
-                    {
-                        startTime = time.floor();
-                    }
-                }
-                _timeRange = OTIO_NS::TimeRange(
-                    startTime,
-                    OTIO_NS::RationalTime(frameCount, speed));
-                _currentTime = startTime;
-
-                _avFrame = av_frame_alloc();
-                if (!_avFrame)
-                {
-                    throw std::runtime_error("Cannot allocate frame");
-                }
-                _avFrame2 = av_frame_alloc();
-                if (!_avFrame2)
-                {
-                    throw std::runtime_error("Cannot allocate frame");
-                }
-                //! \bug These fields need to be filled out for
-                //! sws_scale_frame()?
-                _avFrame2->format = _avOutputPixelFormat;
-                _avFrame2->width = width;
-                _avFrame2->height = height;
-                _avFrame2->buf[0] = av_buffer_alloc(_spec.image_bytes());
-
-                _swsContext = sws_alloc_context();
-                if (!_swsContext)
-                {
-                    throw std::runtime_error("Cannot allocate context");
-                }
-                av_opt_set_defaults(_swsContext);
-                int r = av_opt_set_int(_swsContext, "srcw", _avCodecParameters[_avStream]->width, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "srch", _avCodecParameters[_avStream]->height, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "src_format", _avInputPixelFormat, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "dstw", _avCodecParameters[_avStream]->width, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "dsth", _avCodecParameters[_avStream]->height, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "dst_format", _avOutputPixelFormat, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "sws_flags", SWS_FAST_BILINEAR, AV_OPT_SEARCH_CHILDREN);
-                r = av_opt_set_int(_swsContext, "threads", 0, AV_OPT_SEARCH_CHILDREN);
-                r = sws_init_context(_swsContext, nullptr, nullptr);
-                if (r < 0)
-                {
-                    throw std::runtime_error("Cannot initialize sws context");
-                }
-
-                const int* inTable = nullptr;
-                int        inFull = 0;
-                const int* outTable = nullptr;
-                int        outFull = 0;
-                int        brightness = 0;
-                int        contrast = 0;
-                int        saturation = 0;
-                r = sws_getColorspaceDetails(
-                    _swsContext,
-                    (int**)&inTable,
-                    &inFull,
-                    (int**)&outTable,
-                    &outFull,
-                    &brightness,
-                    &contrast,
-                    &saturation);
-
-                AVColorSpace colorSpace = _avCodecParameters[_avStream]->color_space;
-                if (AVCOL_SPC_UNSPECIFIED == colorSpace)
-                {
-                    colorSpace = AVCOL_SPC_BT709;
-                }
-                inFull = 1;
-                outFull = 1;
-
-                r = sws_setColorspaceDetails(
-                    _swsContext,
-                    sws_getCoefficients(colorSpace),
-                    inFull,
-                    sws_getCoefficients(AVCOL_SPC_BT709),
-                    outFull,
-                    brightness,
-                    contrast,
-                    saturation);
+                _free();
+                throw;
             }
         }
 
         Read::~Read()
+        {
+            _free();
+        }
+
+        void Read::_free()
         {
             if (_swsContext)
             {
@@ -418,13 +434,12 @@ namespace toucan
             }
             if (_avIOContext)
             {
+                // The buffer is the caller's to free, and libavformat may have
+                // swapped in one of its own, so it is the context's pointer
+                // that goes rather than the one handed in.
+                av_freep(&_avIOContext->buffer);
                 avio_context_free(&_avIOContext);
             }
-            //! \bug Free'd by avio_context_free()?
-            //if (_avIOContextBuffer)
-            //{
-            //    av_free(_avIOContextBuffer);
-            //}
             if (_avFormatContext)
             {
                 avformat_close_input(&_avFormatContext);
