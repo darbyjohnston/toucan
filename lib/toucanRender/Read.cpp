@@ -68,13 +68,18 @@ namespace toucan
         // Read the image.
         auto pixels = std::unique_ptr<unsigned char[]>(
             new unsigned char[_spec.width * _spec.height * _spec.nchannels * _spec.channel_bytes()]);
-        _input->read_image(
+        if (!_input->read_image(
             0,
             0,
             0,
             _spec.nchannels,
             _spec.format,
-            &pixels[0]);
+            &pixels[0]))
+        {
+            // An empty frame, which the comp treats as missing, rather than
+            // whatever the buffer held.
+            return out;
+        }
 
         OIIO::ImageBuf buf(
             OIIO::ImageSpec(_spec.width, _spec.height, _spec.nchannels, _spec.format),
@@ -184,13 +189,16 @@ namespace toucan
             const auto& spec = input->spec();
             auto pixels = std::unique_ptr<unsigned char[]>(
                 new unsigned char[spec.width * spec.height * spec.nchannels * spec.channel_bytes()]);
-            input->read_image(
+            if (!input->read_image(
                 0,
                 0,
                 0,
                 spec.nchannels,
                 spec.format,
-                &pixels[0]);
+                &pixels[0]))
+            {
+                return out;
+            }
 
             OIIO::ImageBuf buf(
                 OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, spec.format),
