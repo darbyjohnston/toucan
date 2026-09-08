@@ -44,6 +44,8 @@ namespace toucan
                 int sampleCount);
 
         private:
+            void _free();
+
             void _seek(int64_t sample);
             void _decode(std::vector<float>& output, int sampleCount);
 
