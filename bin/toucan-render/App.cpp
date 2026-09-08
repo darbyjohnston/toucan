@@ -284,9 +284,6 @@ namespace toucan
                 audioCodec);
         }
 
-        const int samplesPerFrame = static_cast<int>(
-            std::round(static_cast<double>(audioSampleRate) / timeRange.duration().rate()));
-
         // Render the timeline frames.
         if (_cmdLine.y4m->hasValue())
         {
@@ -335,10 +332,19 @@ namespace toucan
                 }
             }
 
-            // Render and write audio for this frame.
+            // Render and write audio for this frame. The sample count comes
+            // from the frame's position, so at rates like 29.97 the counts
+            // alternate and the audio stays in step with the video instead of
+            // running long by the rounding every frame.
             if (includeAudio)
             {
-                const AudioBuffer audioBuf = _audioGraph->exec(time, samplesPerFrame);
+                const int64_t sampleStart = std::llround(
+                    (time - timeRange.start_time()).rescaled_to(audioSampleRate).value());
+                const int64_t sampleEnd = std::llround(
+                    (time + timeInc - timeRange.start_time()).rescaled_to(audioSampleRate).value());
+                const AudioBuffer audioBuf = _audioGraph->exec(
+                    time,
+                    static_cast<int>(sampleEnd - sampleStart));
 
                 if (ffWrite)
                 {

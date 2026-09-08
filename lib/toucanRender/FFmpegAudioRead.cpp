@@ -189,7 +189,6 @@ namespace toucan
                 _timeRange = OTIO_NS::TimeRange(
                     OTIO_NS::RationalTime(0.0, rate),
                     OTIO_NS::RationalTime(totalSamples, rate));
-                _currentTime = OTIO_NS::RationalTime(0.0, rate);
             }
         }
 
@@ -256,12 +255,16 @@ namespace toucan
                 return out;
             }
 
-            const OTIO_NS::RationalTime normalizedTime =
-                time.rescaled_to(_timeRange.duration().rate());
-
-            if (normalizedTime != _currentTime)
+            // Where the caller wants to be, in output samples. The caller
+            // sizes each request from rounded timeline positions and this
+            // rounds the media position, and the two roundings can disagree
+            // by one sample without either being wrong; the disagreement
+            // does not accumulate, so one sample is continuity, not a seek.
+            const int64_t wantSample = std::llround(
+                (time - _timeRange.start_time()).rescaled_to(_outputSampleRate).value());
+            if (std::llabs(wantSample - _currentSample) > 1)
             {
-                _seek(normalizedTime);
+                _seek(wantSample);
             }
 
             std::vector<float> samples;
@@ -277,11 +280,7 @@ namespace toucan
                     samples.insert(samples.end(), _residual.begin(), _residual.begin() + needed);
                     _residual.erase(_residual.begin(), _residual.begin() + needed);
                     out.data = std::move(samples);
-                    _currentTime = OTIO_NS::RationalTime(
-                        _currentTime.value() +
-                        static_cast<double>(sampleCount) *
-                        _timeRange.duration().rate() / _outputSampleRate,
-                        _timeRange.duration().rate());
+                    _currentSample += sampleCount;
                     return out;
                 }
                 samples.insert(samples.end(), _residual.begin(), _residual.end());
@@ -305,15 +304,11 @@ namespace toucan
             }
 
             out.data = std::move(samples);
-            _currentTime = OTIO_NS::RationalTime(
-                _currentTime.value() +
-                static_cast<double>(sampleCount) *
-                _timeRange.duration().rate() / _outputSampleRate,
-                _timeRange.duration().rate());
+            _currentSample += sampleCount;
             return out;
         }
 
-        void AudioRead::_seek(const OTIO_NS::RationalTime& time)
+        void AudioRead::_seek(int64_t sample)
         {
             if (_avStream != -1)
             {
@@ -321,22 +316,22 @@ namespace toucan
                 swr_close(_swrContext);
                 swr_init(_swrContext);
 
-                const double seconds =
-                    time.to_seconds() - _timeRange.start_time().to_seconds();
-                const int64_t samplePos = static_cast<int64_t>(
-                    seconds * _avCodecParameters->sample_rate);
+                // The seek lands on a packet at or before the sample, and
+                // _decode() throws away what comes before it.
                 const int64_t timestamp = av_rescale_q(
-                    samplePos,
-                    { 1, _avCodecParameters->sample_rate },
+                    sample,
+                    { 1, _outputSampleRate },
                     _avFormatContext->streams[_avStream]->time_base);
                 av_seek_frame(
                     _avFormatContext,
                     _avStream,
                     timestamp,
                     AVSEEK_FLAG_BACKWARD);
-                _currentTime = time;
                 _residual.clear();
+                _seekTarget = sample;
+                _seekPending = true;
             }
+            _currentSample = sample;
             _eof = false;
         }
 
@@ -400,12 +395,50 @@ namespace toucan
                             const_cast<const uint8_t**>(_avFrame->extended_data),
                             _avFrame->nb_samples);
 
-                        if (convertedSamples > 0)
+                        auto first = converted.begin();
+                        auto last = converted.begin() + convertedSamples * _outputChannelCount;
+                        if (_seekPending)
                         {
-                            output.insert(
-                                output.end(),
-                                converted.begin(),
-                                converted.begin() + convertedSamples * _outputChannelCount);
+                            // The first frames after a seek start before the
+                            // target. Their timestamps say by how much, and
+                            // that much is dropped so the output picks up at
+                            // the sample asked for rather than at the packet
+                            // boundary the seek found.
+                            const auto* avStream = _avFormatContext->streams[_avStream];
+                            const int64_t pts = _avFrame->pts != AV_NOPTS_VALUE ?
+                                _avFrame->pts :
+                                _avFrame->best_effort_timestamp;
+                            if (pts != AV_NOPTS_VALUE)
+                            {
+                                const int64_t streamStart = avStream->start_time != AV_NOPTS_VALUE ?
+                                    avStream->start_time :
+                                    0;
+                                const int64_t framePos = av_rescale_q(
+                                    pts - streamStart,
+                                    avStream->time_base,
+                                    { 1, _outputSampleRate });
+                                const int64_t skip = _seekTarget - framePos;
+                                if (skip >= convertedSamples)
+                                {
+                                    continue;
+                                }
+                                else if (skip > 0)
+                                {
+                                    first += skip * _outputChannelCount;
+                                }
+                                else if (skip < 0)
+                                {
+                                    // The seek landed late, which happens
+                                    // when the target is before the first
+                                    // packet; silence fills the difference.
+                                    output.insert(output.end(), -skip * _outputChannelCount, 0.F);
+                                }
+                            }
+                            _seekPending = false;
+                        }
+                        if (first < last)
+                        {
+                            output.insert(output.end(), first, last);
                         }
 
                         if (static_cast<int>(output.size()) >= totalNeeded)

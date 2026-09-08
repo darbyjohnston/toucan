@@ -44,7 +44,7 @@ namespace toucan
                 int sampleCount);
 
         private:
-            void _seek(const OTIO_NS::RationalTime&);
+            void _seek(int64_t sample);
             void _decode(std::vector<float>& output, int sampleCount);
 
             std::filesystem::path _path;
@@ -52,7 +52,9 @@ namespace toucan
             int _outputSampleRate = 0;
             int _outputChannelCount = 0;
             OTIO_NS::TimeRange _timeRange;
-            OTIO_NS::RationalTime _currentTime;
+            int64_t _currentSample = 0;
+            int64_t _seekTarget = 0;
+            bool _seekPending = false;
 
             struct AVIOBufferData
             {
