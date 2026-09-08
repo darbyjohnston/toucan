@@ -50,43 +50,6 @@ namespace toucan
                 }
             }
         }
-
-        if (!_hasAudio)
-        {
-            for (const auto& child : _timelineWrapper->getTimeline()->tracks()->children())
-            {
-                if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(child))
-                {
-                    if (track->kind() == OTIO_NS::Track::Kind::video)
-                    {
-                        for (auto clip : track->find_clips())
-                        {
-                            if (auto externalRef = dynamic_cast<OTIO_NS::ExternalReference*>(
-                                clip->media_reference()))
-                            {
-                                try
-                                {
-                                    const std::string mediaPath =
-                                        _timelineWrapper->getMediaPath(externalRef->target_url());
-                                    auto audioRead = std::make_shared<ffmpeg::AudioRead>(
-                                        mediaPath, _sampleRate, _channelCount);
-                                    if (audioRead->hasAudio())
-                                    {
-                                        _hasAudio = true;
-                                        _audioReadCache.add(externalRef, audioRead);
-                                        break;
-                                    }
-                                }
-                                catch (const std::exception&)
-                                {
-                                }
-                            }
-                        }
-                        if (_hasAudio) break;
-                    }
-                }
-            }
-        }
     }
 
     AudioGraph::~AudioGraph()
@@ -125,19 +88,11 @@ namespace toucan
         {
             if (auto track = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Track>(i))
             {
-                bool processTrack = false;
+                // Audio comes from the audio tracks. A video clip's media may
+                // carry audio too, and it is left alone: the timeline says
+                // what is heard, the way it says what is seen.
                 if (track->kind() == OTIO_NS::Track::Kind::audio &&
                     !track->find_clips().empty())
-                {
-                    processTrack = true;
-                }
-                else if (track->kind() == OTIO_NS::Track::Kind::video &&
-                    !track->find_clips().empty())
-                {
-                    processTrack = true;
-                }
-
-                if (processTrack)
                 {
                     const auto& trackEffects = track->effects();
                     OTIO_NS::RationalTime t2 = t;
