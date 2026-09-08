@@ -355,7 +355,6 @@ namespace toucan
                     try
                     {
                         read = _timelineWrapper->createReadNode(externalRef);
-                        _readCache.add(externalRef, read);
                     }
                     catch (const std::exception& e)
                     {
@@ -364,6 +363,9 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
+                    // Cached either way: media that did not open is not
+                    // opened, and logged, again on every frame.
+                    _readCache.add(externalRef, read);
                 }
                 if (read)
                 {
@@ -386,7 +388,6 @@ namespace toucan
                     try
                     {
                         read = _timelineWrapper->createReadNode(sequenceRef);
-                        _readCache.add(sequenceRef, read);
                     }
                     catch (const std::exception& e)
                     {
@@ -395,6 +396,9 @@ namespace toucan
                             e.what(),
                             ftk::LogType::Error);
                     }
+                    // Cached either way: media that did not open is not
+                    // opened, and logged, again on every frame.
+                    _readCache.add(sequenceRef, read);
                 }
                 if (read)
                 {
