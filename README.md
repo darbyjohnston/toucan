@@ -98,7 +98,7 @@ toucan-render Transition.otio Transition.mov -vcodec MJPEG
 
 Audio tracks are rendered with the video and written into the movie. The audio
 in the media of video clips is mixed in as well.
-* `-acodec pcm_s16le`: Set the audio codec. Possible values: aac, flac,
+* `-acodec pcm_s16le`: Set the audio codec. Possible values: alac, flac,
 pcm_f32le, pcm_s16le, pcm_s24le
 * `-arate 48000`: Set the audio sample rate.
 * `-achannels 2`: Set the audio channel count.

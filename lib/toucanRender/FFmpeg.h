@@ -60,6 +60,7 @@ namespace toucan
             PCM_S24LE,
             PCM_F32LE,
             FLAC,
+            ALAC,
             AAC,
 
             Count,

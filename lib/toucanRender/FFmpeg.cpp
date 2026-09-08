@@ -94,6 +94,7 @@ namespace toucan
                 "pcm_s24le",
                 "pcm_f32le",
                 "flac",
+                "alac",
                 "aac"
             };
 
@@ -103,6 +104,7 @@ namespace toucan
                 AV_CODEC_ID_PCM_S24LE,
                 AV_CODEC_ID_PCM_F32LE,
                 AV_CODEC_ID_FLAC,
+                AV_CODEC_ID_ALAC,
                 AV_CODEC_ID_AAC
             };
 
@@ -112,6 +114,7 @@ namespace toucan
                 AV_SAMPLE_FMT_S32,
                 AV_SAMPLE_FMT_FLT,
                 AV_SAMPLE_FMT_S32,
+                AV_SAMPLE_FMT_S16P,
                 AV_SAMPLE_FMT_FLTP
             };
         }

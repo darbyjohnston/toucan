@@ -112,9 +112,9 @@ set(FFmpeg_CONFIGURE_ARGS
 if(toucan_FFmpeg_MINIMAL)
     list(APPEND FFmpeg_CONFIGURE_ARGS
         --disable-decoders
-        --enable-decoder=aac
         --enable-decoder=apv
         --enable-decoder=av1
+        --enable-decoder=alac
         --enable-decoder=flac
         --enable-decoder=mjpeg
         --enable-decoder=mp3
@@ -164,7 +164,7 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=vp9
         --enable-decoder=yuv4
         --disable-encoders
-        --enable-encoder=aac
+        --enable-encoder=alac
         --enable-encoder=flac
         --enable-encoder=mjpeg
         --enable-encoder=mpeg2video
@@ -279,7 +279,6 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-muxer=wav
         --enable-muxer=yuv4mpegpipe
         --disable-parsers
-        --enable-parser=aac
         --enable-parser=apv
         --enable-parser=av1
         --enable-parser=flac
