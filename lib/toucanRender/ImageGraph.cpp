@@ -437,9 +437,13 @@ namespace toucan
         {
             if (auto linearTimeWarp = dynamic_cast<OTIO_NS::LinearTimeWarp*>(effect.value))
             {
+                // Scaled about the range start, which is then put back: a
+                // sequence that starts at frame 1001 warps within itself
+                // rather than towards frame 0.
                 const double s = linearTimeWarp->time_scalar();
+                const OTIO_NS::RationalTime start = timeRange.start_time().rescaled_to(time.rate());
                 out = OTIO_NS::RationalTime(
-                    (out - timeRange.start_time()).value() * s,
+                    start.value() + (out - start).value() * s,
                     time.rate()).round();
             }
         }
