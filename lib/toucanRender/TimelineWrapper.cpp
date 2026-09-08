@@ -268,6 +268,10 @@ namespace toucan
             hasExtension(extension, SequenceReadNode::getExtensions()))
         {
             const auto sequence = getSequence(path);
+            if (sequence.empty())
+            {
+                throw std::runtime_error("Cannot find: " + path.string());
+            }
             const auto split = splitFileNameNumber(sequence.front().stem().string());
             if (split.second.empty())
             {
