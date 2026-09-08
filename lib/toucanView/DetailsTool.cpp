@@ -163,7 +163,14 @@ namespace toucan
         }
         else if (auto marker = OTIO_NS::dynamic_retainer_cast<OTIO_NS::Marker>(_item.object))
         {
-            _text.push_back(std::make_pair("Color:", marker->color()));
+            std::string color;
+            if (auto markerColor = marker->color())
+            {
+                color = !markerColor->name().empty() ?
+                    markerColor->name() :
+                    markerColor->to_hex();
+            }
+            _text.push_back(std::make_pair("Color:", color));
             _text.push_back(std::make_pair("Range:",
                 toString(marker->marked_range(), _timeUnits)));
             _text.push_back(std::make_pair("Comment:", marker->comment()));

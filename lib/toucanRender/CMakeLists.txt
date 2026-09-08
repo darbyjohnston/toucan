@@ -51,7 +51,7 @@ set(LIBS_PUBLIC
     OTIO::opentime
     lunasvg::lunasvg
     OpenImageIO::OpenImageIO
-    MINIZIP::minizip)
+    MINIZIP::minizip-ng)
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
     list(APPEND LIBS_PUBLIC stdc++fs)
 endif()

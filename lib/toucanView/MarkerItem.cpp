@@ -7,52 +7,12 @@
 
 namespace toucan
 {
-    ftk::Color4F getMarkerColor(const std::string& color)
+    ftk::Color4F getMarkerColor(const std::optional<OTIO_NS::Color>& color)
     {
         ftk::Color4F out(1.F, 0.F, 0.F);
-        if (color == OTIO_NS::Marker::Color::pink)
+        if (color.has_value())
         {
-            out = ftk::Color4F(1.F, 0.F, .5F);
-        }
-        else if (color == OTIO_NS::Marker::Color::red)
-        {
-            out = ftk::Color4F(1.F, 0.F, 0.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::orange)
-        {
-            out = ftk::Color4F(1.F, .6F, 0.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::yellow)
-        {
-            out = ftk::Color4F(1.F, 1.F, 0.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::green)
-        {
-            out = ftk::Color4F(0.F, 1.F, 0.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::cyan)
-        {
-            out = ftk::Color4F(0.F, 1.F, 1.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::blue)
-        {
-            out = ftk::Color4F(0.F, 0.F, 1.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::purple)
-        {
-            out = ftk::Color4F(.5F, 0.F, 1.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::magenta)
-        {
-            out = ftk::Color4F(1.F, 0.F, 1.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::black)
-        {
-            out = ftk::Color4F(0.F, 0.F, 0.F);
-        }
-        else if (color == OTIO_NS::Marker::Color::white)
-        {
-            out = ftk::Color4F(1.F, 1.F, 1.F);
+            out = ftk::Color4F(color->r(), color->g(), color->b(), color->a());
         }
         return out;
     }

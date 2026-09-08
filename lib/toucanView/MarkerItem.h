@@ -10,10 +10,12 @@
 
 #include <opentimelineio/marker.h>
 
+#include <optional>
+
 namespace toucan
 {
     //! Get a marker color.
-    ftk::Color4F getMarkerColor(const std::string&);
+    ftk::Color4F getMarkerColor(const std::optional<OTIO_NS::Color>&);
 
     //! Timeline marker item.
     class MarkerItem : public IItem

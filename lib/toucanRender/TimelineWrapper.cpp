@@ -26,7 +26,7 @@ namespace toucan
         public:
             ZipFile(const std::filesystem::path& path)
             {
-                mz_zip_reader_create(&handle);
+                handle = mz_zip_reader_create();
                 if (!handle)
                 {
                     throw std::runtime_error("Cannot create zip handle");
@@ -40,7 +40,7 @@ namespace toucan
 
             ZipFile(const void* data, size_t size)
             {
-                mz_zip_reader_create(&handle);
+                handle = mz_zip_reader_create();
                 if (!handle)
                 {
                     throw std::runtime_error("Cannot create zip handle");

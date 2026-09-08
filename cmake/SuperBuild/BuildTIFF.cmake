@@ -1,7 +1,12 @@
 include(ExternalProject)
 
-set(TIFF_GIT_REPOSITORY "https://gitlab.com/libtiff/libtiff.git")
-set(TIFF_GIT_TAG "v4.5.0")
+# The release tarball rather than a clone of the repository. gitlab.com
+# answers git over HTTPS with 403 often enough to fail a build -- three
+# attempts in a row, on a runner that had done nothing else -- and this is
+# the project's own download host, which does not.
+set(TIFF_VERSION "4.7.2")
+set(TIFF_URL "https://download.osgeo.org/libtiff/tiff-${TIFF_VERSION}.tar.gz")
+set(TIFF_HASH "SHA256=672bd7d10aee4606171afb864f3570b83340f6a33e2c186dc0512f7145ffdf6a")
 
 set(TIFF_ARGS
     ${toucan_EXTERNAL_PROJECT_ARGS}
@@ -24,6 +29,6 @@ ExternalProject_Add(
     TIFF
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/TIFF
     DEPENDS ZLIB
-    GIT_REPOSITORY ${TIFF_GIT_REPOSITORY}
-    GIT_TAG ${TIFF_GIT_TAG}
+    URL ${TIFF_URL}
+    URL_HASH ${TIFF_HASH}
     CMAKE_ARGS ${TIFF_ARGS})
