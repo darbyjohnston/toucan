@@ -118,13 +118,13 @@ namespace toucan
             const auto& v = s->second;
             if (index < v.size())
             {
-                const auto& string = v[index];
-                const size_t size = string.size();
-                _buf.resize(1);
-                _buf[0].resize(size + 1);
-                memcpy(_buf[0].data(), string.c_str(), size);
-                _buf[0][size] = 0;
-                *value = _buf[0].data();
+                // The stored string is handed out as is. It stays put until
+                // the property is set again, and the plugin's own set is
+                // only written at describe time, so the pointer is good for
+                // the render it was asked in -- and one exec on each of two
+                // threads can read it at once, which a scratch buffer here
+                // could not allow.
+                *value = const_cast<char*>(v[index].c_str());
                 return kOfxStatOK;
             }
         }
@@ -187,14 +187,9 @@ namespace toucan
             const auto& v = s->second;
             if (count == v.size())
             {
-                _buf.resize(count);
                 for (int i = 0; i < count; ++i)
                 {
-                    const size_t size = v[i].size();
-                    _buf[i].resize(size + 1);
-                    memcpy(_buf[i].data(), v[i].c_str(), size);
-                    _buf[i][size] = 0;
-                    value[i] = _buf[i].data();
+                    value[i] = const_cast<char*>(v[i].c_str());
                 }
                 return kOfxStatOK;
             }

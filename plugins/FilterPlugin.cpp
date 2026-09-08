@@ -164,17 +164,6 @@ OfxStatus BlurPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus BlurPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    FilterPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "radius", &_radiusParam[handle], nullptr);
-    
-    return kOfxStatOK;
-}
-
 OfxStatus BlurPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -183,7 +172,7 @@ OfxStatus BlurPlugin::_render(
     OfxPropertySetHandle inArgs)
 {
     double radius = 0.0;
-    _paramSuite->paramGetValue(_radiusParam[handle], &radius);
+    _paramSuite->paramGetValue(_param(handle, "radius"), &radius);
 
     const OIIO::ImageBuf k = OIIO::ImageBufAlgo::make_kernel(
         "gaussian",
@@ -247,17 +236,6 @@ OfxStatus ColorMapPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus ColorMapPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    FilterPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "map_name", &_mapNameParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus ColorMapPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -267,7 +245,7 @@ OfxStatus ColorMapPlugin::_render(
 {
     // Apply the color map.
     std::string mapName = "plasma";
-    _paramSuite->paramGetValue(_mapNameParam[handle], &mapName);
+    _paramSuite->paramGetValue(_param(handle, "map_name"), &mapName);
     OIIO::ImageBufAlgo::color_map(
         outputBuf,
         sourceBuf,
@@ -406,17 +384,6 @@ OfxStatus PowPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus PowPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    FilterPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus PowPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -425,7 +392,7 @@ OfxStatus PowPlugin::_render(
     OfxPropertySetHandle inArgs)
 {
     double value = 1.0;
-    _paramSuite->paramGetValue(_valueParam[handle], &value);
+    _paramSuite->paramGetValue(_param(handle, "value"), &value);
 
     OIIO::ImageBufAlgo::pow(
         outputBuf,
@@ -483,17 +450,6 @@ OfxStatus SaturatePlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus SaturatePlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    FilterPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "value", &_valueParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus SaturatePlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -502,7 +458,7 @@ OfxStatus SaturatePlugin::_render(
     OfxPropertySetHandle inArgs)
 {
     double value = 1.0;
-    _paramSuite->paramGetValue(_valueParam[handle], &value);
+    _paramSuite->paramGetValue(_param(handle, "value"), &value);
 
     OIIO::ImageBufAlgo::saturate(
         outputBuf,
@@ -573,20 +529,6 @@ OfxStatus UnsharpMaskPlugin::_describeInContextAction(
     return kOfxStatOK;
 }
 
-OfxStatus UnsharpMaskPlugin::_createInstance(OfxImageEffectHandle handle)
-{
-    FilterPlugin::_createInstance(handle);
-
-    OfxParamSetHandle paramSet;
-    _effectSuite->getParamSet(handle, &paramSet);
-    _paramSuite->paramGetHandle(paramSet, "kernel", &_kernelParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "width", &_widthParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "contrast", &_contrastParam[handle], nullptr);
-    _paramSuite->paramGetHandle(paramSet, "threshold", &_thresholdParam[handle], nullptr);
-
-    return kOfxStatOK;
-}
-
 OfxStatus UnsharpMaskPlugin::_render(
     OfxImageEffectHandle handle,
     const OIIO::ImageBuf& sourceBuf,
@@ -598,10 +540,10 @@ OfxStatus UnsharpMaskPlugin::_render(
     double width = 3.0;
     double contrast = 1.0;
     double threshold = 0.0;
-    _paramSuite->paramGetValue(_kernelParam[handle], &kernel);
-    _paramSuite->paramGetValue(_widthParam[handle], &width);
-    _paramSuite->paramGetValue(_contrastParam[handle], &contrast);
-    _paramSuite->paramGetValue(_thresholdParam[handle], &threshold);
+    _paramSuite->paramGetValue(_param(handle, "kernel"), &kernel);
+    _paramSuite->paramGetValue(_param(handle, "width"), &width);
+    _paramSuite->paramGetValue(_param(handle, "contrast"), &contrast);
+    _paramSuite->paramGetValue(_param(handle, "threshold"), &threshold);
 
     //! \bug The unsharp_mask() function does not seem to be working?
     OIIO::ImageBufAlgo::unsharp_mask(

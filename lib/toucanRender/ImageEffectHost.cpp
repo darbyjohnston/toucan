@@ -196,6 +196,7 @@ namespace toucan
                 plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, i, &context);
                 if (context)
                 {
+                    plugin.contexts.push_back(context);
                     PropertySet propSet;
                     propSet.setString(kOfxImageEffectPropContext, 0, context);
                     {
@@ -267,10 +268,12 @@ namespace toucan
     {
         ImageEffectHandle* handle = (ImageEffectHandle*)effectHandle;
         auto i = handle->instance->params.find(name);
-        if (i != handle->instance->params.end())
+        if (i == handle->instance->params.end())
         {
-            *paramHandle = (OfxParamHandle)&handle->instance->params[name];
+            *paramHandle = nullptr;
+            return kOfxStatErrUnknown;
         }
+        *paramHandle = (OfxParamHandle)&i->second;
         return kOfxStatOK;
     }
 
@@ -334,7 +337,12 @@ namespace toucan
         *clip = (OfxImageClipHandle)&handle->instance->images[name];
         if (propHandle)
         {
-            *propHandle = (OfxPropertySetHandle)&handle->plugin->clipPropSets[name];
+            // A find, not operator[]: the plugin's clip sets are shared by
+            // every instance, and instances render on more than one thread.
+            const auto i = handle->plugin->clipPropSets.find(name);
+            *propHandle = i != handle->plugin->clipPropSets.end() ?
+                (OfxPropertySetHandle)&i->second :
+                nullptr;
         }
         return kOfxStatOK;
     }

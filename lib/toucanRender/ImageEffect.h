@@ -19,6 +19,7 @@ namespace toucan
         std::shared_ptr<Plugin> plugin;
         OfxPlugin* ofxPlugin = nullptr;
         PropertySet propSet;
+        std::vector<std::string> contexts;
         std::map<std::string, PropertySet> clipPropSets;
         std::map<std::string, std::string> paramTypes;
         std::map<std::string, PropertySet> paramDefs;

@@ -86,15 +86,14 @@ namespace toucan
         {
             anyToVec(std::any_cast<OTIO_NS::AnyVector>(i->second), size);
         }
-        char* context = nullptr;
-        _plugin.propSet.getString(kOfxImageEffectPropSupportedContexts, 0, &context);
-        if (strcmp(context, kOfxImageEffectContextGenerator) == 0)
+        const std::string context = !_plugin.contexts.empty() ? _plugin.contexts.front() : std::string();
+        if (context == kOfxImageEffectContextGenerator)
         {
             out = OIIO::ImageBuf(OIIO::ImageSpec(size.x, size.y, 4));
             _instance->images["Output"] = bufToPropSet(out);
         }
         else if (
-            strcmp(context, kOfxImageEffectContextFilter) == 0 &&
+            context == kOfxImageEffectContextFilter &&
             !_inputs.empty() &&
             _inputs[0])
         {
@@ -110,7 +109,7 @@ namespace toucan
             _instance->images["Output"] = bufToPropSet(out);
         }
         else if (
-            strcmp(context, kOfxImageEffectContextTransition) == 0 &&
+            context == kOfxImageEffectContextTransition &&
             _inputs.size() > 1 &&
             _inputs[0] &&
             _inputs[1])

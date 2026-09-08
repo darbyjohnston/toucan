@@ -51,7 +51,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -61,7 +60,6 @@ protected:
 
 private:
     static BlurPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _radiusParam;
 };
 
 class ColorMapPlugin : public FilterPlugin
@@ -83,7 +81,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -93,7 +90,6 @@ protected:
 
 private:
     static ColorMapPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _mapNameParam;
 };
 
 class InvertPlugin : public FilterPlugin
@@ -142,7 +138,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -152,7 +147,6 @@ protected:
 
 private:
     static PowPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _valueParam;
 };
 
 class SaturatePlugin : public FilterPlugin
@@ -174,7 +168,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -184,7 +177,6 @@ protected:
 
 private:
     static SaturatePlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _valueParam;
 };
 
 class UnsharpMaskPlugin : public FilterPlugin
@@ -206,7 +198,6 @@ protected:
     OfxStatus _describeInContextAction(
         OfxImageEffectHandle,
         OfxPropertySetHandle) override;
-    OfxStatus _createInstance(OfxImageEffectHandle) override;
     OfxStatus _render(
         OfxImageEffectHandle,
         const OIIO::ImageBuf&,
@@ -216,8 +207,4 @@ protected:
 
 private:
     static UnsharpMaskPlugin* _plugin;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _kernelParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _widthParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _contrastParam;
-    std::map<OfxImageEffectHandle, OfxParamHandle> _thresholdParam;
 };
