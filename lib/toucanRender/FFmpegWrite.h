@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <toucanRender/AudioBuffer.h>
 #include <toucanRender/FFmpeg.h>
 
 #include <opentimelineio/version.h>
@@ -12,11 +13,13 @@
 extern "C"
 {
 #include <libavformat/avformat.h>
+#include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 
 } // extern "C"
 
 #include <filesystem>
+#include <vector>
 
 namespace toucan
 {
@@ -29,14 +32,20 @@ namespace toucan
                 const std::filesystem::path&,
                 const OIIO::ImageSpec&,
                 const OTIO_NS::TimeRange&,
-                VideoCodec);
+                VideoCodec,
+                int audioSampleRate = 0,
+                int audioChannelCount = 0,
+                AudioCodec audioCodec = AudioCodec::PCM_S16LE);
 
             virtual ~Write();
 
             void writeImage(const OIIO::ImageBuf&, const OTIO_NS::RationalTime&);
+            void writeAudio(const AudioBuffer&);
 
         private:
             void _encodeVideo(AVFrame*);
+            void _encodeAudio(AVFrame*);
+            void _flushAudioFifo();
 
             std::filesystem::path _path;
             OIIO::ImageSpec _spec;
@@ -50,6 +59,17 @@ namespace toucan
             AVFrame* _avFrame2 = nullptr;
             SwsContext* _swsContext = nullptr;
             bool _opened = false;
+
+            AVCodecContext* _avAudioCodecContext = nullptr;
+            AVStream* _avAudioStream = nullptr;
+            AVPacket* _avAudioPacket = nullptr;
+            AVFrame* _avAudioFrame = nullptr;
+            SwrContext* _swrContext = nullptr;
+            int64_t _audioPts = 0;
+            int _audioSampleRate = 0;
+            int _audioChannelCount = 0;
+            int _audioFrameSize = 0;
+            std::vector<float> _audioFifo;
         };
     }
 }

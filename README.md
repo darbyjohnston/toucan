@@ -96,6 +96,15 @@ Example command line writing a movie directly:
 toucan-render Transition.otio Transition.mov -vcodec MJPEG
 ```
 
+Audio tracks are rendered with the video and written into the movie.
+* `-acodec pcm_s16le`: Set the audio codec. Possible values: alac, flac,
+pcm_f32le, pcm_s16le, pcm_s24le
+* `-arate 48000`: Set the audio sample rate.
+* `-achannels 2`: Set the audio channel count.
+* `-afile output.wav`: Write the audio to a separate file, for when the video
+is sent over a pipe.
+* `-no_audio`: Render the video only.
+
 Raw images can be sent to FFmpeg as either the y4m format or raw video.
 
 Example command line using the y4m format:

@@ -114,6 +114,7 @@ if(toucan_FFmpeg_MINIMAL)
         --disable-decoders
         --enable-decoder=apv
         --enable-decoder=av1
+        --enable-decoder=alac
         --enable-decoder=flac
         --enable-decoder=mjpeg
         --enable-decoder=mp3
@@ -163,6 +164,7 @@ if(toucan_FFmpeg_MINIMAL)
         --enable-decoder=vp9
         --enable-decoder=yuv4
         --disable-encoders
+        --enable-encoder=alac
         --enable-encoder=flac
         --enable-encoder=mjpeg
         --enable-encoder=mpeg2video
